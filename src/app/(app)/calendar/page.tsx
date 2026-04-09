@@ -140,9 +140,8 @@ function formatDate(dateStr: string) {
         <div className="h-96 bg-gray-50 rounded-lg animate-pulse" />
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <CalendarView
-            events={filteredEvents}
-            onEventClick={toggleParticipation}
+         <CalendarView
+          events={filteredEvents}
           />
         </div>
       )}
