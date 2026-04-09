@@ -1,0 +1,173 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+
+const supabase = createClient()
+
+type Group = {
+  id: string
+  name: string
+  color: string | null
+  members_count: number
+  events_count: number
+  next_event: string | null
+}
+
+const FALLBACK_COLORS = ['#378ADD', '#EF9F27', '#7F77DD', '#1D9E75', '#D85A30', '#D4537E']
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('fr-BE', {
+    weekday: 'short', day: 'numeric', month: 'short',
+  })
+}
+
+export default function GroupsPage() {
+  const router = useRouter()
+  const [groups, setGroups] = useState<Group[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => { loadGroups() }, [])
+
+  async function loadGroups() {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('group_dashboard_view')
+      .select('*')
+      .order('name')
+    if (error) { console.error(error); setLoading(false); return }
+    setGroups(data ?? [])
+    setLoading(false)
+  }
+
+  async function deleteGroup(id: string) {
+    if (!confirm('Supprimer ce groupe ?')) return
+    const { error } = await supabase.from('groups').delete().eq('id', id)
+    if (error) { alert(error.message); return }
+    loadGroups()
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+
+  // ── Empty state — onboarding ──────────────────────────────────────────────
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-[#E6F1FB] flex items-center justify-center mb-5">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="10" cy="9" r="4" stroke="#185FA5" strokeWidth="1.5" />
+            <path d="M2 23c0-4.42 3.58-8 8-8h0a8 8 0 018 8" stroke="#185FA5" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="20" cy="9" r="3" stroke="#185FA5" strokeWidth="1.5" />
+            <path d="M20 16c1.5.5 3 1.5 4 3" stroke="#185FA5" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+        <h2 className="text-[18px] font-medium text-gray-900 mb-2">Bienvenue sur GolfGo</h2>
+        <p className="text-[14px] text-gray-400 max-w-xs mb-6">
+          Crée ton premier groupe pour commencer à organiser tes événements.
+        </p>
+        <button
+          onClick={() => router.push('/groups/add')}
+          className="flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-medium px-5 py-2.5 rounded-md hover:bg-[#0C447C] transition-colors"
+        >
+          + Créer mon premier groupe
+        </button>
+      </div>
+    )
+  }
+
+  // ── Liste groupes ─────────────────────────────────────────────────────────
+  return (
+    <div className="p-6 max-w-2xl">
+
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-[18px] font-medium text-gray-900">Mes groupes</h1>
+          <p className="text-[13px] text-gray-400 mt-0.5">
+            {groups.length} groupe{groups.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <button
+          onClick={() => router.push('/groups/add')}
+          className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors"
+        >
+          + New group
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {groups.map((group, index) => {
+          const color = group.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+          return (
+            <div
+              key={group.id}
+              className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+            >
+              {/* Ligne principale */}
+              <div
+                className="px-4 py-3 flex items-center gap-3 cursor-pointer"
+                onClick={() => router.push(`/groups/${group.id}/events`)}
+              >
+                <div className="w-[3px] h-10 rounded-full flex-shrink-0" style={{ background: color }} />
+
+                <div className="flex-1 min-w-0">
+                  <div className="text-[14px] font-medium text-gray-900">{group.name}</div>
+                  <div className="text-[12px] text-gray-400 mt-0.5 flex items-center gap-1.5">
+                    <span>{group.members_count} membres</span>
+                    <span>·</span>
+                    <span>{group.events_count} events</span>
+                    {group.next_event && (
+                      <>
+                        <span>·</span>
+                        <span>prochain {formatDate(group.next_event)}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                  <button
+                    onClick={() => router.push(`/groups/${group.id}/edit`)}
+                    className="text-[11px] text-gray-500 border border-gray-200 px-2.5 py-1 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteGroup(group.id)}
+                    className="text-[11px] text-red-400 border border-red-100 px-2.5 py-1 rounded-md hover:bg-red-50 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Liens rapides */}
+              <div className="px-4 pb-2.5 flex gap-2" onClick={e => e.stopPropagation()}>
+                <a
+                  href={`/groups/${group.id}/members`}
+                  className="text-[11px] text-gray-400 hover:text-[#185FA5] border border-gray-100 hover:border-blue-200 bg-gray-50 hover:bg-blue-50 px-2.5 py-1 rounded-md transition-colors"
+                >
+                  Members
+                </a>
+                <a
+                  href={`/groups/${group.id}/constraints`}
+                  className="text-[11px] text-gray-400 hover:text-[#185FA5] border border-gray-100 hover:border-blue-200 bg-gray-50 hover:bg-blue-50 px-2.5 py-1 rounded-md transition-colors"
+                >
+                  Constraints
+                </a>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

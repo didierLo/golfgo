@@ -1,0 +1,98 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import PlayerForm, { PlayerFormData } from '@/components/forms/PlayerForm'
+
+const supabase = createClient()
+
+export default function EditPlayerPage() {
+  const router = useRouter()
+  const params = useParams()
+  const playerId = params.id as string
+
+  const [player, setPlayer] = useState<Partial<PlayerFormData> | null>(null)
+  const [playerName, setPlayerName] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadPlayer() {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('id', playerId)
+        .single()
+
+      if (error || !data) {
+        alert('Joueur introuvable')
+        router.push('/players')
+        return
+      }
+
+      setPlayerName(`${data.first_name} ${data.surname}`)
+      setPlayer({
+        surname:           data.surname    ?? '',
+        first_name:        data.first_name ?? '',
+        federal_no:        data.federal_no ?? '',
+        whs:               data.whs ? String(data.whs) : '',
+        email:             data.email      ?? '',
+        phone:             data.phone      ?? '',
+        home_club:         data.home_club  ?? '',
+        gender:            (data.gender as 'M' | 'F') ?? 'M',
+        default_tee_color: (data.default_tee_color as any) ?? 'yellow',
+      })
+      setLoading(false)
+    }
+
+    loadPlayer()
+  }, [playerId, router])
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-3 max-w-2xl">
+        {[1, 2, 3, 4].map(i => <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />)}
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6 max-w-2xl">
+
+      <div className="mb-6">
+        <h1 className="text-[18px] font-medium text-gray-900">Modifier le joueur</h1>
+        <p className="text-[13px] text-gray-400 mt-0.5">{playerName}</p>
+      </div>
+
+      {player && (
+        <PlayerForm
+          initialData={player}
+          playerId={playerId}
+          submitLabel="Sauvegarder"
+          onSubmit={async (data: any) => {
+            const { groups, ...playerData } = data
+
+            const { error } = await supabase
+              .from('players')
+              .update(playerData)
+              .eq('id', playerId)
+
+            if (error) { alert(error.message); return }
+
+            if (groups) {
+              await supabase.from('groups_players').delete().eq('player_id', playerId)
+              if (groups.length > 0) {
+                await supabase.from('groups_players').insert(
+                  groups.map((groupId: string) => ({ group_id: groupId, player_id: playerId }))
+                )
+              }
+            }
+
+            window.history.back()
+          }}
+        />
+      )}
+
+    </div>
+  )
+}
