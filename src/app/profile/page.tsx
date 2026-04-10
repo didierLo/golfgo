@@ -46,7 +46,7 @@ export default async function CalendarPage() {
           {e.player_status === "GOING" && (
             <CancelButton
               eventId={e.event_id}
-              playerId={player.id}
+              playerId={player!.id}
                onSuccess={() => window.location.reload()}
             />
           )}
@@ -55,8 +55,8 @@ export default async function CalendarPage() {
           {!e.player_status && e.remaining_slots > 0 && (
             <JoinButton
               eventId={e.event_id}
-              playerId={player.id}
-               onSuccess={() => window.location.reload()}
+              playerId={player!.id}
+              onSuccess={() => window.location.reload()}
             />
           )}
 
