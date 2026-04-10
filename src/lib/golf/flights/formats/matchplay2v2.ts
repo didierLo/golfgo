@@ -1,4 +1,4 @@
-export function matchplayFlights(players){
+export function matchplayFlights(players: any[]) {
 
   const shuffled =
     [...players].sort(()=>Math.random()-0.5)
