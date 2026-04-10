@@ -47,6 +47,7 @@ export default async function CalendarPage() {
             <CancelButton
               eventId={e.event_id}
               playerId={player.id}
+               onSuccess={() => window.location.reload()}
             />
           )}
 
@@ -55,6 +56,7 @@ export default async function CalendarPage() {
             <JoinButton
               eventId={e.event_id}
               playerId={player.id}
+               onSuccess={() => window.location.reload()}
             />
           )}
 
