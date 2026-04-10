@@ -133,10 +133,10 @@ export function useFlights(eventId: string) {
     )
     console.log("ENGINE RESULT", result)
 
-const flights =
-  Array.isArray(result)
-    ? result
-    : result?.flights || []
+    const flights =
+     Array.isArray(result)
+      ? result
+      : (result as any)?.flights || []
 
 setFlights(flights)
   }
