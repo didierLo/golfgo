@@ -47,13 +47,12 @@ export default function AddParticipantsPage(){
       return
     }
 
-    const list =
-      data?.map(p=>p.players) || []
+    const list = (data?.map(p => p.players).flat() || []) as any[]
 
     setPlayers(
-      list.sort((a,b)=>
-        a.surname.localeCompare(b.surname)
-      ) as any
+     list.sort((a: any, b: any) =>
+    a.surname.localeCompare(b.surname)
+     )
     )
 
     setLoading(false)
