@@ -13,12 +13,10 @@ function buildFlights(
 
   for (const size of structure) {
 
-    flights.push(
-      players.slice(index, index + size)
-    )
-
-    index += size
-  }
+   flights.push({
+    flight_no: flights.length + 1,
+    players: players.slice(index, index + size)
+    })
 
   return flights
 }
