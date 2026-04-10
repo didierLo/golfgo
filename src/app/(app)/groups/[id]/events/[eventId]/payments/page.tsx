@@ -50,7 +50,7 @@ export default function PaymentsPage() {
       .eq('status', 'GOING')
       .order('surname', { foreignTable: 'players', ascending: true })
 
-    setParticipants(data || [])
+    setParticipants((data || []) as any)
     setLoading(false)
   }
 
