@@ -15,8 +15,8 @@ type Pair = {
   player_a: string
   player_b: string
   constraint_type: ConstraintType
-  players_a: { first_name: string; surname: string }
-  players_b: { first_name: string; surname: string }
+  players_a: { first_name: string; surname: string }[]  // ← tableau
+  players_b: { first_name: string; surname: string }[]  // ← tableau
 }
 
 // ─── Composant ────────────────────────────────────────────────────────────────
@@ -49,7 +49,7 @@ export default function ConstraintsPage() {
         players_b:players!player_pair_constraints_player_b_fkey(first_name, surname)
       `)
       .eq('group_id', groupId)
-    setPairs(constraints || [])
+    setPairs((constraints || []) as any)
   }
 
   async function addConstraint() {
@@ -227,9 +227,9 @@ function ConstraintSection({
                 {label}
               </span>
               <span className="text-[13px] text-gray-800 flex-1">
-                {p.players_a?.first_name} {p.players_a?.surname}
+                {p.players_a?.[0]?.first_name} {p.players_a?.[0]?.surname}
                 <span className="text-gray-400 mx-2">×</span>
-                {p.players_b?.first_name} {p.players_b?.surname}
+                {p.players_b?.[0]?.first_name} {p.players_b?.[0]?.surname}
               </span>
               <button
                 onClick={() => onRemove(p.id)}
