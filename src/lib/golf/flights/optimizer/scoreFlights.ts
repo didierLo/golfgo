@@ -75,7 +75,8 @@ for (let i = 0; i < flight.players.length; i++) {
       else if (daysAgo < 90) weight = 0.4
       else weight = 0.2
 
-      const pastIds = new Set(past.players.map(p => p.id))
+      const pastIds = new Set(past.players.map((p: any) => p.id))
+
 
       for (const flight of flights) {
 
