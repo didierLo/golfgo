@@ -25,11 +25,10 @@ export function scoreFlight(
   let preferenceScore = 0
 
   // 🔴 1. FORBIDDEN (HARD STOP)
-  for (let i = 0; i < flight.length; i++) {
-    for (let j = i + 1; j < flight.length; j++) {
-
-      const a = flight.players[i].id
-      const b = flight.players[j].id
+     for (let i = 0; i < flight.players.length; i++) {
+      for (let j = i + 1; j < flight.players.length; j++) {
+     const a = flight.players[i].id
+     const b = flight.players[j].id
 
       if (hasPair(forbiddenPairs, a, b)) {
         return debug
@@ -43,7 +42,7 @@ export function scoreFlight(
   }
 
   // 🎯 2. HANDICAP
- const handicaps = flight.players.map(p => p.whs ?? 36)
+  const handicaps = flight.players.map(p => p.whs ?? 36)
   const max = Math.max(...handicaps)
   const min = Math.min(...handicaps)
 
@@ -51,11 +50,10 @@ export function scoreFlight(
   score += handicapScore * HANDICAP_WEIGHT
 
   // 🧠 3. HISTORY
-  for (let i = 0; i < flight.length; i++) {
-    for (let j = i + 1; j < flight.length; j++) {
-
-         const a = flight.players[i].id
-         const b = flight.players[j].id
+     for (let i = 0; i < flight.players.length; i++) {
+      for (let j = i + 1; j < flight.players.length; j++) {
+     const a = flight.players[i].id
+     const b = flight.players[j].id
 
       historyScore += historyMatrix?.[a]?.[b] ?? 0
     }
@@ -64,11 +62,10 @@ export function scoreFlight(
   score += historyScore * HISTORY_WEIGHT
 
   // 🟢 4. PREFERENCES
-  for (let i = 0; i < flight.length; i++) {
-    for (let j = i + 1; j < flight.length; j++) {
-
-      const a = flight.players[i].id
-      const b = flight.players[j].id
+  for (let i = 0; i < flight.players.length; i++) {
+  for (let j = i + 1; j < flight.players.length; j++) {
+    const a = flight.players[i].id
+    const b = flight.players[j].id
 
       if (hasPair(preferredPairs, a, b)) {
         preferenceScore++
