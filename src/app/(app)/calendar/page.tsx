@@ -142,7 +142,7 @@ function formatDate(dateStr: string) {
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
          <CalendarView
           events={filteredEvents}
-          />
+        />
         </div>
       )}
 

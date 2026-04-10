@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Leaderboard from '@/components/scorecards/Leaderboard'
-import type { Hole, Player, TeeInfo } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page1'
+import type { Hole, Player, TeeInfo } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
 import { computePhcp } from '@/lib/golf/scoring/stableford'
 
 const supabase = createClient()
