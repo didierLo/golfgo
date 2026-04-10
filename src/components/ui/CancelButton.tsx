@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client"
 
-export default function CancelButton({ eventId, playerId, onSuccess }) {
+export default function CancelButton({ eventId, playerId, onSuccess }: { eventId: any; playerId: any; onSuccess: () => void }) {
 
   const supabase = createClient()
 
