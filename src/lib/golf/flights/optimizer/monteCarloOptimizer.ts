@@ -39,8 +39,10 @@ export function monteCarloOptimizer(
     const flights =
       buildFlights(shuffled, structure)
 
-    const score =
-      scoreFlights(flights, forbiddenPairs)
+    const score = scoreFlights(flights, { 
+      flightSize: structure.length,
+      forbiddenPairs 
+      } as any)
 
     if (score < bestScore) {
 
