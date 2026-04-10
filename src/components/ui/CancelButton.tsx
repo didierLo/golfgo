@@ -9,7 +9,7 @@ export default function CancelButton({ eventId, playerId, onSuccess }: { eventId
   async function cancel() {
 
     const { error } = await supabase.rpc("cancel_event_participation", {
-      p_event_id: eventeId,
+      p_event_id: eventId,
       p_player_id: playerId
     })
 
