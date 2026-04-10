@@ -1,33 +1,23 @@
 import { Flight } from "../types"
 
-export function buildHistoryMatrix(
-  previousFlights:Flight[]
-){
+export function buildHistoryMatrix(previousFlights: Flight[]) {
+  const matrix: Record<string, Record<string, number>> = {}
 
-  const matrix:Record<string,Record<string,number>> = {}
+  for (const flight of previousFlights) {
+    const players = flight.players ?? []
 
-  for(const flight of previousFlights){
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i + 1; j < players.length; j++) {
+        const a = players[i].id
+        const b = players[j].id
 
-    for(let i=0;i<flight.length;i++){
+        if (!matrix[a]) matrix[a] = {}
+        if (!matrix[b]) matrix[b] = {}
 
-      for(let j=i+1;j<flight.length;j++){
-
-        const a = flight[i].id
-        const b = flight[j].id
-
-        if(!matrix[a]) matrix[a] = {}
-        if(!matrix[b]) matrix[b] = {}
-
-        matrix[a][b] =
-          (matrix[a][b] ?? 0) + 1
-
-        matrix[b][a] =
-          (matrix[b][a] ?? 0) + 1
-
+        matrix[a][b] = (matrix[a][b] ?? 0) + 1
+        matrix[b][a] = (matrix[b][a] ?? 0) + 1
       }
-
     }
-
   }
 
   return matrix
