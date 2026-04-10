@@ -99,7 +99,7 @@ export default function ParticipantsPage() {
       .select(`player_id, status, players(first_name, surname, whs)`)
       .eq('event_id', evId)
     if (error) { console.error(error); setLoading(false); return }
-    setParticipants(data || [])
+    setParticipants((data || []) as any)
     setLoading(false)
   }
 
