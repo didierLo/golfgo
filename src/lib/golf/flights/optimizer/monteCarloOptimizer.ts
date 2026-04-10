@@ -5,7 +5,7 @@ import { scoreFlights } from "./scoreFlights"
 function buildFlights(
   players: Player[],
   structure: number[]
-): Flight[] {
+): any[] {
 
   const flights: Flight[] = []
   let index = 0
@@ -18,7 +18,7 @@ function buildFlights(
     index += size
   }
 
-  return flights  // ← ajoute cette ligne
+  return flights  
 }
 
 export function monteCarloOptimizer(
