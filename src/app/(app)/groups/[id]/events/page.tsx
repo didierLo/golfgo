@@ -11,7 +11,6 @@ type EventRow = {
   title: string
   location: string | null
   starts_at: string
-  timeZone: 'Europe/Brussels'
   competition_formats: { name: string } | null
 }
 
