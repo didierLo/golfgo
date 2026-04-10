@@ -28,8 +28,8 @@ export function scoreFlight(
   for (let i = 0; i < flight.length; i++) {
     for (let j = i + 1; j < flight.length; j++) {
 
-      const a = flight[i].id
-      const b = flight[j].id
+      const a = flight.players[i].id
+      const b = flight.players[j].id
 
       if (hasPair(forbiddenPairs, a, b)) {
         return debug
@@ -54,8 +54,8 @@ export function scoreFlight(
   for (let i = 0; i < flight.length; i++) {
     for (let j = i + 1; j < flight.length; j++) {
 
-      const a = flight[i].id
-      const b = flight[j].id
+         const a = flight.players[i].id
+         const b = flight.players[j].id
 
       historyScore += historyMatrix?.[a]?.[b] ?? 0
     }
@@ -67,8 +67,8 @@ export function scoreFlight(
   for (let i = 0; i < flight.length; i++) {
     for (let j = i + 1; j < flight.length; j++) {
 
-      const a = flight[i].id
-      const b = flight[j].id
+      const a = flight.players[i].id
+      const b = flight.players[j].id
 
       if (hasPair(preferredPairs, a, b)) {
         preferenceScore++
