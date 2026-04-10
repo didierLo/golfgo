@@ -8,17 +8,17 @@ function buildFlights(
 ): Flight[] {
 
   const flights: Flight[] = []
-
   let index = 0
 
   for (const size of structure) {
-
-   flights.push({
-    flight_no: flights.length + 1,
-    players: players.slice(index, index + size)
+    flights.push({
+      flight_no: flights.length + 1,
+      players: players.slice(index, index + size)
     })
+    index += size
+  }
 
-  return flights
+  return flights  // ← ajoute cette ligne
 }
 
 export function monteCarloOptimizer(
