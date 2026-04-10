@@ -59,7 +59,7 @@ for (let i = 0; i < flight.players.length; i++) {
   }
 
   // 🧠 HISTORIQUE INTELLIGENT
-  if (options.historyWindowDays > 0 && options.pastFlights?.length) {
+    if ((options.historyWindowDays ?? 0) > 0 && options.pastFlights?.length) {
 
     for (const past of options.pastFlights) {
 
