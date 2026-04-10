@@ -111,7 +111,7 @@ export default function EventsPage() {
 
     if (error) { console.error(error); setLoading(false); return }
     const evts = data ?? []
-    setEvents(evts)
+    setEvents(evts as any)
 
     // Compteurs GOING en une seule requête
     if (evts.length > 0) {
