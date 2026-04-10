@@ -1,4 +1,4 @@
-import { pairKey } from "./pairKey"
+import { pairKey } from "@/lib/utils/pairs"
 
 export function hasForbiddenPair(
   players: string[],

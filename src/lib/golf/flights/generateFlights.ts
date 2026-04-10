@@ -18,7 +18,7 @@ function normalizeFlights(flights: any[]) {
   })
 }
 
-export function generateFlights(players, options) {
+export function simpleFlights(players: any[], options: any) {
 
   let result
 

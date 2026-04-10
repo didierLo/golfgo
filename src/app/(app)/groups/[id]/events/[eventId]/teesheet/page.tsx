@@ -176,10 +176,10 @@ export default function TeeSheetPage() {
                       </span>
                     </div>
                    {p.whs !== null && (
-                      <span className="text-[11px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">
-                        {Number(p.whs).toFixed(1)}
-                      </span>
-                    )}
+                <span className="text-[11px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">
+                  {Number(p.whs).toFixed(1)}
+                </span>
+              )}
                   </div>
                 ))}
               </div>

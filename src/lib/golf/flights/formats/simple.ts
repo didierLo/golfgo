@@ -1,7 +1,7 @@
 import { buildFlights } from "@/lib/utils/buildFlights"
 import { shuffle } from "@/lib/utils/shuffle"
 
-export function simpleFlights(players, options) {
+export function simpleFlights(players: any[], options: any) {
 
   const flightSize = options.flightSize ?? 4
 
