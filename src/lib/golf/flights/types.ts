@@ -38,6 +38,6 @@ export type GenerateOptions = {
   weights?: Partial<Weights>
 
   historyWindowDays?: number
-
+  pastFlights?: any[] 
   debug?: boolean
 }
