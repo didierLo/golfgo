@@ -22,7 +22,7 @@ export function matchplayFlights(players: any[]) {
 }
 
 
-function bestTeams(flight){
+function bestTeams(flight: any[]) {
 
   const [a,b,c,d] = flight
 
