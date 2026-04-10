@@ -53,7 +53,7 @@ export default function AddParticipantsPage(){
     setPlayers(
       list.sort((a,b)=>
         a.surname.localeCompare(b.surname)
-      )
+      ) as any
     )
 
     setLoading(false)
