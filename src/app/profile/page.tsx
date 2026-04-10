@@ -19,7 +19,7 @@ export default async function CalendarPage() {
   const { data: events } = await supabase
     .from("calendar_player_view")
     .select("*")
-    .eq("player_id", player.id)
+    .eq("player_id", player!.id)
     .order("starts_at")
 
   return (
