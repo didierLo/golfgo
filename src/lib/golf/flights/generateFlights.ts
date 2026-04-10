@@ -15,7 +15,7 @@ export function generateFlights(players: any[], options: any) {
   if (options.flightMode === "optimized") {
     result = optimizedFlights(players, options)
   } else if (options.flightMode === "scramble3") {
-    result = scramble3Flights(players, options)
+    result = scramble3Flights(players)
   } else {
     result = simpleFlights(players, options)
   }
