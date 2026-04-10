@@ -97,7 +97,7 @@ export default function MyEventsPage() {
 
     if (error) { console.error(error); setLoading(false); return }
 
-    setEvents(data || [])
+    setEvents((data || []) as any)
     setLoading(false)
   }
 
