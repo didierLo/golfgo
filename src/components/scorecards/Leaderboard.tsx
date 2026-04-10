@@ -10,8 +10,7 @@ import {
   type ScoringHole,
   type ScoringScore,
 } from '@/lib/golf/scoring/stableford'
-import type { Player, TeeInfo } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page1'
-
+import type { Player, TeeInfo } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
 // ===================== TYPES =====================
 
 type LeaderboardEntry = {
