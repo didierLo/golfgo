@@ -27,35 +27,29 @@ function formatDate(d: string) {
 }
 
 export default function MyScorecardPage() {
-  const [playerId, setPlayerId]     = useState<string | null>(null)
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState<string | null>(null)
+  const [playerId, setPlayerId]       = useState<string | null>(null)
+  const [loading, setLoading]         = useState(true)
+  const [error, setError]             = useState<string | null>(null)
 
-  // Event
-  const [eventId, setEventId]       = useState<string | null>(null)
-  const [eventTitle, setEventTitle] = useState('')
-  const [eventDate, setEventDate]   = useState('')
+  const [eventId, setEventId]         = useState<string | null>(null)
+  const [eventTitle, setEventTitle]   = useState('')
+  const [eventDate, setEventDate]     = useState('')
   const [eventFormat, setEventFormat] = useState<'stroke' | 'stableford'>('stableford')
-  const [clubName, setClubName]     = useState('')
-  const [courseName, setCourseName] = useState('')
+  const [clubName, setClubName]       = useState('')
+  const [courseName, setCourseName]   = useState('')
 
-  // Flight + joueurs
-  const [flightPlayers, setFlightPlayers] = useState<Player[]>([])
+  const [flightPlayers, setFlightPlayers]   = useState<Player[]>([])
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null)
 
-  // Scorecard
-  const [holes, setHoles]           = useState<Hole[]>([])
-  const [scores, setScores]         = useState<ScoreMap>({})
+  const [holes, setHoles]             = useState<Hole[]>([])
+  const [scores, setScores]           = useState<ScoreMap>({})
   const [scorecardId, setScorecardId] = useState<string | null>(null)
 
-  // Auto-save
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [saveStatus, setSaveStatus]   = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scoresRef = useRef<ScoreMap>({})
 
   useEffect(() => { init() }, [])
-
-  // ── Init ────────────────────────────────────────────────────────────────
 
   async function init() {
     setLoading(true)
@@ -69,30 +63,38 @@ export default function MyScorecardPage() {
     if (!p) { setError('Profil joueur introuvable'); setLoading(false); return }
     setPlayerId(p.id)
 
-    // Trouver l'event du jour ou le prochain
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
+    // ── Étape 1 : récupérer les event_ids où le joueur est GOING ──────────
     const { data: participations } = await supabase
       .from('event_participants')
-      .select(`
-        event_id,
-        status,
-        tee_id,
-        events(
-          id, title, starts_at, course_id,
-          competition_format:competition_format_id(scoring_type),
-          courses(course_name, clubs(name))
-        )
-      `)
+      .select('event_id, tee_id')
       .eq('player_id', p.id)
       .eq('status', 'GOING')
-      .gte('events.starts_at', today.toISOString())
-      .order('starts_at', { foreignTable: 'events', ascending: true })
+
+    if (!participations?.length) {
+      setError('Aucun événement à venir pour toi')
+      setLoading(false)
+      return
+    }
+
+    const eventIds = participations.map(p => p.event_id)
+
+    // ── Étape 2 : filtrer les events par date (aujourd'hui ou futur) ──────
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+
+    const { data: events } = await supabase
+      .from('events')
+      .select(`
+        id, title, starts_at, course_id,
+        competition_formats(scoring_type),
+        courses(course_name, clubs(name))
+      `)
+      .in('id', eventIds)
+      .gte('starts_at', todayStart.toISOString())
+      .order('starts_at', { ascending: true })
       .limit(1)
 
-    const part = participations?.[0]
-    const event = part?.events as any
+    const event = events?.[0] as any
 
     if (!event) {
       setError('Aucun événement à venir pour toi')
@@ -100,62 +102,58 @@ export default function MyScorecardPage() {
       return
     }
 
+    // tee_id du joueur pour cet event
+    const myTeeId = participations.find(p => p.event_id === event.id)?.tee_id ?? null
+
     setEventId(event.id)
     setEventTitle(event.title)
     setEventDate(event.starts_at)
-    setEventFormat((event.competition_format as any)?.scoring_type ?? 'stableford')
-    setClubName(event.courses?.clubs?.name ?? '')
-    setCourseName(event.courses?.course_name ?? '')
+    setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
+    setClubName((event.courses as any)?.clubs?.name ?? '')
+    setCourseName((event.courses as any)?.course_name ?? '')
 
-    await loadScorecardData(event.id, p.id, part?.tee_id ?? null)
-    setLoading(false)
-  }
-
-  // ── Charger scorecard + flight ──────────────────────────────────────────
-
-  async function loadScorecardData(evId: string, pId: string, myTeeId: string | null) {
-    // Course
-    const { data: event } = await supabase
-      .from('events').select('course_id').eq('id', evId).single()
-
-    if (!event?.course_id) {
+    if (!event.course_id) {
       setError('Aucun parcours configuré pour cet événement')
+      setLoading(false)
       return
     }
 
+    await loadScorecardData(event.id, event.course_id, p.id, myTeeId)
+    setLoading(false)
+  }
+
+  async function loadScorecardData(evId: string, courseId: string, pId: string, myTeeId: string | null) {
     // Holes
     const { data: holesData } = await supabase
       .from('course_holes').select('hole_number, par, stroke_index')
-      .eq('course_id', event.course_id).order('hole_number')
+      .eq('course_id', courseId).order('hole_number')
     setHoles(holesData?.length ? holesData : fallbackHoles())
 
     // Tees
     const { data: teesData } = await supabase
       .from('course_tees').select('id, tee_name, par_total, course_rating, slope')
-      .eq('course_id', event.course_id)
+      .eq('course_id', courseId)
 
     // Mon flight
     const { data: myFlight } = await supabase
       .from('flight_players')
-      .select('flight_id')
+      .select('flights(id, event_id)')
       .eq('player_id', pId)
 
-    const flightId = myFlight?.[0]?.flight_id ?? null
+    const myFlightRow = (myFlight || []).find((f: any) => f.flights?.event_id === evId)
+    const flightId = (myFlightRow as any)?.flights?.id ?? null
 
     let flightPlayerIds: string[] = [pId]
-
     if (flightId) {
       const { data: fp } = await supabase
-        .from('flight_players')
-        .select('player_id')
-        .eq('flight_id', flightId)
+        .from('flight_players').select('player_id').eq('flight_id', flightId)
       flightPlayerIds = (fp || []).map(f => f.player_id)
     }
 
-    // Participants du flight avec tee
+    // Participants du flight
     const { data: participants } = await supabase
       .from('event_participants')
-      .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color)')
+      .select('player_id, tee_id, players(id, first_name, surname, whs)')
       .eq('event_id', evId)
       .in('player_id', flightPlayerIds)
 
@@ -170,7 +168,6 @@ export default function MyScorecardPage() {
       }
     })
 
-    // Mettre le joueur connecté en premier
     const sorted = [
       ...built.filter(p => p.id === pId),
       ...built.filter(p => p.id !== pId),
@@ -182,15 +179,12 @@ export default function MyScorecardPage() {
     // Scorecard
     const { data: sc } = await supabase
       .from('scorecards').select('id').eq('event_id', evId).maybeSingle()
-
     let scId = sc?.id ?? null
-
     if (!scId) {
       const { data: created } = await supabase
         .from('scorecards').insert({ event_id: evId }).select('id').single()
       scId = created?.id ?? null
     }
-
     setScorecardId(scId)
 
     if (scId && flightPlayerIds.length > 0) {
@@ -208,36 +202,28 @@ export default function MyScorecardPage() {
     }
   }
 
-  // ── Auto-save ────────────────────────────────────────────────────────────
-
   const autoSave = useCallback(async (newScores: ScoreMap, pId: string, evId: string, scId: string) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
     setSaveStatus('saving')
-
     saveTimer.current = setTimeout(async () => {
       try {
         const rows = Object.entries(newScores).flatMap(([playerId, holes]) =>
           Object.entries(holes)
             .filter(([, strokes]) => strokes != null)
             .map(([hole, strokes]) => ({
-              scorecard_id: scId,
-              event_id: evId,
-              player_id: playerId,
-              hole: Number(hole),
-              strokes: strokes as number,
+              scorecard_id: scId, event_id: evId, player_id: playerId,
+              hole: Number(hole), strokes: strokes as number,
             }))
         )
-
         if (rows.length > 0) {
           await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
         }
-
         setSaveStatus('saved')
         setTimeout(() => setSaveStatus('idle'), 2000)
       } catch {
         setSaveStatus('error')
       }
-    }, 800) // debounce 800ms
+    }, 800)
   }, [])
 
   function handleSetScores(newScores: ScoreMap | ((prev: ScoreMap) => ScoreMap)) {
@@ -250,8 +236,6 @@ export default function MyScorecardPage() {
       return updated
     })
   }
-
-  // ── Render ───────────────────────────────────────────────────────────────
 
   if (loading) return (
     <div className="p-6 space-y-3 max-w-2xl">
@@ -277,7 +261,7 @@ export default function MyScorecardPage() {
   return (
     <div className="p-6 max-w-2xl">
 
-      {/* Header event */}
+      {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
           <h1 className="text-[18px] font-medium text-gray-900">{eventTitle}</h1>
@@ -286,8 +270,6 @@ export default function MyScorecardPage() {
             <p className="text-[12px] text-gray-400 mt-0.5">{clubName}{courseName && ` · ${courseName}`}</p>
           )}
         </div>
-
-        {/* Indicateur auto-save */}
         <div className="flex-shrink-0 mt-1">
           {saveStatus === 'saving' && (
             <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
@@ -295,38 +277,25 @@ export default function MyScorecardPage() {
               Sauvegarde…
             </div>
           )}
-          {saveStatus === 'saved' && (
-            <span className="text-[11px] text-green-600 font-medium">✓ Sauvegardé</span>
-          )}
-          {saveStatus === 'error' && (
-            <span className="text-[11px] text-red-500">Erreur de sauvegarde</span>
-          )}
+          {saveStatus === 'saved' && <span className="text-[11px] text-green-600 font-medium">✓ Sauvegardé</span>}
+          {saveStatus === 'error' && <span className="text-[11px] text-red-500">Erreur de sauvegarde</span>}
         </div>
       </div>
 
       {/* Sélecteur joueurs du flight */}
       {flightPlayers.length > 1 && (
         <div className="mb-5">
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
-            Mon flight
-          </p>
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Mon flight</p>
           <div className="flex gap-2 flex-wrap">
             {flightPlayers.map(p => {
               const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
               const isActive = p.id === activePlayerId
               const isMe = p.id === playerId
               return (
-                <button
-                  key={p.id}
-                  onClick={() => setActivePlayerId(p.id)}
-                  title={`${p.first_name} ${p.surname}`}
-                  className={`relative flex flex-col items-center gap-1 transition-all`}
-                >
+                <button key={p.id} onClick={() => setActivePlayerId(p.id)} title={`${p.first_name} ${p.surname}`}
+                  className="flex flex-col items-center gap-1 transition-all">
                   <div className={`w-11 h-11 rounded-full text-[12px] font-medium border-2 flex items-center justify-center transition-all
-                    ${isActive
-                      ? 'bg-[#185FA5] text-white border-[#185FA5]'
-                      : 'bg-white text-gray-600 border-gray-300 hover:border-[#185FA5]'
-                    }`}>
+                    ${isActive ? 'bg-[#185FA5] text-white border-[#185FA5]' : 'bg-white text-gray-600 border-gray-300 hover:border-[#185FA5]'}`}>
                     {initials}
                   </div>
                   <span className={`text-[10px] ${isActive ? 'text-[#185FA5] font-medium' : 'text-gray-400'}`}>
@@ -353,32 +322,22 @@ export default function MyScorecardPage() {
             )}
           </div>
           <div className="flex gap-3 mt-1">
-            <span className="text-[12px] text-gray-400">
-              WHS <span className="font-medium text-gray-700 ml-0.5">{activePlayer.whs}</span>
-            </span>
-            <span className="text-[12px] text-gray-400">
-              Phcp <span className="font-medium text-gray-700 ml-0.5">{activePlayer.phcp}</span>
-            </span>
+            <span className="text-[12px] text-gray-400">WHS <span className="font-medium text-gray-700 ml-0.5">{activePlayer.whs}</span></span>
+            <span className="text-[12px] text-gray-400">Phcp <span className="font-medium text-gray-700 ml-0.5">{activePlayer.phcp}</span></span>
           </div>
         </div>
       )}
 
-      {/* Scorecard — éditable pour tous les joueurs du flight */}
       {activePlayer ? (
         <ScorecardTable
-          holes={holes}
-          player={activePlayer}
-          scores={scores}
-          setScores={handleSetScores}
-          eventFormat={eventFormat}
-          readOnly={false}
+          holes={holes} player={activePlayer} scores={scores}
+          setScores={handleSetScores} eventFormat={eventFormat} readOnly={false}
         />
       ) : (
         <div className="text-center py-12 text-[13px] text-gray-400 border border-dashed border-gray-200 rounded-lg">
           Aucun joueur dans ce flight
         </div>
       )}
-
     </div>
   )
 }
