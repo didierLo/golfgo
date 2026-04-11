@@ -219,9 +219,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Sidebar — cachée sur mobile */}
         <aside className="hidden sm:flex w-[200px] flex-shrink-0 bg-gray-50 border-r border-gray-200 flex-col py-5 px-2 gap-5">
           <SidebarSection label="Play">
-            <NavItem href="/my-events" icon={Icons.myEvents}  label="My events"  active={isActive('/my-events')} />
-            <NavItem href="/calendar"  icon={Icons.calendar}  label="Calendar"   active={isActive('/calendar')} />
-            <NavItem href="/scorecard" icon={Icons.scorecard} label="Scorecards" active={isActive('/scorecard')} />
+            <NavItem href="/my-events" icon={Icons.myEvents}  label="My Events"  active={isActive('/my-events')} />
+            <NavItem href="/calendar"  icon={Icons.calendar}  label="My Calendar"   active={isActive('/calendar')} />
+            <NavItem href="/scorecard" icon={Icons.scorecard} label="My Scorecard" active={isActive('/scorecard')} />
           </SidebarSection>
 
           <div className="mx-3 h-px bg-gray-200" />
