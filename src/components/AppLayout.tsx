@@ -24,7 +24,6 @@ const Icons = {
   plus: (<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>),
 }
 
-// Textes sidebar plus foncés : text-gray-700 (inactif) au lieu de text-gray-500
 function NavItem({ href, icon, label, active, muted }: { href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean }) {
   return (
     <Link href={href} className={`flex items-center gap-2.5 px-3 py-[7px] rounded-md text-[13px] transition-colors relative ${
@@ -33,9 +32,7 @@ function NavItem({ href, icon, label, active, muted }: { href: string; icon: Rea
                 'text-gray-700 font-normal hover:text-gray-900'
     }`}>
       {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] bg-[#185FA5] rounded-full" />}
-      <span className={`w-[15px] h-[15px] flex-shrink-0 ${
-        active ? 'text-[#185FA5]' : muted ? 'text-gray-400' : 'text-gray-500'
-      }`}>{icon}</span>
+      <span className={`w-[15px] h-[15px] flex-shrink-0 ${active ? 'text-[#185FA5]' : muted ? 'text-gray-400' : 'text-gray-500'}`}>{icon}</span>
       {label}
       {muted && <span className="ml-auto text-[10px] text-gray-400">bientôt</span>}
     </Link>
@@ -51,15 +48,32 @@ function SidebarSection({ label, children }: { label: string; children: React.Re
   )
 }
 
+// Bottom nav item pour mobile
+function BottomNavItem({ href, icon, label, active }: { href: string; icon: React.ReactNode; label: string; active: boolean }) {
+  return (
+    <Link href={href} className="flex flex-col items-center gap-0.5 flex-1 py-2 transition-colors"
+      style={{ color: active ? '#185FA5' : '#6B7280' }}>
+      <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* on rend l'icône un peu plus grande pour la bottom nav */}
+        <svg viewBox="0 0 16 16" fill="none" width="20" height="20" style={{ display: 'contents' }}>
+          {icon}
+        </svg>
+        {icon}
+      </span>
+      <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, lineHeight: 1 }}>{label}</span>
+    </Link>
+  )
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const supabase = createClient()
 
-  const [groups, setGroups]               = useState<Group[]>([])
-  const [activeGroup, setActiveGroup]     = useState<Group | null>(null)
-  const [currentUser, setCurrentUser]     = useState<CurrentUser | null>(null)
+  const [groups, setGroups]           = useState<Group[]>([])
+  const [activeGroup, setActiveGroup] = useState<Group | null>(null)
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
-  const [loading, setLoading]             = useState(true)
+  const [loading, setLoading]         = useState(true)
 
   useEffect(() => {
     async function loadData() {
@@ -112,6 +126,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
   const gid = activeGroup?.id
   const isAnyOwner = groups.some(g => g.role === 'owner')
+
+  // Items bottom nav mobile — les 5 plus importants
+  const bottomNavItems = [
+    { href: '/my-events',                                          icon: Icons.myEvents,  label: 'My Events' },
+    { href: '/calendar',                                           icon: Icons.calendar,  label: 'Calendar'  },
+    { href: isAnyOwner ? '/groups' : '/not-owner',                 icon: Icons.groups,    label: 'Groups'    },
+    { href: isAnyOwner ? (gid ? `/groups/${gid}/events` : '/groups') : '/not-owner',
+                                                                   icon: Icons.events,    label: 'Events'    },
+    { href: '/scorecard',                                          icon: Icons.scorecard, label: 'Scores'    },
+  ]
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -169,7 +193,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           )}
 
-          {/* Avatar — cliquable vers /login si non connecté */}
+          {/* Avatar */}
           <div className="ml-auto">
             {currentUser ? (
               <div className="w-[30px] h-[30px] rounded-full bg-[#0C447C] border-[1.5px] border-white/30 flex items-center justify-center text-[11px] font-medium text-blue-200 select-none">
@@ -179,7 +203,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link href="/login"
                 className="w-[30px] h-[30px] rounded-full bg-[#0C447C] border-[1.5px] border-white/30 flex items-center justify-center hover:bg-[#0a3a6a] transition-colors"
                 title="Se connecter">
-                {/* icône personne */}
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <circle cx="8" cy="5.5" r="2.5" stroke="white" strokeWidth="1.3" />
                   <path d="M2.5 14c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="white" strokeWidth="1.3" strokeLinecap="round" />
@@ -193,9 +216,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Body */}
       <div className="flex flex-1 max-w-[1200px] w-full mx-auto">
 
-        {/* Sidebar */}
-        <aside className="w-[200px] flex-shrink-0 bg-gray-50 border-r border-gray-200 flex flex-col py-5 px-2 gap-5">
-
+        {/* Sidebar — cachée sur mobile */}
+        <aside className="hidden sm:flex w-[200px] flex-shrink-0 bg-gray-50 border-r border-gray-200 flex-col py-5 px-2 gap-5">
           <SidebarSection label="Play">
             <NavItem href="/my-events" icon={Icons.myEvents}  label="My events"  active={isActive('/my-events')} />
             <NavItem href="/calendar"  icon={Icons.calendar}  label="Calendar"   active={isActive('/calendar')} />
@@ -205,18 +227,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="mx-3 h-px bg-gray-200" />
 
           <SidebarSection label="Organiser">
-            <NavItem
-              href={isAnyOwner ? '/groups' : '/not-owner'}
-              icon={Icons.groups} label="Groups"
-              active={isActive('/groups')} />
+            <NavItem href={isAnyOwner ? '/groups' : '/not-owner'} icon={Icons.groups} label="Groups" active={isActive('/groups')} />
             <NavItem
               href={isAnyOwner ? (gid ? `/groups/${gid}/events` : '/groups') : '/not-owner'}
               icon={Icons.events} label="Events"
               active={!isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`)} />
-            <NavItem
-              href={isAnyOwner ? '/admin/clubs' : '/not-owner'}
-              icon={Icons.clubs} label="Clubs"
-              active={isAnyOwner && isActive('/admin/clubs')} />
+            <NavItem href={isAnyOwner ? '/admin/clubs' : '/not-owner'} icon={Icons.clubs} label="Clubs" active={isAnyOwner && isActive('/admin/clubs')} />
             <NavItem
               href={isAnyOwner ? (gid ? `/groups/${gid}/templates` : '/groups') : '/not-owner'}
               icon={Icons.templates} label="Templates"
@@ -227,13 +243,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="mx-3 h-px bg-gray-200 mb-3" />
             <NavItem href="/settings" icon={Icons.settings} label="Settings" active={isActive('/settings')} muted />
           </div>
-
         </aside>
 
-        <main className="flex-1 bg-white overflow-y-auto">
+        {/* Main — padding bottom sur mobile pour la bottom nav */}
+        <main className="flex-1 bg-white overflow-y-auto pb-16 sm:pb-0">
           {children}
         </main>
       </div>
+
+      {/* Bottom nav — visible uniquement sur mobile */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 flex items-stretch"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {bottomNavItems.map(item => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 py-2 transition-colors"
+            style={{ color: isActive(item.href) ? '#185FA5' : '#6B7280' }}
+          >
+            <span style={{
+              width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: isActive(item.href) ? '#185FA5' : '#6B7280',
+            }}>
+              {item.icon}
+            </span>
+            <span style={{ fontSize: 10, fontWeight: isActive(item.href) ? 600 : 400, lineHeight: 1 }}>
+              {item.label}
+            </span>
+          </Link>
+        ))}
+      </nav>
 
       {groupSwitcherOpen && (
         <div className="fixed inset-0 z-20" onClick={() => setGroupSwitcherOpen(false)} />
