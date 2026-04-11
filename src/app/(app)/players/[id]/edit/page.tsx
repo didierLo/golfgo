@@ -80,10 +80,41 @@ export default function EditPlayerPage() {
             if (error) { alert(error.message); return }
 
             if (groups) {
-              await supabase.from('groups_players').delete().eq('player_id', playerId)
+              // Récupérer les rôles existants pour ne pas les écraser
+              const { data: existingRoles } = await supabase
+                .from('groups_players')
+                .select('group_id, role')
+                .eq('player_id', playerId)
+
+              const roleMap: Record<string, string> = {}
+              existingRoles?.forEach(r => { roleMap[r.group_id] = r.role })
+
+              // Supprimer les groupes retirés uniquement
+              const { data: currentGroups } = await supabase
+                .from('groups_players')
+                .select('group_id')
+                .eq('player_id', playerId)
+
+              const currentGroupIds = currentGroups?.map(g => g.group_id) ?? []
+              const removedGroups = currentGroupIds.filter(id => !groups.includes(id))
+
+              if (removedGroups.length > 0) {
+                await supabase
+                  .from('groups_players')
+                  .delete()
+                  .eq('player_id', playerId)
+                  .in('group_id', removedGroups)
+              }
+
+              // Insérer les nouveaux groupes en préservant le rôle existant
               if (groups.length > 0) {
-                await supabase.from('groups_players').insert(
-                  groups.map((groupId: string) => ({ group_id: groupId, player_id: playerId }))
+                await supabase.from('groups_players').upsert(
+                  groups.map((groupId: string) => ({
+                    group_id:  groupId,
+                    player_id: playerId,
+                    role:      roleMap[groupId] ?? 'member', // préserve owner si déjà owner
+                  })),
+                  { onConflict: 'group_id,player_id' }
                 )
               }
             }

@@ -18,9 +18,9 @@ type PlayerPreview = {
 }
 
 const STATUS_STYLE = {
-  NEW:    { label: 'Nouveau',  bg: '#EAF3DE', text: '#3B6D11' },
-  UPDATE: { label: 'Mise à jour', bg: '#FAEEDA', text: '#854F0B' },
-  EXISTS: { label: 'Existant', bg: '#F1EFE8', text: '#5F5E5A' },
+  NEW:    { label: 'Nouveau',      bg: '#EAF3DE', text: '#3B6D11' },
+  UPDATE: { label: 'Mise à jour',  bg: '#FAEEDA', text: '#854F0B' },
+  EXISTS: { label: 'Existant',     bg: '#F1EFE8', text: '#5F5E5A' },
 }
 
 function normalizeColumn(name: string) {
@@ -63,18 +63,15 @@ export default function ImportPlayers() {
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-
     const buffer = await file.arrayBuffer()
     const workbook = XLSX.read(buffer)
     const sheet = workbook.Sheets[workbook.SheetNames[0]]
     const raw: any[] = XLSX.utils.sheet_to_json(sheet)
-
     const normalized = raw.map(row => {
       const obj: any = {}
       Object.keys(row).forEach(k => { obj[normalizeColumn(k)] = row[k] })
       return obj
     })
-
     await buildPreview(normalized)
   }
 
@@ -89,12 +86,10 @@ export default function ImportPlayers() {
     const previewRows: PlayerPreview[] = data.map((r, i) => {
       let federal = String(r.federal_no || '').trim().toUpperCase()
       if (!federal) federal = `AUTO_${Date.now()}_${i}`
-
       const whs = cleanWHS(r.whs)
       const existingPlayer = map.get(federal)
       let status: 'NEW' | 'UPDATE' | 'EXISTS' = 'NEW'
       if (existingPlayer) status = existingPlayer.whs !== whs ? 'UPDATE' : 'EXISTS'
-
       return {
         federal_no: federal,
         first_name: String(r.first_name || '').trim().replace(/\b\w/g, l => l.toUpperCase()),
@@ -128,10 +123,24 @@ export default function ImportPlayers() {
     if (error) { alert(error.message); setLoading(false); return }
 
     if (groupId && data) {
-      await supabase.from('groups_players').upsert(
-        data.map(p => ({ group_id: groupId, player_id: p.id })),
-        { onConflict: 'group_id,player_id' }
-      )
+      // Récupérer les membres existants du groupe pour préserver leurs rôles
+      const playerIds = data.map(p => p.id)
+      const { data: existingMembers } = await supabase
+        .from('groups_players')
+        .select('player_id, role')
+        .eq('group_id', groupId)
+        .in('player_id', playerIds)
+
+      const existingRoleMap: Record<string, string> = {}
+      existingMembers?.forEach(m => { existingRoleMap[m.player_id] = m.role })
+
+      // Insérer seulement les nouveaux membres (pas d'upsert qui écraserait le rôle)
+      const newMembers = data.filter(p => !existingRoleMap[p.id])
+      if (newMembers.length > 0) {
+        await supabase.from('groups_players').insert(
+          newMembers.map(p => ({ group_id: groupId, player_id: p.id, role: 'member' }))
+        )
+      }
     }
 
     alert(`${rows.length} joueur(s) importé(s)`)
@@ -170,7 +179,6 @@ export default function ImportPlayers() {
       {/* Aperçu */}
       {preview.length > 0 && (
         <>
-          {/* Compteurs */}
           <div className="flex gap-2">
             {[
               { n: newCount,    ...STATUS_STYLE.NEW },
@@ -184,7 +192,6 @@ export default function ImportPlayers() {
             ))}
           </div>
 
-          {/* Mode */}
           <div className="flex gap-4">
             {(['insert', 'update'] as const).map(m => (
               <label key={m} className="flex items-center gap-2 text-[12px] text-gray-600 cursor-pointer">
@@ -194,7 +201,6 @@ export default function ImportPlayers() {
             ))}
           </div>
 
-          {/* Liste */}
           <div className="border border-gray-200 rounded-lg overflow-hidden max-h-52 overflow-y-auto">
             {preview.map((p, i) => {
               const s = STATUS_STYLE[p.status]
@@ -212,7 +218,6 @@ export default function ImportPlayers() {
             })}
           </div>
 
-          {/* Bouton import */}
           <button onClick={importPlayers} disabled={loading}
             className="flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-medium px-5 py-2 rounded-md hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
             {loading && <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
