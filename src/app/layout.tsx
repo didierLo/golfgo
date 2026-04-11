@@ -18,8 +18,9 @@ export const metadata: Metadata = {
   description: "Organise tes parties de golf",
   icons: {
     icon: "/favicon.png",
-    apple: "/favicon.png",
+    apple: "/icon-192.png",
   },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
