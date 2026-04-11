@@ -27,6 +27,7 @@ export default function TeeSheetPage() {
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState<string | null>(null)
   const [sending, setSending]       = useState(false)
+  const [emailEnabled, setEmailEnabled] = useState(false)
 
   useEffect(() => { loadData() }, [eventId])
 
@@ -70,7 +71,6 @@ export default function TeeSheetPage() {
   async function handleSendEmail() {
     setSending(true)
     try {
-      // Construire les données de la tee sheet avec les heures calculées
       const teesheetFlights = flights.map((f, index) => ({
         flight_number: f.flight_number,
         start_time:    getFlightTime(index),
@@ -98,6 +98,8 @@ export default function TeeSheetPage() {
     </div>
   )
 
+  const canSend = emailEnabled && !sending
+
   return (
     <div className="p-6 max-w-2xl">
 
@@ -124,25 +126,59 @@ export default function TeeSheetPage() {
         </div>
       </div>
 
-      {/* Toggle envoi email — owner uniquement */}
+      {/* Envoi email — owner uniquement */}
       {isOwner && flights.length > 0 && (
-        <div className="flex items-start gap-3 mb-5 p-3 bg-gray-50 border border-gray-200 rounded-lg print:hidden">
-          <button type="button" onClick={handleSendEmail} disabled={sending}
-            className={`mt-0.5 w-9 h-5 rounded-full transition-colors flex items-center px-0.5 flex-shrink-0 ${
-              sending ? 'bg-gray-300' : 'bg-[#185FA5] cursor-pointer'
-            }`}>
-            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
-              sending ? 'translate-x-0' : 'translate-x-4'
-            }`} />
-          </button>
-          <div>
-            <p className="text-[13px] font-medium text-gray-700">
-              {sending ? 'Envoi en cours…' : 'Envoyer la tee sheet par email'}
-            </p>
-            <p className="text-[11px] text-gray-400 mt-0.5">
-              Chaque participant GOING recevra la tee sheet complète avec son flight mis en évidence
-            </p>
+        <div className="flex items-center justify-between gap-4 mb-5 p-3 bg-gray-50 border border-gray-200 rounded-lg print:hidden">
+
+          {/* Switch + label */}
+          <div className="flex items-start gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={emailEnabled}
+              onClick={() => setEmailEnabled(v => !v)}
+              style={{
+                backgroundColor: emailEnabled ? '#185FA5' : '#D1D5DB',
+                transition: 'background-color 0.2s',
+              }}
+              className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer"
+            >
+              <div
+                style={{
+                  transform: emailEnabled ? 'translateX(16px)' : 'translateX(0)',
+                  transition: 'transform 0.2s',
+                }}
+                className="w-4 h-4 rounded-full bg-white shadow-sm"
+              />
+            </button>
+            <div>
+              <p className="text-[13px] font-medium text-gray-700">Envoyer la tee sheet par email</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                Chaque participant GOING recevra la tee sheet complète avec son flight mis en évidence
+              </p>
+            </div>
           </div>
+
+          {/* Bouton envoi — grisé si switch OFF */}
+          <button
+            type="button"
+            onClick={canSend ? handleSendEmail : undefined}
+            disabled={!canSend}
+            style={canSend ? {
+              borderColor: '#185FA5',
+              color: '#185FA5',
+              cursor: 'pointer',
+            } : {
+              borderColor: '#E5E7EB',
+              color: '#D1D5DB',
+              backgroundColor: '#F9FAFB',
+              cursor: 'not-allowed',
+            }}
+            className="flex-shrink-0 text-[12px] font-medium px-3 py-1.5 rounded-md border transition-colors"
+          >
+            {sending ? 'Envoi…' : '✉ Envoyer'}
+          </button>
+
         </div>
       )}
 
@@ -175,11 +211,11 @@ export default function TeeSheetPage() {
                         {p.first_name} {p.surname}
                       </span>
                     </div>
-                   {p.whs !== null && (
-                <span className="text-[11px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">
-                  {Number(p.whs).toFixed(1)}
-                </span>
-              )}
+                    {p.whs !== null && (
+                      <span className="text-[11px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">
+                        {Number(p.whs).toFixed(1)}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

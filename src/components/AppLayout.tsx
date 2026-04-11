@@ -16,12 +16,7 @@ const Icons = {
   scorecard: (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="2" stroke="currentColor" strokeWidth="1.2" /><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>),
   groups: (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.2" /><path d="M1 13c0-2.76 2.24-5 5-5a5 5 0 015 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><circle cx="12" cy="5" r="2" stroke="currentColor" strokeWidth="1.2" /></svg>),
   events: (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.2" /><path d="M5 4V3a1 1 0 012 0v1M9 4V3a1 1 0 012 0v1" stroke="currentColor" strokeWidth="1.2" /></svg>),
-  clubs: (
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <path d="M3 14V2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-            <path d="M3 2l9 3-9 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        ),
+  clubs: (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 14V2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M3 2l9 3-9 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>),
   templates: (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.2" /><path d="M1 13h6M1 15h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M5 4h6M5 7h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>),
   settings: (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.2" /><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>),
   chevronDown: (<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>),
@@ -29,13 +24,20 @@ const Icons = {
   plus: (<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>),
 }
 
+// Textes sidebar plus foncés : text-gray-700 (inactif) au lieu de text-gray-500
 function NavItem({ href, icon, label, active, muted }: { href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean }) {
   return (
-    <Link href={href} className={`flex items-center gap-2.5 px-3 py-[7px] rounded-md text-[13px] transition-colors relative ${active ? 'text-[#185FA5] font-medium' : muted ? 'text-gray-300 font-normal hover:text-gray-400' : 'text-gray-500 font-normal hover:text-gray-800'}`}>
+    <Link href={href} className={`flex items-center gap-2.5 px-3 py-[7px] rounded-md text-[13px] transition-colors relative ${
+      active  ? 'text-[#185FA5] font-medium' :
+      muted   ? 'text-gray-400 font-normal hover:text-gray-500' :
+                'text-gray-700 font-normal hover:text-gray-900'
+    }`}>
       {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] bg-[#185FA5] rounded-full" />}
-      <span className={`w-[15px] h-[15px] flex-shrink-0 ${active ? 'text-[#185FA5]' : muted ? 'text-gray-300' : 'text-gray-400'}`}>{icon}</span>
+      <span className={`w-[15px] h-[15px] flex-shrink-0 ${
+        active ? 'text-[#185FA5]' : muted ? 'text-gray-400' : 'text-gray-500'
+      }`}>{icon}</span>
       {label}
-      {muted && <span className="ml-auto text-[10px] text-gray-300">bientôt</span>}
+      {muted && <span className="ml-auto text-[10px] text-gray-400">bientôt</span>}
     </Link>
   )
 }
@@ -43,7 +45,7 @@ function NavItem({ href, icon, label, active, muted }: { href: string; icon: Rea
 function SidebarSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mb-0.5">{label}</p>
+      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest px-3 mb-0.5">{label}</p>
       {children}
     </div>
   )
@@ -136,14 +138,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {groupSwitcherOpen && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50">
                   <div className="px-3 pb-2 pt-1">
-                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Mes groupes</span>
+                    <span className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Mes groupes</span>
                   </div>
                   {groups.map(group => (
                     <button key={group.id} onClick={() => { setActiveGroup(group); setGroupSwitcherOpen(false) }}
                       className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors text-left">
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: group.color }} />
                       <span className="text-[13px] text-gray-800 flex-1">{group.name}</span>
-                      <span className="text-[10px] text-gray-400">{group.role}</span>
+                      <span className="text-[10px] text-gray-500">{group.role}</span>
                       {activeGroup.id === group.id && <span className="text-blue-600">{Icons.check}</span>}
                     </button>
                   ))}
@@ -167,10 +169,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           )}
 
+          {/* Avatar — cliquable vers /login si non connecté */}
           <div className="ml-auto">
-            <div className="w-[30px] h-[30px] rounded-full bg-[#0C447C] border-[1.5px] border-white/30 flex items-center justify-center text-[11px] font-medium text-blue-200 select-none">
-              {currentUser?.initials ?? '··'}
-            </div>
+            {currentUser ? (
+              <div className="w-[30px] h-[30px] rounded-full bg-[#0C447C] border-[1.5px] border-white/30 flex items-center justify-center text-[11px] font-medium text-blue-200 select-none">
+                {currentUser.initials}
+              </div>
+            ) : (
+              <Link href="/login"
+                className="w-[30px] h-[30px] rounded-full bg-[#0C447C] border-[1.5px] border-white/30 flex items-center justify-center hover:bg-[#0a3a6a] transition-colors"
+                title="Se connecter">
+                {/* icône personne */}
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="5.5" r="2.5" stroke="white" strokeWidth="1.3" />
+                  <path d="M2.5 14c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="white" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -202,11 +217,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               href={isAnyOwner ? '/admin/clubs' : '/not-owner'}
               icon={Icons.clubs} label="Clubs"
               active={isAnyOwner && isActive('/admin/clubs')} />
-           <NavItem
+            <NavItem
               href={isAnyOwner ? (gid ? `/groups/${gid}/templates` : '/groups') : '/not-owner'}
               icon={Icons.templates} label="Templates"
               active={!!gid && isActive(`/groups/${gid}/templates`)} />
-            
           </SidebarSection>
 
           <div className="mt-auto">
