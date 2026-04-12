@@ -27,7 +27,7 @@ export default function SignupPage() {
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/reset-password`,
+         emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         data: { full_name: fullName.trim() },
       },
     })
