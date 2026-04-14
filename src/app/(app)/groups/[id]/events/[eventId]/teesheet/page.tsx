@@ -102,7 +102,6 @@ export default function TeeSheetPage() {
 
   return (
     <div className="p-6 max-w-2xl">
-
       {/* Header print uniquement */}
       <div className="print-header">
         <div className="print-logo">
@@ -119,8 +118,7 @@ export default function TeeSheetPage() {
       <div className="print-footer">
         <span>GolfGo — golfgo-drab.vercel.app</span>
         <span>Imprimé le {new Date().toLocaleDateString('fr-BE')}</span>
-      </div>  
-
+      </div>
       {/* Header */}
       <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
         <div>
