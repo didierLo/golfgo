@@ -101,6 +101,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             role: row.role as 'owner' | 'member',
           }))
 
+          console.log('fetchedGroups:', fetchedGroups)  
+          console.log('data brut:', data)               
+
         setGroups(fetchedGroups)
         const urlGroupId = pathname.match(/\/groups\/([^/]+)/)?.[1]
         const groupFromUrl = fetchedGroups.find(g => g.id === urlGroupId)
