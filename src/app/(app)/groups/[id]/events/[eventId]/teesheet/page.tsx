@@ -103,6 +103,24 @@ export default function TeeSheetPage() {
   return (
     <div className="p-6 max-w-2xl">
 
+      {/* Header print uniquement */}
+      <div className="print-header">
+        <div className="print-logo">
+          <span className="print-logo-golf">Golf</span>
+          <span className="print-logo-go">Go</span>
+        </div>
+        <div className="print-event-info">
+          <div className="print-event-title">{eventTitle}</div>
+          <div className="print-event-date">{eventDate}</div>
+        </div>
+      </div>
+
+      {/* Footer print uniquement */}
+      <div className="print-footer">
+        <span>GolfGo — golfgo-drab.vercel.app</span>
+        <span>Imprimé le {new Date().toLocaleDateString('fr-BE')}</span>
+      </div>  
+
       {/* Header */}
       <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
         <div>
@@ -224,13 +242,106 @@ export default function TeeSheetPage() {
         </div>
       )}
 
-      <style jsx global>{`
-        @media print {
-          nav, header, aside, .print\\:hidden { display: none !important; }
-          body { background: white; }
-          .p-6 { padding: 0; }
-        }
-      `}</style>
+    <style jsx global>{`
+  @media print {
+    nav, header, aside, .print\\:hidden { display: none !important; }
+    body { background: white; margin: 0; }
+
+    /* Header imprimé */
+    .print-header {
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0 12px;
+      border-bottom: 3px solid #185FA5;
+      margin-bottom: 20px;
+    }
+    .print-logo {
+      display: flex !important;
+      align-items: baseline;
+      gap: 0;
+    }
+    .print-logo-golf { font-size: 22px; font-weight: 600; color: #185FA5; letter-spacing: -0.5px; }
+    .print-logo-go   { font-size: 22px; font-weight: 600; color: #97C459; letter-spacing: -0.5px; }
+    .print-event-info { text-align: right; }
+    .print-event-title { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .print-event-date  { font-size: 12px; color: #6B7280; margin-top: 2px; }
+
+    /* Masquer le header web */
+    .p-6 > div:first-child { display: none !important; }
+
+    /* Flights */
+    .p-6 { padding: 24px 32px; }
+    .flex.flex-col.gap-3 { gap: 12px; }
+
+    .bg-white.border { 
+      border: 1px solid #E5E7EB !important; 
+      border-radius: 8px !important;
+      overflow: hidden;
+      break-inside: avoid;
+    }
+
+    /* Header flight */
+    .bg-gray-50.border-b {
+      background: #185FA5 !important;
+      padding: 8px 16px !important;
+    }
+    .bg-gray-50.border-b span:first-child {
+      color: white !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+    .bg-gray-50.border-b span:last-child {
+      color: #97C459 !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+    }
+
+    /* Lignes joueurs */
+    .divide-y > div {
+      padding: 7px 16px !important;
+    }
+    .divide-y > div:nth-child(even) {
+      background: #F8FAFF !important;
+    }
+
+    /* Numéro joueur */
+    .divide-y > div span:first-child {
+      color: #185FA5 !important;
+      font-weight: 600 !important;
+      font-size: 11px !important;
+    }
+
+    /* Nom joueur */
+    .divide-y > div span.text-\\[13px\\] {
+      font-size: 13px !important;
+      color: #1a1a1a !important;
+    }
+
+    /* WHS badge */
+    .font-mono {
+      background: #E6F1FB !important;
+      color: #185FA5 !important;
+      font-weight: 600 !important;
+      padding: 2px 6px !important;
+      border-radius: 4px !important;
+    }
+
+    /* Footer */
+    .print-footer {
+      display: flex !important;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid #E5E7EB;
+      font-size: 10px;
+      color: #9CA3AF;
+    }
+  }
+
+  /* Éléments print uniquement — cachés à l'écran */
+  .print-header, .print-logo, .print-footer { display: none; }
+`}</style>
     </div>
   )
 }
