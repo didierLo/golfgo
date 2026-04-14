@@ -371,7 +371,7 @@ export default function InvitationsPage() {
 
         <div className="flex items-center gap-2">
           {eventFilter !== 'ALL' && (
-            
+              <a   
               href={`/groups/${groupId}/events/${eventFilter}/participants`}
               className="text-[12px] font-medium text-[#185FA5] hover:underline whitespace-nowrap">
               Voir les participants →
