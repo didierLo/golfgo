@@ -6,9 +6,7 @@ import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
-
 const supabase = createClient()
-
 
 type Invitation = {
   id: string
@@ -47,7 +45,7 @@ function formatDateLong(dateStr: string) {
 export default function InvitationsPage() {
   const params = useParams()
   const groupId = params.id as string
-  const pathname = usePathname()   
+  const pathname = usePathname()
 
   const [invitations, setInvitations]         = useState<Invitation[]>([])
   const [eventsMap, setEventsMap]             = useState<Record<string, Event>>({})
@@ -55,6 +53,7 @@ export default function InvitationsPage() {
   const [members, setMembers]                 = useState<Member[]>([])
   const [loading, setLoading]                 = useState(true)
   const [sending, setSending]                 = useState(false)
+  const [isOwner, setIsOwner]                 = useState(false)  // ← ajouté
 
   const [selectedEvent, setSelectedEvent]     = useState('')
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
@@ -62,13 +61,13 @@ export default function InvitationsPage() {
   const [showForm, setShowForm]               = useState(true)
   const [eventFilter, setEventFilter]         = useState<string>('ALL')
 
-  // Sélection pour annulation — uniquement les INVITED
   const [selectedToCancel, setSelectedToCancel] = useState<string[]>([])
   const [cancelling, setCancelling]             = useState(false)
 
-  useEffect(() => { 
-    if (groupId) loadData() 
-    }, [groupId, pathname])
+  useEffect(() => {
+    if (groupId) loadData()
+  }, [groupId, pathname])
+
   useEffect(() => {
     const handleFocus = () => loadData()
     window.addEventListener('focus', handleFocus)
@@ -77,6 +76,16 @@ export default function InvitationsPage() {
 
   async function loadData() {
     setLoading(true)
+
+    // ← ajouté : vérifier le rôle
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: gp } = await supabase
+      .from('groups_players')
+      .select('role')
+      .eq('group_id', groupId)
+      .eq('user_id', user?.id)
+      .single()
+    setIsOwner(gp?.role === 'owner')
 
     const { data: evts } = await supabase
       .from('events')
@@ -110,9 +119,6 @@ export default function InvitationsPage() {
       .select(`player:players(id, first_name, surname, email)`)
       .eq('group_id', groupId)
     setMembers((mbrs || []).map((m: any) => m.player))
-
-    console.log('groupId in invitations:', groupId)
-    console.log('members loaded:', mbrs?.length)    
 
     setSelectedToCancel([])
     setLoading(false)
@@ -150,27 +156,25 @@ export default function InvitationsPage() {
       }
 
       if (sendEmail) {
-  // 1. Insérer d'abord dans event_participants
-  const rows = toInvite.map(playerId => ({
-    event_id:            selectedEvent,
-    player_id:           playerId,
-    status:              'INVITED',
-    invited_at:          new Date().toISOString(),
-    registration_source: 'email',
-  }))
-  const { error: insertError } = await supabase
-    .from('event_participants').insert(rows)
-  if (insertError) throw new Error(insertError.message)
+        const rows = toInvite.map(playerId => ({
+          event_id:            selectedEvent,
+          player_id:           playerId,
+          status:              'INVITED',
+          invited_at:          new Date().toISOString(),
+          registration_source: 'email',
+        }))
+        const { error: insertError } = await supabase
+          .from('event_participants').insert(rows)
+        if (insertError) throw new Error(insertError.message)
 
-  // 2. Puis envoyer les emails
-  const res = await fetch('/api/send-invitations', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }),
-  })
-  if (!res.ok) throw new Error('Erreur envoi')
-  toast.success(`${toInvite.length} invitation(s) envoyée(s) par email`)
-}
+        const res = await fetch('/api/send-invitations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }),
+        })
+        if (!res.ok) throw new Error('Erreur envoi')
+        toast.success(`${toInvite.length} invitation(s) envoyée(s) par email`)
+      }
 
       setSelectedPlayers([])
       window.location.href = `/groups/${groupId}/events`
@@ -221,12 +225,10 @@ export default function InvitationsPage() {
     )
   }
 
-  // Toutes les invitations filtrées par event
   const filtered = invitations.filter(i =>
     eventFilter === 'ALL' || i.event_id === eventFilter
   )
 
-  // Seulement les INVITED — annulables
   const filteredInvited = filtered.filter(i => i.status === 'INVITED')
   const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length === filteredInvited.length
 
@@ -253,14 +255,16 @@ export default function InvitationsPage() {
             {invitations.filter(i => i.status === 'INVITED').length} invited · {invitations.filter(i => i.status === 'GOING').length} going
           </p>
         </div>
-        <button onClick={() => setShowForm(v => !v)}
-          className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors">
-          {showForm ? 'Fermer' : '+ Inviter'}
-        </button>
+        {isOwner && (  // ← conditionné
+          <button onClick={() => setShowForm(v => !v)}
+            className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors">
+            {showForm ? 'Fermer' : '+ Inviter'}
+          </button>
+        )}
       </div>
 
-      {/* Formulaire */}
-      {showForm && (
+      {/* Formulaire — owner uniquement */}
+      {showForm && isOwner && (  // ← conditionné
         <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">
             Envoyer des invitations
@@ -366,17 +370,15 @@ export default function InvitationsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Lien vers participants */}
           {eventFilter !== 'ALL' && (
-            <a
+            
               href={`/groups/${groupId}/events/${eventFilter}/participants`}
               className="text-[12px] font-medium text-[#185FA5] hover:underline whitespace-nowrap">
               Voir les participants →
             </a>
           )}
 
-          {/* Bouton annuler sélection */}
-          {selectedToCancel.length > 0 && (
+          {selectedToCancel.length > 0 && isOwner && (  // ← conditionné
             <button onClick={handleCancelSelected} disabled={cancelling}
               className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-md border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors">
               {cancelling ? 'Annulation…' : `Annuler (${selectedToCancel.length})`}
@@ -385,7 +387,7 @@ export default function InvitationsPage() {
         </div>
       </div>
 
-      {/* Bandeau event sélectionné avec compteurs */}
+      {/* Bandeau event */}
       {displayedEvent && (
         <div className="mb-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between">
           <div>
@@ -408,8 +410,7 @@ export default function InvitationsPage() {
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
 
-          {/* Header — case à cocher uniquement si des INVITED */}
-          {filteredInvited.length > 0 && (
+          {filteredInvited.length > 0 && isOwner && (  // ← conditionné
             <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 border-b border-gray-200">
               <input type="checkbox" checked={allCancelSelected}
                 onChange={toggleCancelAll} className="rounded" />
@@ -431,8 +432,7 @@ export default function InvitationsPage() {
                   selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''
                 } ${i < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}>
 
-                {/* Case à cocher — seulement pour INVITED */}
-                {isInvited ? (
+                {isInvited && isOwner ? (  // ← conditionné
                   <input type="checkbox"
                     checked={selectedToCancel.includes(inv.id)}
                     onChange={() => toggleCancel(inv.id)}
@@ -467,7 +467,6 @@ export default function InvitationsPage() {
           })}
         </div>
       )}
-
     </div>
   )
 }
