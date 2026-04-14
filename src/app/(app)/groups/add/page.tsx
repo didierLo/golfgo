@@ -59,6 +59,7 @@ export default function AddGroupPage() {
       group_id:  group.id,
       player_id: player.id,
       role:      'owner',
+      user_id:   user.id,  // ← ajouter
     }, { onConflict: 'group_id,player_id' })
     }
 
