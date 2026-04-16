@@ -12,31 +12,28 @@ type FlightPlayer = { id: string; first_name: string; surname: string; whs: numb
 type Flight = { flight_number: number; players: FlightPlayer[] }
 
 export default function TeeSheetPage() {
-  const params   = useParams()
-  const groupId  = params.id as string
-  const eventId  = params.eventId as string
+  const params  = useParams()
+  const groupId = params.id as string
+  const eventId = params.eventId as string
 
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
 
-  const [flights, setFlights]       = useState<Flight[]>([])
-  const [eventTitle, setEventTitle] = useState('')
-  const [eventDate, setEventDate]   = useState('')
-  const [startsAt, setStartsAt]     = useState<string | null>(null)
-  const [interval, setInterval]     = useState(8)
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState<string | null>(null)
-  const [sending, setSending]       = useState(false)
+  const [flights, setFlights]           = useState<Flight[]>([])
+  const [eventTitle, setEventTitle]     = useState('')
+  const [eventDate, setEventDate]       = useState('')
+  const [startsAt, setStartsAt]         = useState<string | null>(null)
+  const [interval, setInterval]         = useState(8)
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState<string | null>(null)
+  const [sending, setSending]           = useState(false)
   const [emailEnabled, setEmailEnabled] = useState(false)
 
   useEffect(() => { loadData() }, [eventId])
 
   async function loadData() {
-    setLoading(true)
-    setError(null)
-
-    const { data: event } = await supabase
-      .from('events').select('title, starts_at').eq('id', eventId).single()
+    setLoading(true); setError(null)
+    const { data: event } = await supabase.from('events').select('title, starts_at').eq('id', eventId).single()
     if (event) {
       setEventTitle(event.title)
       setStartsAt(event.starts_at)
@@ -44,20 +41,15 @@ export default function TeeSheetPage() {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
       }))
     }
-
     const { data: flightsData, error: fErr } = await supabase
       .from('flights')
       .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
-      .eq('event_id', eventId)
-      .order('flight_number')
-
+      .eq('event_id', eventId).order('flight_number')
     if (fErr) { setError(fErr.message); setLoading(false); return }
-
     const built: Flight[] = (flightsData || []).map((f: any) => ({
       flight_number: f.flight_number,
       players: (f.flight_players || []).map((fp: any) => fp.players).filter(Boolean),
     }))
-
     setFlights(built)
     setLoading(false)
   }
@@ -73,10 +65,9 @@ export default function TeeSheetPage() {
     try {
       const teesheetFlights = flights.map((f, index) => ({
         flight_number: f.flight_number,
-        start_time:    getFlightTime(index),
-        players:       f.players,
+        start_time: getFlightTime(index),
+        players: f.players,
       }))
-
       const res = await fetch('/api/send-teesheet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,15 +85,16 @@ export default function TeeSheetPage() {
 
   if (loading || roleLoading) return (
     <div className="p-6 space-y-3 max-w-2xl">
-      {[1, 2, 3].map(i => <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
     </div>
   )
 
   const canSend = emailEnabled && !sending
 
   return (
-    <div className="p-6 max-w-2xl">
-      {/* Header print uniquement */}
+    <div className="p-5 sm:p-6 max-w-2xl">
+
+      {/* Header print */}
       <div className="print-header">
         <div className="print-logo">
           <span className="print-logo-golf">Golf</span>
@@ -113,122 +105,85 @@ export default function TeeSheetPage() {
           <div className="print-event-date">{eventDate}</div>
         </div>
       </div>
-
-      {/* Footer print uniquement */}
       <div className="print-footer">
         <span>GolfGo — golfgo-drab.vercel.app</span>
         <span>Imprimé le {new Date().toLocaleDateString('fr-BE')}</span>
       </div>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-5 flex-wrap gap-3">
-        <div>
-          <h1 className="text-[18px] font-medium text-gray-900">Tee Sheet</h1>
-          {eventTitle && <p className="text-[13px] text-gray-400 mt-0.5">{eventTitle}</p>}
-          {eventDate  && <p className="text-[12px] text-gray-400">{eventDate}</p>}
-        </div>
 
-        <div className="flex items-center gap-2 flex-wrap print:hidden">
-          <label className="text-[12px] text-gray-500">Intervalle</label>
+      {/* Header web */}
+      <div className="flex items-start justify-between mb-5 flex-wrap gap-3 print:hidden">
+        <div>
+          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Tee Sheet</h1>
+          {eventTitle && <p className="text-[13px] text-slate-600 mt-0.5">{eventTitle}</p>}
+          {eventDate  && <p className="text-[12px] text-slate-500">{eventDate}</p>}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <label className="text-[12px] font-semibold text-slate-600">Intervalle</label>
           <select value={interval} onChange={e => setInterval(Number(e.target.value))}
-            className="border border-gray-200 rounded-md px-2 py-1.5 text-[13px] bg-white focus:outline-none focus:border-blue-300">
-            {[6, 7, 8, 9, 10, 12, 15].map(v => (
-              <option key={v} value={v}>{v} min</option>
-            ))}
+            className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
+            {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{v} min</option>)}
           </select>
           <button onClick={() => window.print()}
-            className="text-[12px] font-medium px-3 py-1.5 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors">
+            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
             🖨 Imprimer
           </button>
         </div>
       </div>
 
-      {/* Envoi email — owner uniquement */}
+      {/* Envoi email */}
       {isOwner && flights.length > 0 && (
-        <div className="flex items-center justify-between gap-4 mb-5 p-3 bg-gray-50 border border-gray-200 rounded-lg print:hidden">
-
-          {/* Switch + label */}
+        <div className="flex items-center justify-between gap-4 mb-5 p-4 bg-white border border-slate-200 rounded-xl print:hidden">
           <div className="flex items-start gap-3">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={emailEnabled}
+            <button type="button" role="switch" aria-checked={emailEnabled}
               onClick={() => setEmailEnabled(v => !v)}
-              style={{
-                backgroundColor: emailEnabled ? '#185FA5' : '#D1D5DB',
-                transition: 'background-color 0.2s',
-              }}
-              className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer"
-            >
-              <div
-                style={{
-                  transform: emailEnabled ? 'translateX(16px)' : 'translateX(0)',
-                  transition: 'transform 0.2s',
-                }}
-                className="w-4 h-4 rounded-full bg-white shadow-sm"
-              />
+              style={{ backgroundColor: emailEnabled ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
+              className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
+              <div style={{ transform: emailEnabled ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
+                className="w-4 h-4 rounded-full bg-white shadow-sm" />
             </button>
             <div>
-              <p className="text-[13px] font-medium text-gray-700">Envoyer la tee sheet par email</p>
-              <p className="text-[11px] text-gray-400 mt-0.5">
-                Chaque participant GOING recevra la tee sheet complète avec son flight mis en évidence
+              <p className="text-[13px] font-semibold text-slate-800">Envoyer la tee sheet par email</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Chaque participant GOING recevra la tee sheet avec son flight mis en évidence
               </p>
             </div>
           </div>
-
-          {/* Bouton envoi — grisé si switch OFF */}
-          <button
-            type="button"
-            onClick={canSend ? handleSendEmail : undefined}
-            disabled={!canSend}
-            style={canSend ? {
-              borderColor: '#185FA5',
-              color: '#185FA5',
-              cursor: 'pointer',
-            } : {
-              borderColor: '#E5E7EB',
-              color: '#D1D5DB',
-              backgroundColor: '#F9FAFB',
-              cursor: 'not-allowed',
-            }}
-            className="flex-shrink-0 text-[12px] font-medium px-3 py-1.5 rounded-md border transition-colors"
-          >
+          <button type="button" onClick={canSend ? handleSendEmail : undefined} disabled={!canSend}
+            className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
+              canSend
+                ? 'border-[#185FA5] text-[#185FA5] hover:bg-blue-50 cursor-pointer'
+                : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+            }`}>
             {sending ? 'Envoi…' : '✉ Envoyer'}
           </button>
-
         </div>
       )}
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-[13px] text-red-600">{error}</div>
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium">{error}</div>
       )}
 
       {flights.length === 0 ? (
-        <div className="text-center py-12 border border-dashed border-gray-200 rounded-lg text-[13px] text-gray-400">
+        <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-[13px] text-slate-500">
           Aucun flight généré — génère les flights d'abord dans l'onglet Flights
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {flights.map((flight, index) => (
-            <div key={flight.flight_number} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200">
-                <span className="text-[13px] font-semibold text-gray-700">
-                  Flight {flight.flight_number}
-                </span>
-                <span className="text-[14px] font-medium text-[#185FA5]">
-                  {getFlightTime(index)}
-                </span>
+            <div key={flight.flight_number} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
+                <span className="text-[13px] font-black text-slate-800">Flight {flight.flight_number}</span>
+                <span className="text-[15px] font-black text-[#185FA5]">{getFlightTime(index)}</span>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-slate-100">
                 {flight.players.map((p, i) => (
                   <div key={p.id} className="flex items-center justify-between px-4 py-2.5">
                     <div className="flex items-center gap-3">
-                      <span className="text-[11px] text-gray-300 w-4">{i + 1}</span>
-                      <span className="text-[13px] text-gray-800 font-medium">
-                        {p.first_name} {p.surname}
-                      </span>
+                      <span className="text-[11px] text-slate-300 w-4">{i + 1}</span>
+                      <span className="text-[13px] font-semibold text-slate-800">{p.first_name} {p.surname}</span>
                     </div>
                     {p.whs !== null && (
-                      <span className="text-[11px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">
+                      <span className="text-[11px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-lg font-mono">
                         {Number(p.whs).toFixed(1)}
                       </span>
                     )}
@@ -240,106 +195,34 @@ export default function TeeSheetPage() {
         </div>
       )}
 
-    <style jsx global>{`
-  @media print {
-    nav, header, aside, .print\\:hidden { display: none !important; }
-    body { background: white; margin: 0; }
-
-    /* Header imprimé */
-    .print-header {
-      display: flex !important;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 0 12px;
-      border-bottom: 3px solid #185FA5;
-      margin-bottom: 20px;
-    }
-    .print-logo {
-      display: flex !important;
-      align-items: baseline;
-      gap: 0;
-    }
-    .print-logo-golf { font-size: 22px; font-weight: 600; color: #185FA5; letter-spacing: -0.5px; }
-    .print-logo-go   { font-size: 22px; font-weight: 600; color: #97C459; letter-spacing: -0.5px; }
-    .print-event-info { text-align: right; }
-    .print-event-title { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-    .print-event-date  { font-size: 12px; color: #6B7280; margin-top: 2px; }
-
-    /* Masquer le header web */
-    .p-6 > div:first-child { display: none !important; }
-
-    /* Flights */
-    .p-6 { padding: 24px 32px; }
-    .flex.flex-col.gap-3 { gap: 12px; }
-
-    .bg-white.border { 
-      border: 1px solid #E5E7EB !important; 
-      border-radius: 8px !important;
-      overflow: hidden;
-      break-inside: avoid;
-    }
-
-    /* Header flight */
-    .bg-gray-50.border-b {
-      background: #185FA5 !important;
-      padding: 8px 16px !important;
-    }
-    .bg-gray-50.border-b span:first-child {
-      color: white !important;
-      font-size: 13px !important;
-      font-weight: 600 !important;
-    }
-    .bg-gray-50.border-b span:last-child {
-      color: #97C459 !important;
-      font-size: 15px !important;
-      font-weight: 700 !important;
-    }
-
-    /* Lignes joueurs */
-    .divide-y > div {
-      padding: 7px 16px !important;
-    }
-    .divide-y > div:nth-child(even) {
-      background: #F8FAFF !important;
-    }
-
-    /* Numéro joueur */
-    .divide-y > div span:first-child {
-      color: #185FA5 !important;
-      font-weight: 600 !important;
-      font-size: 11px !important;
-    }
-
-    /* Nom joueur */
-    .divide-y > div span.text-\\[13px\\] {
-      font-size: 13px !important;
-      color: #1a1a1a !important;
-    }
-
-    /* WHS badge */
-    .font-mono {
-      background: #E6F1FB !important;
-      color: #185FA5 !important;
-      font-weight: 600 !important;
-      padding: 2px 6px !important;
-      border-radius: 4px !important;
-    }
-
-    /* Footer */
-    .print-footer {
-      display: flex !important;
-      justify-content: space-between;
-      margin-top: 24px;
-      padding-top: 12px;
-      border-top: 1px solid #E5E7EB;
-      font-size: 10px;
-      color: #9CA3AF;
-    }
-  }
-
-  /* Éléments print uniquement — cachés à l'écran */
-  .print-header, .print-logo, .print-footer { display: none; }
-`}</style>
+      <style jsx global>{`
+        @media print {
+          nav, header, aside, .print\\:hidden { display: none !important; }
+          body { background: white; margin: 0; }
+          .print-header {
+            display: flex !important; align-items: center; justify-content: space-between;
+            padding: 16px 0 12px; border-bottom: 3px solid #185FA5; margin-bottom: 20px;
+          }
+          .print-logo { display: flex !important; align-items: baseline; }
+          .print-logo-golf { font-size: 22px; font-weight: 900; color: #185FA5; letter-spacing: -0.5px; }
+          .print-logo-go   { font-size: 22px; font-weight: 900; color: #4CAF1A; letter-spacing: -0.5px; }
+          .print-event-info { text-align: right; }
+          .print-event-title { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+          .print-event-date  { font-size: 12px; color: #6B7280; margin-top: 2px; }
+          .p-5 > div:nth-child(3) { display: none !important; }
+          .p-5 { padding: 24px 32px; }
+          .flex.flex-col.gap-3 { gap: 12px; }
+          .bg-white.border { border: 1px solid #E5E7EB !important; border-radius: 8px !important; overflow: hidden; break-inside: avoid; }
+          .bg-slate-50.border-b { background: #185FA5 !important; padding: 8px 16px !important; }
+          .bg-slate-50.border-b span:first-child { color: white !important; font-size: 13px !important; font-weight: 700 !important; }
+          .bg-slate-50.border-b span:last-child  { color: #4CAF1A !important; font-size: 15px !important; font-weight: 900 !important; }
+          .divide-y > div { padding: 7px 16px !important; }
+          .divide-y > div:nth-child(even) { background: #F8FAFF !important; }
+          .font-mono { background: #E6F1FB !important; color: #185FA5 !important; font-weight: 600 !important; padding: 2px 6px !important; border-radius: 4px !important; }
+          .print-footer { display: flex !important; justify-content: space-between; margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E7EB; font-size: 10px; color: #9CA3AF; }
+        }
+        .print-header, .print-logo, .print-footer { display: none; }
+      `}</style>
     </div>
   )
 }
