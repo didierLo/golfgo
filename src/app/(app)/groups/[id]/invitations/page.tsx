@@ -98,13 +98,28 @@ export default function InvitationsPage() {
         toast(`Déjà invités — ignorés : ${names}`, { duration: 4000 })
       }
       if (toInvite.length === 0) { toast.error('Tous les joueurs sélectionnés sont déjà invités'); setSending(false); return }
+
+      // Toujours insérer les participants — email optionnel
+      const rows = toInvite.map(playerId => ({
+        event_id: selectedEvent,
+        player_id: playerId,
+        status: 'INVITED',
+        invited_at: new Date().toISOString(),
+        registration_source: sendEmail ? 'email' : 'manual',
+      }))
+      const { error: insertError } = await supabase.from('event_participants').insert(rows)
+      if (insertError) throw new Error(insertError.message)
+
       if (sendEmail) {
-        const rows = toInvite.map(playerId => ({ event_id: selectedEvent, player_id: playerId, status: 'INVITED', invited_at: new Date().toISOString(), registration_source: 'email' }))
-        const { error: insertError } = await supabase.from('event_participants').insert(rows)
-        if (insertError) throw new Error(insertError.message)
-        const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }) })
-        if (!res.ok) throw new Error('Erreur envoi')
+        const res = await fetch('/api/send-invitations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }),
+        })
+        if (!res.ok) throw new Error('Erreur envoi email')
         toast.success(`${toInvite.length} invitation(s) envoyée(s) par email`)
+      } else {
+        toast.success(`${toInvite.length} joueur(s) ajouté(s) sans email`)
       }
       setSelectedPlayers([])
       window.location.href = `/groups/${groupId}/events`
