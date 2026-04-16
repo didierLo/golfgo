@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "GolfGo",
   description: "Organise tes parties de golf",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.ico",
     apple: "/icon-192.png",
   },
   manifest: "/manifest.json",

@@ -1,48 +1,22 @@
 'use client'
 
-import { useParams } from "next/navigation"
-import Link from "next/link"
+import { useParams } from 'next/navigation'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
-export default function GroupPage(){
-
-  const params = useParams()
+// Cette page est rarement visitée directement — on redirige vers events
+export default function GroupPage() {
+  const params  = useParams()
   const groupId = params.id as string
+  const router  = useRouter()
 
-  return(
+  useEffect(() => {
+    router.replace(`/groups/${groupId}/events`)
+  }, [groupId])
 
-    <div className="p-6 space-y-4">
-
-      <h1 className="text-2xl font-bold">
-        Group
-      </h1>
-
-      <div className="flex flex-col gap-2">
-
-        <Link
-          href={`/groups/${groupId}/members`}
-          className="text-blue-600"
-        >
-          Members
-        </Link>
-
-        <Link
-          href={`/groups/${groupId}/events`}
-          className="text-blue-600"
-        >
-          Events
-        </Link>
-
-        <Link
-          href={`/groups/${groupId}/constraints`}
-          className="text-blue-600"
-        >
-          Flight Constraints
-        </Link>
-
-      </div>
-
+  return (
+    <div className="p-6 flex items-center justify-center min-h-[200px]">
+      <div className="w-8 h-8 border-2 border-[#185FA5] border-t-transparent rounded-full animate-spin" />
     </div>
-
   )
-
 }
