@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -302,26 +302,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="h-[56px] bg-[#185FA5] flex items-center px-4 flex-shrink-0 z-30 shadow-md shadow-blue-900/20">
         <div className="max-w-[1280px] w-full mx-auto flex items-center gap-4">
 
-          {/* Logo ── desktop : image avec texte / mobile : favicon seul */}
-          <Link href="/groups" className="flex items-center select-none flex-shrink-0">
-            {/* Desktop + tablette : logo avec nom */}
-            <Image
-              src="/logo/GG_Logo_avec_nom.png"
-              alt="GolfGo"
-              width={110}
-              height={32}
-              priority
-              className="hidden sm:block h-[28px] w-auto object-contain"
-            />
-            {/* Mobile : icône seule */}
-            <Image
+          {/* Logo ── icône GG + texte GolfGo */}
+          <Link href="/groups" className="flex items-center gap-2.5 select-none flex-shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/logo/GG_Favicon.png"
-              alt="GolfGo"
-              width={32}
-              height={32}
-              priority
-              className="block sm:hidden h-[30px] w-auto object-contain"
+              alt=""
+              className="h-[32px] w-[32px] object-contain rounded-lg"
             />
+            <span className="flex items-baseline leading-none">
+              <span className="text-[18px] font-black text-white tracking-tight">Golf</span>
+              <span className="text-[18px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
+            </span>
           </Link>
 
           {/* Séparateur */}
@@ -435,7 +427,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* ── Sidebar desktop (≥ 1024px) — labels complets ─────────────────── */}
         <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 bg-white border-r border-slate-200/80">
-          <SidebarSection label="⛳ Play">
+          <SidebarSection label="Play">
             <NavItem href="/my-events" icon={Icons.myEvents}  label="My Events"    active={isActive('/my-events')} />
             <NavItem href="/calendar"  icon={Icons.calendar}  label="My Calendar"  active={isActive('/calendar')} />
             <NavItem href="/scorecard" icon={Icons.scorecard} label="My Scorecard" active={isActive('/scorecard')} />
@@ -443,7 +435,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <div className="mx-2 my-3 h-px bg-slate-100" />
 
-          <SidebarSection label="🏆 Organiser">
+          <SidebarSection label="Organiser">
             <NavItem href={groupsHref}    icon={Icons.groups}    label="Groups"    active={isActive('/groups')} />
             <NavItem
               href={eventsHref}
