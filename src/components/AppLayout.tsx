@@ -104,18 +104,18 @@ function NavItem({
     <Link
       href={href}
       className={`
-        group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium
+        group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-semibold
         transition-all duration-150
         ${active
           ? 'bg-[#185FA5] text-white shadow-sm shadow-blue-900/20'
           : muted
           ? 'text-slate-400 hover:text-slate-500 hover:bg-slate-100/60'
-          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
         }
       `}
     >
       <span className={`flex-shrink-0 transition-transform duration-150 group-hover:scale-110 ${
-        active ? 'text-white' : muted ? 'text-slate-400' : 'text-slate-500'
+        active ? 'text-white' : muted ? 'text-slate-300' : 'text-[#185FA5]'
       }`}>
         {icon}
       </span>
@@ -146,7 +146,7 @@ function NavIconItem({
           ? 'bg-[#185FA5] text-white shadow-sm shadow-blue-900/20'
           : muted
           ? 'text-slate-300 hover:text-slate-400 hover:bg-slate-100/60'
-          : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/80'
+          : 'text-[#185FA5] hover:bg-blue-50'
         }
       `}
     >
@@ -173,7 +173,7 @@ function NavIconItem({
 function SidebarSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-0.5">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em] px-3 mb-1.5 mt-1">
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] px-3 mb-1.5 mt-1">
         {label}
       </p>
       {children}
