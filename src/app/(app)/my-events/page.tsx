@@ -144,7 +144,7 @@ export default function MyEventsPage() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="mb-5">
         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">My Events</h1>
-        <p className="text-[13px] text-slate-400 mt-0.5">
+        <p className="text-[13px] text-slate-600 mt-0.5">
           {upcoming.length} à venir · {past.length} passés
         </p>
       </div>
@@ -155,7 +155,7 @@ export default function MyEventsPage() {
 
           {/* Prochain event */}
           <div className="bg-white border border-slate-200 rounded-xl p-3.5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Prochain
             </p>
             {nextEvent ? (
@@ -167,7 +167,7 @@ export default function MyEventsPage() {
                     ? "Dem."
                     : `${daysUntil(nextEvent.events.starts_at)}j`}
                 </p>
-                <p className="text-[11px] text-slate-400 mt-1 truncate leading-tight">
+                <p className="text-[11px] text-slate-600 mt-1 truncate leading-tight">
                   {nextEvent.events.title}
                 </p>
               </>
@@ -178,23 +178,23 @@ export default function MyEventsPage() {
 
           {/* Confirmés */}
           <div className="bg-white border border-slate-200 rounded-xl p-3.5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Confirmés
             </p>
             <p className="text-[22px] font-black text-[#3B6D11] leading-none">{goingCount}</p>
-            <p className="text-[11px] text-slate-400 mt-1">évén. à venir</p>
+            <p className="text-[11px] text-slate-600 mt-1">évén. à venir</p>
           </div>
 
           {/* En attente */}
           <div className="bg-white border border-slate-200 rounded-xl p-3.5">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Invitations
             </p>
             <p className="text-[22px] font-black leading-none"
               style={{ color: invitedCount > 0 ? '#0C447C' : '#CBD5E1' }}>
               {invitedCount}
             </p>
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-slate-600 mt-1">
               {invitedCount > 0 ? 'à confirmer' : 'aucune'}
             </p>
           </div>
@@ -205,7 +205,7 @@ export default function MyEventsPage() {
       {/* ── Upcoming ───────────────────────────────────────────────────────── */}
       {upcoming.length > 0 && (
         <div className="mb-8">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
             À venir
           </p>
           <div className="flex flex-col gap-2">
@@ -223,7 +223,7 @@ export default function MyEventsPage() {
       {/* ── Past ───────────────────────────────────────────────────────────── */}
       {past.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
             Passés
           </p>
           <div className="flex flex-col gap-2">
@@ -243,8 +243,8 @@ export default function MyEventsPage() {
       {events.length === 0 && (
         <div className="text-center py-20">
           <div className="text-5xl mb-4">⛳</div>
-          <p className="text-[15px] font-semibold text-slate-500">Aucun événement pour l'instant</p>
-          <p className="text-[13px] text-slate-400 mt-1">
+          <p className="text-[15px] font-semibold text-slate-700">Aucun événement pour l'instant</p>
+          <p className="text-[13px] text-slate-600 mt-1">
             Tu seras notifié par email lors d'une invitation
           </p>
         </div>
@@ -296,7 +296,7 @@ function EventCard({
         <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">
           {e.events.title}
         </div>
-        <div className="text-[11.5px] text-slate-400 mt-0.5 flex items-center gap-1 truncate">
+        <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
           <span
             className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
             style={{ background: groupColor }}
