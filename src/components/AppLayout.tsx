@@ -299,25 +299,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* ════════════════════════════════════════════════════════════════════
           TOPBAR
       ════════════════════════════════════════════════════════════════════ */}
-      <header className="h-[56px] bg-[#185FA5] flex items-center px-4 flex-shrink-0 z-30 shadow-md shadow-blue-900/20">
-        <div className="max-w-[1280px] w-full mx-auto flex items-center gap-4">
+      <header className="h-[56px] bg-[#185FA5] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20">
+        <div className="max-w-[1280px] w-full mx-auto flex items-center">
 
-          {/* Logo ── icône GG + texte GolfGo */}
-          <Link href="/groups" className="flex items-center gap-2.5 select-none flex-shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo/GG_Favicon.png"
-              alt=""
-              className="h-[32px] w-[32px] object-contain rounded-lg"
-            />
-            <span className="flex items-baseline leading-none">
-              <span className="text-[18px] font-black text-white tracking-tight">Golf</span>
-              <span className="text-[18px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
-            </span>
-          </Link>
+          {/* Zone logo — largeur = sidebar pour alignement parfait */}
+          <div className="flex items-center flex-shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
+            <Link href="/groups" className="flex items-center gap-2.5 select-none px-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo/GG_Favicon.png"
+                alt=""
+                className="h-[30px] w-[30px] object-contain rounded-lg flex-shrink-0"
+              />
+              <span className="hidden lg:flex items-baseline leading-none">
+                <span className="text-[18px] font-black text-white tracking-tight">Golf</span>
+                <span className="text-[18px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
+              </span>
+            </Link>
+          </div>
 
-          {/* Séparateur */}
-          <div className="w-px h-6 bg-white/20 flex-shrink-0" />
+          {/* Séparateur vertical aligné bord droit sidebar */}
+          <div className="w-px h-full bg-white/20 flex-shrink-0 self-stretch" />
+
+          {/* Zone contenu topbar */}
+          <div className="flex items-center gap-4 flex-1 px-4">
 
           {/* Group Switcher */}
           {loading ? (
@@ -417,6 +422,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {Icons.user}
             </Link>
           )}
+          </div>{/* fin zone contenu topbar */}
         </div>
       </header>
 
