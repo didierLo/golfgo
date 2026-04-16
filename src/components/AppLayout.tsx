@@ -96,7 +96,7 @@ const Icons = {
 // NavItem — sidebar desktop (labels visibles)
 // ─────────────────────────────────────────────────────────────────────────────
 function NavItem({
-  href, icon, label, active, muted,
+  href, icon, label, active, muted, iconColor,
 }: {
   href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean; iconColor?: string
 }) {
@@ -132,7 +132,7 @@ function NavItem({
 // NavIconItem — sidebar tablette (icône seule + tooltip)
 // ─────────────────────────────────────────────────────────────────────────────
 function NavIconItem({
-  href, icon, label, active, muted,
+  href, icon, label, active, muted, iconColor,
 }: {
   href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean; iconColor?: string
 }) {
