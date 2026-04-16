@@ -25,11 +25,11 @@ type MyEvent = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> = {
-  GOING:    { label: 'going',    bg: '#EAF3DE', text: '#3B6D11' },
-  INVITED:  { label: 'invited',  bg: '#EEEDFE', text: '#3C3489' },
-  DECLINED: { label: 'declined', bg: '#FCEBEB', text: '#A32D2D' },
-  WAITLIST: { label: 'waitlist', bg: '#FAEEDA', text: '#854F0B' },
+const STATUS_STYLE = {
+  GOING:    { label: 'going',    bg: '#EAF8E1', text: '#2F6B0F' },
+  INVITED:  { label: 'invited',  bg: '#EEF2FF', text: '#3730A3' },
+  DECLINED: { label: 'declined', bg: '#FEE2E2', text: '#991B1B' },
+  WAITLIST: { label: 'waitlist', bg: '#FEF3C7', text: '#92400E' },
 }
 
 function Badge({ status }: { status: string }) {
@@ -116,59 +116,49 @@ export default function MyEventsPage() {
     )
   }
 
-  return (
-    <div className="p-6 max-w-2xl">
+   return (
+    <div>
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="mb-6">
-        <h1 className="text-[18px] font-medium text-gray-900">My events</h1>
-        <p className="text-[13px] text-gray-400 mt-0.5">
-          {upcoming.length} à venir · {past.length} passés
-        </p>
-      </div>
+      <h1 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        ⛳ My events
+      </h1>
 
-      {/* ── Upcoming ───────────────────────────────────────────────────────── */}
-      {upcoming.length > 0 && (
-        <div className="mb-8">
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            À venir
-          </p>
-          <div className="flex flex-col gap-2">
-            {upcoming.map(e => (
-              <EventCard
-                key={e.event_id}
-                event={e}
-                onView={() => router.push(`/groups/${e.events.group_id}/events/${e.event_id}/view`)}
-              />
-            ))}
+      {/* UPCOMING */}
+      {upcoming.map(e => (
+        <div
+          key={e.event_id}
+          onClick={() => router.push(`/groups/${e.events.group_id}/events/${e.event_id}/view`)}
+          className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm hover:shadow-md transition cursor-pointer"
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="font-semibold">{e.events.title}</div>
+              <div className="text-sm text-gray-500">
+                {e.events.groups?.name} · {formatDate(e.events.starts_at)}
+              </div>
+            </div>
+
+            <Badge status={e.status} />
           </div>
         </div>
-      )}
+      ))}
 
-      {/* ── Past ───────────────────────────────────────────────────────────── */}
+      {/* PAST */}
       {past.length > 0 && (
-        <div>
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            Passés
-          </p>
-          <div className="flex flex-col gap-2 opacity-60">
-            {past.slice().reverse().map(e => (
-              <EventCard
-                key={e.event_id}
-                event={e}
-                onView={() => router.push(`/groups/${e.events.group_id}/events/${e.event_id}/view`)}
-              />
-            ))}
-          </div>
-        </div>
+        <>
+          <p className="text-xs text-gray-400 mt-6 mb-2 uppercase">Passés</p>
+          {past.map(e => (
+            <div key={e.event_id} className="opacity-50 bg-white rounded-xl p-4 mb-2 border border-gray-100">
+              {e.events.title}
+            </div>
+          ))}
+        </>
       )}
 
-      {/* ── Empty state ────────────────────────────────────────────────────── */}
       {events.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-[15px]">Aucun événement pour l'instant</p>
-          <p className="text-[13px] mt-1">Tu seras notifié par email lors d'une invitation</p>
-        </div>
+        <p className="text-center text-gray-400 mt-10">
+          Aucun événement pour l'instant
+        </p>
       )}
 
     </div>
@@ -182,24 +172,31 @@ function EventCard({ event: e, onView }: { event: MyEvent; onView: () => void })
 
   return (
     <div
-      className="bg-white border border-gray-200 rounded-lg flex items-center gap-3 px-4 py-3 hover:border-gray-300 transition-colors cursor-pointer"
       onClick={onView}
+      className="
+        bg-white rounded-xl px-4 py-3 flex items-center gap-3
+        border border-gray-100 shadow-sm
+        hover:shadow-md hover:-translate-y-[1px]
+        transition-all cursor-pointer
+      "
     >
-      {/* Barre couleur groupe */}
+      {/* Accent couleur groupe */}
       <div
-        className="w-[3px] h-10 rounded-full flex-shrink-0"
+        className="w-[4px] h-10 rounded-full flex-shrink-0"
         style={{ background: groupColor }}
       />
 
       {/* Infos */}
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-medium text-gray-900 truncate">
+        <div className="text-[14px] font-semibold text-gray-900 truncate">
           {e.events.title}
         </div>
-        <div className="text-[12px] text-gray-400 mt-0.5 flex items-center gap-1.5">
+
+        <div className="text-[12px] text-gray-500 mt-1 flex items-center gap-1.5">
           <span>{e.events.groups?.name}</span>
           <span>·</span>
           <span>{formatDate(e.events.starts_at)}</span>
+
           {e.events.location && (
             <>
               <span>·</span>
@@ -209,8 +206,10 @@ function EventCard({ event: e, onView }: { event: MyEvent; onView: () => void })
         </div>
       </div>
 
-      {/* Badge statut */}
-      <Badge status={e.status} />
+      {/* Badge amélioré */}
+      <div className="ml-2">
+        <Badge status={e.status} />
+      </div>
     </div>
   )
 }
