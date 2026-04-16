@@ -280,6 +280,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const isActive    = (href: string) => pathname === href || pathname.startsWith(href + '/')
+
+  // isExactActive — pour les items qui ne doivent pas matcher les sous-routes d'un autre item
+  const isGroupsActive = pathname === '/groups' || pathname === '/groups/add'
   const gid         = activeGroup?.id
   const isAnyOwner  = groups.some(g => g.role === 'owner')
 
@@ -447,7 +450,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="mx-2 my-3 h-px bg-slate-100" />
 
           <SidebarSection label="ORGANISER" emoji="🏆">
-            <NavItem href={groupsHref}    icon={Icons.groups} iconColor="#7F77DD"    label="Groups"    active={isActive('/groups')} />
+            <NavItem href={groupsHref}    icon={Icons.groups} iconColor="#7F77DD"    label="Groups"    active={isGroupsActive} />
             <NavItem
               href={eventsHref}
               icon={Icons.events}
@@ -484,7 +487,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           {/* Section Organiser */}
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href={groupsHref}    icon={Icons.groups} iconColor="#7F77DD"    label="Groups"    active={isActive('/groups')} />
+            <NavIconItem href={groupsHref}    icon={Icons.groups} iconColor="#7F77DD"    label="Groups"    active={isGroupsActive} />
             <NavIconItem
               href={eventsHref}
               icon={Icons.events}
