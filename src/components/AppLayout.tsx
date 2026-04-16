@@ -98,7 +98,7 @@ const Icons = {
 function NavItem({
   href, icon, label, active, muted,
 }: {
-  href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean
+  href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean; iconColor?: string
 }) {
   return (
     <Link
@@ -110,13 +110,14 @@ function NavItem({
           ? 'bg-[#185FA5] text-white shadow-sm shadow-blue-900/20'
           : muted
           ? 'text-slate-400 hover:text-slate-500 hover:bg-slate-100/60'
-          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/80'
+          : 'text-slate-900 hover:text-black hover:bg-slate-100/80'
         }
       `}
     >
-      <span className={`flex-shrink-0 transition-transform duration-150 group-hover:scale-110 ${
-        active ? 'text-white' : muted ? 'text-slate-300' : 'text-[#185FA5]'
-      }`}>
+      <span
+        className="flex-shrink-0 transition-transform duration-150 group-hover:scale-110"
+        style={{ color: active ? 'white' : muted ? '#CBD5E1' : (iconColor ?? '#185FA5') }}
+      >
         {icon}
       </span>
       <span className="flex-1 leading-none">{label}</span>
@@ -133,7 +134,7 @@ function NavItem({
 function NavIconItem({
   href, icon, label, active, muted,
 }: {
-  href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean
+  href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean; iconColor?: string
 }) {
   return (
     <Link
@@ -146,11 +147,14 @@ function NavIconItem({
           ? 'bg-[#185FA5] text-white shadow-sm shadow-blue-900/20'
           : muted
           ? 'text-slate-300 hover:text-slate-400 hover:bg-slate-100/60'
-          : 'text-[#185FA5] hover:bg-blue-50'
+          : `hover:bg-blue-50`
         }
       `}
     >
-      <span className="transition-transform duration-150 group-hover:scale-110">
+      <span
+        className="transition-transform duration-150 group-hover:scale-110"
+        style={{ color: active ? 'white' : muted ? '#CBD5E1' : (iconColor ?? '#185FA5') }}
+      >
         {icon}
       </span>
       {/* Tooltip au survol */}
@@ -434,22 +438,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* ── Sidebar desktop (≥ 1024px) — labels complets ─────────────────── */}
         <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 bg-white border-r border-slate-200/80">
           <SidebarSection label="Play">
-            <NavItem href="/my-events" icon={Icons.myEvents}  label="My Events"    active={isActive('/my-events')} />
-            <NavItem href="/calendar"  icon={Icons.calendar}  label="My Calendar"  active={isActive('/calendar')} />
-            <NavItem href="/scorecard" icon={Icons.scorecard} label="My Scorecard" active={isActive('/scorecard')} />
+            <NavItem href="/my-events" icon={Icons.myEvents} iconColor="#185FA5"  label="My Events"    active={isActive('/my-events')} />
+            <NavItem href="/calendar"  icon={Icons.calendar} iconColor="#1D9E75"  label="My Calendar"  active={isActive('/calendar')} />
+            <NavItem href="/scorecard" icon={Icons.scorecard} iconColor="#D85A30" label="My Scorecard" active={isActive('/scorecard')} />
           </SidebarSection>
 
           <div className="mx-2 my-3 h-px bg-slate-100" />
 
           <SidebarSection label="Organiser">
-            <NavItem href={groupsHref}    icon={Icons.groups}    label="Groups"    active={isActive('/groups')} />
+            <NavItem href={groupsHref}    icon={Icons.groups} iconColor="#7F77DD"    label="Groups"    active={isActive('/groups')} />
             <NavItem
               href={eventsHref}
               icon={Icons.events}
               label="Events"
               active={!isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`)}
             />
-            <NavItem href={clubsHref}     icon={Icons.clubs}     label="Clubs"     active={isAnyOwner && isActive('/admin/clubs')} />
+            <NavItem href={clubsHref}     icon={Icons.clubs} iconColor="#EF9F27"     label="Clubs"     active={isAnyOwner && isActive('/admin/clubs')} />
             <NavItem
               href={templatesHref}
               icon={Icons.templates}
@@ -460,7 +464,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <div className="mt-auto">
             <div className="mx-2 mb-3 h-px bg-slate-100" />
-            <NavItem href="/settings" icon={Icons.settings} label="Settings" active={isActive('/settings')} muted />
+            <NavItem href="/settings" icon={Icons.settings} iconColor="#888780" label="Settings" active={isActive('/settings')} muted />
           </div>
         </aside>
 
@@ -468,23 +472,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <aside className="hidden sm:flex lg:hidden w-[60px] flex-shrink-0 flex-col items-center py-5 gap-1 bg-white border-r border-slate-200/80">
           {/* Section Play */}
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href="/my-events" icon={Icons.myEvents}  label="My Events"    active={isActive('/my-events')} />
-            <NavIconItem href="/calendar"  icon={Icons.calendar}  label="My Calendar"  active={isActive('/calendar')} />
-            <NavIconItem href="/scorecard" icon={Icons.scorecard} label="My Scorecard" active={isActive('/scorecard')} />
+            <NavIconItem href="/my-events" icon={Icons.myEvents} iconColor="#185FA5"  label="My Events"    active={isActive('/my-events')} />
+            <NavIconItem href="/calendar"  icon={Icons.calendar} iconColor="#1D9E75"  label="My Calendar"  active={isActive('/calendar')} />
+            <NavIconItem href="/scorecard" icon={Icons.scorecard} iconColor="#D85A30" label="My Scorecard" active={isActive('/scorecard')} />
           </div>
 
           <div className="w-8 h-px bg-slate-100 my-2" />
 
           {/* Section Organiser */}
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href={groupsHref}    icon={Icons.groups}    label="Groups"    active={isActive('/groups')} />
+            <NavIconItem href={groupsHref}    icon={Icons.groups} iconColor="#7F77DD"    label="Groups"    active={isActive('/groups')} />
             <NavIconItem
               href={eventsHref}
               icon={Icons.events}
               label="Events"
               active={!isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`)}
             />
-            <NavIconItem href={clubsHref}     icon={Icons.clubs}     label="Clubs"     active={isAnyOwner && isActive('/admin/clubs')} />
+            <NavIconItem href={clubsHref}     icon={Icons.clubs} iconColor="#EF9F27"     label="Clubs"     active={isAnyOwner && isActive('/admin/clubs')} />
             <NavIconItem
               href={templatesHref}
               icon={Icons.templates}
@@ -496,7 +500,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Settings en bas */}
           <div className="mt-auto flex flex-col items-center gap-1 w-full px-2.5">
             <div className="w-8 h-px bg-slate-100 mb-2" />
-            <NavIconItem href="/settings" icon={Icons.settings} label="Settings (bientôt)" active={isActive('/settings')} muted />
+            <NavIconItem href="/settings" icon={Icons.settings} iconColor="#888780" label="Settings (bientôt)" active={isActive('/settings')} muted />
           </div>
         </aside>
 

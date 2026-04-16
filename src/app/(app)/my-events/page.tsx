@@ -63,10 +63,15 @@ function getDayMonth(dateStr: string) {
 }
 
 function daysUntil(dateStr: string): number {
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  const target = new Date(dateStr)
-  target.setHours(0, 0, 0, 0)
+  // On extrait la date locale Brussels pour éviter le décalage UTC
+  const nowStr = new Date().toLocaleDateString('fr-BE', { timeZone: 'Europe/Brussels' })
+  const [d1, m1, y1] = nowStr.split('/').map(Number)
+  const now = new Date(y1, m1 - 1, d1)
+
+  const targetStr = new Date(dateStr).toLocaleDateString('fr-BE', { timeZone: 'Europe/Brussels' })
+  const [d2, m2, y2] = targetStr.split('/').map(Number)
+  const target = new Date(y2, m2 - 1, d2)
+
   return Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 }
 
@@ -110,8 +115,12 @@ export default function MyEventsPage() {
   }
 
   const now = new Date()
-  const upcoming = events.filter(e => new Date(e.events.starts_at) >= now)
-  const past     = events.filter(e => new Date(e.events.starts_at) < now)
+  // Tri côté client — garantit l'ordre correct indépendamment de Supabase
+  const sorted = [...events].sort((a, b) =>
+    new Date(a.events.starts_at).getTime() - new Date(b.events.starts_at).getTime()
+  )
+  const upcoming = sorted.filter(e => new Date(e.events.starts_at) >= now)
+  const past     = sorted.filter(e => new Date(e.events.starts_at) < now)
   const nextEvent = upcoming[0] ?? null
   const goingCount = upcoming.filter(e => e.status === 'GOING').length
   const invitedCount = upcoming.filter(e => e.status === 'INVITED').length
