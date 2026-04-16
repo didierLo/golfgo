@@ -174,10 +174,11 @@ function NavIconItem({
 // ─────────────────────────────────────────────────────────────────────────────
 // SidebarSection — desktop uniquement (avec label texte)
 // ─────────────────────────────────────────────────────────────────────────────
-function SidebarSection({ label, children }: { label: string; children: React.ReactNode }) {
+function SidebarSection({ label, emoji, children }: { label: string; emoji?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-0.5">
-      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] px-3 mb-1.5 mt-1">
+      <p className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] px-3 mb-1.5 mt-1">
+        {emoji && <span className="text-[11px]">{emoji}</span>}
         {label}
       </p>
       {children}
@@ -413,7 +414,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Avatar / Login */}
           {currentUser ? (
             <Link href="/settings" title={currentUser.name} className="flex-shrink-0">
-              <div className="w-[34px] h-[34px] rounded-full bg-[#97C459] flex items-center justify-center text-[12px] font-black text-[#185FA5] select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer">
+              <div className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer">
                 {currentUser.initials}
               </div>
             </Link>
@@ -437,7 +438,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* ── Sidebar desktop (≥ 1024px) — labels complets ─────────────────── */}
         <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 bg-white border-r border-slate-200/80">
-          <SidebarSection label="Play">
+          <SidebarSection label="PLAY" emoji="⛳">
             <NavItem href="/my-events" icon={Icons.myEvents} iconColor="#185FA5"  label="My Events"    active={isActive('/my-events')} />
             <NavItem href="/calendar"  icon={Icons.calendar} iconColor="#1D9E75"  label="My Calendar"  active={isActive('/calendar')} />
             <NavItem href="/scorecard" icon={Icons.scorecard} iconColor="#D85A30" label="My Scorecard" active={isActive('/scorecard')} />
@@ -445,11 +446,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <div className="mx-2 my-3 h-px bg-slate-100" />
 
-          <SidebarSection label="Organiser">
+          <SidebarSection label="ORGANISER" emoji="🏆">
             <NavItem href={groupsHref}    icon={Icons.groups} iconColor="#7F77DD"    label="Groups"    active={isActive('/groups')} />
             <NavItem
               href={eventsHref}
               icon={Icons.events}
+              iconColor="#185FA5"
               label="Events"
               active={!isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`)}
             />
@@ -457,6 +459,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem
               href={templatesHref}
               icon={Icons.templates}
+              iconColor="#D4537E"
               label="Templates"
               active={!!gid && isActive(`/groups/${gid}/templates`)}
             />
@@ -485,6 +488,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem
               href={eventsHref}
               icon={Icons.events}
+              iconColor="#185FA5"
               label="Events"
               active={!isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`)}
             />
@@ -492,6 +496,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem
               href={templatesHref}
               icon={Icons.templates}
+              iconColor="#D4537E"
               label="Templates"
               active={!!gid && isActive(`/groups/${gid}/templates`)}
             />
