@@ -106,9 +106,13 @@ export default function InvitationsPage() {
         status: 'INVITED',
         invited_at: new Date().toISOString(),
         registration_source: sendEmail ? 'email' : 'manual',
+        invite_token: crypto.randomUUID(),
       }))
       const { error: insertError } = await supabase.from('event_participants').insert(rows)
-      if (insertError) throw new Error(insertError.message)
+      if (insertError) {
+        console.error('Insert error:', insertError)
+        throw new Error(insertError.message)
+      }
 
       if (sendEmail) {
         const res = await fetch('/api/send-invitations', {
