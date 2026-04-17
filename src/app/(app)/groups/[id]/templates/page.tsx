@@ -30,7 +30,9 @@ const DEFAULTS: Template = {
 }
 
 const VARIABLES = [
-  { label: 'Nom du joueur', value: '{{player_name}}' },
+  { label: 'Nom complet',   value: '{{player_name}}' },
+  { label: 'Prénom',        value: '{{player_first_name}}' },
+  { label: 'Nom de famille',value: '{{player_surname}}' },
   { label: 'Titre event',   value: '{{event_title}}' },
   { label: 'Date event',    value: '{{event_date}}' },
   { label: 'Heure event',   value: '{{event_time}}' },
