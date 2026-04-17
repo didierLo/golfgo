@@ -13,8 +13,17 @@ function formatDate(dateStr: string) {
 function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString('fr-BE', {
     hour: '2-digit', minute: '2-digit',
-    timeZone: 'Europe/Brussels'
+    timeZone: 'Europe/Brussels',
   })
+}
+
+// ─── Remplacement des variables de template ───────────────────────────────────
+
+function applyTemplateVariables(text: string, vars: Record<string, string>): string {
+  return Object.entries(vars).reduce(
+    (result, [key, value]) => result.replace(new RegExp(`{{${key}}}`, 'g'), value),
+    text
+  )
 }
 
 function buildEmailHtml({
@@ -158,10 +167,16 @@ export async function POST(req: Request) {
 
     const supabase = await createServerClient()
 
-    // Charger l'event
+    // Charger l'event + template du groupe
     const { data: event, error: evErr } = await supabase
       .from('events')
-      .select('id, title, location, starts_at, group_id, email_message')
+      .select(`
+        id, title, location, starts_at, group_id, email_message,
+        groups(
+          template_invitation_subject,
+          template_invitation_body
+        )
+      `)
       .eq('id', eventId)
       .single()
 
@@ -180,10 +195,15 @@ export async function POST(req: Request) {
       return Response.json({ success: false, error: pErr.message }, { status: 500 })
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const eventLink = `${appUrl}/groups/${event.group_id}/events/${event.id}`
     const eventDate = formatDate(event.starts_at)
     const eventTime = formatTime(event.starts_at)
+
+    // Template subject depuis le groupe (si défini)
+    const groupTemplate = (event as any).groups
+    const subjectTemplate = groupTemplate?.template_invitation_subject ?? 'Invitation : {{event_title}}'
+    const bodyTemplate    = groupTemplate?.template_invitation_body ?? null
 
     let sent = 0
     let skipped = 0
@@ -196,19 +216,36 @@ export async function POST(req: Request) {
       const token = p.invite_token
       if (!token) { skipped++; continue }
 
-      const yesLink   = `${appUrl}/invite/yes?token=${token}`
-      const noLink    = `${appUrl}/invite/no?token=${token}`
+      const yesLink    = `${appUrl}/invite/yes?token=${token}`
+      const noLink     = `${appUrl}/invite/no?token=${token}`
       const playerName = `${player.first_name} ${player.surname}`
 
-      // Mode preview — EMAIL_ENABLED=false
+      // Variables de template disponibles
+      const templateVars: Record<string, string> = {
+        player_name:       playerName,
+        player_first_name: player.first_name,
+        player_surname:    player.surname,
+        event_title:       event.title,
+        event_date:        eventDate,
+        event_time:        eventTime,
+      }
+
+      // Sujet avec variables
+      const subject = applyTemplateVariables(subjectTemplate, templateVars)
+
+      // Message personnalisé avec variables (email_message ou template body)
+      const rawMessage = event.email_message ?? bodyTemplate ?? null
+      const resolvedMessage = rawMessage ? applyTemplateVariables(rawMessage, templateVars) : null
+
+      // Mode preview
       if (!EMAIL_ENABLED) {
         console.log('━━━ EMAIL PREVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━')
         console.log(`To:      ${player.email}`)
-        console.log(`Subject: Invitation : ${event.title}`)
-        console.log(`Player:  ${playerName}`)
+        console.log(`Subject: ${subject}`)
+        console.log(`Player:  ${playerName} (${player.first_name} / ${player.surname})`)
         console.log(`Date:    ${eventDate} à ${eventTime}`)
         if (event.location) console.log(`Lieu:    ${event.location}`)
-        if (event.email_message) console.log(`Message: ${event.email_message}`)
+        if (resolvedMessage) console.log(`Message: ${resolvedMessage}`)
         console.log(`Yes:     ${yesLink}`)
         console.log(`No:      ${noLink}`)
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
@@ -223,7 +260,7 @@ export async function POST(req: Request) {
         eventDate,
         eventTime,
         eventLocation: event.location,
-        eventMessage:  event.email_message,
+        eventMessage:  resolvedMessage,
         yesLink,
         noLink,
         eventLink,
@@ -232,7 +269,7 @@ export async function POST(req: Request) {
       const { error: emailErr } = await resend.emails.send({
         from:    'GolfGo <info@golfgo.be>',
         to:      player.email,
-        subject: `Invitation : ${event.title}`,
+        subject,
         html,
       })
 
