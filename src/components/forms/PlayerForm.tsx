@@ -31,28 +31,27 @@ const TEE_OPTIONS: { value: PlayerFormData['default_tee_color']; label: string; 
   { value: 'blue',   label: 'Blue',   color: '#378ADD' },
 ]
 
+const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-[12px] font-medium text-gray-500 mb-1.5">{label}</label>
+      <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{label}</label>
       {children}
     </div>
   )
 }
 
-const inputClass = "w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] placeholder-gray-300 focus:outline-none focus:border-blue-300"
-
 export default function PlayerForm({ initialData, playerId, onSubmit, submitLabel = 'Sauvegarder' }: Props) {
-
   const empty: PlayerFormData = {
     surname: '', first_name: '', federal_no: '',
     whs: '', email: '', phone: '', home_club: '',
     gender: 'M', default_tee_color: 'yellow',
   }
 
-  const [form, setForm] = useState<PlayerFormData>({ ...empty, ...initialData })
-  const [loading, setLoading] = useState(false)
-  const [groups, setGroups] = useState<{ id: string; name: string }[]>([])
+  const [form, setForm]                   = useState<PlayerFormData>({ ...empty, ...initialData })
+  const [loading, setLoading]             = useState(false)
+  const [groups, setGroups]               = useState<{ id: string; name: string }[]>([])
   const [selectedGroups, setSelectedGroups] = useState<string[]>([])
 
   useEffect(() => {
@@ -78,11 +77,7 @@ export default function PlayerForm({ initialData, playerId, onSubmit, submitLabe
   }
 
   function setGender(gender: 'M' | 'F') {
-    setForm(prev => ({
-      ...prev,
-      gender,
-      default_tee_color: gender === 'M' ? 'yellow' : 'red',
-    }))
+    setForm(prev => ({ ...prev, gender, default_tee_color: gender === 'M' ? 'yellow' : 'red' }))
   }
 
   function toggleGroup(groupId: string) {
@@ -95,7 +90,6 @@ export default function PlayerForm({ initialData, playerId, onSubmit, submitLabe
     e.preventDefault()
     if (!form.surname.trim() || !form.first_name.trim()) { alert('Nom et prénom requis'); return }
     if (!form.federal_no.trim()) { alert('Numéro fédéral obligatoire'); return }
-
     setLoading(true)
     await onSubmit({
       surname:           form.surname.trim(),
@@ -115,80 +109,57 @@ export default function PlayerForm({ initialData, playerId, onSubmit, submitLabe
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-      {/* Nom / Prénom */}
       <div className="grid grid-cols-2 gap-3">
         <Field label="Nom *">
-          <input value={form.surname} onChange={e => update('surname', e.target.value)}
-            placeholder="Dupont" required className={inputClass} />
+          <input value={form.surname} onChange={e => update('surname', e.target.value)} placeholder="Dupont" required className={inputClass} />
         </Field>
         <Field label="Prénom *">
-          <input value={form.first_name} onChange={e => update('first_name', e.target.value)}
-            placeholder="Jean" required className={inputClass} />
+          <input value={form.first_name} onChange={e => update('first_name', e.target.value)} placeholder="Jean" required className={inputClass} />
         </Field>
       </div>
 
-      {/* N° fédéral / WHS */}
       <div className="grid grid-cols-2 gap-3">
         <Field label="N° fédéral *">
-          <input value={form.federal_no} onChange={e => update('federal_no', e.target.value)}
-            placeholder="123456" required className={inputClass} />
+          <input value={form.federal_no} onChange={e => update('federal_no', e.target.value)} placeholder="123456" required className={inputClass} />
         </Field>
         <Field label="WHS">
-          <input value={form.whs} onChange={e => update('whs', e.target.value)}
-            placeholder="18.4" className={inputClass} />
+          <input value={form.whs} onChange={e => update('whs', e.target.value)} placeholder="18.4" className={inputClass} />
         </Field>
       </div>
 
-      {/* Email / Téléphone */}
       <div className="grid grid-cols-2 gap-3">
         <Field label="Email">
-          <input type="email" value={form.email} onChange={e => update('email', e.target.value)}
-            placeholder="jean@example.com" className={inputClass} />
+          <input type="email" value={form.email} onChange={e => update('email', e.target.value)} placeholder="jean@example.com" className={inputClass} />
         </Field>
         <Field label="Téléphone">
-          <input value={form.phone} onChange={e => update('phone', e.target.value)}
-            placeholder="+32 ..." className={inputClass} />
+          <input value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="+32 ..." className={inputClass} />
         </Field>
       </div>
 
-      {/* Club */}
       <Field label="Club domicile">
-        <input value={form.home_club} onChange={e => update('home_club', e.target.value)}
-          placeholder="GC Louvain-La-Neuve" className={inputClass} />
+        <input value={form.home_club} onChange={e => update('home_club', e.target.value)} placeholder="GC Louvain-La-Neuve" className={inputClass} />
       </Field>
 
       {/* Genre + Tee */}
       <div>
-        <label className="block text-[12px] font-medium text-gray-500 mb-1.5">
-          Genre & tee de départ par défaut
-        </label>
+        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Genre & tee de départ par défaut</label>
         <div className="flex items-center gap-3 flex-wrap">
-
-          {/* Toggle M/F */}
-          <div className="flex gap-1 p-0.5 bg-gray-100 rounded-md">
+          <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
             {(['M', 'F'] as const).map(g => (
               <button key={g} type="button" onClick={() => setGender(g)}
-                className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
-                  form.gender === g
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-gray-400 hover:text-gray-600'
+                className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
+                  form.gender === g ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                 }`}>
                 {g === 'M' ? 'Homme' : 'Femme'}
               </button>
             ))}
           </div>
-
-          <span className="text-gray-300 text-[12px]">→</span>
-
-          {/* Tee selector */}
+          <span className="text-slate-300 text-[12px]">→</span>
           <div className="flex gap-1.5">
             {TEE_OPTIONS.map(t => (
-              <button key={t.value} type="button"
-                onClick={() => update('default_tee_color', t.value)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-[12px] font-medium transition-colors ${
-                  form.default_tee_color === t.value
-                    ? 'border-gray-400 bg-white shadow-sm text-gray-700'
-                    : 'border-gray-200 text-gray-400 hover:border-gray-300'
+              <button key={t.value} type="button" onClick={() => update('default_tee_color', t.value)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[12px] font-semibold transition-colors ${
+                  form.default_tee_color === t.value ? 'border-slate-400 bg-white shadow-sm text-slate-700' : 'border-slate-200 text-slate-400 hover:border-slate-300'
                 }`}>
                 <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
                 {t.label}
@@ -196,40 +167,31 @@ export default function PlayerForm({ initialData, playerId, onSubmit, submitLabe
             ))}
           </div>
         </div>
-        <p className="text-[11px] text-gray-400 mt-1.5">
-          Homme → Yellow par défaut · Femme → Red par défaut · modifiable par event
-        </p>
+        <p className="text-[11px] text-slate-500 mt-1.5">Homme → Yellow par défaut · Femme → Red par défaut · modifiable par event</p>
       </div>
 
       {/* Groupes */}
       {groups.length > 0 && (
         <div>
-          <label className="block text-[12px] font-medium text-gray-500 mb-2">
-            Ajouter au(x) groupe(s)
-          </label>
-          <div className="border border-gray-200 rounded-md overflow-hidden">
+          <label className="block text-[12px] font-semibold text-slate-600 mb-2">Ajouter au(x) groupe(s)</label>
+          <div className="border border-slate-200 rounded-xl overflow-hidden">
             {groups.map((group, i) => (
               <label key={group.id}
-                className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                  i < groups.length - 1 ? 'border-b border-gray-100' : ''
-                }`}>
-                <input type="checkbox" checked={selectedGroups.includes(group.id)}
-                  onChange={() => toggleGroup(group.id)} className="rounded" />
-                <span className="text-[13px] text-gray-700">{group.name}</span>
+                className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors ${i < groups.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                <input type="checkbox" checked={selectedGroups.includes(group.id)} onChange={() => toggleGroup(group.id)} className="rounded accent-[#185FA5]" />
+                <span className="text-[13px] font-medium text-slate-800">{group.name}</span>
               </label>
             ))}
           </div>
         </div>
       )}
 
-      {/* Submit */}
       <div className="flex gap-2 pt-2">
         <button type="submit" disabled={loading}
-          className="bg-[#185FA5] text-white text-[13px] font-medium px-5 py-2 rounded-md hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
+          className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
           {loading ? 'Saving…' : submitLabel}
         </button>
       </div>
-
     </form>
   )
 }

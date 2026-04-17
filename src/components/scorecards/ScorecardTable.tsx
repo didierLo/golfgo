@@ -1,15 +1,12 @@
 'use client'
 
-import ScorecardCell from './ScorecardCell'
+import { ScorecardCell } from './ScorecardCell'
 import type { Hole, Player, ScoreMap } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
 
 type Props = {
-  holes: Hole[]
-  player: Player
-  scores: ScoreMap
+  holes: Hole[]; player: Player; scores: ScoreMap
   setScores: React.Dispatch<React.SetStateAction<ScoreMap>>
-  eventFormat: 'stroke' | 'stableford'
-  readOnly?: boolean
+  eventFormat: 'stroke' | 'stableford'; readOnly?: boolean
 }
 
 function strokesReceived(phcp: number, strokeIndex: number): number {
@@ -20,8 +17,7 @@ function strokesReceived(phcp: number, strokeIndex: number): number {
 }
 
 function stablefordPoints(brut: number, par: number, recv: number): number {
-  const net = brut - recv
-  return Math.max(0, par - net + 2)
+  return Math.max(0, par - (brut - recv) + 2)
 }
 
 export default function ScorecardTable({ holes, player, scores, setScores, eventFormat, readOnly = false }: Props) {
@@ -33,10 +29,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
     if (readOnly) return
     setScores(prev => {
       const current = prev[player.id]?.[hole] ?? 0
-      return {
-        ...prev,
-        [player.id]: { ...prev[player.id], [hole]: Math.max(1, current + delta) },
-      }
+      return { ...prev, [player.id]: { ...prev[player.id], [hole]: Math.max(1, current + delta) } }
     })
   }
 
@@ -45,8 +38,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
     const recv = strokesReceived(player.phcp, h.stroke_index)
     const net  = brut != null ? brut - recv : null
     const pts  = brut != null ? stablefordPoints(brut, h.par, recv) : null
-    const siMark = '*'.repeat(recv)
-    return { brut, recv, net, pts, siMark }
+    return { brut, recv, net, pts, siMark: '*'.repeat(recv) }
   }
 
   function subtotals(holesList: Hole[]) {
@@ -56,7 +48,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
       const { brut, net, pts } = holeStats(h)
       if (brut != null) { brutSum += brut; netSum += net!; ptsSum += pts!; count++ }
     })
-    return { parSum, brutSum: count ? brutSum : null, netSum: count ? netSum : null, ptsSum: count ? ptsSum : null, count }
+    return { parSum, brutSum: count ? brutSum : null, netSum: count ? netSum : null, ptsSum: count ? ptsSum : null }
   }
 
   const outTotals = subtotals(front9)
@@ -67,42 +59,33 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
   function HoleRow({ h }: { h: Hole }) {
     const { brut, siMark, net, pts } = holeStats(h)
     return (
-      <tr className="border-b border-gray-100 hover:bg-gray-50">
-        <td className="py-2 font-bold text-gray-800">{h.hole_number}</td>
-        <td className="py-2 text-center text-gray-600">{h.par}</td>
-        <td className="py-2 text-center text-gray-500">{h.stroke_index}</td>
-        <td className="py-1 text-center text-xs text-gray-400 w-4">{siMark}</td>
+      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+        <td className="py-2 font-black text-slate-800 text-[13px]">{h.hole_number}</td>
+        <td className="py-2 text-center text-slate-600 text-[13px]">{h.par}</td>
+        <td className="py-2 text-center text-slate-500 text-[12px]">{h.stroke_index}</td>
+        <td className="py-1 text-center text-[10px] text-slate-400 w-4">{siMark}</td>
         <td className="py-1" colSpan={3}>
-          <ScorecardCell
-            value={brut}
-            onDecrement={() => updateScore(h.hole_number, -1)}
-            onIncrement={() => updateScore(h.hole_number, +1)}
-            readOnly={readOnly}
-          />
+          <ScorecardCell value={brut} onDecrement={() => updateScore(h.hole_number, -1)} onIncrement={() => updateScore(h.hole_number, +1)} readOnly={readOnly} />
         </td>
-        <td className="py-2 text-center text-gray-600">{brut ?? 0}</td>
-        <td className="py-2 text-center text-gray-600">
-          {isStableford ? (pts ?? 0) : (net ?? 0)}
-        </td>
+        <td className="py-2 text-center text-slate-600 text-[13px]">{brut ?? 0}</td>
+        <td className="py-2 text-center text-slate-600 text-[13px]">{isStableford ? (pts ?? 0) : (net ?? 0)}</td>
       </tr>
     )
   }
 
   return (
     <div className="overflow-x-auto -mx-4 px-4">
-      {readOnly && (
-        <p className="text-[11px] text-gray-400 mb-2 italic">Lecture seule</p>
-      )}
-      <table className="border-collapse text-sm w-full">
+      {readOnly && <p className="text-[11px] text-slate-400 mb-2 italic">Lecture seule</p>}
+      <table className="border-collapse text-[13px] w-full">
         <thead>
-          <tr className="text-xs text-gray-500 border-b">
-            <th className="py-2 text-left font-semibold text-gray-700 w-10">Hole</th>
-            <th className="py-2 text-center font-medium w-10">Par</th>
-            <th className="py-2 text-center font-medium w-12">Str.Ind</th>
-            <th className="py-2 text-center font-medium w-4"></th>
-            <th className="py-2 text-center font-medium" colSpan={3}>Score</th>
-            <th className="py-2 text-center font-medium w-12">Brut</th>
-            <th className="py-2 text-center font-medium w-12">{netLabel}</th>
+          <tr className="text-[11px] text-slate-500 border-b border-slate-200">
+            <th className="py-2.5 text-left font-semibold text-slate-700 w-10">Hole</th>
+            <th className="py-2.5 text-center font-semibold w-10">Par</th>
+            <th className="py-2.5 text-center font-semibold w-12">SI</th>
+            <th className="py-2.5 text-center font-semibold w-4" />
+            <th className="py-2.5 text-center font-semibold" colSpan={3}>Score</th>
+            <th className="py-2.5 text-center font-semibold w-12">Brut</th>
+            <th className="py-2.5 text-center font-semibold w-12">{netLabel}</th>
           </tr>
         </thead>
         <tbody>
@@ -121,14 +104,13 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
 }
 
 function SubtotalRow({ label, parSum, count, brutSum, netSum, isTot = false }: {
-  label: string; parSum: number; count: number
-  brutSum: number | null; netSum: number | null; isTot?: boolean
+  label: string; parSum: number; count: number; brutSum: number | null; netSum: number | null; isTot?: boolean
 }) {
   return (
-    <tr className={`border-b text-sm font-semibold ${isTot ? 'bg-gray-200' : 'bg-gray-100'}`}>
-      <td className="py-2 text-gray-800">{label}</td>
+    <tr className={`border-b text-[13px] font-bold ${isTot ? 'bg-slate-200' : 'bg-slate-100'}`}>
+      <td className="py-2 text-slate-800">{label}</td>
       <td className="py-2 text-center">{parSum}</td>
-      <td className="py-2 text-center text-gray-400">{count}</td>
+      <td className="py-2 text-center text-slate-400 font-normal">{count}</td>
       <td /><td colSpan={3} />
       <td className="py-2 text-center">{brutSum ?? ''}</td>
       <td className="py-2 text-center">{netSum ?? ''}</td>
