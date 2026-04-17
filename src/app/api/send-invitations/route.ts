@@ -167,22 +167,23 @@ export async function POST(req: Request) {
 
     const supabase = await createServerClient()
 
-    // Charger l'event + template du groupe
+    // Charger l'event
     const { data: event, error: evErr } = await supabase
       .from('events')
-      .select(`
-        id, title, location, starts_at, group_id, email_message,
-        groups(
-          template_invitation_subject,
-          template_invitation_body
-        )
-      `)
+      .select('id, title, location, starts_at, group_id, email_message')
       .eq('id', eventId)
       .single()
 
     if (evErr || !event) {
       return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
     }
+
+    // Charger le template du groupe séparément (plus fiable que le join)
+    const { data: groupData } = await supabase
+      .from('groups')
+      .select('template_invitation_subject, template_invitation_body')
+      .eq('id', event.group_id)
+      .single()
 
     // Charger les participants avec leurs tokens
     const { data: participants, error: pErr } = await supabase
@@ -200,10 +201,9 @@ export async function POST(req: Request) {
     const eventDate = formatDate(event.starts_at)
     const eventTime = formatTime(event.starts_at)
 
-    // Template subject depuis le groupe (si défini)
-    const groupTemplate = (event as any).groups
-    const subjectTemplate = groupTemplate?.template_invitation_subject ?? 'Invitation : {{event_title}}'
-    const bodyTemplate    = groupTemplate?.template_invitation_body ?? null
+    // Template depuis le groupe
+    const subjectTemplate = groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}'
+    const bodyTemplate    = groupData?.template_invitation_body ?? null
 
     let sent = 0
     let skipped = 0

@@ -133,6 +133,37 @@ export default function TemplatesPage() {
     }
   }
 
+  async function handleReset() {
+    if (!confirm('Réinitialiser ce template aux valeurs par défaut GolfGo ?')) return
+    if (useGroupTemplate) {
+      const { error } = await supabase.from('groups').update({
+        template_invitation_subject: DEFAULTS.template_invitation_subject,
+        template_invitation_body:    DEFAULTS.template_invitation_body,
+        template_teesheet_subject:   DEFAULTS.template_teesheet_subject,
+        template_teesheet_body:      DEFAULTS.template_teesheet_body,
+        template_logo_url:           null,
+        template_header_color:       '#185FA5',
+      }).eq('id', groupId)
+      if (error) { toast.error(error.message); return }
+      setGroupTemplate({ ...DEFAULTS })
+      toast.success('Template groupe réinitialisé')
+    } else {
+      const { error } = await supabase.from('events').update({
+        use_group_template:          true,
+        template_invitation_subject: null,
+        template_invitation_body:    null,
+        template_teesheet_subject:   null,
+        template_teesheet_body:      null,
+        template_logo_url:           null,
+        template_header_color:       null,
+      }).eq('id', selectedEventId)
+      if (error) { toast.error(error.message); return }
+      setUseGroupTemplate(true)
+      setEventTemplate({ ...groupTemplate })
+      toast.success('Template event réinitialisé — utilise maintenant le template du groupe')
+    }
+  }
+
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -335,10 +366,16 @@ export default function TemplatesPage() {
       )}
 
       {/* Save */}
-      <div className="flex items-center justify-between mt-5">
-        <p className="text-[12px] text-slate-500">
-          {useGroupTemplate ? 'Sauvegarde pour tout le groupe' : `Sauvegarde uniquement pour : ${events.find(e => e.id === selectedEventId)?.title ?? ''}`}
-        </p>
+      <div className="flex items-center justify-between mt-5 gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <button onClick={handleReset}
+            className="text-[12px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+            ↺ Réinitialiser
+          </button>
+          <p className="text-[12px] text-slate-500">
+            {useGroupTemplate ? 'Sauvegarde pour tout le groupe' : `Sauvegarde pour : ${events.find(e => e.id === selectedEventId)?.title ?? ''}`}
+          </p>
+        </div>
         <button onClick={handleSave} disabled={saving}
           className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
           {saving ? 'Sauvegarde…' : 'Sauvegarder'}
