@@ -529,7 +529,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           const active = isActive(item.href)
           return (
             <Link
-              key={item.href}
+              key={item.label}
               href={item.href}
               className="flex flex-col items-center justify-center gap-1 flex-1 py-2.5 transition-colors relative"
             >
