@@ -24,18 +24,12 @@ export default function SignupPage() {
     setError(null)
 
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-      // Avec vérification d'email:
-       // emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-       // data: { full_name: fullName.trim() },
-      // Sans vérification d'email
-      options: {
-      data: { full_name: fullName.trim() },
-
-      },
-    })
+  email: email.trim(),
+  password,
+  options: {
+    data: { full_name: fullName.trim() },
+  },
+})
 
     if (signUpError) {
       setError(
