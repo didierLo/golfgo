@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -21,19 +21,50 @@ export default function AddEventPage() {
   const [saving, setSaving]             = useState(false)
   const [error, setError]               = useState('')
 
+  const [clubs, setClubs]                             = useState<{ id: string; name: string }[]>([])
+  const [courses, setCourses]                         = useState<{ id: string; course_name: string }[]>([])
+  const [formats, setFormats]                         = useState<{ id: string; name: string }[]>([])
+  const [selectedClubId, setSelectedClubId]           = useState('')
+  const [courseId, setCourseId]                       = useState('')
+  const [competitionFormatId, setCompetitionFormatId] = useState('')
+
+  useEffect(() => { loadRefs() }, [])
+  useEffect(() => {
+    if (selectedClubId) loadCourses(selectedClubId)
+    else { setCourses([]); setCourseId('') }
+  }, [selectedClubId])
+
+  async function loadRefs() {
+    const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
+      supabase.from('clubs').select('id, name').order('name'),
+      supabase.from('competition_formats').select('id, name').order('name'),
+    ])
+    setClubs(clubsData || [])
+    setFormats(formatsData || [])
+  }
+
+  async function loadCourses(clubId: string) {
+    const { data } = await supabase.from('courses').select('id, course_name').eq('club_id', clubId).order('course_name')
+    setCourses(data || [])
+    if (data?.length === 1) setCourseId(data[0].id)
+    else setCourseId('')
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(''); setSaving(true)
     try {
       const { error: insertError } = await supabase.from('events').insert({
-        group_id:       groupId,
-        title:          title.trim(),
-        location:       location.trim() || null,
-        starts_at:      start,
-        ends_at:        end || null,
-        is_golf:        isGolf,
-        fee_per_person: fee ? parseFloat(fee.replace(',', '.')) : null,
-        email_message:  emailMessage || null,
+        group_id:              groupId,
+        title:                 title.trim(),
+        location:              location.trim() || null,
+        starts_at:             start,
+        ends_at:               end || null,
+        is_golf:               isGolf,
+        course_id:             courseId || null,
+        competition_format_id: competitionFormatId || null,
+        fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
+        email_message:         emailMessage || null,
       })
       if (insertError) { setError(insertError.message); setSaving(false); return }
       window.location.href = `/groups/${groupId}/events`
@@ -51,16 +82,19 @@ export default function AddEventPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Titre *</label>
           <input value={title} onChange={e => setTitle(e.target.value)} required
             placeholder="Ex: Partie du 2 avril" className={inputClass} />
         </div>
+
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Lieu</label>
           <input value={location} onChange={e => setLocation(e.target.value)}
             placeholder="Ex: GC Louvain-La-Neuve" className={inputClass} />
         </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Début *</label>
@@ -72,19 +106,19 @@ export default function AddEventPage() {
           </div>
         </div>
 
-        <div className="h-px bg-slate-100" />
+        <div className="h-px bg-white/40" />
 
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-2">Type d'événement</label>
-          <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit">
+          <div className="flex gap-1 p-1 bg-white/40 rounded-xl w-fit">
             <button type="button" onClick={() => setIsGolf(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
-                isGolf ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                isGolf ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               ⛳ Partie de golf
             </button>
             <button type="button" onClick={() => setIsGolf(false)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
-                !isGolf ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                !isGolf ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               🎉 Autre événement
             </button>
           </div>
@@ -92,6 +126,45 @@ export default function AddEventPage() {
             {isGolf ? 'Flights, scorecards et leaderboard seront disponibles' : 'Seulement participants et paiements'}
           </p>
         </div>
+
+        {isGolf && (
+          <>
+            <div className="h-px bg-white/40" />
+
+            <div>
+              <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Club</label>
+              <select value={selectedClubId} onChange={e => setSelectedClubId(e.target.value)} className={inputClass}>
+                <option value="">Choisir un club…</option>
+                {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+
+            {selectedClubId && (
+              <div>
+                <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Parcours</label>
+                <select value={courseId} onChange={e => setCourseId(e.target.value)} className={inputClass}>
+                  <option value="">Choisir un parcours…</option>
+                  {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
+                </select>
+                {courses.length === 0 && (
+                  <p className="text-[11px] text-amber-600 mt-1.5">
+                    Aucun parcours — <a href="/admin/clubs" className="underline font-semibold">ajouter dans Clubs</a>
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Format de compétition</label>
+              <select value={competitionFormatId} onChange={e => setCompetitionFormatId(e.target.value)} className={inputClass}>
+                <option value="">Choisir un format…</option>
+                {formats.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+              </select>
+            </div>
+          </>
+        )}
+
+        <div className="h-px bg-white/40" />
 
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
@@ -123,6 +196,7 @@ export default function AddEventPage() {
             Annuler
           </button>
         </div>
+
       </form>
     </div>
   )
