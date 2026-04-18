@@ -62,7 +62,7 @@ export default function InvitationsPage() {
     setIsOwner(gp?.role === 'owner')
 
     const { data: evts } = await supabase.from('events').select('id, title, starts_at')
-      .eq('group_id', groupId).order('starts_at', { ascending: false })
+      .eq('group_id', groupId).order('starts_at', { ascending: true })
     const allEvents = evts || []
     const upcomingEvents = allEvents.filter(e => new Date(e.starts_at) >= new Date())
     setEvents(upcomingEvents)
