@@ -114,7 +114,7 @@ export default function EventOverviewPage() {
       </div>
 
       {/* Infos */}
-      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-4 mb-6 flex flex-col gap-3.5">
+      <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-6 flex flex-col gap-3.5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
 
         {/* Date */}
         <div className="flex items-start gap-3">
@@ -181,7 +181,7 @@ export default function EventOverviewPage() {
 
       {/* Ma participation */}
       {status !== null && (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-4">
+        <div className="rounded-xl border border-white/60 shadow-sm p-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Ma participation</p>
 
           {s && (

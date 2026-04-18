@@ -183,7 +183,7 @@ export default function InvitationsPage() {
 
       {/* Formulaire */}
       {showForm && isOwner && (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 mb-6">
+        <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Envoyer des invitations</p>
 
           <div className="mb-4">
@@ -272,7 +272,7 @@ export default function InvitationsPage() {
 
       {/* Bandeau event */}
       {displayedEvent && (
-        <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" flex items-center justify-between">
+        <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm flex items-center justify-between" style={ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }>
           <div>
             <p className="text-[13px] font-bold text-slate-900">{displayedEvent.title}</p>
             <p className="text-[11px] text-slate-500">{formatDateLong(displayedEvent.starts_at)}</p>
@@ -291,7 +291,7 @@ export default function InvitationsPage() {
           Aucune invitation pour cet événement
         </div>
       ) : (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden">
+        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           {filteredInvited.length > 0 && isOwner && (
             <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
               <input type="checkbox" checked={allCancelSelected} onChange={toggleCancelAll} className="rounded accent-[#185FA5]" />

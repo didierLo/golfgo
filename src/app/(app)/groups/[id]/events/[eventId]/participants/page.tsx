@@ -241,7 +241,7 @@ export default function ParticipantsPage() {
               {[1,2,3,4].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
             </div>
           ) : (
-            <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden">
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
                   ? 'grid-cols-[1fr_60px_90px_auto_32px] sm:grid-cols-[1fr_80px_100px_160px_32px]'

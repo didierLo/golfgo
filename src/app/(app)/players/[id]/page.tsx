@@ -58,7 +58,7 @@ export default function PlayerPage() {
       </div>
 
       {/* Infos */}
-      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden mb-5">
+      <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden mb-5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
         {[
           { label: 'WHS',        value: player.whs ?? '—'        },
           { label: 'Email',      value: player.email || '—'      },

@@ -65,7 +65,7 @@ export default function PlayersPage() {
           className="w-full max-w-sm border border-white/50 rounded-xl px-3 py-2.5 text-[13px] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5]" />
       </div>
 
-      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden">
+      <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
         <div className="grid grid-cols-[1fr_80px_120px_100px] gap-4 px-4 py-3 bg-white/30 border-b border-white/40">
           <span className="text-[12px] font-semibold text-slate-500">Joueur</span>
           <span className="text-[12px] font-semibold text-slate-500 text-center">WHS</span>

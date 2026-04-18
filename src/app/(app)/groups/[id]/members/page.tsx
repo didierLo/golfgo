@@ -67,7 +67,7 @@ export default function MembersPage() {
           Aucun membre dans ce groupe
         </div>
       ) : (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden">
+        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div className="grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-3 bg-white/30 border-b border-white/40">
             <span className="text-[12px] font-semibold text-slate-500">Membre</span>
             <span className="text-[12px] font-semibold text-slate-500 text-center">WHS</span>

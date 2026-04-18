@@ -124,7 +124,7 @@ export default function AddMemberPage() {
 
       {/* Résultats */}
       {results.length > 0 && (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden mb-4">
+        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden mb-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           {results.map((p, i) => {
             const isAdded = added.includes(p.id)
             return (

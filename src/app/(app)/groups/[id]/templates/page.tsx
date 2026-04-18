@@ -227,7 +227,7 @@ export default function TemplatesPage() {
       </div>
 
       {/* Scope */}
-      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-4 mb-5">
+      <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Appliquer à</p>
         <div className="flex items-start gap-3 mb-3">
           <button type="button" onClick={() => handleToggleGroupTemplate(!useGroupTemplate)}
@@ -259,7 +259,7 @@ export default function TemplatesPage() {
       </div>
 
       {/* Identité visuelle */}
-      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 mb-5">
+      <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Identité visuelle</p>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -353,7 +353,7 @@ export default function TemplatesPage() {
 
       {/* Email invitation */}
       {activeTab === 'invitation' && (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 space-y-4">
+        <div className="rounded-xl border border-white/60 shadow-sm p-5 space-y-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div>
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Objet</label>
             <input value={template.template_invitation_subject ?? ''} onChange={e => set('template_invitation_subject', e.target.value)}
@@ -378,7 +378,7 @@ export default function TemplatesPage() {
 
       {/* Email tee sheet */}
       {activeTab === 'teesheet' && (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 space-y-4">
+        <div className="rounded-xl border border-white/60 shadow-sm p-5 space-y-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div>
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Objet</label>
             <input value={template.template_teesheet_subject ?? ''} onChange={e => set('template_teesheet_subject', e.target.value)}
@@ -403,7 +403,7 @@ export default function TemplatesPage() {
 
       {/* Documents */}
       {activeTab === 'print' && (
-        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-8 text-center">
+        <div className="rounded-xl border border-white/60 shadow-sm p-8 text-center" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M9 21h6v-6H9v6z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/>

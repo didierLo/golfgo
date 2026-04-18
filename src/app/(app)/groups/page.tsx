@@ -84,7 +84,7 @@ export default function GroupsPage() {
         {groups.map((group, index) => {
           const color = group.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length]
           return (
-            <div key={group.id} className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" hover:border-slate-300 transition-colors">
+            <div key={group.id} className="rounded-xl border border-white/60 shadow-sm hover:border-slate-300 transition-colors" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div className="px-4 py-3 flex items-center gap-3 cursor-pointer"
                 onClick={() => router.push(`/groups/${group.id}/events`)}>
                 <div className="w-[3px] h-10 rounded-full flex-shrink-0" style={{ background: color }} />

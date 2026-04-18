@@ -154,7 +154,7 @@ export default function MyEventsPage() {
         <div className="grid grid-cols-3 gap-3 mb-6">
 
           {/* Prochain event */}
-          <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-3.5">
+          <div className="rounded-xl border border-white/60 shadow-sm p-3.5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Prochain
             </p>
@@ -177,7 +177,7 @@ export default function MyEventsPage() {
           </div>
 
           {/* Confirmés */}
-          <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-3.5">
+          <div className="rounded-xl border border-white/60 shadow-sm p-3.5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Confirmés
             </p>
@@ -186,7 +186,7 @@ export default function MyEventsPage() {
           </div>
 
           {/* En attente */}
-          <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-3.5">
+          <div className="rounded-xl border border-white/60 shadow-sm p-3.5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Invitations
             </p>
