@@ -107,6 +107,7 @@ export default function TemplatesPage() {
       setEventTemplate({
         template_logo_url:           data.template_logo_url ?? groupTemplate.template_logo_url,
         template_header_color:       data.template_header_color ?? groupTemplate.template_header_color,
+        template_bg_image_url:       data.template_bg_image_url ?? groupTemplate.template_bg_image_url,
         template_invitation_subject: data.template_invitation_subject ?? groupTemplate.template_invitation_subject,
         template_invitation_body:    data.template_invitation_body ?? groupTemplate.template_invitation_body,
         template_teesheet_subject:   data.template_teesheet_subject ?? groupTemplate.template_teesheet_subject,
