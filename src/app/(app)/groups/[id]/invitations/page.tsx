@@ -272,7 +272,7 @@ export default function InvitationsPage() {
 
       {/* Bandeau event */}
       {displayedEvent && (
-        <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm flex items-center justify-between" style={ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }>
+        <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm flex items-center justify-between" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div>
             <p className="text-[13px] font-bold text-slate-900">{displayedEvent.title}</p>
             <p className="text-[11px] text-slate-500">{formatDateLong(displayedEvent.starts_at)}</p>
