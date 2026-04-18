@@ -41,7 +41,7 @@ export default function GroupsPage() {
 
   if (loading) return (
     <div className="p-6 space-y-3">
-      {[1,2,3].map(i => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -84,7 +84,7 @@ export default function GroupsPage() {
         {groups.map((group, index) => {
           const color = group.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length]
           return (
-            <div key={group.id} className="bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+            <div key={group.id} className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" hover:border-slate-300 transition-colors">
               <div className="px-4 py-3 flex items-center gap-3 cursor-pointer"
                 onClick={() => router.push(`/groups/${group.id}/events`)}>
                 <div className="w-[3px] h-10 rounded-full flex-shrink-0" style={{ background: color }} />
@@ -101,7 +101,7 @@ export default function GroupsPage() {
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
                   <button onClick={() => router.push(`/groups/${group.id}/edit`)}
-                    className="text-[11px] font-semibold text-slate-600 border border-slate-200 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                    className="text-[11px] font-semibold text-slate-600 border border-white/50 px-2.5 py-1.5 rounded-lg hover:bg-white/30 transition-colors">
                     Edit
                   </button>
                   <button onClick={() => deleteGroup(group.id)}
@@ -116,7 +116,7 @@ export default function GroupsPage() {
                   { label: 'Constraints', href: `/groups/${group.id}/constraints` },
                 ].map(({ label, href }) => (
                   <a key={label} href={href}
-                    className="text-[11px] font-semibold text-slate-500 hover:text-[#185FA5] border border-slate-100 hover:border-blue-200 bg-slate-50 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-colors">
+                    className="text-[11px] font-semibold text-slate-500 hover:text-[#185FA5] border border-slate-100 hover:border-blue-200 bg-white/30 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-colors">
                     {label}
                   </a>
                 ))}

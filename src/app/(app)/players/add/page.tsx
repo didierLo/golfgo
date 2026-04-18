@@ -24,11 +24,11 @@ export default function AddPlayerPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setIsListModalOpen(true)}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
             Depuis une liste
           </button>
           <button onClick={() => setShowImport(true)}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
             Importer XLS
           </button>
         </div>
@@ -58,7 +58,7 @@ export default function AddPlayerPage() {
 
       {showImport && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-[500px] space-y-4 border border-slate-200">
+          <div className="bg-white rounded-2xl p-6 w-[500px] space-y-4 border border-white/50">
             <div className="flex justify-between items-center">
               <h2 className="text-[15px] font-black text-slate-900">Importer des joueurs</h2>
               <button onClick={() => setShowImport(false)} className="text-slate-400 hover:text-slate-600">

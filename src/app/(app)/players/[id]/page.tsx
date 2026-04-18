@@ -38,7 +38,7 @@ export default function PlayerPage() {
 
   if (loading) return (
     <div className="p-6 space-y-3 max-w-lg">
-      {[1,2,3].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -58,14 +58,14 @@ export default function PlayerPage() {
       </div>
 
       {/* Infos */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-5">
+      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden mb-5">
         {[
           { label: 'WHS',        value: player.whs ?? '—'        },
           { label: 'Email',      value: player.email || '—'      },
           { label: 'Téléphone',  value: player.phone || '—'      },
           { label: 'Club home',  value: player.home_club || '—'  },
         ].map((row, i, arr) => (
-          <div key={row.label} className={`flex items-center gap-4 px-4 py-3 ${i < arr.length - 1 ? 'border-b border-slate-100' : ''}`}>
+          <div key={row.label} className={`flex items-center gap-4 px-4 py-3 ${i < arr.length - 1 ? 'border-b border-white/30' : ''}`}>
             <span className="text-[12px] font-semibold text-slate-500 w-24 flex-shrink-0">{row.label}</span>
             <span className="text-[13px] text-slate-900">{row.value}</span>
           </div>

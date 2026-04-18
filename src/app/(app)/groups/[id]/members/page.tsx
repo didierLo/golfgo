@@ -36,7 +36,7 @@ export default function MembersPage() {
 
   if (loading) return (
     <div className="p-6 space-y-2">
-      {[1,2,3,4].map(i => <div key={i} className="h-11 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3,4].map(i => <div key={i} className="h-11 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -51,7 +51,7 @@ export default function MembersPage() {
         </div>
         <div className="flex gap-2">
           <a href={`/groups/${groupId}/constraints`}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
             Constraints
           </a>
           <button onClick={() => router.push(`/groups/${groupId}/members/add`)}
@@ -67,15 +67,15 @@ export default function MembersPage() {
           Aucun membre dans ce groupe
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          <div className="grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-3 bg-slate-50 border-b border-slate-100">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden">
+          <div className="grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-3 bg-white/30 border-b border-white/40">
             <span className="text-[12px] font-semibold text-slate-500">Membre</span>
             <span className="text-[12px] font-semibold text-slate-500 text-center">WHS</span>
             <span className="text-[12px] font-semibold text-slate-500 text-right">Actions</span>
           </div>
           {members.map((member, i) => (
             <div key={member.id}
-              className={`grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-3 items-center hover:bg-slate-50 transition-colors ${i < members.length - 1 ? 'border-b border-slate-100' : ''}`}>
+              className={`grid grid-cols-[1fr_80px_100px] gap-4 px-4 py-3 items-center hover:bg-white/30 transition-colors ${i < members.length - 1 ? 'border-b border-white/30' : ''}`}>
               <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push(`/players/${member.id}`)}>
                 <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
                   {member.first_name[0]}{member.surname[0]}
@@ -85,7 +85,7 @@ export default function MembersPage() {
               <div className="text-[13px] font-medium text-slate-600 text-center">{member.whs ?? '—'}</div>
               <div className="flex justify-end gap-1">
                 <button onClick={() => router.push(`/players/${member.id}/edit`)}
-                  className="text-[11px] font-semibold text-slate-600 border border-slate-200 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                  className="text-[11px] font-semibold text-slate-600 border border-white/50 px-2.5 py-1.5 rounded-lg hover:bg-white/30 transition-colors">
                   Edit
                 </button>
                 <button onClick={() => removeMember(member.id)}

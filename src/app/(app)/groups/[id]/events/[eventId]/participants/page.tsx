@@ -164,7 +164,7 @@ export default function ParticipantsPage() {
 
   if (roleLoading) return (
     <div className="p-6 space-y-2">
-      {[1,2,3].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -200,7 +200,7 @@ export default function ParticipantsPage() {
         <>
           <div className="mb-5">
             <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-              className="border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] w-full max-w-sm">
+              className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] w-full max-w-sm">
               {events.map(e => (
                 <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>
               ))}
@@ -208,7 +208,7 @@ export default function ParticipantsPage() {
           </div>
 
           {selectedEvent && (
-            <div className="mb-5 pb-4 border-b border-slate-100">
+            <div className="mb-5 pb-4 border-b border-white/30">
               <h2 className="text-[17px] font-black text-slate-900">{selectedEvent.title}</h2>
               <p className="text-[13px] text-slate-600 mt-0.5">{formatDateLong(selectedEvent.starts_at)}</p>
             </div>
@@ -228,7 +228,7 @@ export default function ParticipantsPage() {
               { n: declined,            color: '#A32D2D', bg: '#FCEBEB', label: 'declined' },
               { n: participants.length, color: '#334155', bg: '#F1F5F9', label: 'total'    },
             ].map(({ n, color, bg, label }) => (
-              <div key={label} className="border border-slate-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[64px]"
+              <div key={label} className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[64px]"
                 style={{ background: bg }}>
                 <span className="text-[20px] font-black" style={{ color }}>{n}</span>
                 <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{label}</span>
@@ -238,11 +238,11 @@ export default function ParticipantsPage() {
 
           {loading ? (
             <div className="space-y-2">
-              {[1,2,3,4].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
+              {[1,2,3,4].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
             </div>
           ) : (
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-              <div className={`grid gap-4 px-4 py-3 bg-slate-50 border-b border-slate-100 ${
+            <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden">
+              <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
                   ? 'grid-cols-[1fr_60px_90px_auto_32px] sm:grid-cols-[1fr_80px_100px_160px_32px]'
                   : 'grid-cols-[1fr_60px_90px] sm:grid-cols-[1fr_80px_100px]'}`}>
@@ -264,7 +264,7 @@ export default function ParticipantsPage() {
                       isOwner
                         ? 'grid-cols-[1fr_60px_90px_auto_32px] sm:grid-cols-[1fr_80px_100px_160px_32px]'
                         : 'grid-cols-[1fr_60px_90px] sm:grid-cols-[1fr_80px_100px]'
-                    } ${i < displayed.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                    } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
                     <div className="text-[13px] font-semibold text-slate-900 truncate">
                       {p.players.first_name} {p.players.surname}
                     </div>
@@ -279,7 +279,7 @@ export default function ParticipantsPage() {
                                 ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
                                 : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
                                 :                   'bg-[#EBF3FC] border-[#B5D4F4] text-[#0C447C]'
-                                : 'border-slate-200 text-slate-400 hover:bg-slate-50'
+                                : 'border-slate-200 text-slate-400 hover:bg-white/30'
                             }`}>
                             {s === 'GOING' ? 'Yes' : s === 'DECLINED' ? 'No' : 'Reset'}
                           </button>
@@ -305,7 +305,7 @@ export default function ParticipantsPage() {
         <>
           {overviewLoading ? (
             <div className="space-y-2">
-              {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-slate-100 rounded-xl animate-pulse" />)}
+              {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-white/40 rounded-xl animate-pulse" />)}
             </div>
           ) : upcomingEvents.length === 0 ? (
             <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
@@ -315,8 +315,8 @@ export default function ParticipantsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-[12px] border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="px-4 py-3 text-left text-[12px] font-semibold text-slate-600 sticky left-0 bg-slate-50 min-w-[160px]">Membre</th>
+                  <tr className="bg-white/30 border-b border-white/40">
+                    <th className="px-4 py-3 text-left text-[12px] font-semibold text-slate-600 sticky left-0 bg-white/30 min-w-[160px]">Membre</th>
                     {upcomingEvents.map(e => (
                       <th key={e.id} className="px-3 py-3 text-center font-semibold text-slate-500 min-w-[100px]">
                         <div className="text-[11px] text-slate-700 font-semibold truncate max-w-[90px]">{e.title}</div>
@@ -332,7 +332,7 @@ export default function ParticipantsPage() {
                     const goingCount = Object.values(memberStatuses).filter(s => s === 'GOING').length
                     return (
                       <tr key={member.id}
-                        className={`border-b border-slate-100 hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/30'}`}>
+                        className={`border-b border-white/30 hover:bg-white/30 ${i % 2 === 0 ? '' : 'bg-white/30/30'}`}>
                         <td className="px-4 py-3 font-semibold text-slate-900 sticky left-0 bg-inherit">
                           {member.first_name} {member.surname}
                         </td>

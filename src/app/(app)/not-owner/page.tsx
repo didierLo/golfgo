@@ -1,7 +1,7 @@
 export default function NotOwnerPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-[#EBF3FC] flex items-center justify-center mb-5">
+      <div className="w-16 h-16 rounded-full bg-white/50 flex items-center justify-center mb-5">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
           <circle cx="10" cy="9" r="4" stroke="#185FA5" strokeWidth="1.5"/>
           <path d="M2 23c0-4.42 3.58-8 8-8a8 8 0 018 8" stroke="#185FA5" strokeWidth="1.5" strokeLinecap="round"/>

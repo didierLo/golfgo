@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
-const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
+const inputClass = "w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm"
 
 export default function AddEventPage() {
   const params  = useParams()
@@ -119,7 +119,7 @@ export default function AddEventPage() {
             {saving ? 'Saving…' : "Créer l'événement"}
           </button>
           <button type="button" onClick={() => { window.location.href = `/groups/${groupId}/events` }}
-            className="text-[13px] font-semibold px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            className="text-[13px] font-semibold px-5 py-2.5 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
             Annuler
           </button>
         </div>

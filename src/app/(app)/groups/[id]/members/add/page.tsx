@@ -7,7 +7,7 @@ import BulkAddPlayersModal from '@/components/players/BulkAddPlayersModal'
 import ImportPlayers from '@/components/players/ImportPlayers'
 
 const supabase = createClient()
-const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
+const inputClass = "w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm"
 
 const TEE_OPTIONS = [
   { value: 'yellow', label: 'Yellow', color: '#EF9F27' },
@@ -99,11 +99,11 @@ export default function AddMemberPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setIsListModalOpen(true)}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
             Depuis une liste
           </button>
           <button onClick={() => setShowImport(true)}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
             Importer XLS
           </button>
         </div>
@@ -124,11 +124,11 @@ export default function AddMemberPage() {
 
       {/* Résultats */}
       {results.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-4">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden mb-4">
           {results.map((p, i) => {
             const isAdded = added.includes(p.id)
             return (
-              <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${i < results.length - 1 ? 'border-b border-slate-100' : ''}`}>
+              <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${i < results.length - 1 ? 'border-b border-white/30' : ''}`}>
                 <div className="w-8 h-8 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
                   {p.first_name[0]}{p.surname[0]}
                 </div>
@@ -167,7 +167,7 @@ export default function AddMemberPage() {
 
       {/* Formulaire création */}
       {showCreate && (
-        <div className="border border-slate-200 rounded-xl p-5 mt-2 bg-white">
+        <div className="border border-white/50 rounded-xl p-5 mt-2 bg-white">
           <div className="flex items-center justify-between mb-4">
             <p className="text-[14px] font-black text-slate-900">Nouveau joueur</p>
             <button onClick={() => { setShowCreate(false); setError('') }} className="text-[12px] font-semibold text-slate-400 hover:text-slate-600">Annuler</button>
@@ -248,7 +248,7 @@ export default function AddMemberPage() {
 
       {showImport && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-[500px] space-y-4 border border-slate-200">
+          <div className="bg-white rounded-2xl p-6 w-[500px] space-y-4 border border-white/50">
             <div className="flex justify-between items-center">
               <h2 className="text-[15px] font-black text-slate-900">Importer des joueurs</h2>
               <button onClick={() => setShowImport(false)} className="text-slate-400 hover:text-slate-600">

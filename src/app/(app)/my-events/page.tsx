@@ -131,9 +131,9 @@ export default function MyEventsPage() {
       <div className="p-6 space-y-4 max-w-2xl">
         <div className="h-8 w-48 bg-slate-100 rounded-lg animate-pulse" />
         <div className="grid grid-cols-3 gap-3">
-          {[1,2,3].map(i => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
         </div>
-        {[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}
+        {[1,2,3].map(i => <div key={i} className="h-16 bg-white/40 rounded-xl animate-pulse" />)}
       </div>
     )
   }
@@ -154,7 +154,7 @@ export default function MyEventsPage() {
         <div className="grid grid-cols-3 gap-3 mb-6">
 
           {/* Prochain event */}
-          <div className="bg-white border border-slate-200 rounded-xl p-3.5">
+          <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-3.5">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Prochain
             </p>
@@ -177,7 +177,7 @@ export default function MyEventsPage() {
           </div>
 
           {/* Confirmés */}
-          <div className="bg-white border border-slate-200 rounded-xl p-3.5">
+          <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-3.5">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Confirmés
             </p>
@@ -186,7 +186,7 @@ export default function MyEventsPage() {
           </div>
 
           {/* En attente */}
-          <div className="bg-white border border-slate-200 rounded-xl p-3.5">
+          <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-3.5">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Invitations
             </p>

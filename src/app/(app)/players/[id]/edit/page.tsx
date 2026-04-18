@@ -39,7 +39,7 @@ export default function EditPlayerPage() {
 
   if (loading) return (
     <div className="p-6 space-y-3 max-w-lg">
-      {[1,2,3,4].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3,4].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 

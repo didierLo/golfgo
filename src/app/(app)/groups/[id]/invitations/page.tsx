@@ -158,7 +158,7 @@ export default function InvitationsPage() {
 
   if (loading) return (
     <div className="p-6 space-y-3">
-      {[1,2,3].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -183,7 +183,7 @@ export default function InvitationsPage() {
 
       {/* Formulaire */}
       {showForm && isOwner && (
-        <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 mb-6">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Envoyer des invitations</p>
 
           <div className="mb-4">
@@ -192,7 +192,7 @@ export default function InvitationsPage() {
               <p className="text-[12px] text-slate-500">Aucun événement à venir</p>
             ) : (
               <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
+                className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
                 {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
               </select>
             )}
@@ -204,9 +204,9 @@ export default function InvitationsPage() {
               <button type="button" onClick={() => setSelectedPlayers(members.map(m => m.id))}
                 className="text-[11px] font-semibold text-[#185FA5] hover:underline">Tout sélectionner</button>
             </div>
-            <div className="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+            <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
               {members.map((m, i) => (
-                <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors ${i < members.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/30 transition-colors ${i < members.length - 1 ? 'border-b border-white/30' : ''}`}>
                   <input type="checkbox" checked={selectedPlayers.includes(m.id)} onChange={() => togglePlayer(m.id)} className="rounded accent-[#185FA5]" />
                   <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C]">
                     {m.first_name[0]}{m.surname[0]}
@@ -221,7 +221,7 @@ export default function InvitationsPage() {
           </div>
 
           {/* Toggle email */}
-          <div className="flex items-start gap-3 mb-4 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="flex items-start gap-3 mb-4 p-3.5 bg-white/30 rounded-xl border border-white/50">
             <button type="button" onClick={() => setSendEmail(v => !v)}
               style={{ backgroundColor: sendEmail ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
               className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
@@ -248,7 +248,7 @@ export default function InvitationsPage() {
       {/* Filtres */}
       <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
         <select value={eventFilter} onChange={e => { setEventFilter(e.target.value); setSelectedToCancel([]) }}
-          className="text-[12px] border border-slate-200 rounded-xl px-3 py-2 bg-white text-slate-700 focus:outline-none focus:border-[#185FA5]">
+          className="text-[12px] border border-white/50 rounded-xl px-3 py-2 bg-white text-slate-700 focus:outline-none focus:border-[#185FA5]">
           <option value="ALL">Tous les events</option>
           {Object.values(eventsMap).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
             .map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
@@ -272,7 +272,7 @@ export default function InvitationsPage() {
 
       {/* Bandeau event */}
       {displayedEvent && (
-        <div className="mb-3 px-4 py-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+        <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" flex items-center justify-between">
           <div>
             <p className="text-[13px] font-bold text-slate-900">{displayedEvent.title}</p>
             <p className="text-[11px] text-slate-500">{formatDateLong(displayedEvent.starts_at)}</p>
@@ -291,9 +291,9 @@ export default function InvitationsPage() {
           Aucune invitation pour cet événement
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" overflow-hidden">
           {filteredInvited.length > 0 && isOwner && (
-            <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+            <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
               <input type="checkbox" checked={allCancelSelected} onChange={toggleCancelAll} className="rounded accent-[#185FA5]" />
               <span className="text-[11px] font-semibold text-slate-500">
                 {selectedToCancel.length > 0 ? `${selectedToCancel.length} sélectionnée(s)` : 'Sélectionner les invited'}
@@ -304,7 +304,7 @@ export default function InvitationsPage() {
             const evt = eventsMap[inv.event_id]
             const isInvited = inv.status === 'INVITED'
             return (
-              <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''} ${i < filtered.length - 1 ? 'border-b border-slate-100' : ''}`}>
+              <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''} ${i < filtered.length - 1 ? 'border-b border-white/30' : ''}`}>
                 {isInvited && isOwner
                   ? <input type="checkbox" checked={selectedToCancel.includes(inv.id)} onChange={() => toggleCancel(inv.id)} className="rounded accent-[#185FA5] flex-shrink-0" />
                   : <div className="w-4 flex-shrink-0" />}

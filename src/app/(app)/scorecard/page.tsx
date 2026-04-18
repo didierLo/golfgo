@@ -164,7 +164,7 @@ export default function MyScorecardPage() {
 
   if (loading) return (
     <div className="p-6 space-y-3 max-w-2xl">
-      {[1,2,3].map(i => <div key={i} className="h-14 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-14 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -237,7 +237,7 @@ export default function MyScorecardPage() {
 
       {/* Bandeau joueur actif */}
       {activePlayer && (
-        <div className="bg-white border border-slate-200 rounded-xl p-3.5 mb-5">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-3.5 mb-5">
           <div className="flex items-center justify-between">
             <p className="text-[14px] font-black text-slate-900">
               {activePlayer.id === playerId ? 'Ma scorecard' : `${activePlayer.first_name} ${activePlayer.surname}`}

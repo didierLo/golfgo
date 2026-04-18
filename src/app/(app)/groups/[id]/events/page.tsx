@@ -33,7 +33,7 @@ function EventCard({ event, groupId, goingCount, onDelete, bgUrl }: {
   const bgImage = bgUrl ?? '/golf-bg.jpg'
 
   return (
-    <div className="rounded-xl overflow-hidden border border-slate-200 hover:border-slate-300 transition-colors">
+    <div className="rounded-xl overflow-hidden border border-white/50 hover:border-slate-300 transition-colors">
 
       {/* ── Version MOBILE avec image de fond ── */}
       <div className="sm:hidden relative cursor-pointer" onClick={() => { window.location.href = base }}
@@ -113,7 +113,7 @@ function EventCard({ event, groupId, goingCount, onDelete, bgUrl }: {
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <a href={`${base}/edit`}
-              className="text-[11px] font-semibold text-slate-600 border border-slate-200 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+              className="text-[11px] font-semibold text-slate-600 border border-white/50 px-2.5 py-1.5 rounded-lg hover:bg-white/30 transition-colors">
               Edit
             </a>
             <button onClick={() => onDelete(event.id)}
@@ -133,7 +133,7 @@ function EventCard({ event, groupId, goingCount, onDelete, bgUrl }: {
         ].map(({ label, href, blue }) => (
           <a key={label} href={href}
             className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap ${
-              blue ? 'bg-[#EBF3FC] border-[#B5D4F4] text-[#185FA5] hover:bg-blue-100' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+              blue ? 'bg-[#EBF3FC] border-[#B5D4F4] text-[#185FA5] hover:bg-blue-100' : 'border-slate-200 text-slate-500 hover:bg-white/30'
             }`}>
             {label}
           </a>
@@ -193,7 +193,7 @@ export default function EventsPage() {
 
   if (loading) return (
     <div className="p-6 space-y-3">
-      {[1,2,3].map(i => <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-24 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 

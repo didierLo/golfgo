@@ -94,7 +94,7 @@ export default function EventOverviewPage() {
 
   if (loading) return (
     <div className="p-6 space-y-3 max-w-xl">
-      {[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-16 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -114,7 +114,7 @@ export default function EventOverviewPage() {
       </div>
 
       {/* Infos */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-col gap-3.5">
+      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-4 mb-6 flex flex-col gap-3.5">
 
         {/* Date */}
         <div className="flex items-start gap-3">
@@ -181,7 +181,7 @@ export default function EventOverviewPage() {
 
       {/* Ma participation */}
       {status !== null && (
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-4">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Ma participation</p>
 
           {s && (

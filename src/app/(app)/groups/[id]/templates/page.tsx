@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 
 const supabase = createClient()
 
-const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
+const inputClass = "w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm"
 const textareaClass = `${inputClass} resize-none`
 
 type Template = {
@@ -207,7 +207,7 @@ export default function TemplatesPage() {
 
   if (loading || roleLoading) return (
     <div className="p-6 space-y-3 max-w-2xl">
-      {[1,2,3].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -227,7 +227,7 @@ export default function TemplatesPage() {
       </div>
 
       {/* Scope */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 mb-5">
+      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-4 mb-5">
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Appliquer à</p>
         <div className="flex items-start gap-3 mb-3">
           <button type="button" onClick={() => handleToggleGroupTemplate(!useGroupTemplate)}
@@ -251,7 +251,7 @@ export default function TemplatesPage() {
           <div className="mt-3 pt-3 border-t border-slate-100">
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Événement</label>
             <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
+              className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
               {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
             </select>
           </div>
@@ -259,7 +259,7 @@ export default function TemplatesPage() {
       </div>
 
       {/* Identité visuelle */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 mb-5">
+      <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 mb-5">
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Identité visuelle</p>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -267,7 +267,7 @@ export default function TemplatesPage() {
             {template.template_logo_url ? (
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={template.template_logo_url} alt="Logo" className="h-12 object-contain border border-slate-200 rounded-xl p-1 bg-slate-50" />
+                <img src={template.template_logo_url} alt="Logo" className="h-12 object-contain border border-white/50 rounded-xl p-1 bg-white/30" />
                 <div className="flex flex-col gap-1">
                   <button onClick={() => fileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">Changer</button>
                   <button onClick={() => setTemplate(t => ({ ...t, template_logo_url: null }))} className="text-[11px] font-semibold text-red-500 hover:underline">Supprimer</button>
@@ -287,7 +287,7 @@ export default function TemplatesPage() {
             <div className="flex items-center gap-3">
               <input type="color" value={template.template_header_color}
                 onChange={e => set('template_header_color', e.target.value)}
-                className="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5" />
+                className="w-10 h-10 rounded-xl border border-white/50 cursor-pointer p-0.5" />
               <div>
                 <p className="text-[13px] font-semibold text-slate-700">{template.template_header_color}</p>
                 <button onClick={() => set('template_header_color', '#185FA5')}
@@ -315,7 +315,7 @@ export default function TemplatesPage() {
           {template.template_bg_image_url ? (
             <div className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={template.template_bg_image_url} alt="Fond" className="h-16 w-32 object-cover rounded-xl border border-slate-200" />
+              <img src={template.template_bg_image_url} alt="Fond" className="h-16 w-32 object-cover rounded-xl border border-white/50" />
               <div className="flex flex-col gap-1">
                 <button onClick={() => bgFileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">Changer</button>
                 <button onClick={async () => {
@@ -353,7 +353,7 @@ export default function TemplatesPage() {
 
       {/* Email invitation */}
       {activeTab === 'invitation' && (
-        <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 space-y-4">
           <div>
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Objet</label>
             <input value={template.template_invitation_subject ?? ''} onChange={e => set('template_invitation_subject', e.target.value)}
@@ -378,7 +378,7 @@ export default function TemplatesPage() {
 
       {/* Email tee sheet */}
       {activeTab === 'teesheet' && (
-        <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-5 space-y-4">
           <div>
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Objet</label>
             <input value={template.template_teesheet_subject ?? ''} onChange={e => set('template_teesheet_subject', e.target.value)}
@@ -403,7 +403,7 @@ export default function TemplatesPage() {
 
       {/* Documents */}
       {activeTab === 'print' && (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
+        <div className="rounded-xl border border-white/60 shadow-sm" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }} className=" p-8 text-center">
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M9 21h6v-6H9v6z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/>
@@ -418,7 +418,7 @@ export default function TemplatesPage() {
       <div className="flex items-center justify-between mt-5 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <button onClick={handleReset}
-            className="text-[12px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+            className="text-[12px] font-semibold px-4 py-2 rounded-xl border border-white/50 text-slate-500 hover:bg-white/30 transition-colors">
             ↺ Réinitialiser
           </button>
           <p className="text-[12px] text-slate-500">
