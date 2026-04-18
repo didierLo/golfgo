@@ -243,11 +243,13 @@ export default function ParticipantsPage() {
           ) : (
             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
               <div className={`grid gap-4 px-4 py-3 bg-slate-50 border-b border-slate-100 ${
-                isOwner ? 'grid-cols-[1fr_80px_100px_160px_32px]' : 'grid-cols-[1fr_80px_100px]'}`}>
+                isOwner
+                  ? 'grid-cols-[1fr_60px_90px_auto_32px] sm:grid-cols-[1fr_80px_100px_160px_32px]'
+                  : 'grid-cols-[1fr_60px_90px] sm:grid-cols-[1fr_80px_100px]'}`}>
                 <SortBtn field="name"   label="Joueur" />
                 <SortBtn field="whs"    label="WHS" />
                 <SortBtn field="status" label="Statut" />
-                {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right">Actions</span>}
+                {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
                 {isOwner && <span />}
               </div>
 
@@ -259,18 +261,20 @@ export default function ParticipantsPage() {
                 displayed.map((p, i) => (
                   <div key={p.player_id}
                     className={`grid gap-4 px-4 py-3 items-center ${
-                      isOwner ? 'grid-cols-[1fr_80px_100px_160px_32px]' : 'grid-cols-[1fr_80px_100px]'
+                      isOwner
+                        ? 'grid-cols-[1fr_60px_90px_auto_32px] sm:grid-cols-[1fr_80px_100px_160px_32px]'
+                        : 'grid-cols-[1fr_60px_90px] sm:grid-cols-[1fr_80px_100px]'
                     } ${i < displayed.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                    <div className="text-[13px] font-semibold text-slate-900">
+                    <div className="text-[13px] font-semibold text-slate-900 truncate">
                       {p.players.first_name} {p.players.surname}
                     </div>
-                    <div className="text-[13px] text-slate-600">{p.players.whs ?? '—'}</div>
+                    <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
                     <div><Badge status={p.status} /></div>
                     {isOwner && (
-                      <div className="flex justify-end gap-1">
+                      <div className="flex justify-end gap-1 flex-wrap">
                         {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
                           <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
-                            className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors ${
+                            className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
                               p.status === s
                                 ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
                                 : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
