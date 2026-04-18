@@ -35,8 +35,9 @@ export default function AddMemberPage() {
     first_name: '', surname: '', federal_no: '', whs: '', email: '', phone: '',
     gender: 'M' as Gender, default_tee_color: 'yellow' as TeeColor,
   })
-  const [saving, setSaving] = useState(false)
-  const [error, setError]   = useState('')
+  const [saving, setSaving]   = useState(false)
+  const [error, setError]     = useState('')
+  const [guestMode, setGuestMode] = useState(false)
 
   useEffect(() => {
     if (search.length < 2) { setResults([]); return }
@@ -63,15 +64,21 @@ export default function AddMemberPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!form.surname.trim() || !form.first_name.trim()) { setError('Nom et prénom requis'); return }
-    if (!form.federal_no.trim()) { setError('Numéro fédéral obligatoire'); return }
+    if (!guestMode && !form.federal_no.trim()) { setError('Numéro fédéral obligatoire'); return }
     setSaving(true); setError(''); setSearch(''); setResults([])
 
-    const federal = form.federal_no.trim().toUpperCase()
-    const { data: existing } = await supabase.from('players').select('id').eq('federal_no', federal).maybeSingle()
-    if (existing) { await addExisting(existing.id); setShowCreate(false); setSaving(false); return }
+    // Vérifier si le joueur existe déjà par n° fédéral (seulement si pas guest)
+    if (!guestMode && form.federal_no.trim()) {
+      const federal = form.federal_no.trim().toUpperCase()
+      const { data: existing } = await supabase.from('players').select('id').eq('federal_no', federal).maybeSingle()
+      if (existing) { await addExisting(existing.id); setShowCreate(false); setSaving(false); return }
+    }
+
+    const federal = form.federal_no.trim() ? form.federal_no.trim().toUpperCase() : null
 
     const { data: player, error: playerError } = await supabase.from('players').insert({
-      first_name: form.first_name.trim(), surname: form.surname.trim(), federal_no: federal,
+      first_name: form.first_name.trim(), surname: form.surname.trim(),
+      federal_no: federal,
       whs: form.whs ? parseFloat(form.whs.replace(',', '.')) : null,
       email: form.email.trim() || null, phone: form.phone.trim() || null,
       gender: form.gender, default_tee_color: form.default_tee_color,
@@ -79,7 +86,8 @@ export default function AddMemberPage() {
 
     if (playerError || !player) { setError(playerError?.message ?? 'Erreur création joueur'); setSaving(false); return }
 
-    const { error: gpError } = await supabase.from('groups_players').insert({ group_id: groupId, player_id: player.id })
+    const role = guestMode ? 'guest' : 'member'
+    const { error: gpError } = await supabase.from('groups_players').insert({ group_id: groupId, player_id: player.id, role })
     if (gpError) { setError(gpError.message); setSaving(false); return }
 
     setAdded(prev => [...prev, player.id])
@@ -157,19 +165,32 @@ export default function AddMemberPage() {
         </div>
       )}
 
-      {/* Bouton créer */}
+      {/* Boutons créer */}
       {!showCreate && (
-        <button onClick={() => { setShowCreate(true); const parts = search.trim().split(' '); if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') })) }}
-          className="w-full text-[13px] font-semibold py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
-          + Créer un nouveau joueur
-        </button>
+        <div className="flex flex-col gap-2">
+          <button onClick={() => { setShowCreate(true); setGuestMode(false); const parts = search.trim().split(' '); if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') })) }}
+            className="w-full text-[13px] font-semibold py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
+            + Créer un nouveau joueur
+          </button>
+          <button onClick={() => { setShowCreate(true); setGuestMode(true); const parts = search.trim().split(' '); if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') })) }}
+            className="w-full text-[13px] font-semibold py-3 rounded-xl border border-dashed border-amber-300 text-amber-600 hover:border-amber-500 hover:bg-amber-50/50 transition-colors">
+            + Ajouter un visiteur <span className="text-[11px] font-normal text-amber-400">(sans compte, sans n° fédéral)</span>
+          </button>
+        </div>
       )}
 
       {/* Formulaire création */}
       {showCreate && (
         <div className="border border-white/50 rounded-xl p-5 mt-2 bg-white">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-[14px] font-black text-slate-900">Nouveau joueur</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[14px] font-black text-slate-900">{guestMode ? 'Nouveau visiteur' : 'Nouveau joueur'}</p>
+              {guestMode && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#92400E' }}>
+                  Visiteur
+                </span>
+              )}
+            </div>
             <button onClick={() => { setShowCreate(false); setError('') }} className="text-[12px] font-semibold text-slate-400 hover:text-slate-600">Annuler</button>
           </div>
           <form onSubmit={handleCreate} className="flex flex-col gap-3">
@@ -185,8 +206,11 @@ export default function AddMemberPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">N° fédéral *</label>
-                <input value={form.federal_no} onChange={e => setForm(f => ({ ...f, federal_no: e.target.value }))} required placeholder="123456" className={inputClass} />
+                <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+                  N° fédéral {guestMode ? <span className="text-slate-400 font-normal">— optionnel</span> : '*'}
+                </label>
+                <input value={form.federal_no} onChange={e => setForm(f => ({ ...f, federal_no: e.target.value }))}
+                  required={!guestMode} placeholder={guestMode ? 'Optionnel' : '123456'} className={inputClass} />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">WHS</label>
@@ -232,7 +256,7 @@ export default function AddMemberPage() {
             {error && <div className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</div>}
             <button type="submit" disabled={saving}
               className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
-              {saving ? 'Création…' : 'Créer et ajouter au groupe'}
+              {saving ? 'Création…' : guestMode ? 'Ajouter comme visiteur' : 'Créer et ajouter au groupe'}
             </button>
           </form>
         </div>
