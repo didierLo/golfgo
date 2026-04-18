@@ -60,7 +60,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
     const { brut, siMark, net, pts } = holeStats(h)
     return (
       <tr className="border-b border-white/30 hover:bg-white/30 transition-colors">
-        <td className="py-2 font-black text-slate-800 text-[13px]">{h.hole_number}</td>
+        <td className="py-2 text-center font-black text-slate-800 text-[13px] pl-3">{h.hole_number}</td>
         <td className="py-2 text-center text-slate-600 text-[13px]">{h.par}</td>
         <td className="py-2 text-center text-slate-500 text-[12px]">{h.stroke_index}</td>
         <td className="py-1 text-center text-[10px] text-slate-400 w-4">{siMark}</td>
@@ -79,7 +79,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
       <table className="border-collapse text-[13px] w-full">
         <thead>
           <tr className="text-[11px] text-slate-500 border-b border-white/40">
-            <th className="py-2.5 text-left font-semibold text-slate-700 w-10">Hole</th>
+            <th className="py-2.5 text-center font-semibold text-slate-700 w-10">Hole</th>
             <th className="py-2.5 text-center font-semibold w-10">Par</th>
             <th className="py-2.5 text-center font-semibold w-12">SI</th>
             <th className="py-2.5 text-center font-semibold w-4" />
@@ -108,7 +108,7 @@ function SubtotalRow({ label, parSum, count, brutSum, netSum, isTot = false }: {
 }) {
   return (
     <tr className={`border-b text-[13px] font-bold ${isTot ? 'bg-slate-200' : 'bg-slate-100'}`}>
-      <td className="py-2 text-slate-800">{label}</td>
+      <td className="py-2 text-slate-800 text-center pl-3">{label}</td>
       <td className="py-2 text-center">{parSum}</td>
       <td className="py-2 text-center text-slate-400 font-normal">{count}</td>
       <td /><td colSpan={3} />
