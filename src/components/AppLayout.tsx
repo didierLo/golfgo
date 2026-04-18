@@ -302,12 +302,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
+      {/* ── Image de fond fixe ── */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: 'url(/golf-bg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }}
+      />
+      {/* Overlay clair pour lisibilité */}
+      <div className="fixed inset-0 -z-10 bg-white/40 backdrop-blur-[2px]" />
 
       {/* ════════════════════════════════════════════════════════════════════
           TOPBAR
       ════════════════════════════════════════════════════════════════════ */}
-      <header className="h-[56px] bg-[#185FA5] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20">
+      <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20"
+        style={{ background: 'rgba(24, 95, 165, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
         <div className="max-w-[1280px] w-full mx-auto flex items-center">
 
           {/* Zone logo — largeur = sidebar pour alignement parfait */}
@@ -327,7 +340,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Séparateur vertical aligné bord droit sidebar */}
-          <div className="w-px h-full bg-white/20 flex-shrink-0 self-stretch" />
+          <div className="w-px h-full bg-white/30 flex-shrink-0 self-stretch" />
 
           {/* Zone contenu topbar */}
           <div className="flex items-center gap-4 flex-1 px-4">
@@ -440,7 +453,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 max-w-[1280px] w-full mx-auto">
 
         {/* ── Sidebar desktop (≥ 1024px) — labels complets ─────────────────── */}
-        <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 bg-white border-r border-slate-200/80">
+        <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 border-r border-white/50"
+          style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <SidebarSection label="PLAY" emoji="⛳">
             <NavItem href="/my-events" icon={Icons.myEvents} iconColor="#185FA5"  label="My Events"    active={isActive('/my-events')} />
             <NavItem href="/calendar"  icon={Icons.calendar} iconColor="#1D9E75"  label="My Calendar"  active={isActive('/calendar')} />
@@ -475,7 +489,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* ── Sidebar tablette (640–1023px) — icônes seules + tooltips ──────── */}
-        <aside className="hidden sm:flex lg:hidden w-[60px] flex-shrink-0 flex-col items-center py-5 gap-1 bg-white border-r border-slate-200/80">
+        <aside className="hidden sm:flex lg:hidden w-[60px] flex-shrink-0 flex-col items-center py-5 gap-1 border-r border-white/50"
+          style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           {/* Section Play */}
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
             <NavIconItem href="/my-events" icon={Icons.myEvents} iconColor="#185FA5"  label="My Events"    active={isActive('/my-events')} />
@@ -513,7 +528,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* ── Main content ──────────────────────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto pb-20 sm:pb-0 min-h-0 bg-slate-50">
+        <main className="flex-1 overflow-y-auto pb-20 sm:pb-0 min-h-0" style={{ background: 'transparent' }}>
           {children}
         </main>
       </div>
@@ -522,8 +537,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           BOTTOM NAV — mobile uniquement (< 640px)
       ════════════════════════════════════════════════════════════════════ */}
       <nav
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 flex items-stretch"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
+        style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {bottomNavItems.map(item => {
           const active = isActive(item.href)
