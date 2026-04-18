@@ -314,7 +314,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         }}
       />
       {/* Overlay clair pour lisibilité */}
-      <div className="fixed inset-0 -z-10 bg-white/40 backdrop-blur-[2px]" />
+      <div className="fixed inset-0 -z-10 bg-white/35" />
 
       {/* ════════════════════════════════════════════════════════════════════
           TOPBAR
