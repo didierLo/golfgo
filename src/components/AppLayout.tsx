@@ -309,12 +309,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         style={{
           backgroundImage: 'url(/golf-bg.jpg)',
           backgroundSize: 'cover',
-          backgroundPosition: '0% center',
+          backgroundPosition: '50% center',
           backgroundAttachment: 'fixed',
         }}
       />
       {/* Overlay clair pour lisibilité */}
-      <div className="fixed inset-0 -z-10 bg-white/35" />
+      <div className="fixed inset-0 -z-10 bg-white/0" />
 
       {/* ════════════════════════════════════════════════════════════════════
           TOPBAR
