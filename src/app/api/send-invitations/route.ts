@@ -197,7 +197,7 @@ export async function POST(req: Request) {
     }
 
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-    const eventLink = `${appUrl}/groups/${event.group_id}/events/${event.id}`
+    const eventLink = `${appUrl}/login`
     const eventDate = formatDate(event.starts_at)
     const eventTime = formatTime(event.starts_at)
 

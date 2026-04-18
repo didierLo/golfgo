@@ -27,8 +27,13 @@ export default function SignupPage() {
       email: email.trim(),
       password,
       options: {
-         emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-        data: { full_name: fullName.trim() },
+      // Avec vérification d'email:
+       // emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+       // data: { full_name: fullName.trim() },
+      // Sans vérification d'email
+      options: {
+      data: { full_name: fullName.trim() },
+
       },
     })
 
@@ -43,7 +48,7 @@ export default function SignupPage() {
     }
 
     if (data.user) {
-      router.push('/login?message=check-email')
+      router.push('/my-events')
     }
 
     setLoading(false)

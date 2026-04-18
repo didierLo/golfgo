@@ -32,7 +32,7 @@ function LoginContent() {
       setErrorMsg(error.message || 'Erreur de connexion')
       setLoading(false)
     } else {
-      router.push('/groups')
+      router.push('/my-events')
       router.refresh()
     }
   }
