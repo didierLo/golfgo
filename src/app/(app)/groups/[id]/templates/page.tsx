@@ -14,6 +14,7 @@ const textareaClass = `${inputClass} resize-none`
 type Template = {
   template_logo_url:           string | null
   template_header_color:       string
+  template_bg_image_url:       string | null
   template_invitation_subject: string | null
   template_invitation_body:    string | null
   template_teesheet_subject:   string | null
@@ -23,6 +24,7 @@ type Template = {
 const DEFAULTS: Template = {
   template_logo_url:           null,
   template_header_color:       '#185FA5',
+  template_bg_image_url:       null,
   template_invitation_subject: 'Invitation : {{event_title}}',
   template_invitation_body:    'Bonjour {{player_name}},\n\nTu es invité(e) à {{event_title}} le {{event_date}} à {{event_time}}.\n\nSeras-tu présent(e) ?',
   template_teesheet_subject:   'Tee Sheet — {{event_title}}',
@@ -62,7 +64,8 @@ export default function TemplatesPage() {
   const [saving, setSaving]                   = useState(false)
   const [uploading, setUploading]             = useState(false)
   const [activeTab, setActiveTab]             = useState<'invitation' | 'teesheet' | 'print'>('invitation')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef   = useRef<HTMLInputElement>(null)
+  const bgFileInputRef = useRef<HTMLInputElement>(null)
 
   const template    = useGroupTemplate ? groupTemplate : eventTemplate
   const setTemplate = useGroupTemplate
@@ -75,12 +78,13 @@ export default function TemplatesPage() {
   async function loadAll() {
     setLoading(true)
     const { data: group } = await supabase.from('groups')
-      .select('template_logo_url, template_header_color, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
+      .select('template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
       .eq('id', groupId).single()
     if (group) {
       setGroupTemplate({
         template_logo_url:           group.template_logo_url ?? null,
         template_header_color:       group.template_header_color ?? '#185FA5',
+        template_bg_image_url:       group.template_bg_image_url ?? null,
         template_invitation_subject: group.template_invitation_subject ?? DEFAULTS.template_invitation_subject,
         template_invitation_body:    group.template_invitation_body ?? DEFAULTS.template_invitation_body,
         template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
@@ -176,6 +180,22 @@ export default function TemplatesPage() {
     const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
     setTemplate(t => ({ ...t, template_logo_url: publicUrl }))
     toast.success('Logo uploadé')
+    setUploading(false)
+  }
+
+  async function handleBgUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const ext  = file.name.split('.').pop()
+    const path = `${groupId}/bg.${ext}`
+    const { error: uploadError } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
+    if (uploadError) { toast.error(uploadError.message); setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
+    setTemplate(t => ({ ...t, template_bg_image_url: publicUrl }))
+    // Sauvegarder immédiatement en base
+    await supabase.from('groups').update({ template_bg_image_url: publicUrl }).eq('id', groupId)
+    toast.success('Image de fond uploadée')
     setUploading(false)
   }
 
@@ -284,6 +304,34 @@ export default function TemplatesPage() {
               <span className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Aperçu</span>
             </div>
           </div>
+        </div>
+
+        {/* Image de fond mobile */}
+        <div className="mt-5 pt-5 border-t border-slate-100">
+          <label className="block text-[12px] font-semibold text-slate-600 mb-2">
+            Image de fond <span className="text-slate-400 font-normal">— cards mobile uniquement</span>
+          </label>
+          {template.template_bg_image_url ? (
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={template.template_bg_image_url} alt="Fond" className="h-16 w-32 object-cover rounded-xl border border-slate-200" />
+              <div className="flex flex-col gap-1">
+                <button onClick={() => bgFileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">Changer</button>
+                <button onClick={async () => {
+                  setTemplate(t => ({ ...t, template_bg_image_url: null }))
+                  await supabase.from('groups').update({ template_bg_image_url: null }).eq('id', groupId)
+                  toast.success('Image supprimée')
+                }} className="text-[11px] font-semibold text-red-500 hover:underline">Supprimer</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => bgFileInputRef.current?.click()} disabled={uploading}
+              className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
+              {uploading ? 'Upload…' : '+ Ajouter une image de fond'}
+            </button>
+          )}
+          <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
+          <p className="text-[10px] text-slate-400 mt-1.5">JPG, PNG — affiché en arrière-plan des cards événements sur mobile</p>
         </div>
       </div>
 
