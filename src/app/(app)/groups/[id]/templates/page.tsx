@@ -100,7 +100,7 @@ export default function TemplatesPage() {
 
   async function loadEventTemplate(eventId: string) {
     const { data } = await supabase.from('events')
-      .select('use_group_template, template_logo_url, template_header_color, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
+      .select('use_group_template, template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
       .eq('id', eventId).single()
     if (data) {
       setUseGroupTemplate(data.use_group_template ?? true)
