@@ -309,7 +309,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         style={{
           backgroundImage: 'url(/golf-bg.jpg)',
           backgroundSize: 'cover',
-          backgroundPosition: '25% center',
+          backgroundPosition: '0% center',
           backgroundAttachment: 'fixed',
         }}
       />
