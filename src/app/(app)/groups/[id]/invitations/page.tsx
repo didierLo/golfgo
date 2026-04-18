@@ -250,7 +250,7 @@ export default function InvitationsPage() {
         <select value={eventFilter} onChange={e => { setEventFilter(e.target.value); setSelectedToCancel([]) }}
           className="text-[12px] border border-slate-200 rounded-xl px-3 py-2 bg-white text-slate-700 focus:outline-none focus:border-[#185FA5]">
           <option value="ALL">Tous les events</option>
-          {Object.values(eventsMap).sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime())
+          {Object.values(eventsMap).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
             .map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
         </select>
 
