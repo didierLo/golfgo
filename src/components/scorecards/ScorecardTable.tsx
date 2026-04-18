@@ -59,7 +59,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
   function HoleRow({ h }: { h: Hole }) {
     const { brut, siMark, net, pts } = holeStats(h)
     return (
-      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+      <tr className="border-b border-white/30 hover:bg-white/30 transition-colors">
         <td className="py-2 font-black text-slate-800 text-[13px]">{h.hole_number}</td>
         <td className="py-2 text-center text-slate-600 text-[13px]">{h.par}</td>
         <td className="py-2 text-center text-slate-500 text-[12px]">{h.stroke_index}</td>
@@ -78,7 +78,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
       {readOnly && <p className="text-[11px] text-slate-400 mb-2 italic">Lecture seule</p>}
       <table className="border-collapse text-[13px] w-full">
         <thead>
-          <tr className="text-[11px] text-slate-500 border-b border-slate-200">
+          <tr className="text-[11px] text-slate-500 border-b border-white/40">
             <th className="py-2.5 text-left font-semibold text-slate-700 w-10">Hole</th>
             <th className="py-2.5 text-center font-semibold w-10">Par</th>
             <th className="py-2.5 text-center font-semibold w-12">SI</th>

@@ -209,7 +209,8 @@ export default function MyScorecardPage() {
 
       {/* Sélecteur flight */}
       {flightPlayers.length > 1 && (
-        <div className="mb-5">
+        <div className="mb-5 rounded-xl border border-white/60 shadow-sm p-4"
+          style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Mon flight</p>
           <div className="flex gap-2 flex-wrap">
             {flightPlayers.map(p => {
@@ -256,10 +257,14 @@ export default function MyScorecardPage() {
       )}
 
       {activePlayer ? (
-        <ScorecardTable holes={holes} player={activePlayer} scores={scores}
-          setScores={handleSetScores} eventFormat={eventFormat} readOnly={false} />
+        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          <ScorecardTable holes={holes} player={activePlayer} scores={scores}
+            setScores={handleSetScores} eventFormat={eventFormat} readOnly={false} />
+        </div>
       ) : (
-        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-white/40 rounded-xl"
+          style={{ background: "rgba(255,255,255,0.5)" }}>
           Aucun joueur dans ce flight
         </div>
       )}
