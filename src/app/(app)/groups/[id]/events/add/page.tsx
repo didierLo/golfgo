@@ -179,6 +179,23 @@ export default function AddEventPage() {
 
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+            Nombre de places <span className="text-slate-400 font-normal">— optionnel</span>
+          </label>
+          <input
+            value={maxParticipants}
+            onChange={e => setMaxParticipants(e.target.value)}
+            placeholder="Ex: 24"
+            type="number"
+            min="1"
+            className={inputClass}
+          />
+          <p className="text-[11px] text-slate-500 mt-1">
+            Les membres verront les places restantes
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
             Message d'invitation <span className="text-slate-400 font-normal">— optionnel</span>
           </label>
           <textarea value={emailMessage} onChange={e => setEmailMessage(e.target.value)}
