@@ -28,7 +28,7 @@ export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
           <div className="mb-6">
             <h1 className="text-[18px] font-medium text-gray-900">{title}</h1>
             {subtitle && (
-              <p className="text-[13px] text-gray-400 mt-1">{subtitle}</p>
+              <p className="text-[13px] text-gray-600 mt-1">{subtitle}</p>
             )}
           </div>
           {children}
@@ -36,7 +36,7 @@ export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
 
         {/* Footer links */}
         {footer && (
-          <div className="mt-4 text-center text-[13px] text-gray-400">
+          <div className="mt-4 text-center text-[13px] text-gray-500">
             {footer}
           </div>
         )}
@@ -63,7 +63,7 @@ export function AuthInput({
 }: AuthInputProps) {
   return (
     <div>
-      <label className="block text-[12px] font-medium text-gray-500 mb-1.5">
+      <label className="block text-[12px] font-medium text-gray-700 mb-1.5">
         {label}
       </label>
       <div className="relative">
@@ -74,7 +74,7 @@ export function AuthInput({
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
-          className="w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] placeholder-gray-300 focus:outline-none focus:border-blue-300 pr-10"
+          className="w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-300 pr-10"
         />
         {suffix && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">

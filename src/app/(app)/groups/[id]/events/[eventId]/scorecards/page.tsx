@@ -379,18 +379,19 @@ export default function ScorecardsPage() {
             </div>
           )}
 
-          {/* Scorecard */}
+         {/* Scorecard */}
           {activePlayer ? (
-             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-            <ScorecardTable
-              holes={holes}
-              player={activePlayer}
-              scores={scores}
-              setScores={isOwner ? setScores : () => {}}
-              eventFormat={eventFormat}
-              readOnly={!isOwner}
-            />
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+              style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+              <ScorecardTable
+                holes={holes}
+                player={activePlayer}
+                scores={scores}
+                setScores={isOwner ? setScores : () => {}}
+                eventFormat={eventFormat}
+                readOnly={!isOwner}
+              />
+            </div>
           ) : (
             <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
               Aucun joueur confirmé pour cet événement
