@@ -167,31 +167,29 @@ export default function AddEventPage() {
           </>
         )}
 
-        <div className="h-px bg-white/40" />
+       <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+              Frais par personne (€) <span className="text-slate-400 font-normal">— optionnel</span>
+            </label>
+            <input value={fee} onChange={e => setFee(e.target.value)} placeholder="Ex: 35" className={inputClass} />
+            {fee && <p className="text-[11px] text-slate-500 mt-1">Un onglet "Paiements" sera disponible</p>}
+          </div>
 
-        <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            Frais par personne (€) <span className="text-slate-400 font-normal">— optionnel</span>
-          </label>
-          <input value={fee} onChange={e => setFee(e.target.value)} placeholder="Ex: 35" className={inputClass} />
-          {fee && <p className="text-[11px] text-slate-500 mt-1">Un onglet "Paiements" sera disponible pour suivre qui a payé</p>}
-        </div>
-
-        <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            Nombre de places <span className="text-slate-400 font-normal">— optionnel</span>
-          </label>
-          <input
-            value={maxParticipants}
-            onChange={e => setMaxParticipants(e.target.value)}
-            placeholder="Ex: 24"
-            type="number"
-            min="1"
-            className={inputClass}
-          />
-          <p className="text-[11px] text-slate-500 mt-1">
-            Les membres verront les places restantes
-          </p>
+          <div>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+              Nb. de places <span className="text-slate-400 font-normal">— optionnel</span>
+            </label>
+            <input
+              value={maxParticipants}
+              onChange={e => setMaxParticipants(e.target.value)}
+              placeholder="Ex: 24"
+              type="number"
+              min="1"
+              className={inputClass}
+            />
+            {maxParticipants && <p className="text-[11px] text-slate-500 mt-1">Places restantes visibles</p>}
+          </div>
         </div>
 
         <div>
