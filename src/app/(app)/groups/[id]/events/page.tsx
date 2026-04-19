@@ -12,6 +12,7 @@ type EventRow = {
   location: string | null
   starts_at: string
   competition_formats: { name: string } | null
+  max_participants: number | null
 }
 
 type GroupBg = { bg: string | null }
@@ -77,7 +78,7 @@ function EventCard({ event, groupId, goingCount, onDelete, bgUrl }: {
               </span>
             )}
             <span className="text-[11px] font-bold text-[#4CAF1A]">
-              👥 {goingCount} going
+              👥 {goingCount}{event.max_participants ? `/${event.max_participants}` : ''} going
             </span>
           </div>
         </div>
@@ -108,7 +109,9 @@ function EventCard({ event, groupId, goingCount, onDelete, bgUrl }: {
               {event.location && <><span>·</span><span className="truncate">{event.location}</span></>}
               {event.competition_formats?.name && <><span>·</span><span>{event.competition_formats.name}</span></>}
               <span>·</span>
-              <span className="font-semibold text-[#3B6D11]">{goingCount} going</span>
+              <span className="font-semibold text-[#3B6D11]">
+                {goingCount}{event.max_participants ? `/${event.max_participants}` : ''} going
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -164,7 +167,7 @@ export default function EventsPage() {
     setBgUrl(grp?.template_bg_image_url ?? null)
 
     const { data, error } = await supabase
-      .from('events').select(`id, title, location, starts_at, competition_formats(name)`)
+      .select(`id, title, location, starts_at, max_participants, competition_formats(name)`)
       .eq('group_id', groupId).order('starts_at', { ascending: true })
     if (error) { console.error(error); setLoading(false); return }
     const evts = data ?? []

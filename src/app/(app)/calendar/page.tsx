@@ -45,24 +45,27 @@ export default function CalendarPage() {
 
     if (error) { console.error(error); return }
 
-    const formatted = (data ?? [])
-      .map(row => {
-       const time = new Date(row.starts_at).toLocaleTimeString('fr-BE', { 
-        hour: '2-digit', minute: '2-digit',
-        timeZone: 'UTC',
-        })
-        return {
-          id: row.event_id,
-          title: `${time} • ${row.title}`,
-          start: row.starts_at,
-          color: row.color,
-          extendedProps: row,
-        }
-      })
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+const formatted = (data ?? [])
+  .map(row => {
+    const time = new Date(row.starts_at).toLocaleTimeString('fr-BE', { 
+      hour: '2-digit', minute: '2-digit',
+      timeZone: 'UTC',
+    })
+    return {
+      id: row.event_id,
+      title: `${time} • ${row.title}`,
+      start: row.starts_at,
+      color: row.color,
+      extendedProps: {
+        ...row,
+        max_participants: row.max_participants ?? null,
+      },
+    }
+  })
+  .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
 
-    setEvents(formatted)
-    setLoading(false)
+setEvents(formatted)
+setLoading(false)
   }
 
   async function toggleParticipation(info: any) {

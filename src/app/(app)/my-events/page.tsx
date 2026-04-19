@@ -19,6 +19,7 @@ type MyEvent = {
     groups: {
       name: string
       color: string | null
+    max_participants: number | null
     }
   }
 }
@@ -98,11 +99,13 @@ export default function MyEventsPage() {
       .select(`
         event_id,
         status,
-        events(
+        location,
+       events(
           title,
           starts_at,
           location,
           group_id,
+          max_participants,
           groups!events_group_id_fkey(name, color)
         )
       `)
@@ -308,6 +311,12 @@ function EventCard({
               <span className="truncate">{e.events.location}</span>
             </>
           )}
+            {e.events.max_participants && (
+              <span className="text-[11px] text-slate-400 flex-shrink-0">
+                {e.events.max_participants} places
+              </span>
+            )}
+
         </div>
       </div>
 
