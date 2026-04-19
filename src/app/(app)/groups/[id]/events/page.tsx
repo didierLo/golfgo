@@ -166,7 +166,8 @@ export default function EventsPage() {
     const { data: grp } = await supabase.from('groups').select('template_bg_image_url').eq('id', groupId).single()
     setBgUrl(grp?.template_bg_image_url ?? null)
 
-    const { data, error } = await supabase
+   const { data, error } = await supabase
+      .from('events')
       .select(`id, title, location, starts_at, max_participants, competition_formats(name)`)
       .eq('group_id', groupId).order('starts_at', { ascending: true })
     if (error) { console.error(error); setLoading(false); return }
