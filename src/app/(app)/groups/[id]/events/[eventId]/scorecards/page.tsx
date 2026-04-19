@@ -240,13 +240,15 @@ export default function ScorecardsPage() {
     <div className="p-5 sm:p-6 max-w-2xl">
 
       {!isOwner && (
-        <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
+        <div className="mb-4 px-4 py-3 rounded-xl border border-blue-200/60 text-[12px] text-blue-700 font-medium"
+          style={{ background: "rgba(219,234,254,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
           Vue en lecture seule — seul l'organisateur peut modifier les scorecards
         </div>
       )}
 
       {/* Club & Parcours */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
+     <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6"
+       style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Club & Parcours</p>
 
         <div className="mb-4">
@@ -330,7 +332,8 @@ export default function ScorecardsPage() {
 
           {/* Bandeau joueur actif */}
           {activePlayer && (
-            <div className="bg-white border border-slate-200 rounded-xl p-4 mb-5">
+           <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5"
+              style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div className="flex items-center gap-3 flex-wrap mb-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-black text-slate-900 truncate">{activePlayer.first_name} {activePlayer.surname}</p>
@@ -378,6 +381,8 @@ export default function ScorecardsPage() {
 
           {/* Scorecard */}
           {activePlayer ? (
+             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             <ScorecardTable
               holes={holes}
               player={activePlayer}
