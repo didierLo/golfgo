@@ -28,6 +28,8 @@ export default function AddEventPage() {
   const [courseId, setCourseId]                       = useState('')
   const [competitionFormatId, setCompetitionFormatId] = useState('')
 
+  const [maxParticipants, setMaxParticipants] = useState('')
+
   useEffect(() => { loadRefs() }, [])
   useEffect(() => {
     if (selectedClubId) loadCourses(selectedClubId)
@@ -65,6 +67,7 @@ export default function AddEventPage() {
         competition_format_id: competitionFormatId || null,
         fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
         email_message:         emailMessage || null,
+        max_participants:      maxParticipants ? parseInt(maxParticipants) : null,
       })
       if (insertError) { setError(insertError.message); setSaving(false); return }
       window.location.href = `/groups/${groupId}/events`

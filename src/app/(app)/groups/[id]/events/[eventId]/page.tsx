@@ -16,6 +16,7 @@ type EventDetail = {
   description: string | null
   competition_formats: { name: string } | null
   courses: { course_name: string; clubs: { name: string } | null } | null
+  max_participants: number | null
 }
 type ParticipationStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST' | null
 
@@ -51,7 +52,7 @@ export default function EventOverviewPage() {
     setLoading(true)
     const { data: eventData } = await supabase
       .from('events')
-      .select(`id, title, location, starts_at, ends_at, description, competition_formats(name), courses(course_name, clubs(name))`)
+      .select(`id, title, location, starts_at, ends_at, description, max_participants, competition_formats(name), courses(course_name, clubs(name))`)
       .eq('id', eventId).single()
     if (eventData) setEvent(eventData as any)
 
@@ -103,6 +104,7 @@ export default function EventOverviewPage() {
   )
 
   const s = status ? STATUS_STYLE[status] : null
+  const isFull = !!event.max_participants && participantCount >= event.max_participants && status !== 'GOING'
 
   return (
     <div className="p-5 sm:p-6 max-w-xl">
@@ -166,7 +168,7 @@ export default function EventOverviewPage() {
         )}
 
         {/* Participants confirmés */}
-        <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+       <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
             <circle cx="6" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
             <path d="M1 13c0-2.76 2.24-5 5-5a5 5 0 015 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
@@ -174,10 +176,22 @@ export default function EventOverviewPage() {
           </svg>
           <span className="text-[13px] text-slate-700">
             <span className="font-black text-[#3B6D11]">{participantCount}</span>
-            {' '}participant{participantCount !== 1 ? 's' : ''} confirmé{participantCount !== 1 ? 's' : ''}
+            {event.max_participants
+              ? <>
+                  {' '}/ {event.max_participants} place{event.max_participants !== 1 ? 's' : ''}
+                  {' — '}
+                  {(() => {
+                    const remaining = event.max_participants - participantCount
+                    return remaining > 0
+                      ? <span className="text-[#3B6D11] font-semibold">{remaining} restante{remaining !== 1 ? 's' : ''}</span>
+                      : <span className="text-[#A32D2D] font-semibold">Complet</span>
+                  })()}
+                </>
+              : <> participant{participantCount !== 1 ? 's' : ''} confirmé{participantCount !== 1 ? 's' : ''}</>
+            }
           </span>
-        </div>
       </div>
+     </div>
 
       {/* Ma participation */}
       {status !== null && (
@@ -192,13 +206,17 @@ export default function EventOverviewPage() {
           )}
 
           <div className="flex gap-2">
-            <button onClick={() => updateStatus('GOING')} disabled={updating || status === 'GOING'}
+            <button
+              onClick={() => updateStatus('GOING')}
+              disabled={updating || status === 'GOING' || isFull}
               className={`flex-1 text-[13px] font-semibold py-2.5 rounded-xl border transition-colors disabled:opacity-50 ${
                 status === 'GOING'
                   ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
-                  : 'border-slate-200 text-slate-600 hover:bg-[#EAF3DE] hover:border-[#C0DD97] hover:text-[#3B6D11]'
+                  : isFull
+                    ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                    : 'border-slate-200 text-slate-600 hover:bg-[#EAF3DE] hover:border-[#C0DD97] hover:text-[#3B6D11]'
               }`}>
-              Je participe
+              {status === 'GOING' ? 'Je participe' : isFull ? 'Complet' : 'Je participe'}
             </button>
             <button onClick={() => updateStatus('DECLINED')} disabled={updating || status === 'DECLINED'}
               className={`flex-1 text-[13px] font-semibold py-2.5 rounded-xl border transition-colors disabled:opacity-50 ${
