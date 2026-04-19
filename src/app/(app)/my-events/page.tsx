@@ -16,10 +16,10 @@ type MyEvent = {
     starts_at: string
     location: string | null
     group_id: string
+    max_participants: number | null  // ← ici, pas dans groups
     groups: {
       name: string
       color: string | null
-    max_participants: number | null
     }
   }
 }
@@ -107,7 +107,7 @@ export default function MyEventsPage() {
           group_id,
           max_participants,
           groups!events_group_id_fkey(name, color)
-        )
+)
       `)
       .eq('player_id', player.id)
       .order('starts_at', { foreignTable: 'events', ascending: true })
