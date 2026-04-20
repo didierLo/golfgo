@@ -25,19 +25,19 @@ export default function AddMemberPage() {
   const params  = useParams()
   const groupId = params.id as string
 
-  const [search, setSearch]               = useState('')
-  const [results, setResults]             = useState<Player[]>([])
-  const [loading, setLoading]             = useState<string | null>(null) // playerId + role being added
-  const [added, setAdded]                 = useState<Record<string, Role>>({}) // playerId -> role
+  const [search, setSearch]                   = useState('')
+  const [results, setResults]                 = useState<Player[]>([])
+  const [loadingKey, setLoadingKey]           = useState<string | null>(null)
+  const [added, setAdded]                     = useState<Record<string, Role>>({})
   const [isListModalOpen, setIsListModalOpen] = useState(false)
-  const [showImport, setShowImport]       = useState(false)
-  const [showCreate, setShowCreate]       = useState(false)
+  const [showImport, setShowImport]           = useState(false)
+  const [showCreate, setShowCreate]           = useState(false)
   const [form, setForm] = useState({
     first_name: '', surname: '', federal_no: '', whs: '', email: '', phone: '',
     gender: 'M' as Gender, default_tee_color: 'yellow' as TeeColor,
   })
-  const [saving, setSaving]   = useState(false)
-  const [error, setError]     = useState('')
+  const [saving, setSaving]       = useState(false)
+  const [error, setError]         = useState('')
   const [guestMode, setGuestMode] = useState(false)
 
   useEffect(() => {
@@ -53,9 +53,9 @@ export default function AddMemberPage() {
 
   async function addExisting(playerId: string, role: Role) {
     const key = `${playerId}-${role}`
-    setLoading(key)
+    setLoadingKey(key)
 
-    // Si déjà dans le groupe avec un autre rôle, on met à jour ; sinon on insère
+    // Vérifier si déjà dans le groupe
     const { data: existing } = await supabase.from('groups_players')
       .select('id, role').eq('group_id', groupId).eq('player_id', playerId).maybeSingle()
 
@@ -63,24 +63,22 @@ export default function AddMemberPage() {
     if (existing) {
       if (existing.role === role) {
         alert(`Ce joueur est déjà dans ce groupe comme ${role === 'guest' ? 'visiteur' : 'membre'}`)
-        setLoading(null)
+        setLoadingKey(null)
         return
       }
-      // Mettre à jour le rôle existant
-      const { error } = await supabase.from('groups_players')
-        .update({ role }).eq('id', existing.id)
+      // Rôle différent → mettre à jour
+      const { error } = await supabase.from('groups_players').update({ role }).eq('id', existing.id)
       err = error
     } else {
-      const { error } = await supabase.from('groups_players')
-        .insert({ group_id: groupId, player_id: playerId, role })
+      const { error } = await supabase.from('groups_players').insert({ group_id: groupId, player_id: playerId, role })
       err = error
     }
 
-    if (err) { alert(err.message); setLoading(null); return }
+    if (err) { alert(err.message); setLoadingKey(null); return }
     setAdded(prev => ({ ...prev, [playerId]: role }))
     setSearch('')
     setResults([])
-    setLoading(null)
+    setLoadingKey(null)
   }
 
   function setGender(gender: Gender) {
@@ -93,7 +91,6 @@ export default function AddMemberPage() {
     if (!guestMode && !form.federal_no.trim()) { setError('Numéro fédéral obligatoire'); return }
     setSaving(true); setError(''); setSearch(''); setResults([])
 
-    // Vérifier si le joueur existe déjà par n° fédéral (seulement si pas guest)
     if (!guestMode && form.federal_no.trim()) {
       const federal = form.federal_no.trim().toUpperCase()
       const { data: existing } = await supabase.from('players').select('id').eq('federal_no', federal).maybeSingle()
@@ -177,7 +174,6 @@ export default function AddMemberPage() {
                 </div>
 
                 {addedRole ? (
-                  // Déjà ajouté — badge de confirmation
                   <span className="text-[11px] font-bold px-2.5 py-1 rounded-full"
                     style={addedRole === 'guest'
                       ? { background: '#FEF3C7', color: '#92400E' }
@@ -185,19 +181,18 @@ export default function AddMemberPage() {
                     ✓ {addedRole === 'guest' ? 'Visiteur' : 'Membre'}
                   </span>
                 ) : (
-                  // Deux boutons distincts
                   <div className="flex gap-1.5 flex-shrink-0">
                     <button
                       onClick={() => addExisting(p.id, 'member')}
-                      disabled={loading === `${p.id}-member`}
+                      disabled={loadingKey === `${p.id}-member`}
                       className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] disabled:opacity-50 transition-colors whitespace-nowrap">
-                      {loading === `${p.id}-member` ? '…' : 'Membre'}
+                      {loadingKey === `${p.id}-member` ? '…' : 'Membre'}
                     </button>
                     <button
                       onClick={() => addExisting(p.id, 'guest')}
-                      disabled={loading === `${p.id}-guest`}
+                      disabled={loadingKey === `${p.id}-guest`}
                       className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-amber-400 text-amber-700 bg-white hover:bg-amber-50 disabled:opacity-50 transition-colors whitespace-nowrap">
-                      {loading === `${p.id}-guest` ? '…' : 'Visiteur'}
+                      {loadingKey === `${p.id}-guest` ? '…' : 'Visiteur'}
                     </button>
                   </div>
                 )}
@@ -217,19 +212,11 @@ export default function AddMemberPage() {
       {/* Boutons créer */}
       {!showCreate && (
         <div className="flex flex-col gap-2">
-          <button onClick={() => {
-            setShowCreate(true); setGuestMode(false)
-            const parts = search.trim().split(' ')
-            if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') }))
-          }}
+          <button onClick={() => { setShowCreate(true); setGuestMode(false); const parts = search.trim().split(' '); if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') })) }}
             className="w-full text-[13px] font-semibold py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
             + Créer un nouveau joueur
           </button>
-          <button onClick={() => {
-            setShowCreate(true); setGuestMode(true)
-            const parts = search.trim().split(' ')
-            if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') }))
-          }}
+          <button onClick={() => { setShowCreate(true); setGuestMode(true); const parts = search.trim().split(' '); if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') })) }}
             className="w-full text-[13px] font-semibold py-3 rounded-xl border border-dashed border-amber-300 text-amber-600 hover:border-amber-500 hover:bg-amber-50/50 transition-colors">
             + Ajouter un visiteur <span className="text-[11px] font-normal text-amber-400">(sans compte, sans n° fédéral)</span>
           </button>
