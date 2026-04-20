@@ -10,6 +10,8 @@ type Member = {
   id: string; surname: string; first_name: string; whs: number | null; role: string
 }
 
+type SortKey = 'first_name' | 'surname'
+
 export default function MembersPage() {
   const router  = useRouter()
   const params  = useParams()
@@ -17,6 +19,7 @@ export default function MembersPage() {
 
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
+  const [sortKey, setSortKey] = useState<SortKey>('surname')
 
   useEffect(() => { if (!groupId) return; loadMembers() }, [groupId])
 
@@ -25,11 +28,14 @@ export default function MembersPage() {
       .from('groups_players')
       .select(`role, player:players(id, surname, first_name, whs)`)
       .eq('group_id', groupId)
-      .order('surname', { foreignTable: 'players', ascending: true })
     if (error) { console.error(error); return }
     setMembers((data || []).map((row: any) => ({ ...row.player, role: row.role })))
     setLoading(false)
   }
+
+  const sortedMembers = [...members].sort((a, b) =>
+    a[sortKey].localeCompare(b[sortKey], 'fr', { sensitivity: 'base' })
+  )
 
   async function removeMember(playerId: string) {
     if (!confirm('Retirer ce joueur du groupe ?')) return
@@ -71,15 +77,40 @@ export default function MembersPage() {
       ) : (
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+
+          {/* Header with sort controls */}
           <div className="grid grid-cols-[1fr_60px_80px_100px] gap-3 px-4 py-3 bg-white/30 border-b border-white/40">
-            <span className="text-[12px] font-semibold text-slate-500">Membre</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-semibold text-slate-500">Membre</span>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setSortKey('first_name')}
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${
+                    sortKey === 'first_name'
+                      ? 'bg-[#185FA5] text-white'
+                      : 'bg-white/60 text-slate-500 hover:bg-white/80'
+                  }`}>
+                  Prénom
+                </button>
+                <button
+                  onClick={() => setSortKey('surname')}
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${
+                    sortKey === 'surname'
+                      ? 'bg-[#185FA5] text-white'
+                      : 'bg-white/60 text-slate-500 hover:bg-white/80'
+                  }`}>
+                  Nom
+                </button>
+              </div>
+            </div>
             <span className="text-[12px] font-semibold text-slate-500 text-center">WHS</span>
             <span className="text-[12px] font-semibold text-slate-500">Statut</span>
             <span className="text-[12px] font-semibold text-slate-500 text-right">Actions</span>
           </div>
-          {members.map((member, i) => (
+
+          {sortedMembers.map((member, i) => (
             <div key={member.id}
-              className={`grid grid-cols-[1fr_60px_80px_100px] gap-3 px-4 py-3 items-center hover:bg-white/30 transition-colors ${i < members.length - 1 ? 'border-b border-white/30' : ''}`}>
+              className={`grid grid-cols-[1fr_60px_80px_100px] gap-3 px-4 py-3 items-center hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
 
               <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push(`/players/${member.id}`)}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
@@ -89,7 +120,12 @@ export default function MembersPage() {
                   }}>
                   {member.first_name[0]}{member.surname[0]}
                 </div>
-                <span className="text-[13px] font-semibold text-slate-900">{member.first_name} {member.surname}</span>
+                <span className="text-[13px] font-semibold text-slate-900">
+                  {sortKey === 'first_name'
+                    ? <>{member.first_name} <span className="font-medium text-slate-600">{member.surname}</span></>
+                    : <><span className="font-medium text-slate-600">{member.first_name}</span> {member.surname}</>
+                  }
+                </span>
               </div>
 
               <div className="text-[13px] font-medium text-slate-600 text-center">{member.whs ?? '—'}</div>
