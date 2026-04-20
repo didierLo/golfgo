@@ -24,7 +24,7 @@ export default function FlightsPage() {
   const [flightSize, setFlightSize]         = useState(4)
   const [balanceWHS, setBalanceWHS]         = useState(true)
   const [iterations, setIterations]         = useState(800)
-  const [historyWindow, setHistoryWindow]   = useState(120)
+  const [historyWindow, setHistoryWindow]   = useState(180)
   const [pastFlights, setPastFlights]       = useState<any[]>([])
   const [forbiddenPairs, setForbiddenPairs] = useState<Set<string>>(new Set())
   const [preferredPairs, setPreferredPairs] = useState<Set<string>>(new Set())
@@ -184,7 +184,7 @@ export default function FlightsPage() {
               const avgWHS = whsValues.length > 0
                 ? (whsValues.reduce((s: number, p: any) => s + (p.whs ?? 0), 0) / whsValues.length).toFixed(1)
                 : null
-                
+
               return (
                 <div key={flight.flight_no} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
