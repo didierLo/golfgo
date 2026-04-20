@@ -14,6 +14,8 @@ type Invitation = {
 type Event  = { id: string; title: string; starts_at: string }
 type Member = { id: string; first_name: string; surname: string; email: string | null }
 
+type SortKey = 'first_name' | 'surname'
+
 const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> = {
   INVITED:  { label: 'invited',  bg: '#EBF3FC', text: '#0C447C' },
   GOING:    { label: 'going',    bg: '#EAF3DE', text: '#3B6D11' },
@@ -26,6 +28,10 @@ function Badge({ status }: { status: string }) {
 }
 function formatDate(d: string) { return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short', year: 'numeric' }) }
 function formatDateLong(d: string) { return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) }
+
+function sortByKey<T extends { first_name: string; surname: string }>(arr: T[], key: SortKey): T[] {
+  return [...arr].sort((a, b) => a[key].localeCompare(b[key], 'fr', { sensitivity: 'base' }))
+}
 
 export default function InvitationsPage() {
   const params   = useParams()
@@ -41,11 +47,12 @@ export default function InvitationsPage() {
   const [isOwner, setIsOwner]                   = useState(false)
   const [selectedEvent, setSelectedEvent]       = useState('')
   const [selectedPlayers, setSelectedPlayers]   = useState<string[]>([])
-  const [sendEmail, setSendEmail]               = useState(true)
+  const [sendEmail, setSendEmail]               = useState(false)   // OFF par défaut
   const [showForm, setShowForm]                 = useState(true)
   const [eventFilter, setEventFilter]           = useState<string>('ALL')
   const [selectedToCancel, setSelectedToCancel] = useState<string[]>([])
   const [cancelling, setCancelling]             = useState(false)
+  const [sortKey, setSortKey]                   = useState<SortKey>('surname')
 
   useEffect(() => { if (groupId) loadData() }, [groupId, pathname])
   useEffect(() => {
@@ -99,7 +106,6 @@ export default function InvitationsPage() {
       }
       if (toInvite.length === 0) { toast.error('Tous les joueurs sélectionnés sont déjà invités'); setSending(false); return }
 
-      // Toujours insérer les participants — email optionnel
       const rows = toInvite.map(playerId => ({
         event_id: selectedEvent,
         player_id: playerId,
@@ -156,6 +162,11 @@ export default function InvitationsPage() {
   const declinedCount = filtered.filter(i => i.status === 'DECLINED').length
   const displayedEvent = eventFilter !== 'ALL' ? eventsMap[eventFilter] : null
 
+  const sortedMembers = sortByKey(members, sortKey)
+  const sortedFiltered = [...filtered].sort((a, b) =>
+    (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', 'fr', { sensitivity: 'base' })
+  )
+
   if (loading) return (
     <div className="p-6 space-y-3">
       {[1,2,3].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
@@ -200,18 +211,35 @@ export default function InvitationsPage() {
 
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[12px] font-semibold text-slate-600">Joueurs ({selectedPlayers.length} sélectionnés)</label>
+              <div className="flex items-center gap-2">
+                <label className="text-[12px] font-semibold text-slate-600">Joueurs ({selectedPlayers.length} sélectionnés)</label>
+                <div className="flex gap-1">
+                  <button type="button" onClick={() => setSortKey('first_name')}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                    Prénom
+                  </button>
+                  <button type="button" onClick={() => setSortKey('surname')}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                    Nom
+                  </button>
+                </div>
+              </div>
               <button type="button" onClick={() => setSelectedPlayers(members.map(m => m.id))}
                 className="text-[11px] font-semibold text-[#185FA5] hover:underline">Tout sélectionner</button>
             </div>
             <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
-              {members.map((m, i) => (
-                <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/30 transition-colors ${i < members.length - 1 ? 'border-b border-white/30' : ''}`}>
+              {sortedMembers.map((m, i) => (
+                <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
                   <input type="checkbox" checked={selectedPlayers.includes(m.id)} onChange={() => togglePlayer(m.id)} className="rounded accent-[#185FA5]" />
                   <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C]">
                     {m.first_name[0]}{m.surname[0]}
                   </div>
-                  <span className="text-[13px] font-medium text-slate-800 flex-1">{m.first_name} {m.surname}</span>
+                  <span className="text-[13px] font-medium text-slate-800 flex-1">
+                    {sortKey === 'first_name'
+                      ? <>{m.first_name} <span className="font-normal text-slate-500">{m.surname}</span></>
+                      : <><span className="font-normal text-slate-500">{m.first_name}</span> {m.surname}</>
+                    }
+                  </span>
                   {m.email
                     ? <span className="text-[11px] text-slate-400 truncate max-w-[140px]">{m.email}</span>
                     : <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>}
@@ -285,26 +313,38 @@ export default function InvitationsPage() {
         </div>
       )}
 
-      {/* Liste */}
-      {filtered.length === 0 ? (
+      {/* Liste invitations */}
+      {sortedFiltered.length === 0 ? (
         <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
           Aucune invitation pour cet événement
         </div>
       ) : (
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-          {filteredInvited.length > 0 && isOwner && (
-            <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
+          {/* Header liste avec tri */}
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
+            {filteredInvited.length > 0 && isOwner && (
               <input type="checkbox" checked={allCancelSelected} onChange={toggleCancelAll} className="rounded accent-[#185FA5]" />
-              <span className="text-[11px] font-semibold text-slate-500">
-                {selectedToCancel.length > 0 ? `${selectedToCancel.length} sélectionnée(s)` : 'Sélectionner les invited'}
-              </span>
+            )}
+            <span className="text-[11px] font-semibold text-slate-500 flex-1">
+              {selectedToCancel.length > 0 ? `${selectedToCancel.length} sélectionnée(s)` : 'Participant'}
+            </span>
+            <div className="flex gap-1">
+              <button onClick={() => setSortKey('first_name')}
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                Prénom
+              </button>
+              <button onClick={() => setSortKey('surname')}
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                Nom
+              </button>
             </div>
-          )}
-          {filtered.map((inv, i) => {
+          </div>
+
+          {sortedFiltered.map((inv, i) => {
             const evt = eventsMap[inv.event_id]
             const isInvited = inv.status === 'INVITED'
             return (
-              <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''} ${i < filtered.length - 1 ? 'border-b border-white/30' : ''}`}>
+              <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''} ${i < sortedFiltered.length - 1 ? 'border-b border-white/30' : ''}`}>
                 {isInvited && isOwner
                   ? <input type="checkbox" checked={selectedToCancel.includes(inv.id)} onChange={() => toggleCancel(inv.id)} className="rounded accent-[#185FA5] flex-shrink-0" />
                   : <div className="w-4 flex-shrink-0" />}
@@ -312,7 +352,12 @@ export default function InvitationsPage() {
                   {inv.players?.first_name[0]}{inv.players?.surname[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-slate-900">{inv.players?.first_name} {inv.players?.surname}</div>
+                  <div className="text-[13px] font-semibold text-slate-900">
+                    {sortKey === 'first_name'
+                      ? <>{inv.players?.first_name} <span className="font-normal text-slate-500">{inv.players?.surname}</span></>
+                      : <><span className="font-normal text-slate-500">{inv.players?.first_name}</span> {inv.players?.surname}</>
+                    }
+                  </div>
                   {evt && eventFilter === 'ALL' && <div className="text-[11px] text-slate-500">{evt.title} · {formatDate(evt.starts_at)}</div>}
                   {inv.invited_at && <div className="text-[11px] text-slate-400">invité le {formatDate(inv.invited_at)}</div>}
                 </div>
