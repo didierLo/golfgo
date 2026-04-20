@@ -209,6 +209,7 @@ export default function EventOverviewPage() {
             <button
               onClick={() => updateStatus('GOING')}
               disabled={updating || status === 'GOING' || isFull}
+              title={isFull && status !== 'GOING' ? "L'événement est complet" : undefined}
               className={`flex-1 text-[13px] font-semibold py-2.5 rounded-xl border transition-colors disabled:opacity-50 ${
                 status === 'GOING'
                   ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
