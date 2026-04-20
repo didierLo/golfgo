@@ -11,12 +11,13 @@ const supabase = createClient()
 type MyEvent = {
   event_id: string
   status: 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
+  goingCount?: number
   events: {
     title: string
     starts_at: string
     location: string | null
     group_id: string
-    max_participants: number | null  // ← ici, pas dans groups
+    max_participants: number | null
     groups: {
       name: string
       color: string | null
@@ -111,8 +112,26 @@ export default function MyEventsPage() {
       .eq('player_id', player.id)
       .order('starts_at', { foreignTable: 'events', ascending: true })
 
-    if (error) { console.error(error); setLoading(false); return }
-    setEvents((data || []) as any)
+   if (error) { console.error(error); setLoading(false); return }
+
+    const eventIds = (data || []).map((e: any) => e.event_id)
+    const { data: counts } = await supabase
+      .from('event_participants')
+      .select('event_id, status')
+      .in('event_id', eventIds)
+      .eq('status', 'GOING')
+
+    const goingByEvent: Record<string, number> = {}
+    for (const row of counts || []) {
+      goingByEvent[row.event_id] = (goingByEvent[row.event_id] ?? 0) + 1
+    }
+
+    const enriched = (data || []).map((e: any) => ({
+      ...e,
+      goingCount: goingByEvent[e.event_id] ?? 0,
+    }))
+
+    setEvents(enriched as any)
     setLoading(false)
   }
 
@@ -293,31 +312,36 @@ function EventCard({
         </span>
       </div>
 
-      {/* Infos */}
-      <div className="flex-1 min-w-0">
-        <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">
-          {e.events.title}
-        </div>
-        <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
-          <span
-            className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
-            style={{ background: groupColor }}
-          />
-          <span className="truncate">{e.events.groups?.name}</span>
-          {e.events.location && (
-            <>
-              <span className="flex-shrink-0">·</span>
-              <span className="truncate">{e.events.location}</span>
-            </>
-          )}
-            {e.events.max_participants && (
-              <span className="text-[11px] text-slate-400 flex-shrink-0">
-                {e.events.max_participants} places
-              </span>
-            )}
-
-        </div>
-      </div>
+     {/* Infos */}
+<div className="flex-1 min-w-0">
+  <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">
+    {e.events.title}
+  </div>
+  <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
+    <span
+      className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+      style={{ background: groupColor }}
+    />
+    <span className="truncate">{e.events.groups?.name}</span>
+    {e.events.location && (
+      <>
+        <span className="flex-shrink-0">·</span>
+        <span className="truncate">{e.events.location}</span>
+      </>
+    )}
+  </div>
+ {e.events.max_participants && (
+  <span className={`text-[11px] flex-shrink-0 font-medium ${
+    (e.events.max_participants - (e.goingCount ?? 0)) <= 0
+      ? 'text-red-400'
+      : (e.events.max_participants - (e.goingCount ?? 0)) <= 3
+      ? 'text-amber-500'
+      : 'text-slate-400'
+  }`}>
+    {Math.max(0, e.events.max_participants - (e.goingCount ?? 0))} places dispo
+  </span>
+)}
+</div>
 
       {/* Badge statut */}
       <Badge status={e.status} />
