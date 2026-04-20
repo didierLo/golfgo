@@ -99,7 +99,6 @@ export default function MyEventsPage() {
       .select(`
         event_id,
         status,
-        location,
        events(
           title,
           starts_at,
