@@ -27,8 +27,7 @@ export default function AddEventPage() {
   const [selectedClubId, setSelectedClubId]           = useState('')
   const [courseId, setCourseId]                       = useState('')
   const [competitionFormatId, setCompetitionFormatId] = useState('')
-
-  const [maxParticipants, setMaxParticipants] = useState('')
+  const [maxParticipants, setMaxParticipants]         = useState('')
 
   useEffect(() => { loadRefs() }, [])
   useEffect(() => {
@@ -54,6 +53,7 @@ export default function AddEventPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (saving) return
     setError(''); setSaving(true)
     try {
       const { error: insertError } = await supabase.from('events').insert({
@@ -167,7 +167,7 @@ export default function AddEventPage() {
           </>
         )}
 
-       <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
               Frais par personne (€) <span className="text-slate-400 font-normal">— optionnel</span>

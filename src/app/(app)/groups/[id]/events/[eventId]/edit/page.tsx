@@ -22,6 +22,7 @@ export default function EditEventPage() {
   const [isGolf, setIsGolf]                             = useState(true)
   const [fee, setFee]                                   = useState('')
   const [emailMessage, setEmailMessage]                 = useState('')
+  const [maxParticipants, setMaxParticipants]           = useState('')
 
   const [clubs, setClubs]     = useState<{ id: string; name: string }[]>([])
   const [courses, setCourses] = useState<{ id: string; course_name: string }[]>([])
@@ -41,7 +42,7 @@ export default function EditEventPage() {
     setLoading(true)
     const { data: event, error: evErr } = await supabase
       .from('events')
-      .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person')
+      .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants')
       .eq('id', eventId).single()
     if (evErr || !event) { alert('Event not found'); window.location.href = `/groups/${groupId}/events`; return }
 
@@ -53,6 +54,8 @@ export default function EditEventPage() {
     setCompetitionFormatId(event.competition_format_id || '')
     setIsGolf(event.is_golf ?? true)
     setFee(event.fee_per_person ? String(event.fee_per_person) : '')
+    setEmailMessage(event.email_message || '')
+    setMaxParticipants(event.max_participants ? String(event.max_participants) : '')
 
     const { data: clubsData } = await supabase.from('clubs').select('id, name').order('name')
     setClubs(clubsData || [])
@@ -81,18 +84,21 @@ export default function EditEventPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (saving) return
     setError('')
     setSaving(true)
     const { error: updateError } = await supabase.from('events').update({
-      title: title.trim(),
-      location: location.trim() || null,
-      starts_at: start,
-      ends_at: end || null,
-      course_id: courseId || null,
+      title:                 title.trim(),
+      location:              location.trim() || null,
+      starts_at:             start,
+      ends_at:               end || null,
+      course_id:             courseId || null,
       competition_format_id: competitionFormatId || null,
-      is_golf: isGolf,
-      fee_per_person: fee ? parseFloat(fee.replace(',', '.')) : null,
-      updated_at: new Date().toISOString(),
+      is_golf:               isGolf,
+      fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
+      email_message:         emailMessage || null,
+      max_participants:      maxParticipants ? parseInt(maxParticipants) : null,
+      updated_at:            new Date().toISOString(),
     }).eq('id', eventId)
     if (updateError) { setError(updateError.message); setSaving(false); return }
     window.location.href = `/groups/${groupId}/events`
@@ -185,12 +191,29 @@ export default function EditEventPage() {
 
         <div className="h-px bg-slate-100" />
 
-        <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            Frais par personne (€) <span className="text-slate-400 font-normal">— optionnel</span>
-          </label>
-          <input value={fee} onChange={e => setFee(e.target.value)} placeholder="Ex: 35" className={inputClass} />
-          {fee && <p className="text-[11px] text-slate-500 mt-1">Un onglet "Paiements" sera disponible pour suivre qui a payé</p>}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+              Frais par personne (€) <span className="text-slate-400 font-normal">— optionnel</span>
+            </label>
+            <input value={fee} onChange={e => setFee(e.target.value)} placeholder="Ex: 35" className={inputClass} />
+            {fee && <p className="text-[11px] text-slate-500 mt-1">Un onglet "Paiements" sera disponible</p>}
+          </div>
+
+          <div>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+              Nb. de places <span className="text-slate-400 font-normal">— optionnel</span>
+            </label>
+            <input
+              value={maxParticipants}
+              onChange={e => setMaxParticipants(e.target.value)}
+              placeholder="Ex: 24"
+              type="number"
+              min="1"
+              className={inputClass}
+            />
+            {maxParticipants && <p className="text-[11px] text-slate-500 mt-1">Places restantes visibles</p>}
+          </div>
         </div>
 
         <div>
