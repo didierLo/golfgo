@@ -174,12 +174,17 @@ export default function FlightsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {flights.map((flight: any) => {
+           {[...flights].sort((a: any, b: any) => {
+              const aLen = (Array.isArray(a.players) ? a.players : Array.isArray(a) ? a : []).length
+              const bLen = (Array.isArray(b.players) ? b.players : Array.isArray(b) ? b : []).length
+              return aLen - bLen
+            }).map((flight: any) => {
               const flightPlayers = Array.isArray(flight.players) ? flight.players : Array.isArray(flight) ? flight : []
               const whsValues = flightPlayers.filter((p: any) => p.whs !== null)
               const avgWHS = whsValues.length > 0
                 ? (whsValues.reduce((s: number, p: any) => s + (p.whs ?? 0), 0) / whsValues.length).toFixed(1)
                 : null
+                
               return (
                 <div key={flight.flight_no} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">

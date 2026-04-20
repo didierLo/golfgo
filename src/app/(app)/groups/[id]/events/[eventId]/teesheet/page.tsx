@@ -50,6 +50,7 @@ export default function TeeSheetPage() {
       flight_number: f.flight_number,
       players: (f.flight_players || []).map((fp: any) => fp.players).filter(Boolean),
     }))
+        built.sort((a, b) => a.players.length - b.players.length)
     setFlights(built)
     setLoading(false)
   }
