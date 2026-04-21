@@ -204,6 +204,7 @@ setFlights(flights)
   return {
     players,
     flights,
+    setFlights,
     event,
     loading,
     loadData,
