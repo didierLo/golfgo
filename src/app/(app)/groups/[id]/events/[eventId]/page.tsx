@@ -104,7 +104,7 @@ export default function EventOverviewPage() {
   )
 
   const s = status ? STATUS_STYLE[status] : null
-  const isFull = !!event.max_participants && participantCount >= event.max_participants && status !== 'GOING'
+  const isFull = !!event.max_participants && participantCount >= event.max_participants && status !== ('GOING' as ParticipationStatus)
 
   return (
     <div className="p-5 sm:p-6 max-w-xl">
