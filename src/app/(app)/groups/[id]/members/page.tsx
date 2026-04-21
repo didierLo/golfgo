@@ -20,6 +20,7 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [sortKey, setSortKey] = useState<SortKey>('surname')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => { if (!groupId) return; loadMembers() }, [groupId])
 
@@ -45,6 +46,99 @@ export default function MembersPage() {
     loadMembers()
   }
 
+  function formatMemberLine(member: Member) {
+    const name = sortKey === 'first_name'
+      ? `${member.first_name} ${member.surname}`
+      : `${member.surname} ${member.first_name}`
+    const whs  = member.whs != null ? `WHS: ${member.whs}` : 'WHS: —'
+    const role = member.role === 'guest' ? 'Visiteur' : member.role === 'owner' ? 'Admin' : 'Membre'
+    return `${name.padEnd(30)} ${whs.padEnd(12)} ${role}`
+  }
+
+  async function copyList() {
+    const header = `LISTE DES MEMBRES (${members.length})\n${'─'.repeat(55)}\n`
+    const lines  = sortedMembers.map(formatMemberLine).join('\n')
+    const text   = header + lines
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for browsers without clipboard API
+      const el = document.createElement('textarea')
+      el.value = text
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  function printList() {
+    const rows = sortedMembers.map(member => {
+      const name = sortKey === 'first_name'
+        ? `${member.first_name} <strong>${member.surname}</strong>`
+        : `<strong>${member.first_name}</strong> ${member.surname}`
+      const whs  = member.whs != null ? member.whs : '—'
+      const role = member.role === 'guest'
+        ? '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;">Visiteur</span>'
+        : member.role === 'owner'
+        ? '<span style="background:#EBF3FC;color:#185FA5;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;">Admin</span>'
+        : ''
+      return `<tr>
+        <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;font-size:13px;">${name}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;font-size:13px;text-align:center;color:#475569;">${whs}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;">${role}</td>
+      </tr>`
+    }).join('')
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Liste des membres</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+          body { font-family: 'Inter', sans-serif; color: #0F172A; margin: 0; padding: 32px; }
+          h1   { font-size: 22px; font-weight: 900; margin: 0 0 4px; }
+          p    { font-size: 13px; color: #64748B; margin: 0 0 24px; }
+          table { width: 100%; border-collapse: collapse; }
+          thead tr { background: #F8FAFC; }
+          thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700;
+                     text-transform: uppercase; letter-spacing: 0.05em; color: #64748B;
+                     border-bottom: 2px solid #E2E8F0; }
+          thead th:nth-child(2) { text-align: center; }
+          @media print { body { padding: 16px; } }
+        </style>
+      </head>
+      <body>
+        <h1>Liste des membres</h1>
+        <p>${members.length} membre${members.length !== 1 ? 's' : ''}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Membre</th>
+              <th>WHS</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </body>
+      </html>
+    `
+
+    const win = window.open('', '_blank', 'width=800,height=600')
+    if (!win) return
+    win.document.write(html)
+    win.document.close()
+    win.focus()
+    win.print()
+  }
+
   if (loading) return (
     <div className="p-6 space-y-2">
       {[1,2,3,4].map(i => <div key={i} className="h-11 bg-white/40 rounded-xl animate-pulse" />)}
@@ -58,11 +152,53 @@ export default function MembersPage() {
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Members</h1>
           <p className="text-[13px] text-slate-600 mt-0.5">{members.length} membre{members.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
           <a href={`/groups/${groupId}/constraints`}
             className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
             Constraints
           </a>
+
+          {/* Copy button */}
+          <button
+            onClick={copyList}
+            disabled={members.length === 0}
+            className={`flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-xl border transition-colors
+              ${copied
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                : 'border-white/50 text-slate-600 hover:bg-white/30'
+              }
+              disabled:opacity-40 disabled:cursor-not-allowed`}>
+            {copied ? (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Copié !
+              </>
+            ) : (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copier
+              </>
+            )}
+          </button>
+
+          {/* Print button */}
+          <button
+            onClick={printList}
+            disabled={members.length === 0}
+            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Imprimer
+          </button>
+
           <button onClick={() => router.push(`/groups/${groupId}/members/add`)}
             className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-semibold px-4 py-2 rounded-xl hover:bg-[#0C447C] transition-colors">
             + Add member
