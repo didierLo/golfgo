@@ -64,19 +64,16 @@ function buildEmailHtml({
 
           <!-- Header -->
           <tr>
-            <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;">
-              <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;">Golf</span>
-              <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;">Go</span>
+            <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;vertical-align:middle;">
+              <img src="${process.env.NEXT_PUBLIC_APP_URL}/logo/GG_Logo_avec_nom.png" alt="GolfGo" height="32" style="display:inline-block;vertical-align:middle;margin-right:8px;" />
+              <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
+              <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
             </td>
           </tr>
 
           <!-- Body -->
           <tr>
             <td style="background:#ffffff;padding:32px;">
-
-              <p style="margin:0 0 8px;font-size:14px;color:#6B7280;">
-                Bonjour ${playerName},
-              </p>
 
               <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#111827;line-height:1.3;">
                 Tu es invité(e) à<br/>${eventTitle}

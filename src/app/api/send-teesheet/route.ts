@@ -78,9 +78,10 @@ function buildTeesheetEmail({
             <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td>
-                    <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;">Golf</span>
-                    <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;">Go</span>
+                  <td style="vertical-align:middle;">
+                    <img src="${process.env.NEXT_PUBLIC_APP_URL}/logo/GG_Logo_avec_nom.png" alt="GolfGo" height="32" style="display:inline-block;vertical-align:middle;margin-right:8px;" />
+                    <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
+                    <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
                   </td>
                   <td style="text-align:right;">
                     <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;">Tee Sheet</span>
@@ -94,7 +95,6 @@ function buildTeesheetEmail({
           <tr>
             <td style="background:#ffffff;padding:32px;">
 
-              <p style="margin:0 0 4px;font-size:14px;color:#6B7280;">Bonjour ${playerName},</p>
               <h1 style="margin:0 0 20px;font-size:20px;font-weight:600;color:#111827;line-height:1.3;">
                 ${eventTitle}
               </h1>
