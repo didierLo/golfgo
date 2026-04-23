@@ -35,9 +35,9 @@ const DEFAULTS: Template = {
   template_header_color:       '#185FA5',
   template_bg_image_url:       null,
   template_invitation_subject: 'Invitation : {{event_title}}',
-  template_invitation_body:    'Bonjour {{player_name}},\n\nTu es invité(e) à {{event_title}} le {{event_date}} à {{event_time}}.\n\nSeras-tu présent(e) ?',
+  template_invitation_body:    'Bonjour {{player_first_name}},\n\nTu es invité(e) à {{event_title}} le {{event_date}} à {{event_time}}.\n\nSeras-tu présent(e) ?',
   template_teesheet_subject:   'Tee Sheet — {{event_title}}',
-  template_teesheet_body:      "Bonjour {{player_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
+  template_teesheet_body:      "Bonjour {{player_first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
 }
 
 const TEMPLATE_VARS = [
@@ -54,7 +54,7 @@ const TEMPLATE_VARS = [
 const COMM_TEMPLATES = [
   { id: 'reminder', label: '⏰ Rappel',
     subject: 'Rappel — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nNous voulions te rappeler qu'un événement est prévu prochainement.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours !` },
+    body: `Bonjour {{first_name}},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
   { id: 'info', label: '📢 Information',
     subject: 'Information — {{group_name}}',
     body: `Bonjour {{first_name}},\n\nNous souhaitons te communiquer une information importante concernant notre groupe.\n\n` },
