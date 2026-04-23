@@ -42,7 +42,7 @@ const DEFAULTS: Template = {
 
 const TEMPLATE_VARS = [
   { label: 'Nom complet',    value: '{{player_name}}' },
-  { label: 'Prénom',         value: '{{player_first_name}}' },
+  { label: 'Prénom',         value: '{{first_name}}' },
   { label: 'Nom',            value: '{{player_surname}}' },
   { label: 'Titre event',    value: '{{event_title}}' },
   { label: 'Date event',     value: '{{event_date}}' },
