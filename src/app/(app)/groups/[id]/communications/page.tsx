@@ -54,16 +54,16 @@ const TEMPLATE_VARS = [
 const COMM_TEMPLATES = [
   { id: 'reminder', label: '⏰ Rappel',
     subject: 'Rappel — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
+    body: `Bonjour {{player_first_name},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
   { id: 'info', label: '📢 Information',
     subject: 'Information — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nNous souhaitons te communiquer une information importante concernant notre groupe.\n\n` },
+    body: `Bonjour {{player_first_name}},\n\nVoici une information importante concernant notre groupe.\n\nDidier L.` },
   { id: 'weather', label: '🌧️ Météo',
     subject: 'Information météo — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nSuite aux prévisions météo, nous te tenons informé(e) de la situation.\n\nNous reviendrons vers toi dès que possible.\n\nMerci de ta compréhension.` },
+    body: `Bonjour {{player_first_name}},\n\nSuite aux prévisions météo, notre rencontre est annulée.\n\nNous reviendrons vers toi dès que possible.\n\nMerci de ta compréhension.` },
   { id: 'cancel', label: '❌ Annulation',
     subject: 'Annulation — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.` },
+    body: `Bonjour {{player_first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.` },
   { id: 'free', label: '✏️ Libre', subject: '', body: '' },
 ]
 
