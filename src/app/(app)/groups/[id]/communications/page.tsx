@@ -35,9 +35,9 @@ const DEFAULTS: Template = {
   template_header_color:       '#185FA5',
   template_bg_image_url:       null,
   template_invitation_subject: 'Invitation : {{event_title}}',
-  template_invitation_body:    'Bonjour {{player_first_name}},\n\nTu es invité(e) à {{event_title}} le {{event_date}} à {{event_time}}.\n\nSeras-tu présent(e) ?',
+  template_invitation_body:    'Bonjour {{first_name}},\n\nTu es invité(e) à {{event_title}} le {{event_date}} à {{event_time}}.\n\nSeras-tu présent(e) ?',
   template_teesheet_subject:   'Tee Sheet — {{event_title}}',
-  template_teesheet_body:      "Bonjour {{player_first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
+  template_teesheet_body:      "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
 }
 
 const TEMPLATE_VARS = [
@@ -54,16 +54,16 @@ const TEMPLATE_VARS = [
 const COMM_TEMPLATES = [
   { id: 'reminder', label: '⏰ Rappel',
     subject: 'Rappel — {{group_name}}',
-    body: `Bonjour {{player_first_name},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
+    body: `Bonjour {{first_name},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
   { id: 'info', label: '📢 Information',
     subject: 'Information — {{group_name}}',
-    body: `Bonjour {{player_first_name}},\n\nVoici une information importante concernant notre groupe.\n\nDidier L.` },
+    body: `Bonjour {{first_name}},\n\nVoici une information importante concernant notre groupe.\n\nDidier L.` },
   { id: 'weather', label: '🌧️ Météo',
     subject: 'Information météo — {{group_name}}',
-    body: `Bonjour {{player_first_name}},\n\nSuite aux prévisions météo, notre rencontre est annulée.\n\nNous reviendrons vers toi dès que possible.\n\nMerci de ta compréhension.` },
+    body: `Bonjour {{first_name}},\n\nSuite aux prévisions météo, notre rencontre est annulée.\n\nNous reviendrons vers toi dès que possible.\n\nMerci de ta compréhension.` },
   { id: 'cancel', label: '❌ Annulation',
     subject: 'Annulation — {{group_name}}',
-    body: `Bonjour {{player_first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.` },
+    body: `Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.` },
   { id: 'free', label: '✏️ Libre', subject: '', body: '' },
 ]
 
