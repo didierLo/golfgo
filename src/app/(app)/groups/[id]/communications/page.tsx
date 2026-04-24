@@ -283,7 +283,8 @@ export default function CommunicationsPage() {
     try {
       const res = await fetch('/api/send-communication', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ groupId, playerIds: [...selectedIds], subject: commSubject, body: commBody }),
+            body: JSON.stringify({ groupId, playerIds: [...selectedIds], subject: commSubject, body: commBody, eventId: filterEventId || null }),
+      })
       const json = await res.json()
       if (json.success) toast.success(`${json.sent} email${json.sent > 1 ? 's' : ''} envoyé${json.sent > 1 ? 's' : ''}${json.skipped ? ` · ${json.skipped} ignoré(s)` : ''}`)
       else toast.error(json.error ?? 'Erreur envoi')
