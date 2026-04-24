@@ -106,13 +106,26 @@ export async function POST(req: Request) {
 
     // Charger les tokens si un eventId est fourni
     const tokenMap: Record<string, string> = {}
-    if (eventId) {
+   if (eventId) {
       const { data: participants } = await supabase
         .from('event_participants')
         .select('player_id, invite_token')
         .eq('event_id', eventId)
         .in('player_id', playerIds)
-      participants?.forEach(p => { if (p.invite_token) tokenMap[p.player_id] = p.invite_token })
+
+      // Générer les tokens manquants
+      for (const p of participants || []) {
+        if (p.invite_token) {
+          tokenMap[p.player_id] = p.invite_token
+        } else {
+          const newToken = crypto.randomUUID()
+          await supabase.from('event_participants')
+            .update({ invite_token: newToken })
+            .eq('event_id', eventId)
+            .eq('player_id', p.player_id)
+          tokenMap[p.player_id] = newToken
+        }
+      }
     }
 
     // Charger les joueurs destinataires
