@@ -30,9 +30,7 @@ const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
-//function formatTime(d: string) {
- // return new Date(d).toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })
-//}
+
 
 export default function EventOverviewPage() {
   const params  = useParams()
