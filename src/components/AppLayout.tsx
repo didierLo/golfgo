@@ -289,22 +289,29 @@ const bottomNavItems = [
         </div>
         {[
           { href: groupsHref,         icon: Icons.groups,         label: 'Groups',         color: '#7F77DD', active: isGroupsActive },
-          { href: eventsHref,         icon: Icons.events,         label: 'Events',         color: '#185FA5', active: !isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`) },
+          { href: eventsHref,         icon: Icons.events,         label: 'Events',  sublabel: activeGroup?.name ?? null,   color: '#185FA5',  active: !isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`) },
           { href: clubsHref,          icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
           { href: communicationsHref, icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
           { href: '/settings',        icon: Icons.settings,       label: 'Settings',       color: '#888780', active: isActive('/settings') },
-        ].map(item => (
-          <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
-            className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
-            <span style={{ color: item.active ? '#185FA5' : item.color, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {item.icon}
-            </span>
+          ].map(item => (
+        <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
+          className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
+          <span style={{ color: item.active ? '#185FA5' : item.color, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {item.icon}
+          </span>
+          <div className="flex flex-col">
             <span style={{ fontSize: 15, fontWeight: item.active ? 700 : 600, color: item.active ? '#185FA5' : '#1e293b' }}>
               {item.label}
             </span>
-            {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
-          </Link>
-        ))}
+            {item.sublabel && (
+              <span style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
+                {item.sublabel}
+              </span>
+            )}
+    </div>
+    {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
+  </Link>
+))}
         <div style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 8 }} />
       </div>
 
