@@ -22,7 +22,11 @@ function buildCommunicationHtml({
   body: string
   groupName: string
 }) {
-  const bodyHtml = body.replace(/\n/g, '<br/>')
+    // Remplacer les \n par <br/> uniquement hors balises HTML
+  const bodyHtml = body
+    .split(/(<[^>]+>[\s\S]*?<\/[^>]+>|<[^>]+\/>)/g)
+    .map((part, i) => i % 2 === 0 ? part.replace(/\n/g, '<br/>') : part)
+    .join('')
 
   return `
 <!DOCTYPE html>
