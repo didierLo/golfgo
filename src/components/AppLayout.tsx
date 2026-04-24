@@ -70,7 +70,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [currentUser,       setCurrentUser]       = useState<CurrentUser | null>(null)
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
   const [loading,           setLoading]           = useState(true)
+  const [drawerOpen, setDrawerOpen]               = useState(false) 
   const switcherRef = useRef<HTMLDivElement>(null)
+ 
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -271,48 +273,77 @@ const bottomNavItems = [
         </main>
       </div>
 
-      {/* BOTTOM NAV mobile */}
- <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40"
-  style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-  <div className="flex overflow-x-auto scrollbar-none items-stretch"
-    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-  {bottomNavItems.map((item, index) => {
-  const active = item.href === groupsHref && isGroupsActive
-    ? true
-    : item.href === eventsHref && !!gid && isActive(`/groups/${gid}/events`)
-    ? true
-    : item.href === communicationsHref && !!gid && isActive(`/groups/${gid}/communications`)
-    ? true
-    : item.href === clubsHref && isAnyOwner && isActive('/admin/clubs')
-    ? true
-    : isActive(item.href)
-  
-  // Séparateur avant Groups (index 3)
-  const showSeparator = index === 3
-
-  return (
-    <div key={item.label} className="flex items-stretch flex-shrink-0">
-      {showSeparator && (
-        <div className="flex items-center px-1">
-          <div className="w-px h-8 bg-slate-300 rounded-full" />
-        </div>
+ {/* Overlay drawer */}
+      {drawerOpen && (
+        <div className="sm:hidden fixed inset-0 z-30" onClick={() => setDrawerOpen(false)} />
       )}
-      <Link href={item.href}
-        className="flex flex-col items-center justify-center gap-1 py-2.5 transition-colors relative flex-shrink-0"
-        style={{ minWidth: 72 }}>
-        {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#185FA5] rounded-b-full" />}
-        <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? '#185FA5' : item.iconColor, transform: active ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.15s, color 0.15s' }}>
-          {item.icon}
-        </span>
-        <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, color: active ? '#185FA5' : '#475569', lineHeight: 1, transition: 'color 0.15s', whiteSpace: 'nowrap' }}>
-          {item.label}
-        </span>
-      </Link>
-    </div>
-  )
-})}
-  </div>
-</nav>
+
+      {/* Drawer ORGANISER */}
+      <div className={`sm:hidden fixed bottom-[57px] left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
+        style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderRadius: '20px 20px 0 0', borderTop: '0.5px solid rgba(0,0,0,0.1)', boxShadow: '0 -8px 32px rgba(0,0,0,0.12)' }}>
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-slate-300" />
+        </div>
+        <div className="px-5 py-2 border-b border-slate-100">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Organiser 🏆</p>
+        </div>
+        {[
+          { href: groupsHref,         icon: Icons.groups,         label: 'Groups',         color: '#7F77DD', active: isGroupsActive },
+          { href: eventsHref,         icon: Icons.events,         label: 'Events',         color: '#185FA5', active: !isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`) },
+          { href: clubsHref,          icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
+          { href: communicationsHref, icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
+          { href: '/settings',        icon: Icons.settings,       label: 'Settings',       color: '#888780', active: isActive('/settings') },
+        ].map(item => (
+          <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
+            className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
+            <span style={{ color: item.active ? '#185FA5' : item.color, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {item.icon}
+            </span>
+            <span style={{ fontSize: 15, fontWeight: item.active ? 700 : 600, color: item.active ? '#185FA5' : '#1e293b' }}>
+              {item.label}
+            </span>
+            {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
+          </Link>
+        ))}
+        <div style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 8 }} />
+      </div>
+
+      {/* BOTTOM NAV mobile */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
+        style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {[
+          { href: '/my-events', icon: Icons.myEvents,  label: 'My Events', color: '#185FA5' },
+          { href: '/calendar',  icon: Icons.calendar,  label: 'Calendar',  color: '#1D9E75' },
+          { href: '/scorecard', icon: Icons.scorecard, label: 'Scorecard', color: '#D85A30' },
+        ].map(item => {
+          const active = isActive(item.href)
+          return (
+            <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
+              className="flex flex-col items-center justify-center gap-1 flex-1 py-2.5 transition-colors relative">
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#185FA5] rounded-b-full" />}
+              <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? '#185FA5' : item.color, transform: active ? 'scale(1.1)' : 'scale(1)', transition: 'transform .15s, color .15s' }}>
+                {item.icon}
+              </span>
+              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, color: active ? '#185FA5' : '#334155', lineHeight: 1 }}>
+                {item.label}
+              </span>
+            </Link>
+          )
+        })}
+        <div className="w-px bg-slate-200 self-stretch my-2" />
+        <button onClick={() => setDrawerOpen(v => !v)}
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2.5 transition-colors relative">
+          {drawerOpen && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#185FA5] rounded-b-full" />}
+          <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: drawerOpen ? '#185FA5' : '#334155', transition: 'color .15s' }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <circle cx="4" cy="10" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="16" cy="10" r="2"/>
+            </svg>
+          </span>
+          <span style={{ fontSize: 10, fontWeight: drawerOpen ? 700 : 500, color: drawerOpen ? '#185FA5' : '#334155', lineHeight: 1 }}>
+            Organiser
+          </span>
+        </button>
+      </nav>
     </div>
   )
 }
