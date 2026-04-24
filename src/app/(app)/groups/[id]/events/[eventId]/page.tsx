@@ -30,6 +30,9 @@ const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
+function formatTime(d: string) {
+  return new Date(d).toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Brussels' })
+}
 
 
 export default function EventOverviewPage() {
@@ -124,7 +127,9 @@ export default function EventOverviewPage() {
           </svg>
           <div>
             <div className="text-[13px] font-semibold text-slate-900">{formatDate(event.starts_at)}</div>
-            
+            <div className="text-[12px] text-slate-500">
+              {formatTime(event.starts_at)}{event.ends_at && ` → ${formatTime(event.ends_at)}`}
+            </div>
           </div>
         </div>
 
