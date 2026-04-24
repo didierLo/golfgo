@@ -56,6 +56,12 @@ function formatDate(dateStr: string) {
   })
 }
 
+function formatTime(dateStr: string) {
+  return new Date(dateStr).toLocaleTimeString('fr-BE', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'UTC'
+  })
+}
+
 function getDayMonth(dateStr: string) {
   const d = new Date(dateStr)
   return {
@@ -317,12 +323,14 @@ function EventCard({
   <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">
     {e.events.title}
   </div>
-  <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
+ <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
     <span
       className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
       style={{ background: groupColor }}
     />
     <span className="truncate">{e.events.groups?.name}</span>
+    <span className="flex-shrink-0">·</span>
+    <span className="flex-shrink-0 font-medium">{formatTime(e.events.starts_at)}</span>
     {e.events.location && (
       <>
         <span className="flex-shrink-0">·</span>
