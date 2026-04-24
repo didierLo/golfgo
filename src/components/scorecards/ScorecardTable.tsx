@@ -63,7 +63,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
         <td className="py-2 text-center font-black text-slate-800 text-[13px] pl-3">{h.hole_number}</td>
         <td className="py-2 text-center text-slate-600 text-[13px]">{h.par}</td>
         <td className="py-2 text-center text-slate-500 text-[12px]">{h.stroke_index}</td>
-        <td className="py-1 text-center text-[10px] text-slate-900 w-4">{siMark}</td>
+       <td className="py-1 text-center text-[13px] font-black text-black w-4">{siMark}</td>
         <td className="py-1" colSpan={3}>
           <ScorecardCell value={brut} onDecrement={() => updateScore(h.hole_number, -1)} onIncrement={() => updateScore(h.hole_number, +1)} readOnly={readOnly} />
         </td>
