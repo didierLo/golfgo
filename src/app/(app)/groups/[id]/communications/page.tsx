@@ -49,6 +49,8 @@ const TEMPLATE_VARS = [
   { label: 'Heure event',    value: '{{event_time}}' },
   { label: 'N° flight',      value: '{{flight_number}}' },
   { label: 'Heure départ',   value: '{{start_time}}' },
+  { label: '✓ Bouton oui',   value: '{{yes_button}}' },
+  { label: '✗ Bouton non',   value: '{{no_button}}' },
 ]
 
 const COMM_TEMPLATES = [
@@ -605,7 +607,9 @@ export default function CommunicationsPage() {
                       className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>
                   ))}
                 </div>
-                <p className="text-[11px] text-slate-500 mt-2">Ce texte apparaît dans le bloc bleu de l'email, avant les boutons de réponse</p>
+                 <p className="text-[11px] text-slate-500 mt-2">
+                  Utilise <code className="bg-slate-100 px-1 rounded">{'{{yes_button}}'}</code> pour insérer les boutons "Je participe / Je ne peux pas" à l'endroit de ton choix dans le message.
+                </p>
               </div>
             </div>
           )}
