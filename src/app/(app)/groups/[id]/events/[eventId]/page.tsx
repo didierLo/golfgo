@@ -124,9 +124,7 @@ export default function EventOverviewPage() {
           </svg>
           <div>
             <div className="text-[13px] font-semibold text-slate-900">{formatDate(event.starts_at)}</div>
-            <div className="text-[12px] text-slate-500">
-              {formatTime(event.starts_at)}{event.ends_at && ` → ${formatTime(event.ends_at)}`}
-            </div>
+            
           </div>
         </div>
 
