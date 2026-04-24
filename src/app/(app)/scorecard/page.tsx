@@ -241,7 +241,7 @@ export default function MyScorecardPage() {
         <div className="rounded-xl border border-white/60 shadow-sm p-3.5 mb-5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div className="flex items-center justify-between">
             <p className="text-[14px] font-black text-slate-900">
-              {activePlayer.id === playerId ? 'Ma scorecard' : `${activePlayer.first_name} ${activePlayer.surname}`}
+              {activePlayer.id === playerId ? 'My scorecard' : `${activePlayer.first_name} ${activePlayer.surname}`}
             </p>
             {activePlayer.tee && (
               <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">

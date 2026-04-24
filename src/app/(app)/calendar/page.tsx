@@ -119,8 +119,8 @@ function formatDate(dateStr: string) {
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[18px] font-medium text-gray-900">Calendar</h1>
-          <p className="text-[13px] text-gray-400 mt-0.5">
+         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Calendar</h1>
+          <p className="text-[13px] text-slate-600 mt-0.5">
             {filteredEvents.length} événement{filteredEvents.length !== 1 ? 's' : ''}
           </p>
         </div>
