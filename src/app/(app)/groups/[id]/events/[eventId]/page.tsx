@@ -31,9 +31,8 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
 function formatTime(d: string) {
-  return new Date(d).toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Brussels' })
+  return new Date(d).toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
 }
-
 
 export default function EventOverviewPage() {
   const params  = useParams()
