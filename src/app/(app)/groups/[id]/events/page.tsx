@@ -150,23 +150,23 @@ export default function EventsPage() {
         </a>
       </div>
 
-      {upcoming.length > 0 && (
-        <div className="mb-8">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
-          <div className="flex flex-col gap-2">
-            {upcoming.map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} bgUrl={bgUrl} />)}
+            {upcoming.length > 0 && (
+          <div className="mb-8">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
+            <div className="flex flex-col gap-2">
+              {upcoming.map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {past.length > 0 && (
-        <div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Passés</p>
-          <div className="flex flex-col gap-2 opacity-60">
-            {past.slice().reverse().map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} bgUrl={bgUrl} />)}
+         {past.length > 0 && (
+          <div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Passés</p>
+            <div className="flex flex-col gap-2 opacity-60">
+              {past.slice().reverse().map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {events.length === 0 && (
         <div className="text-center py-16 text-slate-500">
