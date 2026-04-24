@@ -85,7 +85,7 @@ function buildCommunicationHtml({
 
 export async function POST(req: Request) {
   try {
-    const { groupId, playerIds, subject, body } = await req.json()
+    const { groupId, playerIds, subject, body, eventId } = await req.json()
 
     if (!groupId || !playerIds?.length || !subject || !body) {
       return Response.json({ success: false, error: 'groupId, playerIds, subject et body requis' }, { status: 400 })
@@ -95,8 +95,24 @@ export async function POST(req: Request) {
 
     // Charger le groupe
     const { data: group } = await supabase
-      .from('groups').select('name').eq('id', groupId).single()
+      .from('groups').select('name, owner_id').eq('id', groupId).single()
     if (!group) return Response.json({ success: false, error: 'Groupe introuvable' }, { status: 404 })
+
+    // Charger le nom de l'owner
+    const { data: ownerData } = await supabase
+      .from('players').select('first_name, surname').eq('user_id', group.owner_id).single()
+    const ownerName = ownerData ? `${ownerData.first_name} ${ownerData.surname}` : ''
+
+    // Charger les tokens si un eventId est fourni
+    const tokenMap: Record<string, string> = {}
+    if (eventId) {
+      const { data: participants } = await supabase
+        .from('event_participants')
+        .select('player_id, invite_token')
+        .eq('event_id', eventId)
+        .in('player_id', playerIds)
+      participants?.forEach(p => { if (p.invite_token) tokenMap[p.player_id] = p.invite_token })
+    }
 
     // Charger les joueurs destinataires
     const { data: players, error: pErr } = await supabase
@@ -115,11 +131,28 @@ export async function POST(req: Request) {
 
       const playerName = `${player.first_name} ${player.surname}`
 
-      const vars: Record<string, string> = {
+     const vars: Record<string, string> = {
         first_name:  player.first_name,
         surname:     player.surname,
         player_name: playerName,
         group_name:  group.name,
+        owner_name:  ownerName,
+      }
+
+      // Boutons oui/non si token disponible
+      const token = tokenMap[player.id]
+      if (token) {
+        const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+        const yesLink = `${appUrl}/invite/yes?token=${token}`
+        const noLink  = `${appUrl}/invite/no?token=${token}`
+        vars.yes_button = `<table cellpadding="0" cellspacing="0" style="margin:16px 0;"><tr>
+          <td style="padding-right:12px;">
+            <a href="${yesLink}" style="display:inline-block;background:#16A34A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;">✓ Je participe</a>
+          </td>
+          <td>
+            <a href="${noLink}" style="display:inline-block;background:#ffffff;color:#DC2626;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;border:1.5px solid #DC2626;">✗ Je ne peux pas</a>
+          </td>
+        </tr></table>`
       }
 
       const resolvedSubject = applyVars(subject, vars)

@@ -41,7 +41,6 @@ const DEFAULTS: Template = {
 }
 
 const TEMPLATE_VARS = [
-  { label: 'Nom complet',    value: '{{player_name}}' },
   { label: 'Prénom',         value: '{{first_name}}' },
   { label: 'Nom',            value: '{{player_surname}}' },
   { label: 'Titre event',    value: '{{event_title}}' },
@@ -49,23 +48,23 @@ const TEMPLATE_VARS = [
   { label: 'Heure event',    value: '{{event_time}}' },
   { label: 'N° flight',      value: '{{flight_number}}' },
   { label: 'Heure départ',   value: '{{start_time}}' },
-  { label: '✓ Bouton oui',   value: '{{yes_button}}' },
-  { label: '✗ Bouton non',   value: '{{no_button}}' },
+  { label: '✓ Boutons oui/non', value: '{{yes_button}}' },
+  { label: '✍️ Signature',   value: '{{owner_name}}' },
 ]
 
 const COMM_TEMPLATES = [
   { id: 'reminder', label: '⏰ Rappel',
     subject: 'Rappel — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
+    body: `Bonjour {{first_name}},\n\nIl reste des places pour la semaine prochaine.\n\nSi tu veux jouer, clique sur le bouton ci-dessous\n\nÀ bientôt sur le parcours !\n\n{{owner_name}}\n\n{{yes_button}}` },
   { id: 'info', label: '📢 Information',
     subject: 'Information — {{group_name}}',
     body: `Bonjour {{first_name}},\n\nVoici une information importante concernant notre groupe.\n\nDidier L.` },
   { id: 'weather', label: '🌧️ Météo',
     subject: 'Information météo — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nSuite aux prévisions météo, notre rencontre est annulée.\n\nNous reviendrons vers toi dès que possible.\n\nMerci de ta compréhension.` },
+    body: `Bonjour {{first_name}},\n\nSuite aux prévisions météo, notre rencontre est annulée.\n\nNous reviendrons vers toi dès que possible.\n\nMerci de ta compréhension.\n\nDidier L.` },
   { id: 'cancel', label: '❌ Annulation',
     subject: 'Annulation — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.` },
+    body: `Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.\n\nDidier L.` },
   { id: 'free', label: '✏️ Libre', subject: '', body: '' },
 ]
 
@@ -74,6 +73,7 @@ const COMM_VARS = [
   { key: '{{surname}}',     label: 'Nom' },
   { key: '{{player_name}}', label: 'Prénom + Nom' },
   { key: '{{group_name}}',  label: 'Groupe' },
+  { key: '{{yes_button}}',  label: '✓/✗ Boutons réponse' },
 ]
 
 function formatDate(d: string) {
@@ -284,7 +284,6 @@ export default function CommunicationsPage() {
       const res = await fetch('/api/send-communication', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ groupId, playerIds: [...selectedIds], subject: commSubject, body: commBody }),
-      })
       const json = await res.json()
       if (json.success) toast.success(`${json.sent} email${json.sent > 1 ? 's' : ''} envoyé${json.sent > 1 ? 's' : ''}${json.skipped ? ` · ${json.skipped} ignoré(s)` : ''}`)
       else toast.error(json.error ?? 'Erreur envoi')
