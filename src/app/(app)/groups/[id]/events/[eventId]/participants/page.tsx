@@ -257,7 +257,7 @@ export default function ParticipantsPage() {
                   : 'grid-cols-[1fr_60px_110px_90px] sm:grid-cols-[1fr_80px_130px_100px]'}`}>
                 <SortBtn field="name"   label="Joueur" />
                 <SortBtn field="whs"    label="WHS" />
-                <span className="text-[12px] font-semibold text-slate-800">Répondu le</span>
+                <span className="text-[12px] font-semibold text-slate-400">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
                 {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
                 {isOwner && <span />}
@@ -279,7 +279,7 @@ export default function ParticipantsPage() {
                         {p.players.first_name} {p.players.surname}
                       </div>
                       <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
-                      <div className="text-[11px] text-slate-400">{formatResponded(p.responded_at)}</div>
+                      <div className="text-[11px] text-slate-600">{formatResponded(p.responded_at)}</div>
                       <div><Badge status={p.status} /></div>
                       {isOwner && (
                       <div className="flex justify-end gap-1 flex-wrap">
