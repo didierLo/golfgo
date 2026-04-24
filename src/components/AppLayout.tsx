@@ -122,13 +122,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const groupsHref         = isAnyOwner ? '/groups' : '/not-owner'
   const clubsHref          = isAnyOwner ? '/admin/clubs' : '/not-owner'
 
-  const bottomNavItems = [
-    { href: '/my-events', icon: Icons.myEvents,  label: 'Events'   },
-    { href: '/calendar',  icon: Icons.calendar,  label: 'Calendar' },
-    { href: eventsHref,   icon: Icons.events,    label: 'Agenda'   },
-    { href: '/scorecard', icon: Icons.scorecard, label: 'Scores'   },
-    { href: groupsHref,   icon: Icons.groups,    label: 'Groups'   },
-  ]
+
+const bottomNavItems = [
+  { href: '/my-events',          icon: Icons.myEvents,        label: 'My Events',       iconColor: '#185FA5' },
+  { href: '/calendar',           icon: Icons.calendar,        label: 'My Calendar',     iconColor: '#1D9E75' },
+  { href: '/scorecard',          icon: Icons.scorecard,       label: 'My Scorecard',    iconColor: '#D85A30' },
+  { href: groupsHref,            icon: Icons.groups,          label: 'Groups',          iconColor: '#7F77DD' },
+  { href: eventsHref,            icon: Icons.events,          label: 'Events',          iconColor: '#185FA5' },
+  { href: clubsHref,             icon: Icons.clubs,           label: 'Clubs',           iconColor: '#EF9F27' },
+  { href: communicationsHref,    icon: Icons.communications,  label: 'Communications',  iconColor: '#D4537E' },
+  { href: '/settings',           icon: Icons.settings,        label: 'Settings',        iconColor: '#888780' },
+]
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
@@ -138,7 +142,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* TOPBAR */}
       <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20"
         style={{ background: 'rgba(24, 95, 165, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-        <div className="max-w-[1280px] w-full mx-auto flex items-center">
+       <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           <div className="flex items-center flex-shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
             <Link href="/groups" className="flex items-center gap-2.5 select-none px-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -268,23 +272,47 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* BOTTOM NAV mobile */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
-        style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {bottomNavItems.map(item => {
-          const active = isActive(item.href)
-          return (
-            <Link key={item.label} href={item.href} className="flex flex-col items-center justify-center gap-1 flex-1 py-2.5 transition-colors relative">
-              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#185FA5] rounded-b-full" />}
-              <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? '#185FA5' : '#94A3B8', transform: active ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.15s, color 0.15s' }}>
-                {item.icon}
-              </span>
-              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, color: active ? '#185FA5' : '#94A3B8', lineHeight: 1, transition: 'color 0.15s' }}>
-                {item.label}
-              </span>
-            </Link>
-          )
-        })}
-      </nav>
+ <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40"
+  style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+  <div className="flex overflow-x-auto scrollbar-none items-stretch"
+    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+  {bottomNavItems.map((item, index) => {
+  const active = item.href === groupsHref && isGroupsActive
+    ? true
+    : item.href === eventsHref && !!gid && isActive(`/groups/${gid}/events`)
+    ? true
+    : item.href === communicationsHref && !!gid && isActive(`/groups/${gid}/communications`)
+    ? true
+    : item.href === clubsHref && isAnyOwner && isActive('/admin/clubs')
+    ? true
+    : isActive(item.href)
+  
+  // Séparateur avant Groups (index 3)
+  const showSeparator = index === 3
+
+  return (
+    <div key={item.label} className="flex items-stretch flex-shrink-0">
+      {showSeparator && (
+        <div className="flex items-center px-1">
+          <div className="w-px h-8 bg-slate-300 rounded-full" />
+        </div>
+      )}
+      <Link href={item.href}
+        className="flex flex-col items-center justify-center gap-1 py-2.5 transition-colors relative flex-shrink-0"
+        style={{ minWidth: 72 }}>
+        {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#185FA5] rounded-b-full" />}
+        <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? '#185FA5' : item.iconColor, transform: active ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.15s, color 0.15s' }}>
+          {item.icon}
+        </span>
+        <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, color: active ? '#185FA5' : '#475569', lineHeight: 1, transition: 'color 0.15s', whiteSpace: 'nowrap' }}>
+          {item.label}
+        </span>
+      </Link>
+    </div>
+  )
+})}
+  </div>
+</nav>
     </div>
   )
 }
