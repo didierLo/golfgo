@@ -10,6 +10,7 @@ const supabase = createClient()
 type Participant = {
   player_id: string
   status: 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
+  responded_at: string | null
   players: { first_name: string; surname: string; whs: number | null }
 }
 type Event    = { id: string; title: string; starts_at: string }
@@ -48,6 +49,13 @@ function formatDateLong(d: string) {
 function formatDateShort(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short' })
 }
+function formatResponded(d: string | null) {
+  if (!d) return '—'
+  return new Date(d).toLocaleString('fr-BE', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+    timeZone: 'Europe/Brussels',
+  })
+}
 
 export default function ParticipantsPage() {
   const params  = useParams()
@@ -82,7 +90,7 @@ export default function ParticipantsPage() {
   async function loadParticipants(evId: string) {
     setLoading(true)
     const { data, error } = await supabase
-      .from('event_participants').select(`player_id, status, players(first_name, surname, whs)`).eq('event_id', evId)
+       .from('event_participants').select(`player_id, status, responded_at, players(first_name, surname, whs)`).eq('event_id', evId)
     if (error) { console.error(error); setLoading(false); return }
     setParticipants((data || []) as any)
     setLoading(false)
@@ -127,6 +135,7 @@ export default function ParticipantsPage() {
     loadParticipants(selectedEventId)
   }
 
+  
   function changeSort(field: SortField) {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortField(field); setSortDir('asc') }
@@ -242,12 +251,13 @@ export default function ParticipantsPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-              <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
+            <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[1fr_60px_90px_auto_32px] sm:grid-cols-[1fr_80px_100px_160px_32px]'
-                  : 'grid-cols-[1fr_60px_90px] sm:grid-cols-[1fr_80px_100px]'}`}>
+                  ? 'grid-cols-[1fr_60px_110px_90px_auto_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
+                  : 'grid-cols-[1fr_60px_110px_90px] sm:grid-cols-[1fr_80px_130px_100px]'}`}>
                 <SortBtn field="name"   label="Joueur" />
                 <SortBtn field="whs"    label="WHS" />
+                <span className="text-[12px] font-semibold text-slate-400">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
                 {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
                 {isOwner && <span />}
@@ -259,18 +269,19 @@ export default function ParticipantsPage() {
                 </div>
               ) : (
                 displayed.map((p, i) => (
-                  <div key={p.player_id}
-                    className={`grid gap-4 px-4 py-3 items-center ${
-                      isOwner
-                        ? 'grid-cols-[1fr_60px_90px_auto_32px] sm:grid-cols-[1fr_80px_100px_160px_32px]'
-                        : 'grid-cols-[1fr_60px_90px] sm:grid-cols-[1fr_80px_100px]'
-                    } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
-                    <div className="text-[13px] font-semibold text-slate-900 truncate">
-                      {p.players.first_name} {p.players.surname}
-                    </div>
-                    <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
-                    <div><Badge status={p.status} /></div>
-                    {isOwner && (
+              <div key={p.player_id}
+                      className={`grid gap-4 px-4 py-3 items-center ${
+                        isOwner
+                          ? 'grid-cols-[1fr_60px_110px_90px_auto_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
+                          : 'grid-cols-[1fr_60px_110px_90px] sm:grid-cols-[1fr_80px_130px_100px]'
+                      } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
+                      <div className="text-[13px] font-semibold text-slate-900 truncate">
+                        {p.players.first_name} {p.players.surname}
+                      </div>
+                      <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
+                      <div className="text-[11px] text-slate-400">{formatResponded(p.responded_at)}</div>
+                      <div><Badge status={p.status} /></div>
+                      {isOwner && (
                       <div className="flex justify-end gap-1 flex-wrap">
                         {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
                           <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
