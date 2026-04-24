@@ -21,7 +21,7 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleString('fr-BE', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
-    timeZone: 'Europe/Brussels',
+    timeZone: 'UTC',
   })
 }
 
