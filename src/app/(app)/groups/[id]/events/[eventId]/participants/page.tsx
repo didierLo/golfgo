@@ -257,7 +257,7 @@ export default function ParticipantsPage() {
                   : 'grid-cols-[1fr_60px_110px_90px] sm:grid-cols-[1fr_80px_130px_100px]'}`}>
                 <SortBtn field="name"   label="Joueur" />
                 <SortBtn field="whs"    label="WHS" />
-                <span className="text-[12px] font-semibold text-slate-400">Répondu le</span>
+                <span className="text-[12px] font-semibold text-slate-800">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
                 {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
                 {isOwner && <span />}
