@@ -22,11 +22,8 @@ function buildCommunicationHtml({
   body: string
   groupName: string
 }) {
-    // Remplacer les \n par <br/> uniquement hors balises HTML
-  const bodyHtml = body
-    .split(/(<[^>]+>[\s\S]*?<\/[^>]+>|<[^>]+\/>)/g)
-    .map((part, i) => i % 2 === 0 ? part.replace(/\n/g, '<br/>') : part)
-    .join('')
+    
+   const bodyHtml = body 
 
   return `
 <!DOCTYPE html>
@@ -159,8 +156,9 @@ export async function POST(req: Request) {
         </tr></table>`
       }
 
-      const resolvedSubject = applyVars(subject, vars)
-      const resolvedBody    = applyVars(body, vars)
+         const resolvedSubject = applyVars(subject, vars)
+         const bodyWithBreaks  = body.replace(/\n/g, '<br/>')
+         const resolvedBody    = applyVars(bodyWithBreaks, vars)
 
       if (!EMAIL_ENABLED) {
         console.log('━━━ COMMUNICATION PREVIEW ━━━━━━━━━━━━━━━━━━━')
