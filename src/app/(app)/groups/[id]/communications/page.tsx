@@ -73,7 +73,9 @@ const COMM_VARS = [
   { key: '{{surname}}',     label: 'Nom' },
   { key: '{{player_name}}', label: 'Prénom + Nom' },
   { key: '{{group_name}}',  label: 'Groupe' },
-  { key: '{{yes_button}}',  label: '✓/✗ Boutons réponse' },
+  { key: '{{owner_name}}',       label: 'Signature' },
+  { key: '{{places_restantes}}', label: 'Places restantes' },
+  { key: '{{yes_button}}',       label: '✓/✗ Boutons réponse' },
 ]
 
 function formatDate(d: string) {

@@ -128,6 +128,21 @@ export async function POST(req: Request) {
       }
     }
 
+       // ← ICI — Charger places restantes si eventId
+    let placesRestantes = ''
+    if (eventId) {
+      const { data: eventData } = await supabase
+        .from('events').select('max_participants').eq('id', eventId).single()
+      if (eventData?.max_participants) {
+        const { count } = await supabase
+          .from('event_participants')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', eventId).eq('status', 'GOING')
+        const remaining = eventData.max_participants - (count ?? 0)
+        placesRestantes = remaining > 0 ? `${remaining} place${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}` : 'complet'
+      }
+    }
+
     // Charger les joueurs destinataires
     const { data: players, error: pErr } = await supabase
       .from('players')
@@ -151,18 +166,21 @@ export async function POST(req: Request) {
         player_name: playerName,
         group_name:  group.name,
         owner_name:  ownerName,
+        places_restantes: placesRestantes,
       }
 
       // Boutons oui/non si token disponible
       const token = tokenMap[player.id]
       if (token) {
-        const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-        const yesLink = `${appUrl}/invite/yes?token=${token}`
-        const noLink  = `${appUrl}/invite/no?token=${token}`
+        const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+        const yesLink   = `${appUrl}/invite/yes?token=${token}`
+        const noLink    = `${appUrl}/invite/no?token=${token}`
+        const isFull    = placesRestantes === 'complet'
+        const yesButton = isFull
+          ? `<span style="display:inline-block;background:#9CA3AF;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;cursor:not-allowed;">Complet</span>`
+          : `<a href="${yesLink}" style="display:inline-block;background:#16A34A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;">✓ Je participe</a>`
         vars.yes_button = `<table cellpadding="0" cellspacing="0" style="margin:16px 0;"><tr>
-          <td style="padding-right:12px;">
-            <a href="${yesLink}" style="display:inline-block;background:#16A34A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;">✓ Je participe</a>
-          </td>
+          <td style="padding-right:12px;">${yesButton}</td>
           <td>
             <a href="${noLink}" style="display:inline-block;background:#ffffff;color:#DC2626;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;border:1.5px solid #DC2626;">✗ Je ne peux pas</a>
           </td>
