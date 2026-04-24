@@ -56,7 +56,7 @@ const TEMPLATE_VARS = [
 const COMM_TEMPLATES = [
   { id: 'reminder', label: '⏰ Rappel',
     subject: 'Rappel — {{group_name}}',
-    body: `Bonjour {{first_name},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
+    body: `Bonjour {{first_name}},\n\nJe te rappelle que nous jouons la semaine prochaine.\n\nN'oublie pas de confirmer ta participation si ce n'est pas encore fait.\n\nÀ bientôt sur le parcours ! Didier L.` },
   { id: 'info', label: '📢 Information',
     subject: 'Information — {{group_name}}',
     body: `Bonjour {{first_name}},\n\nVoici une information importante concernant notre groupe.\n\nDidier L.` },
