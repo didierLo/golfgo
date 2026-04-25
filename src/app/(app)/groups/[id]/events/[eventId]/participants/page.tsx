@@ -90,7 +90,7 @@ export default function ParticipantsPage() {
   async function loadParticipants(evId: string) {
     setLoading(true)
     const { data, error } = await supabase
-       .from('event_participants').select(`player_id, status, responded_at, players(first_name, surname, whs)`).eq('event_id', evId)
+      .from('event_participants').select(`player_id, status, responded_at, players(first_name, surname, whs)`).eq('event_id', evId)
     if (error) { console.error(error); setLoading(false); return }
     setParticipants((data || []) as any)
     setLoading(false)
@@ -135,7 +135,6 @@ export default function ParticipantsPage() {
     loadParticipants(selectedEventId)
   }
 
-  
   function changeSort(field: SortField) {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortField(field); setSortDir('asc') }
@@ -250,11 +249,15 @@ export default function ParticipantsPage() {
               {[1,2,3,4].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
             </div>
           ) : (
-            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-            <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+
+              {/* Header */}
+              <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
                   ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
                   : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_80px_130px_100px]'
+              }`}>
                 <SortBtn field="name"   label="Joueur" />
                 <SortBtn field="whs"    label="WHS" />
                 <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">Répondu le</span>
@@ -269,20 +272,22 @@ export default function ParticipantsPage() {
                 </div>
               ) : (
                 displayed.map((p, i) => (
-              <div key={p.player_id}
-                      className={`grid gap-4 px-4 py-3 items-center ${
-                        isOwner
-                          ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
-                          : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_80px_130px_100px]'
-                      } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
-                      <div className="text-[13px] font-semibold text-slate-900 truncate">
-                        {p.players.first_name} {p.players.surname}
-                      </div>
-                      <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
-                      <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
-                      <div><Badge status={p.status} /></div>
-                      {isOwner && (
-                      <div className="flex justify-end gap-1 flex-wrap">
+                  <div key={p.player_id}
+                    className={`grid gap-4 px-4 py-3 items-center ${
+                      isOwner
+                        ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
+                        : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_80px_130px_100px]'
+                    } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
+
+                    <div className="text-[13px] font-semibold text-slate-900 truncate">
+                      {p.players.first_name} {p.players.surname}
+                    </div>
+                    <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
+                    <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
+                    <div><Badge status={p.status} /></div>
+
+                    {isOwner && (
+                      <div className="hidden sm:flex justify-end gap-1 flex-wrap">
                         {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
                           <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
                             className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
@@ -323,68 +328,71 @@ export default function ParticipantsPage() {
               Aucun événement à venir
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-[12px] border-collapse">
-                <thead>
-                  <tr className="bg-white/30 border-b border-white/40">
-                    <th className="px-4 py-3 text-left text-[12px] font-semibold text-slate-600 sticky left-0 bg-white/30 min-w-[160px]">Membre</th>
-                    {upcomingEvents.map(e => (
-                      <th key={e.id} className="px-3 py-3 text-center font-semibold text-slate-500 min-w-[100px]">
-                        <div className="text-[11px] text-slate-700 font-semibold truncate max-w-[90px]">{e.title}</div>
-                        <div className="text-[10px] text-slate-400 font-normal">{formatDateShort(e.starts_at)}</div>
-                      </th>
-                    ))}
-                    <th className="px-3 py-3 text-center font-semibold text-slate-400 min-w-[60px]">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allMembers.map((member, i) => {
-                    const memberStatuses = statusMatrix[member.id] ?? {}
-                    const goingCount = Object.values(memberStatuses).filter(s => s === 'GOING').length
-                    return (
-                      <tr key={member.id}
-                        className={`border-b border-white/30 hover:bg-white/30 ${i % 2 === 0 ? '' : 'bg-white/30/30'}`}>
-                        <td className="px-4 py-3 font-semibold text-slate-900 sticky left-0 bg-inherit">
-                          {member.first_name} {member.surname}
-                        </td>
-                        {upcomingEvents.map(e => {
-                          const status = memberStatuses[e.id]
-                          const icon = status ? STATUS_ICON[status] : null
-                          return (
-                            <td key={e.id} className="px-3 py-3 text-center">
-                              {icon ? (
-                                <span className="text-[14px] font-black" style={{ color: icon.color }}>{icon.icon}</span>
-                              ) : (
-                                <span className="text-slate-200 text-[14px]">—</span>
-                              )}
-                            </td>
-                          )
-                        })}
-                        <td className="px-3 py-3 text-center">
-                          <span className={`text-[12px] font-semibold ${goingCount > 0 ? 'text-[#3B6D11]' : 'text-slate-300'}`}>
-                            {goingCount}/{upcomingEvents.length}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-slate-100 border-t border-slate-200">
-                    <td className="px-4 py-2.5 text-[11px] font-bold text-slate-600 sticky left-0 bg-slate-100">Going</td>
-                    {upcomingEvents.map(e => {
-                      const count = allMembers.filter(m => statusMatrix[m.id]?.[e.id] === 'GOING').length
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[12px] border-collapse">
+                  <thead>
+                    <tr className="bg-white/30 border-b border-white/40">
+                      <th className="px-4 py-3 text-left text-[12px] font-semibold text-slate-600 sticky left-0 bg-white/40 min-w-[160px]">Membre</th>
+                      {upcomingEvents.map(e => (
+                        <th key={e.id} className="px-3 py-3 text-center font-semibold text-slate-500 min-w-[100px]">
+                          <div className="text-[11px] text-slate-700 font-semibold truncate max-w-[90px]">{e.title}</div>
+                          <div className="text-[10px] text-slate-400 font-normal">{formatDateShort(e.starts_at)}</div>
+                        </th>
+                      ))}
+                      <th className="px-3 py-3 text-center font-semibold text-slate-400 min-w-[60px]">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allMembers.map((member, i) => {
+                      const memberStatuses = statusMatrix[member.id] ?? {}
+                      const goingCount = Object.values(memberStatuses).filter(s => s === 'GOING').length
                       return (
-                        <td key={e.id} className="px-3 py-2.5 text-center">
-                          <span className="text-[12px] font-bold text-[#3B6D11]">{count}</span>
-                        </td>
+                        <tr key={member.id}
+                          className={`border-b border-white/30 hover:bg-white/30 ${i % 2 === 0 ? '' : 'bg-white/20'}`}>
+                          <td className="px-4 py-3 font-semibold text-slate-900 sticky left-0 bg-white/60">
+                            {member.first_name} {member.surname}
+                          </td>
+                          {upcomingEvents.map(e => {
+                            const status = memberStatuses[e.id]
+                            const icon = status ? STATUS_ICON[status] : null
+                            return (
+                              <td key={e.id} className="px-3 py-3 text-center">
+                                {icon ? (
+                                  <span className="text-[14px] font-black" style={{ color: icon.color }}>{icon.icon}</span>
+                                ) : (
+                                  <span className="text-slate-200 text-[14px]">—</span>
+                                )}
+                              </td>
+                            )
+                          })}
+                          <td className="px-3 py-3 text-center">
+                            <span className={`text-[12px] font-semibold ${goingCount > 0 ? 'text-[#3B6D11]' : 'text-slate-300'}`}>
+                              {goingCount}/{upcomingEvents.length}
+                            </span>
+                          </td>
+                        </tr>
                       )
                     })}
-                    <td />
-                  </tr>
-                </tfoot>
-              </table>
-              <div className="flex gap-4 mt-3 px-1">
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-slate-100 border-t border-slate-200">
+                      <td className="px-4 py-2.5 text-[11px] font-bold text-slate-600 sticky left-0 bg-slate-100">Going</td>
+                      {upcomingEvents.map(e => {
+                        const count = allMembers.filter(m => statusMatrix[m.id]?.[e.id] === 'GOING').length
+                        return (
+                          <td key={e.id} className="px-3 py-2.5 text-center">
+                            <span className="text-[12px] font-bold text-[#3B6D11]">{count}</span>
+                          </td>
+                        )
+                      })}
+                      <td />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div className="flex gap-4 px-4 py-3 border-t border-white/30">
                 {Object.entries(STATUS_ICON).map(([status, { icon, color }]) => (
                   <div key={status} className="flex items-center gap-1">
                     <span className="text-[13px] font-black" style={{ color }}>{icon}</span>
