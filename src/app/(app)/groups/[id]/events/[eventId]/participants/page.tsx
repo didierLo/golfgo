@@ -253,11 +253,11 @@ export default function ParticipantsPage() {
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[1fr_60px_110px_90px_auto_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
-                  : 'grid-cols-[1fr_60px_110px_90px] sm:grid-cols-[1fr_80px_130px_100px]'}`}>
+                  ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
+                  : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_80px_130px_100px]'
                 <SortBtn field="name"   label="Joueur" />
                 <SortBtn field="whs"    label="WHS" />
-                <span className="text-[12px] font-semibold text-slate-400">Répondu le</span>
+                <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
                 {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
                 {isOwner && <span />}
@@ -272,14 +272,14 @@ export default function ParticipantsPage() {
               <div key={p.player_id}
                       className={`grid gap-4 px-4 py-3 items-center ${
                         isOwner
-                          ? 'grid-cols-[1fr_60px_110px_90px_auto_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
-                          : 'grid-cols-[1fr_60px_110px_90px] sm:grid-cols-[1fr_80px_130px_100px]'
+                          ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
+                          : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_80px_130px_100px]'
                       } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
                       <div className="text-[13px] font-semibold text-slate-900 truncate">
                         {p.players.first_name} {p.players.surname}
                       </div>
                       <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
-                      <div className="text-[11px] text-slate-600">{formatResponded(p.responded_at)}</div>
+                      <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
                       <div><Badge status={p.status} /></div>
                       {isOwner && (
                       <div className="flex justify-end gap-1 flex-wrap">
