@@ -210,11 +210,14 @@ const bottomNavItems = [
             <div className="flex-1" />
             {currentUser ? (
           <div className="relative flex-shrink-0" ref={avatarRef}>
-            <button onClick={() => setAvatarMenuOpen(v => !v)} title={currentUser.name}>
-              <div className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer">
-                {currentUser.initials}
-              </div>
-            </button>
+          <button
+            onClick={() => setAvatarMenuOpen(v => !v)}
+            title={currentUser.name}
+            className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer"
+          >
+            {currentUser.initials}
+          </button>
+           
             {avatarMenuOpen && (
               <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-50 overflow-hidden">
                 <div className="px-4 py-2.5 border-b border-slate-100">
