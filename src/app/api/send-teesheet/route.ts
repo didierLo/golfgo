@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
+import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
