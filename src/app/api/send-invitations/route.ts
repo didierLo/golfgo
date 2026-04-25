@@ -276,6 +276,28 @@ export async function POST(req: Request) {
       } else {
         sent++
       }
+        const html = buildTeesheetEmail({
+        playerName,
+        playerFlightNumber: playerFlight.flight_number,
+        eventTitle:  event.title,
+        eventDate,
+        eventLocation: event.location,
+        flights,
+      })
+
+      const { error: emailErr } = await resend.emails.send({
+        from:    'GolfGo <info@golfgo.be>',
+        to:      player.email,
+        subject: `Tee Sheet — ${event.title}`,
+        html,
+      })
+
+      if (emailErr) {
+        errors.push(`${playerName}: ${emailErr.message}`)
+      } else {
+        sent++
+      }
+    await sleep(EMAIL_SEND_DELAY_MS)
     }
 
     return Response.json({ success: true, sent, skipped, errors })

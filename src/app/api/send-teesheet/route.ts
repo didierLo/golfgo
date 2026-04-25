@@ -220,6 +220,7 @@ export async function POST(req: Request) {
       } else {
         sent++
       }
+      await sleep(EMAIL_SEND_DELAY_MS)
     }
 
     return Response.json({ success: true, sent, skipped, errors })
