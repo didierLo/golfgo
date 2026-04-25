@@ -158,7 +158,7 @@ const bottomNavItems = [
                 <span className="text-[18px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
               </span>
             </Link>
-          </div>
+          </div> 
           <div className="w-px h-full bg-white/30 flex-shrink-0 self-stretch" />
           <div className="flex items-center gap-4 flex-1 px-4">
             {loading ? (
@@ -219,7 +219,7 @@ const bottomNavItems = [
           </button>
            
             {avatarMenuOpen && (
-              <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-50 overflow-hidden">
+              <div className="fixed top-[56px] right-4 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
                 <div className="px-4 py-2.5 border-b border-slate-100">
                   <p className="text-[12px] font-bold text-slate-800 truncate">{currentUser.name}</p>
                 </div>
