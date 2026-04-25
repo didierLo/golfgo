@@ -71,13 +71,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
   const [loading,           setLoading]           = useState(true)
   const [drawerOpen, setDrawerOpen]               = useState(false) 
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
+  const avatarRef = useRef<HTMLDivElement>(null)
+
   const switcherRef = useRef<HTMLDivElement>(null)
  
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) setGroupSwitcherOpen(false)
-    }
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) setAvatarMenuOpen(false)
+      }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
@@ -205,13 +209,37 @@ const bottomNavItems = [
             )}
             <div className="flex-1" />
             {currentUser ? (
-              <Link href="/settings" title={currentUser.name} className="flex-shrink-0">
-                <div className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer">
-                  {currentUser.initials}
+          <div className="relative flex-shrink-0" ref={avatarRef}>
+            <button onClick={() => setAvatarMenuOpen(v => !v)} title={currentUser.name}>
+              <div className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer">
+                {currentUser.initials}
+              </div>
+            </button>
+            {avatarMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-50 overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-slate-100">
+                  <p className="text-[12px] font-bold text-slate-800 truncate">{currentUser.name}</p>
                 </div>
-              </Link>
-            ) : (
-              <Link href="/login" className="w-[34px] h-[34px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0" title="Se connecter">
+                <Link href="/settings" onClick={() => setAvatarMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                  <span className="text-slate-400">{Icons.settings}</span>
+                  <span className="text-[13px] text-slate-700 font-medium">Settings</span>
+                </Link>
+                <div className="mx-3 my-1 h-px bg-slate-100" />
+                <button onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors">
+                  <span className="text-red-400">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                  <span className="text-[13px] text-red-500 font-semibold">Se déconnecter</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+                      <Link href="/login" className="w-[34px] h-[34px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0" title="Se connecter">
                 {Icons.user}
               </Link>
             )}
