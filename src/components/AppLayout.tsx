@@ -211,7 +211,7 @@ const bottomNavItems = [
             {currentUser ? (
           <div className="relative flex-shrink-0" ref={avatarRef}>
           <button
-            onClick={() => setAvatarMenuOpen(v => !v)}
+            onClick={() => { console.log('avatar click'); setAvatarMenuOpen(v => !v) }}
             title={currentUser.name}
             className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer"
           >
