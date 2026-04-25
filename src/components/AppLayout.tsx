@@ -146,7 +146,7 @@ const bottomNavItems = [
       <div className="fixed inset-0 -z-10 bg-white/0" />
 
       {/* TOPBAR */}
-      <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20"
+     <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20 overflow-visible"
         style={{ background: 'rgba(24, 95, 165, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
        <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           <div className="flex items-center flex-shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
@@ -172,7 +172,7 @@ const bottomNavItems = [
                   <span className={`text-white/60 transition-transform duration-200 ${groupSwitcherOpen ? 'rotate-180' : ''}`}>{Icons.chevronDown}</span>
                 </button>
                 {groupSwitcherOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-50 overflow-hidden">
+                  <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
                     <div className="px-4 pt-2 pb-3 border-b border-slate-100">
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Mes groupes</span>
                     </div>
