@@ -23,7 +23,7 @@ export default function TeeSheetPage() {
   const [eventTitle, setEventTitle]     = useState('')
   const [eventDate, setEventDate]       = useState('')
   const [startsAt, setStartsAt]         = useState<string | null>(null)
-  const [interval, setInterval]         = useState(8)
+  const [interval, setInterval]         = useState(9)
   const [loading, setLoading]           = useState(true)
   const [error, setError]               = useState<string | null>(null)
   const [sending, setSending]           = useState(false)
