@@ -39,13 +39,13 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
   const base = `/groups/${id}/events/${eventId}`
 
   const tabs = [
-    { label: 'Overview',     href: base,                   always: true },
-    { label: 'Participants', href: `${base}/participants`, always: true },
+    { label: 'Overview',     href: base,                  always: true,  mobileHidden: true  },
+    { label: 'Participants', href: `${base}/participants`, always: true,  mobileHidden: true  },
     { label: 'Flights',      href: `${base}/flights`,      always: false, golfOnly: true },
-    { label: 'Tee Sheet',    href: `${base}/teesheet`,     always: false, golfOnly: true },
+    { label: 'Tee Sheet',    href: `${base}/teesheet`,     always: false, golfOnly: true, mobileHidden: true },
     { label: 'Scorecards',   href: `${base}/scorecards`,   always: false, golfOnly: true },
     { label: 'Leaderboard',  href: `${base}/leaderboard`,  always: false, golfOnly: true },
-    { label: 'Paiements',    href: `${base}/payments`,     always: false, feeOnly: true },
+    { label: 'Paiements',    href: `${base}/payments`,     always: false, feeOnly: true  },
   ].filter(tab => {
     if (tab.always) return true
     if (tab.golfOnly && isGolf) return true
@@ -70,6 +70,7 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
               href={tab.href}
               className={`
                 relative px-4 py-3.5 text-[13px] font-medium transition-colors whitespace-nowrap
+                ${(tab as any).mobileHidden ? 'hidden sm:block' : ''}
                 ${isActive(tab.href, index)
                   ? 'text-blue-700'
                   : 'text-gray-500 hover:text-gray-800'
@@ -83,7 +84,7 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
             </Link>
           )) : (
             ['Overview', 'Participants'].map(label => (
-              <div key={label} className="px-4 py-3.5 text-[13px] text-gray-300">{label}</div>
+              <div key={label} className="hidden sm:block px-4 py-3.5 text-[13px] text-gray-300">{label}</div>
             ))
           )}
         </nav>
