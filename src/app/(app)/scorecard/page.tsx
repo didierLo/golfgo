@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import ScorecardTable from '@/components/scorecards/ScorecardTable'
+import EventPillSelector, { useNearestEvent } from '@/components/events/EventPillSelector'
 
 const supabase = createClient()
 
@@ -27,28 +29,39 @@ function formatDate(d: string) {
 }
 
 export default function MyScorecardPage() {
-  const [playerId, setPlayerId]         = useState<string | null>(null)
-  const [loading, setLoading]           = useState(true)
-  const [error, setError]               = useState<string | null>(null)
-  const [eventId, setEventId]           = useState<string | null>(null)
-  const [eventTitle, setEventTitle]     = useState('')
-  const [eventDate, setEventDate]       = useState('')
-  const [eventFormat, setEventFormat]   = useState<'stroke' | 'stableford'>('stableford')
-  const [clubName, setClubName]         = useState('')
-  const [courseName, setCourseName]     = useState('')
+  const params  = useParams()
+  // groupId peut être présent selon la structure de routing
+  const groupId = (params?.id ?? params?.groupId) as string | undefined
+
+  const [playerId, setPlayerId]           = useState<string | null>(null)
+  const [initDone, setInitDone]           = useState(false)
+  const [loading, setLoading]             = useState(true)
+  const [error, setError]                 = useState<string | null>(null)
+
+  // Event sélectionné — initialisé via useNearestEvent si groupId dispo, sinon via init()
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+
+  const [eventTitle, setEventTitle]       = useState('')
+  const [eventDate, setEventDate]         = useState('')
+  const [eventFormat, setEventFormat]     = useState<'stroke' | 'stableford'>('stableford')
+  const [clubName, setClubName]           = useState('')
+  const [courseName, setCourseName]       = useState('')
   const [flightPlayers, setFlightPlayers] = useState<Player[]>([])
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null)
-  const [holes, setHoles]               = useState<Hole[]>([])
-  const [scores, setScores]             = useState<ScoreMap>({})
-  const [scorecardId, setScorecardId]   = useState<string | null>(null)
-  const [saveStatus, setSaveStatus]     = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [holes, setHoles]                 = useState<Hole[]>([])
+  const [scores, setScores]               = useState<ScoreMap>({})
+  const [scorecardId, setScorecardId]     = useState<string | null>(null)
+  const [saveStatus, setSaveStatus]       = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scoresRef = useRef<ScoreMap>({})
 
-  useEffect(() => { init() }, [])
+  // Hook nearest event (si groupId connu dans la route)
+  const { nearestEventId, loading: nearestLoading } = useNearestEvent(groupId ?? '')
 
-  async function init() {
-    setLoading(true); setError(null)
+  // Step 1 : identifier le joueur connecté + son groupId si non dispo dans la route
+  useEffect(() => { initPlayer() }, [])
+
+  async function initPlayer() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) { setError('Non connecté'); setLoading(false); return }
 
@@ -56,30 +69,71 @@ export default function MyScorecardPage() {
       .select('id, first_name, surname').eq('user_id', session.user.id).single()
     if (!p) { setError('Profil joueur introuvable'); setLoading(false); return }
     setPlayerId(p.id)
+    setInitDone(true)
+  }
+
+  // Step 2 : une fois le joueur connu + nearestEventId résolu (ou pas de groupId), choisir l'event par défaut
+  useEffect(() => {
+    if (!initDone) return
+    if (groupId && nearestLoading) return // attendre la résolution
+
+    if (groupId && nearestEventId) {
+      setSelectedEventId(nearestEventId)
+    } else if (!groupId) {
+      // Pas de groupId dans la route : fallback legacy — chercher le prochain event GOING du joueur
+      loadNearestEventForPlayer()
+    }
+  }, [initDone, nearestLoading, nearestEventId, groupId])
+
+  async function loadNearestEventForPlayer() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return
+    const { data: p } = await supabase.from('players').select('id').eq('user_id', session.user.id).single()
+    if (!p) return
 
     const { data: participations } = await supabase.from('event_participants')
-      .select('event_id, tee_id').eq('player_id', p.id).eq('status', 'GOING')
+      .select('event_id').eq('player_id', p.id).eq('status', 'GOING')
     if (!participations?.length) { setError('Aucun événement à venir pour toi'); setLoading(false); return }
 
     const eventIds = participations.map(p => p.event_id)
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
 
     const { data: events } = await supabase.from('events')
-      .select(`id, title, starts_at, course_id, competition_formats(scoring_type), courses(course_name, clubs(name))`)
-      .in('id', eventIds).gte('starts_at', todayStart.toISOString())
+      .select('id').in('id', eventIds)
+      .gte('starts_at', todayStart.toISOString())
       .order('starts_at', { ascending: true }).limit(1)
 
-    const event = events?.[0] as any
-    if (!event) { setError('Aucun événement à venir pour toi'); setLoading(false); return }
+    if (events?.[0]) setSelectedEventId(events[0].id)
+    else { setError('Aucun événement à venir pour toi'); setLoading(false) }
+  }
 
-    const myTeeId = participations.find(p => p.event_id === event.id)?.tee_id ?? null
-    setEventId(event.id); setEventTitle(event.title); setEventDate(event.starts_at)
-    setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
-    setClubName((event.courses as any)?.clubs?.name ?? '')
-    setCourseName((event.courses as any)?.course_name ?? '')
+  // Step 3 : charger les données de l'event sélectionné
+  useEffect(() => {
+    if (selectedEventId && playerId) loadEventData(selectedEventId, playerId)
+  }, [selectedEventId, playerId])
 
-    if (!event.course_id) { setError('Aucun parcours configuré pour cet événement'); setLoading(false); return }
-    await loadScorecardData(event.id, event.course_id, p.id, myTeeId)
+  async function loadEventData(evId: string, pId: string) {
+    setLoading(true); setError(null)
+    setFlightPlayers([]); setScores({}); setScorecardId(null)
+
+    const { data: event } = await supabase.from('events')
+      .select(`id, title, starts_at, course_id, competition_formats(scoring_type), courses(course_name, clubs(name))`)
+      .eq('id', evId).single()
+
+    if (!event) { setError('Événement introuvable'); setLoading(false); return }
+
+    const { data: myParticipation } = await supabase.from('event_participants')
+      .select('tee_id').eq('event_id', evId).eq('player_id', pId).maybeSingle()
+    const myTeeId = myParticipation?.tee_id ?? null
+
+    setEventTitle((event as any).title)
+    setEventDate((event as any).starts_at)
+    setEventFormat(((event as any).competition_formats as any)?.scoring_type ?? 'stableford')
+    setClubName(((event as any).courses as any)?.clubs?.name ?? '')
+    setCourseName(((event as any).courses as any)?.course_name ?? '')
+
+    if (!(event as any).course_id) { setError('Aucun parcours configuré pour cet événement'); setLoading(false); return }
+    await loadScorecardData(evId, (event as any).course_id, pId, myTeeId)
     setLoading(false)
   }
 
@@ -157,7 +211,7 @@ export default function MyScorecardPage() {
     setScores(prev => {
       const updated = typeof newScores === 'function' ? newScores(prev) : newScores
       scoresRef.current = updated
-      if (scorecardId && eventId && playerId) autoSave(updated, playerId, eventId, scorecardId)
+      if (scorecardId && selectedEventId && playerId) autoSave(updated, playerId, selectedEventId, scorecardId)
       return updated
     })
   }
@@ -187,10 +241,10 @@ export default function MyScorecardPage() {
     <div className="p-5 sm:p-6 max-w-2xl">
 
       {/* Header */}
-      <div className="mb-5 flex items-start justify-between">
+      <div className="mb-4 flex items-start justify-between">
         <div>
-          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{eventTitle}</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">{formatDate(eventDate)}</p>
+          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Scorecard</h1>
+          {eventDate && <p className="text-[13px] text-slate-600 mt-0.5">{formatDate(eventDate)}</p>}
           {(clubName || courseName) && (
             <p className="text-[12px] text-slate-500 mt-0.5">{clubName}{courseName && ` · ${courseName}`}</p>
           )}
@@ -206,6 +260,20 @@ export default function MyScorecardPage() {
           {saveStatus === 'error'  && <span className="text-[11px] text-red-500 font-semibold">Erreur de sauvegarde</span>}
         </div>
       </div>
+
+      {/* Pill sélecteur event */}
+      {groupId && selectedEventId && (
+        <div className="mb-5">
+          <EventPillSelector
+            groupId={groupId}
+            selectedEventId={selectedEventId}
+            onChange={id => {
+              setSelectedEventId(id)
+              setSaveStatus('idle')
+            }}
+          />
+        </div>
+      )}
 
       {/* Sélecteur flight */}
       {flightPlayers.length > 1 && (

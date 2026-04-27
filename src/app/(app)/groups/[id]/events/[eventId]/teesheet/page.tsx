@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import EventPillSelector, { useNearestEvent } from '@/components/events/EventPillSelector'
 import toast from 'react-hot-toast'
 
 const supabase = createClient()
@@ -14,10 +15,13 @@ type Flight = { flight_number: number; players: FlightPlayer[] }
 export default function TeeSheetPage() {
   const params  = useParams()
   const groupId = params.id as string
-  const eventId = params.eventId as string
+  const eventIdFromRoute = params.eventId as string
 
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
+
+  const { nearestEventId, loading: nearestLoading } = useNearestEvent(groupId)
+  const [selectedEventId, setSelectedEventId] = useState<string>(eventIdFromRoute)
 
   const [flights, setFlights]           = useState<Flight[]>([])
   const [eventTitle, setEventTitle]     = useState('')
@@ -29,11 +33,20 @@ export default function TeeSheetPage() {
   const [sending, setSending]           = useState(false)
   const [emailEnabled, setEmailEnabled] = useState(false)
 
-  useEffect(() => { loadData() }, [eventId])
+  // Initialise avec l'event futur le plus proche si pas d'eventId dans la route
+  useEffect(() => {
+    if (!eventIdFromRoute && nearestEventId && !nearestLoading) {
+      setSelectedEventId(nearestEventId)
+    }
+  }, [nearestEventId, nearestLoading, eventIdFromRoute])
 
-  async function loadData() {
+  useEffect(() => {
+    if (selectedEventId) loadData(selectedEventId)
+  }, [selectedEventId])
+
+  async function loadData(evId: string) {
     setLoading(true); setError(null)
-    const { data: event } = await supabase.from('events').select('title, starts_at').eq('id', eventId).single()
+    const { data: event } = await supabase.from('events').select('title, starts_at').eq('id', evId).single()
     if (event) {
       setEventTitle(event.title)
       setStartsAt(event.starts_at)
@@ -44,13 +57,13 @@ export default function TeeSheetPage() {
     const { data: flightsData, error: fErr } = await supabase
       .from('flights')
       .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
-      .eq('event_id', eventId).order('flight_number')
+      .eq('event_id', evId).order('flight_number')
     if (fErr) { setError(fErr.message); setLoading(false); return }
     const built: Flight[] = (flightsData || []).map((f: any) => ({
       flight_number: f.flight_number,
       players: (f.flight_players || []).map((fp: any) => fp.players).filter(Boolean),
     }))
-      built.sort((a, b) => a.players.length - b.players.length)
+    built.sort((a, b) => a.players.length - b.players.length)
     const renumbered = built.map((f, i) => ({ ...f, flight_number: i + 1 }))
     setFlights(renumbered)
     setLoading(false)
@@ -73,7 +86,7 @@ export default function TeeSheetPage() {
       const res = await fetch('/api/send-teesheet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId, flights: teesheetFlights }),
+        body: JSON.stringify({ eventId: selectedEventId, flights: teesheetFlights }),
       })
       const result = await res.json()
       if (!res.ok) throw new Error(result.error ?? 'Erreur envoi')
@@ -85,7 +98,7 @@ export default function TeeSheetPage() {
     }
   }
 
-  if (loading || roleLoading) return (
+  if (nearestLoading || roleLoading) return (
     <div className="p-6 space-y-3 max-w-2xl">
       {[1,2,3].map(i => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
     </div>
@@ -113,11 +126,10 @@ export default function TeeSheetPage() {
       </div>
 
       {/* Header web */}
-      <div className="flex items-start justify-between mb-5 flex-wrap gap-3 print:hidden">
+      <div className="flex items-start justify-between mb-4 flex-wrap gap-3 print:hidden">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Tee Sheet</h1>
-          {eventTitle && <p className="text-[13px] text-slate-600 mt-0.5">{eventTitle}</p>}
-          {eventDate  && <p className="text-[12px] text-slate-500">{eventDate}</p>}
+          {eventDate && <p className="text-[12px] text-slate-500 mt-0.5">{eventDate}</p>}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <label className="text-[12px] font-semibold text-slate-600">Intervalle</label>
@@ -130,6 +142,15 @@ export default function TeeSheetPage() {
             🖨 Imprimer
           </button>
         </div>
+      </div>
+
+      {/* Pill sélecteur event */}
+      <div className="mb-5 print:hidden">
+        <EventPillSelector
+          groupId={groupId}
+          selectedEventId={selectedEventId}
+          onChange={id => { setSelectedEventId(id); setEmailEnabled(false) }}
+        />
       </div>
 
       {/* Envoi email */}
@@ -165,7 +186,11 @@ export default function TeeSheetPage() {
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium">{error}</div>
       )}
 
-      {flights.length === 0 ? (
+      {loading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
+        </div>
+      ) : flights.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-[13px] text-slate-500">
           Aucun flight généré — génère les flights d'abord dans l'onglet Flights
         </div>
