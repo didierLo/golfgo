@@ -41,17 +41,20 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
   const tabs = [
     { label: 'Overview',     href: base,                  always: true,  mobileHidden: true  },
     { label: 'Participants', href: `${base}/participants`, always: true,  mobileHidden: true  },
-    { label: 'Flights',      href: `${base}/flights`,      always: false, golfOnly: true },
-    { label: 'Tee Sheet',    href: `${base}/teesheet`,     always: false, golfOnly: true, mobileHidden: true },
-    { label: 'Scorecards',   href: `${base}/scorecards`,   always: false, golfOnly: true },
-    { label: 'Leaderboard',  href: `${base}/leaderboard`,  always: false, golfOnly: true },
-    { label: 'Paiements',    href: `${base}/payments`,     always: false, feeOnly: true  },
+    { label: 'Flights',      href: `${base}/flights`,      always: false, golfOnly: true,  mobileHidden: false },
+    { label: 'Tee Sheet',    href: `${base}/teesheet`,     always: false, golfOnly: true,  mobileHidden: true  },
+    { label: 'Scorecards',   href: `${base}/scorecards`,   always: false, golfOnly: true,  mobileHidden: false },
+    { label: 'Leaderboard',  href: `${base}/leaderboard`,  always: false, golfOnly: true,  mobileHidden: false },
+    { label: 'Paiements',    href: `${base}/payments`,     always: false, feeOnly: true,   mobileHidden: false },
   ].filter(tab => {
     if (tab.always) return true
     if (tab.golfOnly && isGolf) return true
     if (tab.feeOnly && hasFee) return true
     return false
   })
+
+  // La barre n'est utile sur mobile que s'il reste des onglets visibles
+  const hasMobileTabs = tabs.some(tab => !(tab as any).mobileHidden)
 
   const isActive = (href: string, index: number) => {
     if (index === 0) return pathname === href
@@ -61,8 +64,8 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
   return (
     <div className="flex flex-col h-full">
 
-      {/* Onglets */}
-      <div className="border-b border-gray-200 bg-white px-6 flex-shrink-0">
+      {/* Onglets — masqués sur mobile si aucun onglet technique */}
+      <div className={`border-b border-gray-200 bg-white px-6 flex-shrink-0 ${hasMobileTabs ? '' : 'hidden sm:block'}`}>
         <nav className="flex gap-0">
           {loaded ? tabs.map((tab, index) => (
             <Link
