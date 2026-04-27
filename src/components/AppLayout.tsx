@@ -373,7 +373,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           { href: eventsHref,         icon: Icons.events,         label: 'Events',         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: !isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`) },
           { href: clubsHref,          icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
           { href: communicationsHref, icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
-          { href: '/settings',        icon: Icons.settings,       label: 'Settings',       color: '#888780', active: isActive('/settings') },
         ].map(item => (
           <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
             className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
