@@ -23,17 +23,6 @@ const Icons = {
   check: (<svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>),
   plus: (<svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>),
   user: (<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="white" strokeWidth="1.4" /><path d="M2.5 14c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" /></svg>),
-  // Icône hamburger "lasagne" — 3 lignes avec petits carrés à gauche
-  hamburger: (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="3" y="4.5" width="3" height="3" rx="0.5" fill="currentColor" />
-      <rect x="8" y="5" width="9" height="2" rx="1" fill="currentColor" />
-      <rect x="3" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" />
-      <rect x="8" y="9" width="9" height="2" rx="1" fill="currentColor" />
-      <rect x="3" y="12.5" width="3" height="3" rx="0.5" fill="currentColor" />
-      <rect x="8" y="13" width="9" height="2" rx="1" fill="currentColor" />
-    </svg>
-  ),
 }
 
 function NavItem({ href, icon, label, active, muted, iconColor }: { href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean; iconColor?: string }) {
@@ -81,16 +70,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [currentUser,       setCurrentUser]       = useState<CurrentUser | null>(null)
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
   const [loading,           setLoading]           = useState(true)
-  const [drawerOpen,        setDrawerOpen]        = useState(false)
-  const [avatarMenuOpen,    setAvatarMenuOpen]    = useState(false)
-  const avatarRef   = useRef<HTMLDivElement>(null)
+  const [drawerOpen, setDrawerOpen]               = useState(false) 
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
+  const avatarRef = useRef<HTMLDivElement>(null)
+
   const switcherRef = useRef<HTMLDivElement>(null)
+ 
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) setGroupSwitcherOpen(false)
-      if (avatarRef.current   && !avatarRef.current.contains(e.target as Node))   setAvatarMenuOpen(false)
-    }
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) setAvatarMenuOpen(false)
+      }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
@@ -137,12 +128,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const groupsHref         = isAnyOwner ? '/groups' : '/not-owner'
   const clubsHref          = isAnyOwner ? '/admin/clubs' : '/not-owner'
 
-  // Organiser actif si une des pages organiser est active
-  const isOrganiserActive = isGroupsActive
-    || (!isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`))
-    || (isAnyOwner && isActive('/admin/clubs'))
-    || (!!gid && isActive(`/groups/${gid}/communications`))
-    || isActive('/settings')
+
+const bottomNavItems = [
+  { href: '/my-events',          icon: Icons.myEvents,        label: 'My Events',       iconColor: '#185FA5' },
+  { href: '/calendar',           icon: Icons.calendar,        label: 'My Calendar',     iconColor: '#1D9E75' },
+  { href: '/scorecard',          icon: Icons.scorecard,       label: 'My Scorecard',    iconColor: '#D85A30' },
+  { href: groupsHref,            icon: Icons.groups,          label: 'Groups',          iconColor: '#7F77DD' },
+  { href: eventsHref,            icon: Icons.events,          label: 'Events',          iconColor: '#185FA5' },
+  { href: clubsHref,             icon: Icons.clubs,           label: 'Clubs',           iconColor: '#EF9F27' },
+  { href: communicationsHref,    icon: Icons.communications,  label: 'Communications',  iconColor: '#D4537E' },
+  { href: '/settings',           icon: Icons.settings,        label: 'Settings',        iconColor: '#888780' },
+]
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
@@ -150,9 +146,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="fixed inset-0 -z-10 bg-white/0" />
 
       {/* TOPBAR */}
-      <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20 overflow-visible"
+     <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20 overflow-visible"
         style={{ background: 'rgba(24, 95, 165, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-        <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+       <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           <div className="flex items-center flex-shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
             <Link href="/groups" className="flex items-center gap-2.5 select-none px-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -162,7 +158,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <span className="text-[18px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
               </span>
             </Link>
-          </div>
+          </div> 
           <div className="w-px h-full bg-white/30 flex-shrink-0 self-stretch" />
           <div className="flex items-center gap-4 flex-1 px-4">
             {loading ? (
@@ -211,57 +207,42 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <span className="text-[13px] text-white/60 font-medium leading-none">Créer un groupe</span>
               </Link>
             )}
-
             <div className="flex-1" />
-
-            {/* Bouton hamburger — mobile uniquement, dans la topbar */}
-            <button
-              onClick={() => setDrawerOpen(v => !v)}
-              className={`sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-xl transition-all duration-150 mr-1 ${
-                drawerOpen || isOrganiserActive
-                  ? 'bg-white/25 text-white'
-                  : 'bg-white/10 hover:bg-white/20 text-white/80 hover:text-white'
-              }`}
-              title="Organiser"
-            >
-              {Icons.hamburger}
-            </button>
-
-            {/* Avatar */}
             {currentUser ? (
-              <div className="relative flex-shrink-0" ref={avatarRef}>
-                <button
-                  onClick={() => setAvatarMenuOpen(v => !v)}
-                  title={currentUser.name}
-                  className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer"
-                >
-                  {currentUser.initials}
+          <div className="relative flex-shrink-0" ref={avatarRef}>
+          <button
+            onClick={() => { console.log('avatar click'); setAvatarMenuOpen(v => !v) }}
+            title={currentUser.name}
+            className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer"
+          >
+            {currentUser.initials}
+          </button>
+           
+            {avatarMenuOpen && (
+              <div className="fixed top-[56px] right-4 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-slate-100">
+                  <p className="text-[12px] font-bold text-slate-800 truncate">{currentUser.name}</p>
+                </div>
+                <Link href="/settings" onClick={() => setAvatarMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                  <span className="text-slate-400">{Icons.settings}</span>
+                  <span className="text-[13px] text-slate-700 font-medium">Settings</span>
+                </Link>
+                <div className="mx-3 my-1 h-px bg-slate-100" />
+                <button onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors">
+                  <span className="text-red-400">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                  <span className="text-[13px] text-red-500 font-semibold">Se déconnecter</span>
                 </button>
-                {avatarMenuOpen && (
-                  <div className="fixed top-[56px] right-4 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
-                    <div className="px-4 py-2.5 border-b border-slate-100">
-                      <p className="text-[12px] font-bold text-slate-800 truncate">{currentUser.name}</p>
-                    </div>
-                    <Link href="/settings" onClick={() => setAvatarMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
-                      <span className="text-slate-400">{Icons.settings}</span>
-                      <span className="text-[13px] text-slate-700 font-medium">Settings</span>
-                    </Link>
-                    <div className="mx-3 my-1 h-px bg-slate-100" />
-                    <button onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors">
-                      <span className="text-red-400">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </span>
-                      <span className="text-[13px] text-red-500 font-semibold">Se déconnecter</span>
-                    </button>
-                  </div>
-                )}
               </div>
-            ) : (
-              <Link href="/login" className="w-[34px] h-[34px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0" title="Se connecter">
+            )}
+          </div>
+        ) : (
+                      <Link href="/login" className="w-[34px] h-[34px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0" title="Se connecter">
                 {Icons.user}
               </Link>
             )}
@@ -323,62 +304,55 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* Overlay drawer */}
+ {/* Overlay drawer */}
       {drawerOpen && (
-        <div className="sm:hidden fixed inset-0 z-30 bg-black/10" onClick={() => setDrawerOpen(false)} />
+        <div className="sm:hidden fixed inset-0 z-30" onClick={() => setDrawerOpen(false)} />
       )}
 
-      {/* Drawer ORGANISER — s'ouvre sous la topbar */}
-      <div
-        className={`sm:hidden fixed top-[56px] left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : '-translate-y-full pointer-events-none'}`}
-        style={{
-          background: 'rgba(255,255,255,0.97)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          borderRadius: '0 0 20px 20px',
-          borderBottom: '0.5px solid rgba(0,0,0,0.08)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-        }}
-      >
-        <div className="px-5 py-3 border-b border-slate-100">
+      {/* Drawer ORGANISER */}
+      <div className={`sm:hidden fixed bottom-[57px] left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
+        style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderRadius: '20px 20px 0 0', borderTop: '0.5px solid rgba(0,0,0,0.1)', boxShadow: '0 -8px 32px rgba(0,0,0,0.12)' }}>
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-slate-300" />
+        </div>
+        <div className="px-5 py-2 border-b border-slate-100">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Organiser 🏆</p>
         </div>
         {[
           { href: groupsHref,         icon: Icons.groups,         label: 'Groups',         color: '#7F77DD', active: isGroupsActive },
-          { href: eventsHref,         icon: Icons.events,         label: 'Events',         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: !isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`) },
+          { href: eventsHref,         icon: Icons.events,         label: 'Events',  sublabel: activeGroup?.name ?? null,   color: '#185FA5',  active: !isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`) },
           { href: clubsHref,          icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
           { href: communicationsHref, icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
           { href: '/settings',        icon: Icons.settings,       label: 'Settings',       color: '#888780', active: isActive('/settings') },
-        ].map(item => (
-          <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
-            className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
-            <span style={{ color: item.active ? '#185FA5' : item.color, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {item.icon}
+          ].map(item => (
+        <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
+          className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
+          <span style={{ color: item.active ? '#185FA5' : item.color, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {item.icon}
+          </span>
+          <div className="flex flex-col">
+            <span style={{ fontSize: 15, fontWeight: item.active ? 700 : 600, color: item.active ? '#185FA5' : '#1e293b' }}>
+              {item.label}
             </span>
-            <div className="flex flex-col">
-              <span style={{ fontSize: 15, fontWeight: item.active ? 700 : 600, color: item.active ? '#185FA5' : '#1e293b' }}>
-                {item.label}
+            {item.sublabel && (
+              <span style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
+                {item.sublabel}
               </span>
-              {(item as any).sublabel && (
-                <span style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
-                  {(item as any).sublabel}
-                </span>
-              )}
-            </div>
-            {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
-          </Link>
-        ))}
-        <div className="h-3" />
+            )}
+    </div>
+    {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
+  </Link>
+))}
+        <div style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 8 }} />
       </div>
 
-      {/* BOTTOM NAV mobile — sans Organiser */}
+      {/* BOTTOM NAV mobile */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
         style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
-          { href: '/my-events',                                      icon: Icons.myEvents,  label: 'My Events',    color: '#185FA5' },
-          { href: '/calendar',                                       icon: Icons.calendar,  label: 'Calendar',     color: '#1D9E75' },
-          { href: '/scorecard',                                      icon: Icons.scorecard, label: 'Scorecard',    color: '#D85A30' },
-          { href: gid ? `/groups/${gid}/participants` : '/groups',   icon: Icons.groups,    label: 'Participants', color: '#7F77DD' },
+          { href: '/my-events', icon: Icons.myEvents,  label: 'My Events', color: '#185FA5' },
+          { href: '/calendar',  icon: Icons.calendar,  label: 'Calendar',  color: '#1D9E75' },
+          { href: '/scorecard', icon: Icons.scorecard, label: 'Scorecard', color: '#D85A30' },
         ].map(item => {
           const active = isActive(item.href)
           return (
@@ -394,6 +368,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           )
         })}
+        <div className="w-px bg-slate-200 self-stretch my-2" />
+        <button onClick={() => setDrawerOpen(v => !v)}
+          className="flex flex-col items-center justify-center gap-1 flex-1 py-2.5 transition-colors relative">
+          {drawerOpen && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#185FA5] rounded-b-full" />}
+          <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: drawerOpen ? '#185FA5' : '#334155', transition: 'color .15s' }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <circle cx="4" cy="10" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="16" cy="10" r="2"/>
+            </svg>
+          </span>
+          <span style={{ fontSize: 10, fontWeight: drawerOpen ? 700 : 500, color: drawerOpen ? '#185FA5' : '#334155', lineHeight: 1 }}>
+            Organiser
+          </span>
+        </button>
       </nav>
     </div>
   )
