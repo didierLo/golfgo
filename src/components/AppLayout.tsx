@@ -239,6 +239,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
             <div className="flex-1" />
 
+            {/* Bouton hamburger — mobile uniquement, dans la topbar */}
+            <button
+              onClick={() => setDrawerOpen(v => !v)}
+              className={`sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-xl transition-all duration-150 mr-1 ${
+                drawerOpen || isOrganiserActive
+                  ? 'bg-white/25 text-white'
+                  : 'bg-white/10 hover:bg-white/20 text-white/80 hover:text-white'
+              }`}
+              title="Organiser"
+            >
+              {Icons.hamburger}
+            </button>
 
             {/* Avatar */}
             {currentUser ? (
@@ -336,30 +348,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-
-      {/* Bouton hamburger flottant — sous la topbar, à droite */}
-      <button
-        onClick={() => setDrawerOpen(v => !v)}
-        className="sm:hidden fixed z-50 right-4"
-        style={{
-          top: 'calc(56px + env(safe-area-inset-top) + 12px)',
-          width: 40,
-          height: 40,
-          borderRadius: 12,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: drawerOpen || isOrganiserActive ? 'rgba(24,95,165,0.95)' : 'rgba(15,40,80,0.75)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          color: 'white',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
-          border: drawerOpen || isOrganiserActive ? '1.5px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.15)',
-        }}
-        title="Organiser"
-      >
-        {Icons.hamburger}
-      </button>
       {/* Overlay drawer */}
       {drawerOpen && (
         <div className="sm:hidden fixed inset-0 z-30 bg-black/10" onClick={() => setDrawerOpen(false)} />
@@ -367,9 +355,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Drawer ORGANISER — s'ouvre sous la topbar */}
       <div
-        className={`sm:hidden fixed left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : '-translate-y-full pointer-events-none'}`}
+        className={`sm:hidden fixed top-[56px] left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : '-translate-y-full pointer-events-none'}`}
         style={{
-          top: 'calc(56px + env(safe-area-inset-top))', background: 'rgba(255,255,255,0.97)',
+          background: 'rgba(255,255,255,0.97)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           borderRadius: '0 0 20px 20px',
@@ -385,6 +373,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           { href: eventsHref,         icon: Icons.events,         label: 'Events',         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: !isAnyOwner ? false : !!gid && isActive(`/groups/${gid}/events`) },
           { href: clubsHref,          icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
           { href: communicationsHref, icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
+          { href: '/settings',        icon: Icons.settings,       label: 'Settings',       color: '#888780', active: isActive('/settings') },
         ].map(item => (
           <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
             className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
