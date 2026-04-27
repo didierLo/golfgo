@@ -342,7 +342,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         onClick={() => setDrawerOpen(v => !v)}
         className="sm:hidden fixed z-50 right-4"
         style={{
-          top: 'calc(56px + 12px)',
+          top: 'calc(56px + env(safe-area-inset-top) + 12px)',
           width: 40,
           height: 40,
           borderRadius: 12,
@@ -367,9 +367,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Drawer ORGANISER — s'ouvre sous la topbar */}
       <div
-        className={`sm:hidden fixed top-[56px] left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : '-translate-y-full pointer-events-none'}`}
+        className={`sm:hidden fixed left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : '-translate-y-full pointer-events-none'}`}
         style={{
-          background: 'rgba(255,255,255,0.97)',
+          top: 'calc(56px + env(safe-area-inset-top))', background: 'rgba(255,255,255,0.97)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           borderRadius: '0 0 20px 20px',
