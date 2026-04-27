@@ -53,8 +53,18 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
     return false
   })
 
-  // La barre n'est utile sur mobile que s'il reste des onglets visibles
-  const hasMobileTabs = tabs.some(tab => !(tab as any).mobileHidden)
+  // Pages techniques = celles où la barre est utile sur mobile
+  const technicalPaths = [
+    `${base}/flights`,
+    `${base}/scorecards`,
+    `${base}/leaderboard`,
+    `${base}/payments`,
+    `${base}/invitations`,
+  ]
+  const isOnTechnicalPage = technicalPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
+
+  // La barre mobile s'affiche uniquement sur les pages techniques
+  const showMobileNav = isOnTechnicalPage
 
   const isActive = (href: string, index: number) => {
     if (index === 0) return pathname === href
@@ -65,14 +75,23 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
     <div className="flex flex-col h-full">
 
       {/* Onglets — masqués sur mobile si aucun onglet technique */}
-      <div className={`border-b border-gray-200 bg-white px-6 flex-shrink-0 ${hasMobileTabs ? '' : 'hidden sm:block'}`}>
-        <nav className="flex gap-0">
+      <div className={`border-b border-gray-200 bg-white px-6 flex-shrink-0 ${showMobileNav ? '' : 'hidden sm:block'}`}>
+        <nav className="flex gap-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {/* Flèche retour Overview — mobile uniquement sur pages techniques */}
+          {showMobileNav && (
+            <Link href={base}
+              className="sm:hidden flex items-center px-3 py-3.5 text-[13px] text-gray-400 hover:text-gray-600 flex-shrink-0 border-r border-gray-100 mr-1">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
+          )}
           {loaded ? tabs.map((tab, index) => (
             <Link
               key={tab.href}
               href={tab.href}
               className={`
-                relative px-4 py-3.5 text-[13px] font-medium transition-colors whitespace-nowrap
+                relative px-4 py-3.5 text-[13px] font-medium transition-colors whitespace-nowrap flex-shrink-0
                 ${(tab as any).mobileHidden ? 'hidden sm:block' : ''}
                 ${isActive(tab.href, index)
                   ? 'text-blue-700'
@@ -86,7 +105,7 @@ export default function EventLayout({ children, params }: EventLayoutProps) {
               )}
             </Link>
           )) : (
-            ['Overview', 'Participants'].map(label => (
+            ['Flights', 'Scorecards', 'Leaderboard'].map(label => (
               <div key={label} className="hidden sm:block px-4 py-3.5 text-[13px] text-gray-300">{label}</div>
             ))
           )}
