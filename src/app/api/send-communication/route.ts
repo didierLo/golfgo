@@ -46,7 +46,7 @@ function buildCommunicationHtml({
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                    <td style="vertical-align:middle;">
-                    <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" />
+                    <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="36" height="36" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
                     <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
                     <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
                   </td>

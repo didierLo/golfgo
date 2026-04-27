@@ -66,7 +66,7 @@ function buildEmailHtml({
           <!-- Header -->
           <tr>
             <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;vertical-align:middle;">
-              <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" />
+              <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="36" height="36" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
               <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
               <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
             </td>
