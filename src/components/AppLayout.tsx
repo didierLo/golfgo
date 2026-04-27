@@ -129,20 +129,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [pathname, groups])
 
 
+
   useEffect(() => {
-    if (!activeGroup?.id) return
+    const groupId = activeGroup?.id
+    if (!groupId) return
     async function loadNearest() {
       const now = new Date().toISOString()
       const { data: future } = await supabase.from('events')
         .select('id')
-        .eq('group_id', activeGroup.id)
+        .eq('group_id', groupId)
         .gte('starts_at', now)
         .order('starts_at', { ascending: true })
         .limit(1)
       if (future?.[0]) { setNearestEventId(future[0].id); return }
       const { data: past } = await supabase.from('events')
         .select('id')
-        .eq('group_id', activeGroup.id)
+        .eq('group_id', groupId)
         .lt('starts_at', now)
         .order('starts_at', { ascending: false })
         .limit(1)
