@@ -375,9 +375,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
         style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
-          { href: '/my-events', icon: Icons.myEvents,  label: 'My Events', color: '#185FA5' },
-          { href: '/calendar',  icon: Icons.calendar,  label: 'Calendar',  color: '#1D9E75' },
-          { href: '/scorecard', icon: Icons.scorecard, label: 'Scorecard', color: '#D85A30' },
+          { href: '/my-events',                                      icon: Icons.myEvents,  label: 'My Events',    color: '#185FA5' },
+          { href: '/calendar',                                       icon: Icons.calendar,  label: 'Calendar',     color: '#1D9E75' },
+          { href: '/scorecard',                                      icon: Icons.scorecard, label: 'Scorecard',    color: '#D85A30' },
+          { href: gid ? `/groups/${gid}/participants` : '/groups',   icon: Icons.groups,    label: 'Participants', color: '#7F77DD' },
         ].map(item => {
           const active = isActive(item.href)
           return (
