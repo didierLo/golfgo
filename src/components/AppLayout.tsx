@@ -83,6 +83,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [loading,           setLoading]           = useState(true)
   const [drawerOpen,        setDrawerOpen]        = useState(false)
   const [avatarMenuOpen,    setAvatarMenuOpen]    = useState(false)
+  const [nearestEventId,    setNearestEventId]    = useState<string | null>(null)
   const avatarRef   = useRef<HTMLDivElement>(null)
   const switcherRef = useRef<HTMLDivElement>(null)
 
@@ -127,6 +128,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (urlGroupId) { const match = groups.find(g => g.id === urlGroupId); if (match) setActiveGroup(match) }
   }, [pathname, groups])
 
+
+  useEffect(() => {
+    if (!activeGroup?.id) return
+    async function loadNearest() {
+      const now = new Date().toISOString()
+      const { data: future } = await supabase.from('events')
+        .select('id')
+        .eq('group_id', activeGroup.id)
+        .gte('starts_at', now)
+        .order('starts_at', { ascending: true })
+        .limit(1)
+      if (future?.[0]) { setNearestEventId(future[0].id); return }
+      const { data: past } = await supabase.from('events')
+        .select('id')
+        .eq('group_id', activeGroup.id)
+        .lt('starts_at', now)
+        .order('starts_at', { ascending: false })
+        .limit(1)
+      setNearestEventId(past?.[0]?.id ?? null)
+    }
+    loadNearest()
+  }, [activeGroup?.id])
   const isActive       = (href: string) => pathname === href || pathname.startsWith(href + '/')
   const isGroupsActive = pathname === '/groups' || pathname === '/groups/add'
   const gid            = activeGroup?.id
@@ -378,7 +401,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           { href: '/my-events',                                      icon: Icons.myEvents,  label: 'My Events',    color: '#185FA5' },
           { href: '/calendar',                                       icon: Icons.calendar,  label: 'Calendar',     color: '#1D9E75' },
           { href: '/scorecard',                                      icon: Icons.scorecard, label: 'Scorecard',    color: '#D85A30' },
-          { href: gid ? `/groups/${gid}/participants` : '/groups',   icon: Icons.groups,    label: 'Participants', color: '#7F77DD' },
+          { href: gid && nearestEventId ? `/groups/${gid}/events/${nearestEventId}/participants` : '/groups', icon: Icons.groups, label: 'Participants', color: '#7F77DD' },
         ].map(item => {
           const active = isActive(item.href)
           return (
