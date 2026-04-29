@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 const supabase = createClient()
 
 type Invitation = {
-  id: string; status: 'INVITED' | 'GOING' | 'DECLINED'; invited_at: string | null
+  id: string; player_id: string; status: 'INVITED' | 'GOING' | 'DECLINED'; invited_at: string | null
   event_id: string; players: { first_name: string; surname: string; email: string | null }
 }
 type Event  = { id: string; title: string; starts_at: string }
@@ -44,11 +44,14 @@ export default function InvitationsPage() {
   const [members, setMembers]                   = useState<Member[]>([])
   const [loading, setLoading]                   = useState(true)
   const [sending, setSending]                   = useState(false)
+  const [resending, setResending]               = useState(false)
   const [isOwner, setIsOwner]                   = useState(false)
   const [selectedEvent, setSelectedEvent]       = useState('')
   const [selectedPlayers, setSelectedPlayers]   = useState<string[]>([])
-  const [sendEmail, setSendEmail]               = useState(false)   // OFF par défaut
+  const [sendEmail, setSendEmail]               = useState(false)
   const [showForm, setShowForm]                 = useState(true)
+  const [resendMode, setResendMode]             = useState(false)
+  const [resendParticipants, setResendParticipants] = useState<Invitation[]>([])
   const [eventFilter, setEventFilter]           = useState<string>('ALL')
   const [selectedToCancel, setSelectedToCancel] = useState<string[]>([])
   const [cancelling, setCancelling]             = useState(false)
@@ -60,6 +63,19 @@ export default function InvitationsPage() {
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
   }, [groupId])
+
+  // Charger les participants existants quand on passe en mode renvoyer
+  useEffect(() => {
+    if (!resendMode || !selectedEvent) { setResendParticipants([]); return }
+    supabase
+      .from('event_participants')
+      .select('id, player_id, status, event_id, players(first_name, surname, email)')
+      .eq('event_id', selectedEvent)
+      .then(({ data }) => {
+        setResendParticipants((data || []) as any)
+        setSelectedPlayers([])
+      })
+  }, [resendMode, selectedEvent])
 
   async function loadData() {
     setLoading(true)
@@ -80,7 +96,7 @@ export default function InvitationsPage() {
 
     if (allEvents.length > 0) {
       const { data: inv } = await supabase.from('event_participants')
-        .select('id, status, invited_at, event_id, players(first_name, surname, email)')
+        .select('id, player_id, status, invited_at, event_id, players(first_name, surname, email)')
         .in('event_id', allEvents.map(e => e.id)).order('invited_at', { ascending: false })
       setInvitations((inv || []) as any)
     } else { setInvitations([]) }
@@ -115,10 +131,7 @@ export default function InvitationsPage() {
         invite_token: crypto.randomUUID(),
       }))
       const { error: insertError } = await supabase.from('event_participants').insert(rows)
-      if (insertError) {
-        console.error('Insert error:', insertError)
-        throw new Error(insertError.message)
-      }
+      if (insertError) throw new Error(insertError.message)
 
       if (sendEmail) {
         const res = await fetch('/api/send-invitations', {
@@ -138,6 +151,39 @@ export default function InvitationsPage() {
     } finally { setSending(false) }
   }
 
+  async function handleResend() {
+    if (!selectedEvent || selectedPlayers.length === 0) return
+    setResending(true)
+    try {
+      const { error: upsertErr } = await supabase
+        .from('event_participants')
+        .upsert(
+          selectedPlayers.map(playerId => ({
+            event_id:            selectedEvent,
+            player_id:           playerId,
+            status:              'INVITED',
+            invited_at:          new Date().toISOString(),
+            registration_source: 'email',
+          })),
+          { onConflict: 'event_id,player_id' }
+        )
+      if (upsertErr) throw new Error(upsertErr.message)
+
+      const res = await fetch('/api/send-invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId: selectedEvent, playerIds: selectedPlayers }),
+      })
+      if (!res.ok) throw new Error('Erreur envoi email')
+      toast.success(`${selectedPlayers.length} invitation(s) renvoyée(s)`)
+      setSelectedPlayers([])
+      setResendMode(false)
+      loadData()
+    } catch (e: any) {
+      toast.error(e.message ?? 'Erreur')
+    } finally { setResending(false) }
+  }
+
   async function handleCancelSelected() {
     if (selectedToCancel.length === 0) return
     if (!confirm(`Annuler ${selectedToCancel.length} invitation(s) ?`)) return
@@ -154,6 +200,11 @@ export default function InvitationsPage() {
   }
   function togglePlayer(id: string) { setSelectedPlayers(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]) }
 
+  function switchMode(mode: 'invite' | 'resend') {
+    setResendMode(mode === 'resend')
+    setSelectedPlayers([])
+  }
+
   const filtered        = invitations.filter(i => eventFilter === 'ALL' || i.event_id === eventFilter)
   const filteredInvited = filtered.filter(i => i.status === 'INVITED')
   const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length === filteredInvited.length
@@ -166,6 +217,7 @@ export default function InvitationsPage() {
   const sortedFiltered = [...filtered].sort((a, b) =>
     (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', 'fr', { sensitivity: 'base' })
   )
+  const sortedResendParticipants = sortByKey(resendParticipants, sortKey)
 
   if (loading) return (
     <div className="p-6 space-y-3">
@@ -195,81 +247,175 @@ export default function InvitationsPage() {
       {/* Formulaire */}
       {showForm && isOwner && (
         <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Envoyer des invitations</p>
 
+          {/* Toggle invite / renvoyer */}
+          <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-5">
+            <button type="button"
+              onClick={() => switchMode('invite')}
+              className={`flex-1 text-[12px] font-semibold py-1.5 rounded-lg transition-colors ${!resendMode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              Nouvelles invitations
+            </button>
+            <button type="button"
+              onClick={() => switchMode('resend')}
+              className={`flex-1 text-[12px] font-semibold py-1.5 rounded-lg transition-colors ${resendMode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              Renvoyer
+            </button>
+          </div>
+
+          {/* Avertissement mode renvoyer */}
+          {resendMode && (
+            <div className="mb-4 px-3.5 py-3 rounded-xl bg-amber-50 border border-amber-200">
+              <p className="text-[12px] text-amber-700 leading-relaxed">
+                Le statut des joueurs sélectionnés sera remis à <strong>invited</strong> et un nouvel email leur sera envoyé.
+              </p>
+            </div>
+          )}
+
+          {/* Sélecteur event */}
           <div className="mb-4">
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Événement</label>
-            {events.length === 0 ? (
-              <p className="text-[12px] text-slate-500">Aucun événement à venir</p>
-            ) : (
+            {resendMode ? (
+              /* En mode renvoyer : tous les events (passés inclus) */
               <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)}
                 className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-                {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
+                <option value="">— choisir un événement —</option>
+                {Object.values(eventsMap)
+                  .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+                  .map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
               </select>
+            ) : (
+              /* En mode invite : uniquement les events à venir */
+              events.length === 0 ? (
+                <p className="text-[12px] text-slate-500">Aucun événement à venir</p>
+              ) : (
+                <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)}
+                  className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
+                  {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
+                </select>
+              )
             )}
           </div>
 
+          {/* Liste joueurs */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <label className="text-[12px] font-semibold text-slate-600">Joueurs ({selectedPlayers.length} sélectionnés)</label>
-                <div className="flex gap-1">
-                  <button type="button" onClick={() => setSortKey('first_name')}
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
-                    Prénom
-                  </button>
-                  <button type="button" onClick={() => setSortKey('surname')}
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
-                    Nom
-                  </button>
-                </div>
-              </div>
-              <button type="button" onClick={() => setSelectedPlayers(members.map(m => m.id))}
-                className="text-[11px] font-semibold text-[#185FA5] hover:underline">Tout sélectionner</button>
-            </div>
-            <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
-              {sortedMembers.map((m, i) => (
-                <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
-                  <input type="checkbox" checked={selectedPlayers.includes(m.id)} onChange={() => togglePlayer(m.id)} className="rounded accent-[#185FA5]" />
-                  <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C]">
-                    {m.first_name[0]}{m.surname[0]}
-                  </div>
-                  <span className="text-[13px] font-medium text-slate-800 flex-1">
-                    {sortKey === 'first_name'
-                      ? <>{m.first_name} <span className="font-normal text-slate-500">{m.surname}</span></>
-                      : <><span className="font-normal text-slate-500">{m.first_name}</span> {m.surname}</>
-                    }
-                  </span>
-                  {m.email
-                    ? <span className="text-[11px] text-slate-400 truncate max-w-[140px]">{m.email}</span>
-                    : <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>}
+                <label className="text-[12px] font-semibold text-slate-600">
+                  {resendMode ? 'Participants' : 'Joueurs'} ({selectedPlayers.length} sélectionnés)
                 </label>
-              ))}
+                {!resendMode && (
+                  <div className="flex gap-1">
+                    <button type="button" onClick={() => setSortKey('first_name')}
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                      Prénom
+                    </button>
+                    <button type="button" onClick={() => setSortKey('surname')}
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                      Nom
+                    </button>
+                  </div>
+                )}
+              </div>
+              <button type="button"
+                onClick={() => {
+                  if (resendMode) {
+                    setSelectedPlayers(sortedResendParticipants.filter(p => p.players?.email).map(p => p.player_id))
+                  } else {
+                    setSelectedPlayers(members.map(m => m.id))
+                  }
+                }}
+                className="text-[11px] font-semibold text-[#185FA5] hover:underline">
+                Tout sélectionner
+              </button>
             </div>
+
+            {resendMode ? (
+              /* Liste participants existants */
+              !selectedEvent ? (
+                <p className="text-[12px] text-slate-400 px-1">Sélectionne d'abord un événement</p>
+              ) : sortedResendParticipants.length === 0 ? (
+                <p className="text-[12px] text-slate-400 px-1">Aucun participant pour cet événement</p>
+              ) : (
+                <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                  {sortedResendParticipants.map((p, i) => (
+                    <label key={p.player_id}
+                      className={`flex items-center gap-3 px-3 py-2.5 hover:bg-white/30 transition-colors ${i < sortedResendParticipants.length - 1 ? 'border-b border-white/30' : ''} ${!p.players?.email ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
+                      <input type="checkbox"
+                        disabled={!p.players?.email}
+                        checked={selectedPlayers.includes(p.player_id)}
+                        onChange={() => togglePlayer(p.player_id)}
+                        className="rounded accent-[#185FA5]" />
+                      <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] flex-shrink-0">
+                        {p.players?.first_name[0]}{p.players?.surname[0]}
+                      </div>
+                      <span className="text-[13px] font-medium text-slate-800 flex-1">
+                        {p.players?.first_name} {p.players?.surname}
+                      </span>
+                      <Badge status={p.status} />
+                      {!p.players?.email && (
+                        <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              )
+            ) : (
+              /* Liste membres du groupe */
+              <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                {sortedMembers.map((m, i) => (
+                  <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
+                    <input type="checkbox" checked={selectedPlayers.includes(m.id)} onChange={() => togglePlayer(m.id)} className="rounded accent-[#185FA5]" />
+                    <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C]">
+                      {m.first_name[0]}{m.surname[0]}
+                    </div>
+                    <span className="text-[13px] font-medium text-slate-800 flex-1">
+                      {sortKey === 'first_name'
+                        ? <>{m.first_name} <span className="font-normal text-slate-500">{m.surname}</span></>
+                        : <><span className="font-normal text-slate-500">{m.first_name}</span> {m.surname}</>
+                      }
+                    </span>
+                    {m.email
+                      ? <span className="text-[11px] text-slate-400 truncate max-w-[140px]">{m.email}</span>
+                      : <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>}
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Toggle email */}
-          <div className="flex items-start gap-3 mb-4 p-3.5 bg-white/30 rounded-xl border border-white/50">
-            <button type="button" onClick={() => setSendEmail(v => !v)}
-              style={{ backgroundColor: sendEmail ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
-              className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
-              <div style={{ transform: sendEmail ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
-                className="w-4 h-4 rounded-full bg-white shadow-sm" />
+          {/* Toggle email (mode invite uniquement) */}
+          {!resendMode && (
+            <div className="flex items-start gap-3 mb-4 p-3.5 bg-white/30 rounded-xl border border-white/50">
+              <button type="button" onClick={() => setSendEmail(v => !v)}
+                style={{ backgroundColor: sendEmail ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
+                className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
+                <div style={{ transform: sendEmail ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
+                  className="w-4 h-4 rounded-full bg-white shadow-sm" />
+              </button>
+              <div>
+                <p className="text-[13px] font-semibold text-slate-800">Envoyer un email d'invitation</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {sendEmail ? 'Les joueurs recevront un email avec un lien pour répondre' : 'Les joueurs sont enregistrés sans notification email'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Bouton submit */}
+          {resendMode ? (
+            <button onClick={handleResend}
+              disabled={resending || selectedPlayers.length === 0 || !selectedEvent}
+              className="bg-amber-500 text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-amber-600 disabled:opacity-40 transition-colors">
+              {resending ? 'Envoi…' : `Renvoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
             </button>
-            <div>
-              <p className="text-[13px] font-semibold text-slate-800">Envoyer un email d'invitation</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                {sendEmail ? 'Les joueurs recevront un email avec un lien pour répondre' : 'Les joueurs sont enregistrés sans notification email'}
-              </p>
-            </div>
-          </div>
-
-          <button onClick={handleSend} disabled={sending || selectedPlayers.length === 0 || !selectedEvent}
-            className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-            {sending ? 'En cours…' : sendEmail
-              ? `Envoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`
-              : `Enregistrer sans email${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
-          </button>
+          ) : (
+            <button onClick={handleSend} disabled={sending || selectedPlayers.length === 0 || !selectedEvent}
+              className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
+              {sending ? 'En cours…' : sendEmail
+                ? `Envoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`
+                : `Enregistrer sans email${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
+            </button>
+          )}
         </div>
       )}
 
