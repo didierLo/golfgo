@@ -77,7 +77,7 @@ function buildEmailHtml({
             <td style="background:#ffffff;padding:32px;">
 
               <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#111827;line-height:1.3;">
-                Tu es invité(e) à<br/>${eventTitle}
+                Invitation — ${eventTitle}
               </h1>
 
               <!-- Infos event -->
@@ -101,14 +101,9 @@ function buildEmailHtml({
 
               ${eventMessage ? `
               <!-- Message personnalisé -->
-              <div style="margin-bottom:24px;padding:16px 20px;border-left:3px solid #185FA5;background:#EFF6FF;border-radius:0 8px 8px 0;">
-                <p style="margin:0;font-size:14px;color:#1E40AF;line-height:1.6;">${eventMessage.replace(/\n/g, '<br/>')}</p>
+              <div style="margin-bottom:24px;padding:16px 20px;background:#ffffff;border-radius:8px;">
+                <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">${eventMessage.replace(/\n/g, '<br/>')}</p>
               </div>` : ''}
-
-              <!-- Question -->
-              <p style="margin:0 0 16px;font-size:15px;font-weight:500;color:#111827;">
-                Seras-tu présent(e) ?
-              </p>
 
               <!-- Boutons réponse -->
               <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
@@ -176,12 +171,18 @@ export async function POST(req: Request) {
       return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
     }
 
-    // Charger le template du groupe séparément (plus fiable que le join)
+    // Charger le template du groupe + nom du owner
     const { data: groupData } = await supabase
       .from('groups')
-      .select('template_invitation_subject, template_invitation_body')
+      .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
       .eq('id', event.group_id)
+      .eq('groups_players.role', 'owner')
       .single()
+
+    const ownerPlayer = (groupData?.owner as any)?.[0]?.players
+    const ownerName = ownerPlayer
+      ? `${ownerPlayer.first_name} ${ownerPlayer.surname}`
+      : ''
 
     // Charger les participants avec leurs tokens
     const { data: participants, error: pErr } = await supabase
@@ -223,17 +224,20 @@ export async function POST(req: Request) {
         player_name:       playerName,
         player_first_name: player.first_name,
         player_surname:    player.surname,
+        first_name:        player.first_name,
         event_title:       event.title,
         event_date:        eventDate,
         event_time:        eventTime,
+        owner_name:        ownerName,
       }
 
       // Sujet avec variables
       const subject = applyTemplateVariables(subjectTemplate, templateVars)
 
       // Message personnalisé avec variables (email_message ou template body)
-      const rawMessage = event.email_message ?? bodyTemplate ?? null
-      const resolvedMessage = rawMessage ? applyTemplateVariables(rawMessage, templateVars) : null
+      const defaultBody = `Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te voir,\n{{owner_name}}`
+      const rawMessage = event.email_message ?? bodyTemplate ?? defaultBody
+      const resolvedMessage = applyTemplateVariables(rawMessage, templateVars)
 
       // Mode preview
       if (!EMAIL_ENABLED) {
@@ -243,7 +247,7 @@ export async function POST(req: Request) {
         console.log(`Player:  ${playerName} (${player.first_name} / ${player.surname})`)
         console.log(`Date:    ${eventDate} à ${eventTime}`)
         if (event.location) console.log(`Lieu:    ${event.location}`)
-        if (resolvedMessage) console.log(`Message: ${resolvedMessage}`)
+        console.log(`Message: ${resolvedMessage}`)
         console.log(`Yes:     ${yesLink}`)
         console.log(`No:      ${noLink}`)
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
