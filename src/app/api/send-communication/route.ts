@@ -5,36 +5,55 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
-function applyVars(text: string, vars: Record<string, string>): string {
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('fr-BE', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+}
+
+function formatTime(dateStr: string) {
+  return new Date(dateStr).toLocaleTimeString('fr-BE', {
+    hour: '2-digit', minute: '2-digit',
+    timeZone: 'UTC',
+  })
+}
+
+function applyTemplateVariables(text: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(
-    (r, [k, v]) => r.replace(new RegExp(`{{${k}}}`, 'g'), v),
+    (result, [key, value]) => result.replace(new RegExp(`{{${key}}}`, 'g'), value),
     text
   )
 }
 
-function buildCommunicationHtml({
-  playerName,
-  subject,
-  body,
-  groupName,
+function buildEmailHtml({
+  eventTitle,
+  eventDate,
+  eventTime,
+  eventLocation,
+  eventMessage,
+  yesLink,
+  noLink,
+  eventLink,
 }: {
-  playerName: string
-  subject: string
-  body: string
-  groupName: string
+  eventTitle: string
+  eventDate: string
+  eventTime: string
+  eventLocation: string | null
+  eventMessage: string | null
+  yesLink: string
+  noLink: string
+  eventLink: string
 }) {
-    
-   const bodyHtml = body 
-
   return `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${subject}</title>
+  <title>Invitation — ${eventTitle}</title>
 </head>
 <body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;padding:32px 16px;">
     <tr>
       <td align="center">
@@ -42,28 +61,69 @@ function buildCommunicationHtml({
 
           <!-- Header -->
           <tr>
-            <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                   <td style="vertical-align:middle;">
-                    <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="36" height="36" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
-                    <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
-                    <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
-                  </td>
-                  <td style="text-align:right;">
-                    <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;">${groupName}</span>
-                  </td>
-                </tr>
-              </table>
+            <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;vertical-align:middle;">
+              <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="36" height="36" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
+              <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
+              <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
             </td>
           </tr>
 
           <!-- Body -->
           <tr>
             <td style="background:#ffffff;padding:32px;">
-              <div style="margin:0 0 0;font-size:15px;color:#111827;line-height:1.7;">
-                ${bodyHtml}
-              </div>
+
+              <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#111827;line-height:1.3;">
+                Invitation — ${eventTitle}
+              </h1>
+
+              <!-- Infos event -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;margin-bottom:24px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#6B7280;width:80px;">📅 Date</td>
+                        <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventDate} à ${eventTime}</td>
+                      </tr>
+                      ${eventLocation ? `
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#6B7280;">📍 Lieu</td>
+                        <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventLocation}</td>
+                      </tr>` : ''}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              ${eventMessage ? `
+              <!-- Message personnalisé -->
+              <div style="margin-bottom:24px;padding:16px 20px;background:#ffffff;border-radius:8px;">
+                <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">${eventMessage.replace(/\n/g, '<br/>')}</p>
+              </div>` : ''}
+
+              <!-- Boutons réponse -->
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="padding-right:12px;">
+                    <a href="${yesLink}"
+                      style="display:inline-block;background:#16A34A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;">
+                      ✓ Je participe
+                    </a>
+                  </td>
+                  <td>
+                    <a href="${noLink}"
+                      style="display:inline-block;background:#ffffff;color:#DC2626;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;border:1.5px solid #DC2626;">
+                      ✗ Je ne peux pas
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Lien voir event -->
+              <p style="margin:0;font-size:13px;color:#6B7280;">
+                Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:underline;">voir les détails de l'événement</a> dans l'app.
+              </p>
+
             </td>
           </tr>
 
@@ -71,7 +131,7 @@ function buildCommunicationHtml({
           <tr>
             <td style="background:#F9FAFB;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 12px 12px;padding:16px 32px;">
               <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;">
-                Message envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#9CA3AF;">golfgo.be</a>
+                Cet email t'a été envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#9CA3AF;">golfgo.be</a>
               </p>
             </td>
           </tr>
@@ -80,6 +140,7 @@ function buildCommunicationHtml({
       </td>
     </tr>
   </table>
+
 </body>
 </html>
   `.trim()
@@ -87,136 +148,127 @@ function buildCommunicationHtml({
 
 export async function POST(req: Request) {
   try {
-    const { groupId, playerIds, subject, body, eventId } = await req.json()
+    const { eventId, playerIds } = await req.json()
 
-    if (!groupId || !playerIds?.length || !subject || !body) {
-      return Response.json({ success: false, error: 'groupId, playerIds, subject et body requis' }, { status: 400 })
+    if (!eventId || !playerIds?.length) {
+      return Response.json({ success: false, error: 'eventId et playerIds requis' }, { status: 400 })
     }
 
     const supabase = await createServerClient()
 
-    // Charger le groupe
-    const { data: group } = await supabase
-      .from('groups').select('name, owner_id').eq('id', groupId).single()
-    if (!group) return Response.json({ success: false, error: 'Groupe introuvable' }, { status: 404 })
+    // Charger l'event
+    const { data: event, error: evErr } = await supabase
+      .from('events')
+      .select('id, title, location, starts_at, group_id, email_message')
+      .eq('id', eventId)
+      .single()
 
-    // Charger le nom de l'owner
-    const { data: ownerData } = await supabase
-      .from('players').select('first_name, surname').eq('user_id', group.owner_id).single()
-    const ownerName = ownerData ? `${ownerData.first_name} ${ownerData.surname}` : ''
-
-    // Charger les tokens si un eventId est fourni
-    const tokenMap: Record<string, string> = {}
-   if (eventId) {
-      const { data: participants } = await supabase
-        .from('event_participants')
-        .select('player_id, invite_token')
-        .eq('event_id', eventId)
-        .in('player_id', playerIds)
-
-      // Générer les tokens manquants
-      for (const p of participants || []) {
-        if (p.invite_token) {
-          tokenMap[p.player_id] = p.invite_token
-        } else {
-          const newToken = crypto.randomUUID()
-          await supabase.from('event_participants')
-            .update({ invite_token: newToken })
-            .eq('event_id', eventId)
-            .eq('player_id', p.player_id)
-          tokenMap[p.player_id] = newToken
-        }
-      }
+    if (evErr || !event) {
+      return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
     }
 
-       // ← ICI — Charger places restantes si eventId
-    let placesRestantes = ''
-    if (eventId) {
-      const { data: eventData } = await supabase
-        .from('events').select('max_participants').eq('id', eventId).single()
-      if (eventData?.max_participants) {
-        const { count } = await supabase
-          .from('event_participants')
-          .select('*', { count: 'exact', head: true })
-          .eq('event_id', eventId).eq('status', 'GOING')
-        const remaining = eventData.max_participants - (count ?? 0)
-        placesRestantes = remaining > 0 ? `${remaining} place${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}` : 'complet'
-      }
+    // Charger le template du groupe + nom du owner
+    const { data: groupData } = await supabase
+      .from('groups')
+      .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
+      .eq('id', event.group_id)
+      .eq('groups_players.role', 'owner')
+      .single()
+
+    const ownerPlayer = (groupData?.owner as any)?.[0]?.players
+    const ownerName = ownerPlayer
+      ? `${ownerPlayer.first_name} ${ownerPlayer.surname}`
+      : ''
+
+    // Charger les participants avec leurs tokens
+    const { data: participants, error: pErr } = await supabase
+      .from('event_participants')
+      .select('player_id, invite_token, players(first_name, surname, email)')
+      .eq('event_id', eventId)
+      .in('player_id', playerIds)
+
+    if (pErr) {
+      return Response.json({ success: false, error: pErr.message }, { status: 500 })
     }
 
-    // Charger les joueurs destinataires
-    const { data: players, error: pErr } = await supabase
-      .from('players')
-      .select('id, first_name, surname, email')
-      .in('id', playerIds)
+    const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const eventLink = `${appUrl}/login`
+    const eventDate = formatDate(event.starts_at)
+    const eventTime = formatTime(event.starts_at)
 
-    if (pErr) return Response.json({ success: false, error: pErr.message }, { status: 500 })
+    // Template depuis le groupe — pas de fallback hardcodé ici,
+    // le fallback est géré côté DEFAULTS dans communications/page.tsx
+    // et sauvegardé en base lors de la première visite.
+    const subjectTemplate = groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}'
+    const bodyTemplate    = groupData?.template_invitation_body    ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
 
     let sent = 0
     let skipped = 0
     const errors: string[] = []
 
-    for (const player of players || []) {
-      if (!player.email) { skipped++; continue }
+    for (const p of participants || []) {
+      const player = p.players as any
+      if (!player?.email) { skipped++; continue }
 
+      const token = p.invite_token
+      if (!token) { skipped++; continue }
+
+      const yesLink    = `${appUrl}/invite/yes?token=${token}`
+      const noLink     = `${appUrl}/invite/no?token=${token}`
       const playerName = `${player.first_name} ${player.surname}`
 
-     const vars: Record<string, string> = {
-        first_name:  player.first_name,
-        surname:     player.surname,
-        player_name: playerName,
-        group_name:  group.name,
-        owner_name:  ownerName,
-        places_restantes: placesRestantes,
+      const templateVars: Record<string, string> = {
+        player_name:       playerName,
+        player_first_name: player.first_name,
+        player_surname:    player.surname,
+        first_name:        player.first_name,
+        event_title:       event.title,
+        event_date:        eventDate,
+        event_time:        eventTime,
+        owner_name:        ownerName,
       }
 
-      // Boutons oui/non si token disponible
-      const token = tokenMap[player.id]
-      if (token) {
-        const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-        const yesLink   = `${appUrl}/invite/yes?token=${token}`
-        const noLink    = `${appUrl}/invite/no?token=${token}`
-        const isFull    = placesRestantes === 'complet'
-        const yesButton = isFull
-          ? `<span style="display:inline-block;background:#9CA3AF;color:#ffffff;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;cursor:not-allowed;">Complet</span>`
-          : `<a href="${yesLink}" style="display:inline-block;background:#16A34A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;">✓ Je participe</a>`
-        vars.yes_button = `<table cellpadding="0" cellspacing="0" style="margin:16px 0;"><tr>
-          <td style="padding-right:12px;">${yesButton}</td>
-          <td>
-            <a href="${noLink}" style="display:inline-block;background:#ffffff;color:#DC2626;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;border:1.5px solid #DC2626;">✗ Je ne peux pas</a>
-          </td>
-        </tr></table>`
-      }
+      const subject = applyTemplateVariables(subjectTemplate, templateVars)
 
-         const resolvedSubject = applyVars(subject, vars)
-         const bodyWithBreaks  = body.replace(/\n/g, '<br/>')
-         const resolvedBody    = applyVars(bodyWithBreaks, vars)
+      // email_message (par event) a priorité sur le template du groupe
+      const rawMessage     = event.email_message ?? bodyTemplate
+      const resolvedMessage = applyTemplateVariables(rawMessage, templateVars)
 
       if (!EMAIL_ENABLED) {
-        console.log('━━━ COMMUNICATION PREVIEW ━━━━━━━━━━━━━━━━━━━')
+        console.log('━━━ EMAIL PREVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━')
         console.log(`To:      ${player.email}`)
-        console.log(`Subject: ${resolvedSubject}`)
-        console.log(`Body:    ${resolvedBody}`)
+        console.log(`Subject: ${subject}`)
+        console.log(`Player:  ${playerName}`)
+        console.log(`Date:    ${eventDate} à ${eventTime}`)
+        if (event.location) console.log(`Lieu:    ${event.location}`)
+        console.log(`Message:\n${resolvedMessage}`)
+        console.log(`Yes:     ${yesLink}`)
+        console.log(`No:      ${noLink}`)
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
         sent++
         continue
       }
 
-      const html = buildCommunicationHtml({
-        playerName,
-        subject: resolvedSubject,
-        body:    resolvedBody,
-        groupName: group.name,
+      const html = buildEmailHtml({
+        eventTitle:    event.title,
+        eventDate,
+        eventTime,
+        eventLocation: event.location,
+        eventMessage:  resolvedMessage,
+        yesLink,
+        noLink,
+        eventLink,
       })
 
       const { error: emailErr } = await resend.emails.send({
         from:    'GolfGo <info@golfgo.be>',
         to:      player.email,
-        subject: resolvedSubject,
+        subject,
         html,
       })
 
       if (emailErr) {
+        console.error(`Email error for ${playerName}:`, emailErr)
         errors.push(`${playerName}: ${emailErr.message}`)
       } else {
         sent++
@@ -227,7 +279,7 @@ export async function POST(req: Request) {
     return Response.json({ success: true, sent, skipped, errors })
 
   } catch (error: any) {
-    console.error('COMMUNICATION EMAIL ERROR:', error)
+    console.error('EMAIL ERROR:', error)
     return Response.json({ success: false, error: error.message }, { status: 500 })
   }
 }

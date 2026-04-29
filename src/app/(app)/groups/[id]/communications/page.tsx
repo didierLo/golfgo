@@ -30,12 +30,14 @@ type ParticipantStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+const INVITATION_BODY_DEFAULT = "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
+
 const DEFAULTS: Template = {
   template_logo_url:           null,
   template_header_color:       '#185FA5',
   template_bg_image_url:       null,
   template_invitation_subject: 'Invitation : {{event_title}}',
-  template_invitation_body:    "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\n\nPourras-tu être des nôtres ?",
+  template_invitation_body:    INVITATION_BODY_DEFAULT,
   template_teesheet_subject:   'Tee Sheet — {{event_title}}',
   template_teesheet_body:      "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
 }
@@ -52,19 +54,22 @@ const TEMPLATE_VARS = [
   { label: '✍️ Signature',   value: '{{owner_name}}' },
 ]
 
+// COMM_TEMPLATES — "Invitation" remplace "Météo".
+// Le body est une constante statique ; applyCommTemplate le charge,
+// et l'owner peut ensuite l'éditer librement avant envoi.
 const COMM_TEMPLATES = [
   { id: 'reminder', label: '⏰ Rappel',
     subject: 'Rappel — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nIl reste {{places_restantes}} places pour la semaine prochaine.\n\nSi tu veux jouer, clique sur le bouton ci-dessous\n\nÀ bientôt sur le parcours !\n\n{{owner_name}}\n\n{{yes_button}}` },
+    body: "Bonjour {{first_name}},\n\nIl reste {{places_restantes}} places pour la semaine prochaine.\n\nSi tu veux jouer, clique sur le bouton ci-dessous\n\nÀ bientôt sur le parcours !\n\n{{owner_name}}\n\n{{yes_button}}" },
+  { id: 'invitation', label: '✉️ Invitation',
+    subject: 'Invitation : {{event_title}}',
+    body: INVITATION_BODY_DEFAULT },
   { id: 'info', label: '📢 Information',
     subject: 'Information — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nVoici une information importante concernant notre groupe.\n\nDidier L.` },
-  { id: 'weather', label: '🌧️ Météo',
-    subject: 'Information météo — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nSuite aux prévisions météo, notre rencontre est annulée.\n\nNous reviendrons vers toi dès que possible.\n\nMerci de ta compréhension.\n\nDidier L.` },
+    body: "Bonjour {{first_name}},\n\nVoici une information importante concernant notre groupe.\n\nDidier L." },
   { id: 'cancel', label: '❌ Annulation',
     subject: 'Annulation — {{group_name}}',
-    body: `Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.\n\nDidier L.` },
+    body: "Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.\n\nDidier L." },
   { id: 'free', label: '✏️ Libre', subject: '', body: '' },
 ]
 
@@ -265,7 +270,16 @@ export default function CommunicationsPage() {
 
   function applyCommTemplate(tplId: string) {
     const tpl = COMM_TEMPLATES.find(t => t.id === tplId); if (!tpl) return
-    setActiveCommTpl(tplId); setCommSubject(tpl.subject); setCommBody(tpl.body)
+    // Pour le template "Invitation", utiliser le body sauvegardé du groupe si disponible
+    const body = tplId === 'invitation'
+      ? (groupTemplate.template_invitation_body ?? tpl.body)
+      : tpl.body
+    const subject = tplId === 'invitation'
+      ? (groupTemplate.template_invitation_subject ?? tpl.subject)
+      : tpl.subject
+    setActiveCommTpl(tplId)
+    setCommSubject(subject)
+    setCommBody(body)
   }
 
   const previewVars = selectedMembers[0] ? {
@@ -285,7 +299,7 @@ export default function CommunicationsPage() {
     try {
       const res = await fetch('/api/send-communication', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ groupId, playerIds: [...selectedIds], subject: commSubject, body: commBody, eventId: filterEventId || null }),
+        body: JSON.stringify({ groupId, playerIds: [...selectedIds], subject: commSubject, body: commBody, eventId: filterEventId || null }),
       })
       const json = await res.json()
       if (json.success) toast.success(`${json.sent} email${json.sent > 1 ? 's' : ''} envoyé${json.sent > 1 ? 's' : ''}${json.skipped ? ` · ${json.skipped} ignoré(s)` : ''}`)
@@ -609,7 +623,7 @@ export default function CommunicationsPage() {
                       className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>
                   ))}
                 </div>
-                 <p className="text-[11px] text-slate-500 mt-2">
+                <p className="text-[11px] text-slate-500 mt-2">
                   Utilise <code className="bg-slate-100 px-1 rounded">{'{{yes_button}}'}</code> pour insérer les boutons "Je participe / Je ne peux pas" à l'endroit de ton choix dans le message.
                 </p>
               </div>
