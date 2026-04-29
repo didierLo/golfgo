@@ -129,7 +129,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (urlGroupId) { const match = groups.find(g => g.id === urlGroupId); if (match) setActiveGroup(match) }
   }, [pathname, groups])
 
-  // Event futur le plus proche pour Participants & Teesheet
   useEffect(() => {
     const groupId = activeGroup?.id
     if (!groupId) return
@@ -158,19 +157,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const clubsHref          = isAnyOwner ? '/admin/clubs' : '/not-owner'
   const participantsHref   = gid && nearestEventId ? `/groups/${gid}/events/${nearestEventId}/participants` : '/groups'
   const teesheetHref       = gid && nearestEventId ? `/groups/${gid}/events/${nearestEventId}/teesheet`     : '/groups'
-
-  // Icône bottom nav helper
-  function BottomNavLink({ href, icon, label, color, forceActive }: { href: string; icon: React.ReactNode; label: string; color: string; forceActive?: boolean }) {
-    const active = forceActive ?? isActive(href)
-    return (
-      <Link href={href} onClick={() => setDrawerOpen(false)}
-        className="flex flex-col items-center justify-center gap-1 flex-1 py-2.5 relative">
-        {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#185FA5] rounded-b-full" />}
-        <span style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: active ? '#185FA5' : color, transform: active ? 'scale(1.1)' : 'scale(1)', transition: 'transform .15s, color .15s' }}>{icon}</span>
-        <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, color: active ? '#185FA5' : '#334155', lineHeight: 1 }}>{label}</span>
-      </Link>
-    )
-  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
@@ -281,15 +267,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* BODY */}
       <div className="flex flex-1 max-w-[1280px] w-full mx-auto">
 
-        {/* Sidebar desktop (≥ 1024px) */}
+        {/* ── Sidebar desktop (≥ 1024px) ── */}
         <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+
+          {/* PLAY — même ordre que la bottom nav mobile */}
           <SidebarSection label="PLAY" emoji="⛳">
-            <NavItem href="/my-events" icon={Icons.myEvents}  iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
-            <NavItem href="/calendar"  icon={Icons.calendar}  iconColor="#1D9E75" label="My Calendar"  active={isActive('/calendar')} />
-            <NavItem href="/scorecard" icon={Icons.scorecard} iconColor="#D85A30" label="My Scorecard" active={isActive('/scorecard')} />
+            <NavItem href="/my-events"     icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
+            <NavItem href={participantsHref} icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={isActive(participantsHref)} />
+            <NavItem href={teesheetHref}   icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={isActive(teesheetHref)} />
+            <NavItem href="/scorecard"     icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
           </SidebarSection>
+
           <div className="mx-2 my-3 h-px bg-slate-100" />
+
+          {/* ORGANISER — inchangé */}
           <SidebarSection label="ORGANISER" emoji="🏆">
             <NavItem href={groupsHref} icon={Icons.groups} iconColor="#7F77DD" label="Groups" active={isGroupsActive} />
             <NavItem href={eventsHref} icon={Icons.events} iconColor="#185FA5" label="Events"
@@ -298,21 +290,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem href={communicationsHref} icon={Icons.communications} iconColor="#D4537E" label="Communications"
               active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </SidebarSection>
+
           <div className="mt-auto">
             <div className="mx-2 mb-3 h-px bg-slate-100" />
             <NavItem href="/settings" icon={Icons.settings} iconColor="#888780" label="Settings" active={isActive('/settings')} muted />
           </div>
         </aside>
 
-        {/* Sidebar tablette (640–1023px) */}
+        {/* ── Sidebar tablette (640–1023px) ── */}
         <aside className="hidden sm:flex lg:hidden w-[60px] flex-shrink-0 flex-col items-center py-5 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+
+          {/* PLAY */}
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href="/my-events" icon={Icons.myEvents}  iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
-            <NavIconItem href="/calendar"  icon={Icons.calendar}  iconColor="#1D9E75" label="My Calendar"  active={isActive('/calendar')} />
-            <NavIconItem href="/scorecard" icon={Icons.scorecard} iconColor="#D85A30" label="My Scorecard" active={isActive('/scorecard')} />
+            <NavIconItem href="/my-events"      icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
+            <NavIconItem href={participantsHref} icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={isActive(participantsHref)} />
+            <NavIconItem href={teesheetHref}    icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={isActive(teesheetHref)} />
+            <NavIconItem href="/scorecard"      icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
           </div>
+
           <div className="w-8 h-px bg-slate-100 my-2" />
+
+          {/* ORGANISER */}
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
             <NavIconItem href={groupsHref} icon={Icons.groups} iconColor="#7F77DD" label="Groups" active={isGroupsActive} />
             <NavIconItem href={eventsHref} icon={Icons.events} iconColor="#185FA5" label="Events"
@@ -321,6 +320,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem href={communicationsHref} icon={Icons.communications} iconColor="#D4537E" label="Communications"
               active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </div>
+
           <div className="mt-auto flex flex-col items-center gap-1 w-full px-2.5">
             <div className="w-8 h-px bg-slate-100 mb-2" />
             <NavIconItem href="/settings" icon={Icons.settings} iconColor="#888780" label="Settings" active={isActive('/settings')} muted />
@@ -328,7 +328,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </aside>
 
         <main className="flex-1 overflow-y-auto pb-20 sm:pb-0 min-h-0 relative" style={{ background: 'transparent' }}>
-          {/* Bouton hamburger flottant — mobile uniquement, coin haut-droit sous la topbar */}
+          {/* Bouton hamburger flottant — mobile uniquement */}
           <button
             onClick={() => setDrawerOpen(v => !v)}
             className="sm:hidden absolute top-3 right-4 z-20 flex items-center justify-center w-9 h-9 rounded-xl transition-all"
@@ -352,7 +352,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="sm:hidden fixed inset-0 z-30" onClick={() => setDrawerOpen(false)} />
       )}
 
-      {/* Drawer ORGANISER + SETTINGS — monte depuis le bas */}
+      {/* Drawer ORGANISER + SETTINGS — inchangé */}
       <div
         className={`sm:hidden fixed bottom-[57px] left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
         style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderRadius: '20px 20px 0 0', borderTop: '0.5px solid rgba(0,0,0,0.1)', boxShadow: '0 -8px 32px rgba(0,0,0,0.12)' }}
@@ -391,15 +391,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 8 }} />
       </div>
 
-      {/* BOTTOM NAV mobile : My Events · Participants · Teesheet · Scorecard · ☰ */}
+      {/* BOTTOM NAV mobile — inchangé */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
         style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-
         {[
-          { href: '/my-events',    icon: Icons.myEvents,     label: 'My Events',    color: '#185FA5' },
-          { href: participantsHref, icon: Icons.participants, label: 'Participants', color: '#7F77DD' },
-          { href: teesheetHref,    icon: Icons.teesheet,     label: 'Teesheet',     color: '#1D9E75' },
-          { href: '/scorecard',    icon: Icons.scorecard,    label: 'Scorecard',    color: '#D85A30' },
+          { href: '/my-events',     icon: Icons.myEvents,     label: 'My Events',    color: '#185FA5' },
+          { href: participantsHref, icon: Icons.participants,  label: 'Participants', color: '#7F77DD' },
+          { href: teesheetHref,     icon: Icons.teesheet,     label: 'Teesheet',     color: '#1D9E75' },
+          { href: '/scorecard',     icon: Icons.scorecard,    label: 'Scorecard',    color: '#D85A30' },
         ].map(item => {
           const active = isActive(item.href)
           return (
@@ -415,8 +414,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           )
         })}
-
-
       </nav>
     </div>
   )
