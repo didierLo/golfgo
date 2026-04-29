@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useFlights } from '@/lib/hooks/useFlights'
 import { createClient } from '@/lib/supabase/client'
@@ -9,15 +9,12 @@ import { useGroupRole } from '@/lib/hooks/useGroupRole'
 
 const supabase = createClient()
 
-const selectClass = "border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5]"
-
 type HolesMode = 'mixed' | 'separated'
 
 type DragState = {
   playerId:     string
   playerName:   string
   fromFlightNo: number
-  group?:       '18' | '9'
 }
 
 export default function FlightsPage() {
@@ -30,16 +27,16 @@ export default function FlightsPage() {
 
   const { players, flights, setFlights, loading, loadData, generate, save, remove } = useFlights(eventId)
 
-  const [flightSize,     setFlightSize]     = useState(4)
-  const [balanceWHS,     setBalanceWHS]     = useState(true)
-  const [iterations,     setIterations]     = useState(800)
-  const [historyWindow,  setHistoryWindow]  = useState(180)
-  const [holesMode,      setHolesMode]      = useState<HolesMode>('mixed')
-  const [pastFlights,    setPastFlights]    = useState<any[]>([])
-  const [forbiddenPairs, setForbiddenPairs] = useState<Set<string>>(new Set())
-  const [preferredPairs, setPreferredPairs] = useState<Set<string>>(new Set())
-  const [generating,     setGenerating]     = useState(false)
-  const [saving,         setSaving]         = useState(false)
+  const [flightSize,    setFlightSize]    = useState(4)
+  const [balanceWHS,    setBalanceWHS]    = useState(true)
+  const [iterations,    setIterations]    = useState(800)
+  const [historyWindow, setHistoryWindow] = useState(180)
+  const [holesMode,     setHolesMode]     = useState<HolesMode>('mixed')
+  const [pastFlights,   setPastFlights]   = useState<any[]>([])
+  const [forbiddenPairs,setForbiddenPairs]= useState<Set<string>>(new Set())
+  const [preferredPairs,setPreferredPairs]= useState<Set<string>>(new Set())
+  const [generating,    setGenerating]    = useState(false)
+  const [saving,        setSaving]        = useState(false)
 
   const [dragState,      setDragState]      = useState<DragState | null>(null)
   const [dragOverFlight, setDragOverFlight] = useState<number | null>(null)
@@ -50,8 +47,7 @@ export default function FlightsPage() {
   useEffect(() => { if (!groupId) return; loadConstraints(); loadPastFlights() }, [groupId])
 
   async function loadConstraints() {
-    const { data, error } = await supabase.from('player_pair_constraints').select('*').eq('group_id', groupId)
-    if (error) return
+    const { data } = await supabase.from('player_pair_constraints').select('*').eq('group_id', groupId)
     const forbidden = new Set<string>()
     const preferred = new Set<string>()
     for (const c of data ?? []) {
@@ -64,52 +60,37 @@ export default function FlightsPage() {
   }
 
   async function loadPastFlights() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('flights')
       .select(`id, created_at, flight_players(player_id, players(id, first_name, surname, whs))`)
-    if (error) return
     setPastFlights((data ?? []).map((f: any) => ({
       date: f.created_at,
       players: f.flight_players.map((fp: any) => fp.players),
     })))
   }
 
-  // ─── Génération avec gestion 9/18 trous ──────────────────────────────────
+  // Joueurs 9T et 18T
+  const players9  = players.filter((p: any) => p.holes_played === 9)
+  const players18 = players.filter((p: any) => !p.holes_played || p.holes_played === 18)
+  const has9holers = players9.length > 0
 
   async function handleGenerate() {
     setGenerating(true)
     setManualEdits(false)
     try {
-      if (holesMode === 'mixed') {
-        // Tous ensemble
-        await generate({
-          flightSize, balanceWHS, iterations,
-          historyWindowDays: historyWindow,
-          pastFlights, forbiddenPairs, preferredPairs, debug: true,
-        })
+      const baseOpts = { flightSize, balanceWHS, iterations, historyWindowDays: historyWindow, pastFlights, forbiddenPairs, preferredPairs, debug: true }
+
+      if (holesMode === 'mixed' || !has9holers) {
+        await generate(baseOpts)
       } else {
-        // Séparés : générer deux groupes indépendants
-        const players18 = players.filter((p: any) => !p.holes_played || p.holes_played === 18)
-        const players9  = players.filter((p: any) => p.holes_played === 9)
-
-        // Générer 18 trous
-        await generate({
-          flightSize, balanceWHS, iterations,
-          historyWindowDays: historyWindow,
-          pastFlights, forbiddenPairs, preferredPairs, debug: true,
-          overridePlayers: players18,
-          flightNoOffset: 0,
-          groupLabel: '18T',
-        })
-
-        // Générer 9 trous (offset pour ne pas écraser les flight_no)
+        // 18T d'abord (remplace)
+        await generate({ ...baseOpts, overridePlayers: players18, flightNoOffset: 0, groupLabel: '18T' })
+        // 9T ensuite (append)
         if (players9.length > 0) {
           await generate({
-            flightSize: Math.min(flightSize, players9.length),
-            balanceWHS, iterations,
-            historyWindowDays: historyWindow,
-            pastFlights, forbiddenPairs, preferredPairs, debug: true,
+            ...baseOpts,
             overridePlayers: players9,
+            flightSize: Math.min(flightSize, players9.length),
             flightNoOffset: Math.ceil(players18.length / flightSize),
             groupLabel: '9T',
           })
@@ -124,36 +105,27 @@ export default function FlightsPage() {
     try { await save() } finally { setSaving(false) }
   }
 
-  // ─── Drag & Drop ─────────────────────────────────────────────────────────
-
+  // Drag & drop
   function onDragStart(e: React.DragEvent, player: any, fromFlightNo: number) {
     e.dataTransfer.effectAllowed = 'move'
     setDragState({ playerId: player.id, playerName: `${player.first_name} ${player.surname}`, fromFlightNo })
   }
   function onDragEnd() { setDragState(null); setDragOverFlight(null); setDragOverPlayer(null) }
-
   function onDragOverFlight(e: React.DragEvent, flightNo: number) {
-    e.preventDefault(); e.dataTransfer.dropEffect = 'move'
-    setDragOverFlight(flightNo); setDragOverPlayer(null)
+    e.preventDefault(); setDragOverFlight(flightNo); setDragOverPlayer(null)
   }
   function onDragOverPlayer(e: React.DragEvent, flightNo: number, targetPlayerId: string) {
-    e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move'
-    setDragOverFlight(flightNo); setDragOverPlayer(targetPlayerId)
+    e.preventDefault(); e.stopPropagation(); setDragOverFlight(flightNo); setDragOverPlayer(targetPlayerId)
   }
   function onDropOnFlight(e: React.DragEvent, toFlightNo: number) {
     e.preventDefault()
-    if (!dragState) return
-    if (dragState.fromFlightNo === toFlightNo) { onDragEnd(); return }
-    movePlayer(dragState.playerId, dragState.fromFlightNo, toFlightNo)
-    onDragEnd()
-  }
-  function movePlayer(playerId: string, fromFlightNo: number, toFlightNo: number) {
+    if (!dragState || dragState.fromFlightNo === toFlightNo) { onDragEnd(); return }
     setFlights((prev: any[]) => {
       const next = prev.map((f: any) => {
         const fps = Array.isArray(f.players) ? f.players : []
-        if (f.flight_no === fromFlightNo) return { ...f, players: fps.filter((p: any) => p.id !== playerId) }
+        if (f.flight_no === dragState.fromFlightNo) return { ...f, players: fps.filter((p: any) => p.id !== dragState.playerId) }
         if (f.flight_no === toFlightNo) {
-          const moved = prev.find((ff: any) => ff.flight_no === fromFlightNo)?.players?.find((p: any) => p.id === playerId)
+          const moved = prev.find((ff: any) => ff.flight_no === dragState.fromFlightNo)?.players?.find((p: any) => p.id === dragState.playerId)
           return moved ? { ...f, players: [...fps, moved] } : f
         }
         return f
@@ -161,24 +133,18 @@ export default function FlightsPage() {
       setManualEdits(true)
       return next
     })
+    onDragEnd()
   }
 
-  // ─── Grouper les flights par label (séparés) ──────────────────────────────
-
+  // Groupes pour l'affichage
   const sortedFlights = [...flights].sort((a: any, b: any) => a.flight_no - b.flight_no)
-
-  // Regrouper si mode séparé
-  const flightGroups: { label: string | null; flights: any[] }[] =
-    holesMode === 'separated'
+  const flightGroups =
+    holesMode === 'separated' && has9holers
       ? [
-          { label: '18 trous', flights: sortedFlights.filter((f: any) => f.groupLabel === '18T' || !f.groupLabel) },
-          { label: '9 trous',  flights: sortedFlights.filter((f: any) => f.groupLabel === '9T') },
+          { label: '18 trous', color: '#185FA5', bg: '#EBF3FC', flights: sortedFlights.filter((f: any) => f.groupLabel === '18T' || !f.groupLabel) },
+          { label: '9 trous',  color: '#92400E', bg: '#FEF3C7', flights: sortedFlights.filter((f: any) => f.groupLabel === '9T') },
         ].filter(g => g.flights.length > 0)
-      : [{ label: null, flights: sortedFlights }]
-
-  // Stats joueurs
-  const players18 = players.filter((p: any) => !p.holes_played || p.holes_played === 18)
-  const players9  = players.filter((p: any) => p.holes_played === 9)
+      : [{ label: null, color: null, bg: null, flights: sortedFlights }]
 
   if (loading || roleLoading) return (
     <div className="p-6 space-y-3">
@@ -189,97 +155,112 @@ export default function FlightsPage() {
   return (
     <div className="p-5 sm:p-6 max-w-4xl">
 
-      {/* Bannière lecture seule */}
       {!isOwner && (
         <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
           Vue en lecture seule — seul l'organisateur peut générer et modifier les flights
         </div>
       )}
 
-      {/* ── Paramètres ── */}
+      {/* ── Carte Paramètres ── */}
       {isOwner && (
-        <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6"
-          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Paramètres</p>
+        <div className="rounded-2xl border border-white/60 shadow-sm mb-6 overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
-          <div className="flex flex-wrap items-end gap-4 mb-4">
-            <div>
-              <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Taille flight</label>
-              <select value={flightSize} onChange={e => setFlightSize(Number(e.target.value))} className={selectClass}>
-                <option value={4}>4 joueurs</option>
-                <option value={3}>3 joueurs</option>
-                <option value={2}>2 joueurs</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Historique</label>
-              <select value={historyWindow} onChange={e => setHistoryWindow(Number(e.target.value))} className={selectClass}>
-                <option value={0}>Sans historique</option>
-                <option value={30}>30 derniers jours</option>
-                <option value={90}>90 derniers jours</option>
-                <option value={180}>6 derniers mois</option>
-                <option value={365}>Dernière année</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Itérations</label>
-              <input type="number" value={iterations} onChange={e => setIterations(Number(e.target.value))}
-                className={`${selectClass} w-24`} />
-            </div>
-
-            <label className="flex items-center gap-2 text-[13px] font-medium text-slate-700 cursor-pointer mb-0.5">
-              <input type="checkbox" checked={balanceWHS} onChange={() => setBalanceWHS(v => !v)} className="rounded" />
-              Équilibrer WHS
-            </label>
-          </div>
-
-          {/* Toggle 9/18 trous — uniquement si des joueurs 9T existent */}
-          {players9.length > 0 && (
-            <div className="mb-4 p-3.5 rounded-xl border border-slate-100 bg-slate-50/60">
-              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2.5">
-                Joueurs 9 trous ({players9.length})
-              </p>
-              <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit">
-                <button type="button" onClick={() => setHolesMode('mixed')}
-                  className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
-                    holesMode === 'mixed' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                  Mélangés
-                </button>
-                <button type="button" onClick={() => setHolesMode('separated')}
-                  className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
-                    holesMode === 'separated' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                  Séparés
-                </button>
-              </div>
-              {holesMode === 'separated' && (
-                <p className="text-[11px] text-slate-400 mt-2">
-                  Flights 18T et 9T générés indépendamment
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex gap-2">
+          {/* Header carte */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">Paramètres</span>
+            <div className="flex items-center gap-2">
               <a href={`/groups/${groupId}/events/${eventId}/flights/history`}
-                className="text-[12px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors flex items-center gap-1.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
-                </svg>
-                Matrice historique
+                className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors flex items-center gap-1">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 5h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                Matrice
               </a>
-              <span className="text-slate-200">·</span>
+              <span className="text-slate-200 text-[10px]">·</span>
               <a href={`/groups/${groupId}/constraints`}
-                className="text-[12px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors">
+                className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors">
                 Contraintes
               </a>
             </div>
-            <div className="flex gap-2">
+          </div>
+
+          {/* Contrôles */}
+          <div className="px-5 py-4">
+            <div className="flex flex-wrap gap-x-6 gap-y-4 items-end mb-4">
+
+              {/* Taille flight */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Taille flight</label>
+                <div className="flex gap-1 p-0.5 bg-slate-100 rounded-xl">
+                  {[2, 3, 4].map(n => (
+                    <button key={n} onClick={() => setFlightSize(n)}
+                      className={`w-9 h-8 rounded-lg text-[13px] font-bold transition-all ${
+                        flightSize === n ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Historique */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Historique</label>
+                <select value={historyWindow} onChange={e => setHistoryWindow(Number(e.target.value))}
+                  className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20">
+                  <option value={0}>Aucun</option>
+                  <option value={30}>30 jours</option>
+                  <option value={90}>3 mois</option>
+                  <option value={180}>6 mois</option>
+                  <option value={365}>1 an</option>
+                </select>
+              </div>
+
+              {/* Itérations */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Itérations</label>
+                <input type="number" value={iterations} onChange={e => setIterations(Number(e.target.value))}
+                  className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 w-24" />
+              </div>
+
+              {/* Équilibrer WHS */}
+              <label className="flex items-center gap-2 cursor-pointer mb-1">
+                <div onClick={() => setBalanceWHS(v => !v)}
+                  className={`w-9 h-5 rounded-full flex items-center px-0.5 transition-colors cursor-pointer ${balanceWHS ? 'bg-[#185FA5]' : 'bg-slate-200'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${balanceWHS ? 'translate-x-4' : 'translate-x-0'}`} />
+                </div>
+                <span className="text-[13px] font-medium text-slate-700">Équilibrer WHS</span>
+              </label>
+
+            </div>
+
+            {/* Toggle 9 trous — toujours visible si has9holers */}
+            {has9holers && (
+              <div className="flex items-center gap-4 py-3 px-4 rounded-xl mb-4"
+                style={{ background: 'rgba(254,243,199,0.6)', border: '1px solid rgba(217,119,6,0.2)' }}>
+                <div>
+                  <p className="text-[12px] font-bold text-amber-800">
+                    {players9.length} joueur{players9.length > 1 ? 's' : ''} joue{players9.length === 1 ? '' : 'nt'} 9 trous
+                  </p>
+                  <p className="text-[11px] text-amber-600 mt-0.5">Comment les intégrer aux flights ?</p>
+                </div>
+                <div className="ml-auto flex gap-1 p-0.5 bg-amber-100 rounded-xl">
+                  <button onClick={() => setHolesMode('mixed')}
+                    className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
+                      holesMode === 'mixed' ? 'bg-white text-slate-800 shadow-sm' : 'text-amber-700 hover:text-amber-900'}`}>
+                    Mélangés
+                  </button>
+                  <button onClick={() => setHolesMode('separated')}
+                    className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
+                      holesMode === 'separated' ? 'bg-white text-slate-800 shadow-sm' : 'text-amber-700 hover:text-amber-900'}`}>
+                    Séparés
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2">
               <button onClick={remove}
-                className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+                className="text-[12px] font-semibold px-3 py-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
                 Effacer
               </button>
               <button onClick={handleSave} disabled={saving || flights.length === 0}
@@ -287,7 +268,7 @@ export default function FlightsPage() {
                 {saving ? 'Saving...' : 'Sauvegarder'}
               </button>
               <button onClick={handleGenerate} disabled={generating}
-                className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-60 transition-colors">
+                className="text-[12px] font-semibold px-5 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-60 transition-colors shadow-sm">
                 {generating ? 'Génération...' : 'Générer'}
               </button>
             </div>
@@ -299,6 +280,7 @@ export default function FlightsPage() {
       <div className="mb-6">
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
           Joueurs confirmés ({players.length})
+          {has9holers && <span className="ml-2 text-amber-600 normal-case font-semibold text-[10px]">· {players9.length} jouent 9T</span>}
         </p>
         <div className="flex flex-wrap gap-2">
           {players.length === 0 && <p className="text-[13px] text-slate-500">Aucun joueur confirmé (GOING)</p>}
@@ -351,14 +333,10 @@ export default function FlightsPage() {
           <div className="space-y-6">
             {flightGroups.map(group => (
               <div key={group.label ?? 'all'}>
-                {/* Label groupe (mode séparé uniquement) */}
                 {group.label && (
                   <div className="flex items-center gap-3 mb-3">
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-                      group.label === '18 trous'
-                        ? 'bg-[#EBF3FC] text-[#0C447C]'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}>
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full"
+                      style={{ background: group.bg ?? '#EBF3FC', color: group.color ?? '#185FA5' }}>
                       {group.label}
                     </span>
                     <div className="flex-1 h-px bg-slate-100" />
@@ -378,23 +356,17 @@ export default function FlightsPage() {
                     return (
                       <div key={flight.flight_no}
                         className={`bg-white border rounded-xl overflow-hidden transition-all ${
-                          isDragTarget
-                            ? 'border-[#185FA5] shadow-[0_0_0_2px_rgba(24,95,165,0.15)] scale-[1.01]'
-                            : 'border-slate-200'
-                        }`}
+                          isDragTarget ? 'border-[#185FA5] shadow-[0_0_0_2px_rgba(24,95,165,0.15)] scale-[1.01]' : 'border-slate-200'}`}
                         onDragOver={e => onDragOverFlight(e, flight.flight_no)}
                         onDrop={e => onDropOnFlight(e, flight.flight_no)}
                         onDragLeave={() => { setDragOverFlight(null); setDragOverPlayer(null) }}>
 
-                        <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
+                        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100">
                           <span className="text-[13px] font-bold text-slate-800">Flight {flight.flight_no}</span>
                           <div className="flex items-center gap-2">
                             {avgWHS && <span className="text-[11px] text-slate-400">moy. {avgWHS}</span>}
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                              flightPlayers.length === flightSize
-                                ? 'bg-[#EAF3DE] text-[#3B6D11]'
-                                : 'bg-amber-50 text-amber-600'
-                            }`}>
+                              flightPlayers.length === flightSize ? 'bg-[#EAF3DE] text-[#3B6D11]' : 'bg-amber-50 text-amber-600'}`}>
                               {flightPlayers.length}/{flightSize}
                             </span>
                           </div>
@@ -410,7 +382,6 @@ export default function FlightsPage() {
                           {flightPlayers.map((p: any, i: number) => {
                             const isDragging   = dragState?.playerId === p.id
                             const isDropTarget = dragOverPlayer === p.id && dragState?.fromFlightNo !== flight.flight_no
-
                             return (
                               <div key={p.id}
                                 draggable={isOwner}
@@ -442,7 +413,6 @@ export default function FlightsPage() {
                               </div>
                             )
                           })}
-
                           {flightPlayers.length === 0 && (
                             <div className="text-center py-4 text-[11px] text-slate-400 border border-dashed border-slate-200 rounded-lg">
                               Flight vide
