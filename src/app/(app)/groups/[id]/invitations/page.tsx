@@ -217,7 +217,9 @@ export default function InvitationsPage() {
   const sortedFiltered = [...filtered].sort((a, b) =>
     (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', 'fr', { sensitivity: 'base' })
   )
-  const sortedResendParticipants = sortByKey(resendParticipants, sortKey)
+  const sortedResendParticipants = [...resendParticipants].sort((a, b) =>
+    (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', 'fr', { sensitivity: 'base' })
+  )
 
   if (loading) return (
     <div className="p-6 space-y-3">
