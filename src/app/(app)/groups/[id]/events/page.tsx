@@ -7,34 +7,27 @@ import { createClient } from '@/lib/supabase/client'
 const supabase = createClient()
 
 type EventRow = {
-  id: string
-  title: string
-  location: string | null
-  starts_at: string
-  competition_formats: { name: string } | null
-  max_participants: number | null
+  id: string; title: string; location: string | null; starts_at: string
+  competition_formats: { name: string } | null; max_participants: number | null
 }
-
-type GroupBg = { bg: string | null }
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleString('fr-BE', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-    timeZone: 'UTC',
+    hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
   })
 }
 
 function isPast(dateStr: string) { return new Date(dateStr) < new Date() }
 
-function EventCard({ event, groupId, goingCount, onDelete, bgUrl }: {
-  event: EventRow; groupId: string; goingCount: number; onDelete: (id: string) => void; bgUrl?: string | null
+function EventCard({ event, groupId, goingCount, onDelete }: {
+  event: EventRow; groupId: string; goingCount: number; onDelete: (id: string) => void
 }) {
   const base = `/groups/${groupId}/events/${event.id}`
   const past = isPast(event.starts_at)
 
   return (
-    <div className="rounded-xl overflow-hidden border border-white/50 hover:border-slate-300 transition-colors bg-white">
+    <div className={`rounded-xl overflow-hidden border border-white/50 hover:border-slate-300 transition-colors bg-white ${past ? 'opacity-60' : ''}`}>
       <div className="px-4 py-3">
         <div className="flex items-start gap-3">
           <div className="w-[3px] h-12 rounded-full flex-shrink-0 bg-[#185FA5] mt-0.5" />
@@ -61,26 +54,6 @@ function EventCard({ event, groupId, goingCount, onDelete, bgUrl }: {
             </button>
           </div>
         </div>
-
-        <div className="flex gap-1.5 mt-2.5 ml-[15px] flex-wrap">
-          {[
-            { label: 'Invitations',  href: `/groups/${groupId}/invitations`, blue: true },
-            { label: 'Participants', href: `${base}/participants` },
-            { label: 'Flights',      href: `${base}/flights` },
-            { label: 'Tee Sheet',    href: `${base}/teesheet` },
-            { label: 'Scorecards',   href: `${base}/scorecards` },
-            { label: 'Leaderboard',  href: `${base}/leaderboard` },
-          ].map(({ label, href, blue }) => (
-            <a key={label} href={href}
-              className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors whitespace-nowrap ${
-                blue
-                  ? 'bg-[#EBF3FC] border-[#B5D4F4] text-[#185FA5] hover:bg-blue-100'
-                  : 'border-slate-200 text-slate-500 hover:bg-slate-50'
-              }`}>
-              {label}
-            </a>
-          ))}
-        </div>
       </div>
     </div>
   )
@@ -90,20 +63,15 @@ export default function EventsPage() {
   const params  = useParams()
   const groupId = params.id as string
 
-  const [events, setEvents]           = useState<EventRow[]>([])
+  const [events,      setEvents]      = useState<EventRow[]>([])
   const [goingCounts, setGoingCounts] = useState<Record<string, number>>({})
-  const [loading, setLoading]         = useState(true)
+  const [loading,     setLoading]     = useState(true)
 
   useEffect(() => { if (!groupId) return; fetchData() }, [groupId])
 
-
-
   async function fetchData() {
     setLoading(true)
-  
-  
-
-   const { data, error } = await supabase
+    const { data, error } = await supabase
       .from('events')
       .select(`id, title, location, starts_at, max_participants, competition_formats(name)`)
       .eq('group_id', groupId).order('starts_at', { ascending: true })
@@ -130,11 +98,11 @@ export default function EventsPage() {
   }
 
   const upcoming = events.filter(e => !isPast(e.starts_at))
-  const past     = events.filter(e => isPast(e.starts_at))
+  const past     = events.filter(e =>  isPast(e.starts_at))
 
   if (loading) return (
     <div className="p-6 space-y-3">
-      {[1,2,3].map(i => <div key={i} className="h-24 bg-white/40 rounded-xl animate-pulse" />)}
+      {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
 
@@ -151,23 +119,23 @@ export default function EventsPage() {
         </a>
       </div>
 
-            {upcoming.length > 0 && (
-          <div className="mb-8">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
-            <div className="flex flex-col gap-2">
-              {upcoming.map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
-            </div>
+      {upcoming.length > 0 && (
+        <div className="mb-8">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
+          <div className="flex flex-col gap-2">
+            {upcoming.map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
           </div>
-        )}
+        </div>
+      )}
 
-         {past.length > 0 && (
-          <div>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Passés</p>
-            <div className="flex flex-col gap-2 opacity-60">
-              {past.slice().reverse().map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
-            </div>
+      {past.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Passés</p>
+          <div className="flex flex-col gap-2">
+            {past.slice().reverse().map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
           </div>
-        )}
+        </div>
+      )}
 
       {events.length === 0 && (
         <div className="text-center py-16 text-slate-500">
