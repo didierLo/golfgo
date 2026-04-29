@@ -35,7 +35,7 @@ const DEFAULTS: Template = {
   template_header_color:       '#185FA5',
   template_bg_image_url:       null,
   template_invitation_subject: 'Invitation : {{event_title}}',
-  template_invitation_body:    'Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\n\nPourras-tu être des nôtres ?',
+  template_invitation_body:    "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\n\nPourras-tu être des nôtres ?",
   template_teesheet_subject:   'Tee Sheet — {{event_title}}',
   template_teesheet_body:      "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
 }
