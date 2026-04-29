@@ -18,8 +18,6 @@ function formatTime(dateStr: string) {
   })
 }
 
-// ─── Remplacement des variables de template ───────────────────────────────────
-
 function applyTemplateVariables(text: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(
     (result, [key, value]) => result.replace(new RegExp(`{{${key}}}`, 'g'), value),
@@ -28,7 +26,6 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
 }
 
 function buildEmailHtml({
-  playerName,
   eventTitle,
   eventDate,
   eventTime,
@@ -38,7 +35,6 @@ function buildEmailHtml({
   noLink,
   eventLink,
 }: {
-  playerName: string
   eventTitle: string
   eventDate: string
   eventTime: string
@@ -200,9 +196,11 @@ export async function POST(req: Request) {
     const eventDate = formatDate(event.starts_at)
     const eventTime = formatTime(event.starts_at)
 
-    // Template depuis le groupe
+    // Template depuis le groupe — pas de fallback hardcodé ici,
+    // le fallback est géré côté DEFAULTS dans communications/page.tsx
+    // et sauvegardé en base lors de la première visite.
     const subjectTemplate = groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}'
-    const bodyTemplate    = groupData?.template_invitation_body ?? null
+    const bodyTemplate    = groupData?.template_invitation_body    ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
 
     let sent = 0
     let skipped = 0
@@ -219,7 +217,6 @@ export async function POST(req: Request) {
       const noLink     = `${appUrl}/invite/no?token=${token}`
       const playerName = `${player.first_name} ${player.surname}`
 
-      // Variables de template disponibles
       const templateVars: Record<string, string> = {
         player_name:       playerName,
         player_first_name: player.first_name,
@@ -231,23 +228,29 @@ export async function POST(req: Request) {
         owner_name:        ownerName,
       }
 
-      // Sujet avec variables
       const subject = applyTemplateVariables(subjectTemplate, templateVars)
 
-      // Message personnalisé avec variables (email_message ou template body)
-      const defaultBody = `Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te voir,\n{{owner_name}}`
-      const rawMessage = event.email_message ?? bodyTemplate ?? defaultBody
-      const resolvedMessage = applyTemplateVariables(rawMessage, templateVars)
+      // bodyTemplate = texte d'invitation principal (toujours affiché)
+      const resolvedBody = applyTemplateVariables(bodyTemplate, templateVars)
 
-      // Mode preview
+      // email_message = note pratique optionnelle ajoutée EN PLUS du template
+      // (ex: "Rendez-vous au départ n°1") — jamais à la place
+      const practicalNote = event.email_message?.trim()
+        ? applyTemplateVariables(event.email_message.trim(), templateVars)
+        : null
+
+      const resolvedMessage = practicalNote
+        ? `${resolvedBody}\n\n${practicalNote}`
+        : resolvedBody
+
       if (!EMAIL_ENABLED) {
         console.log('━━━ EMAIL PREVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━')
         console.log(`To:      ${player.email}`)
         console.log(`Subject: ${subject}`)
-        console.log(`Player:  ${playerName} (${player.first_name} / ${player.surname})`)
+        console.log(`Player:  ${playerName}`)
         console.log(`Date:    ${eventDate} à ${eventTime}`)
         if (event.location) console.log(`Lieu:    ${event.location}`)
-        console.log(`Message: ${resolvedMessage}`)
+        console.log(`Message:\n${resolvedMessage}`)
         console.log(`Yes:     ${yesLink}`)
         console.log(`No:      ${noLink}`)
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
@@ -255,9 +258,7 @@ export async function POST(req: Request) {
         continue
       }
 
-      // Envoi réel
       const html = buildEmailHtml({
-        playerName,
         eventTitle:    event.title,
         eventDate,
         eventTime,
