@@ -14,7 +14,7 @@ function formatDate(dateStr: string) {
 function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString('fr-BE', {
     hour: '2-digit', minute: '2-digit',
-    timeZone: 'Europe/Brussels',
+    timeZone: 'UTC',
   })
 }
 
