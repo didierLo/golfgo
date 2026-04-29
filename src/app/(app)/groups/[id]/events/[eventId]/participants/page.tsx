@@ -11,10 +11,11 @@ type Participant = {
   player_id: string
   status: 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
   responded_at: string | null
+  holes_played: number | null
   players: { first_name: string; surname: string; whs: number | null }
 }
-type Event    = { id: string; title: string; starts_at: string }
-type Member   = { id: string; first_name: string; surname: string }
+type Event     = { id: string; title: string; starts_at: string }
+type Member    = { id: string; first_name: string; surname: string }
 type SortField = 'name' | 'status' | 'whs'
 type ViewMode  = 'list' | 'overview'
 
@@ -40,11 +41,17 @@ function Badge({ status }: { status: string }) {
   )
 }
 
+function HolesBadge({ holes }: { holes: number | null }) {
+  if (!holes || holes === 18) return null
+  return (
+    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 flex-shrink-0">
+      {holes}T
+    </span>
+  )
+}
+
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-function formatDateLong(d: string) {
-  return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
 function formatDateShort(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short' })
@@ -59,23 +66,23 @@ function formatResponded(d: string | null) {
 
 export default function ParticipantsPage() {
   const params  = useParams()
-  const groupId = params.id as string
+  const groupId = params.id      as string
   const eventId = params.eventId as string
 
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
 
-  const [viewMode, setViewMode]                   = useState<ViewMode>('list')
-  const [events, setEvents]                       = useState<Event[]>([])
-  const [selectedEventId, setSelectedEventId]     = useState(eventId)
-  const [participants, setParticipants]           = useState<Participant[]>([])
-  const [loading, setLoading]                     = useState(true)
-  const [sortField, setSortField]                 = useState<SortField>('status')
-  const [sortDir, setSortDir]                     = useState<'asc' | 'desc'>('asc')
-  const [allMembers, setAllMembers]               = useState<Member[]>([])
-  const [upcomingEvents, setUpcomingEvents]       = useState<Event[]>([])
-  const [statusMatrix, setStatusMatrix]           = useState<Record<string, Record<string, string>>>({})
-  const [overviewLoading, setOverviewLoading]     = useState(false)
+  const [viewMode,        setViewMode]        = useState<ViewMode>('list')
+  const [events,          setEvents]          = useState<Event[]>([])
+  const [selectedEventId, setSelectedEventId] = useState(eventId)
+  const [participants,    setParticipants]    = useState<Participant[]>([])
+  const [loading,         setLoading]         = useState(true)
+  const [sortField,       setSortField]       = useState<SortField>('status')
+  const [sortDir,         setSortDir]         = useState<'asc' | 'desc'>('asc')
+  const [allMembers,      setAllMembers]      = useState<Member[]>([])
+  const [upcomingEvents,  setUpcomingEvents]  = useState<Event[]>([])
+  const [statusMatrix,    setStatusMatrix]    = useState<Record<string, Record<string, string>>>({})
+  const [overviewLoading, setOverviewLoading] = useState(false)
 
   useEffect(() => { if (groupId) loadEvents() }, [groupId])
   useEffect(() => { if (selectedEventId) loadParticipants(selectedEventId) }, [selectedEventId])
@@ -90,7 +97,9 @@ export default function ParticipantsPage() {
   async function loadParticipants(evId: string) {
     setLoading(true)
     const { data, error } = await supabase
-      .from('event_participants').select(`player_id, status, responded_at, players(first_name, surname, whs)`).eq('event_id', evId)
+      .from('event_participants')
+      .select(`player_id, status, responded_at, holes_played, players(first_name, surname, whs)`)
+      .eq('event_id', evId)
     if (error) { console.error(error); setLoading(false); return }
     setParticipants((data || []) as any)
     setLoading(false)
@@ -153,10 +162,13 @@ export default function ParticipantsPage() {
     return 0
   })
 
-  const going    = participants.filter(p => p.status === 'GOING').length
-  const invited  = participants.filter(p => p.status === 'INVITED').length
+  // Stats
+  const going   = participants.filter(p => p.status === 'GOING')
+  const going18 = going.filter(p => !p.holes_played || p.holes_played === 18)
+  const going9  = going.filter(p => p.holes_played === 9)
+  const invited = participants.filter(p => p.status === 'INVITED').length
   const declined = participants.filter(p => p.status === 'DECLINED').length
-  const selectedEvent = events.find(e => e.id === selectedEventId)
+  const has9holers = going9.length > 0
 
   function SortBtn({ field, label }: { field: SortField; label: string }) {
     const active = sortField === field
@@ -179,7 +191,7 @@ export default function ParticipantsPage() {
   return (
     <div className="p-5 sm:p-6">
 
-      {/* Onglets vue */}
+      {/* Toggle vue */}
       <div className="flex items-center gap-4 mb-5">
         <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
           <button type="button" onClick={() => setViewMode('list')}
@@ -203,19 +215,17 @@ export default function ParticipantsPage() {
         )}
       </div>
 
-      {/* ── VUE PAR ÉVÉNEMENT ──────────────────────────────────────────────── */}
+      {/* ── VUE PAR ÉVÉNEMENT ── */}
       {viewMode === 'list' && (
         <>
           <div className="mb-5">
             <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-              className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] w-full max-w-sm">
+              className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 w-full max-w-sm">
               {events.map(e => (
                 <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>
               ))}
             </select>
           </div>
-
-      
 
           {!isOwner && (
             <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
@@ -223,20 +233,44 @@ export default function ParticipantsPage() {
             </div>
           )}
 
-          {/* Stats */}
-          <div className="flex gap-3 mb-5">
-            {[
-              { n: going,               color: '#3B6D11', bg: '#EAF3DE', label: 'going'    },
-              { n: invited,             color: '#0C447C', bg: '#EBF3FC', label: 'invited'  },
-              { n: declined,            color: '#A32D2D', bg: '#FCEBEB', label: 'declined' },
-              { n: participants.length, color: '#334155', bg: '#F1F5F9', label: 'total'    },
-            ].map(({ n, color, bg, label }) => (
-              <div key={label} className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[64px]"
-                style={{ background: bg }}>
-                <span className="text-[20px] font-black" style={{ color }}>{n}</span>
-                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{label}</span>
+          {/* Stats cards */}
+          <div className="flex gap-3 mb-5 flex-wrap">
+
+            {/* Going 18T */}
+            <div className="border border-[#C0DD97] rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
+              style={{ background: '#EAF3DE' }}>
+              <span className="text-[20px] font-black text-[#3B6D11]">{going18.length}</span>
+              <span className="text-[10px] font-semibold text-[#3B6D11] uppercase tracking-wide whitespace-nowrap">
+                {has9holers ? 'going 18T' : 'going'}
+              </span>
+            </div>
+
+            {/* Going 9T — affiché uniquement si au moins 1 */}
+            {has9holers && (
+              <div className="border border-amber-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
+                style={{ background: '#FEF3C7' }}>
+                <span className="text-[20px] font-black text-amber-700">{going9.length}</span>
+                <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide whitespace-nowrap">going 9T</span>
               </div>
-            ))}
+            )}
+
+            <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
+              style={{ background: '#EBF3FC' }}>
+              <span className="text-[20px] font-black text-[#0C447C]">{invited}</span>
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">invited</span>
+            </div>
+
+            <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
+              style={{ background: '#FCEBEB' }}>
+              <span className="text-[20px] font-black text-[#A32D2D]">{declined}</span>
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">declined</span>
+            </div>
+
+            <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
+              style={{ background: '#F1F5F9' }}>
+              <span className="text-[20px] font-black text-slate-700">{participants.length}</span>
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">total</span>
+            </div>
           </div>
 
           {loading ? (
@@ -247,13 +281,13 @@ export default function ParticipantsPage() {
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
 
-              {/* Header */}
               <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
-                  : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_80px_130px_100px]'
+                  ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_60px_80px_130px_100px_160px_32px]'
+                  : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_60px_80px_130px_100px]'
               }`}>
                 <SortBtn field="name"   label="Joueur" />
+                <span className="text-[12px] font-semibold text-slate-400 hidden sm:block text-center">Trous</span>
                 <SortBtn field="whs"    label="WHS" />
                 <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
@@ -270,13 +304,21 @@ export default function ParticipantsPage() {
                   <div key={p.player_id}
                     className={`grid gap-4 px-4 py-3 items-center ${
                       isOwner
-                        ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_80px_130px_100px_160px_32px]'
-                        : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_80px_130px_100px]'
+                        ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_60px_80px_130px_100px_160px_32px]'
+                        : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_60px_80px_130px_100px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
-                    <div className="text-[13px] font-semibold text-slate-900 truncate">
-                      {p.players.first_name} {p.players.surname}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[13px] font-semibold text-slate-900 truncate">
+                        {p.players.first_name} {p.players.surname}
+                      </span>
+                      <span className="sm:hidden"><HolesBadge holes={p.holes_played} /></span>
                     </div>
+
+                    <div className="hidden sm:flex justify-center">
+                      <HolesBadge holes={p.holes_played} />
+                    </div>
+
                     <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
                     <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
                     <div><Badge status={p.status} /></div>
@@ -311,7 +353,7 @@ export default function ParticipantsPage() {
         </>
       )}
 
-      {/* ── VUE D'ENSEMBLE ─────────────────────────────────────────────────── */}
+      {/* ── VUE D'ENSEMBLE ── */}
       {viewMode === 'overview' && isOwner && (
         <>
           {overviewLoading ? (
@@ -329,7 +371,7 @@ export default function ParticipantsPage() {
                 <table className="w-full text-[12px] border-collapse">
                   <thead>
                     <tr className="bg-white/30 border-b border-white/40">
-                      <th className="px-4 py-3 text-left text-[12px] font-semibold text-slate-600 sticky left-0 bg-white/40 min-w-[160px]">Membre</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-600 sticky left-0 bg-white/40 min-w-[160px]">Membre</th>
                       {upcomingEvents.map(e => (
                         <th key={e.id} className="px-3 py-3 text-center font-semibold text-slate-500 min-w-[100px]">
                           <div className="text-[11px] text-slate-700 font-semibold truncate max-w-[90px]">{e.title}</div>
@@ -354,11 +396,9 @@ export default function ParticipantsPage() {
                             const icon = status ? STATUS_ICON[status] : null
                             return (
                               <td key={e.id} className="px-3 py-3 text-center">
-                                {icon ? (
-                                  <span className="text-[14px] font-black" style={{ color: icon.color }}>{icon.icon}</span>
-                                ) : (
-                                  <span className="text-slate-200 text-[14px]">—</span>
-                                )}
+                                {icon
+                                  ? <span className="text-[14px] font-black" style={{ color: icon.color }}>{icon.icon}</span>
+                                  : <span className="text-slate-200 text-[14px]">—</span>}
                               </td>
                             )
                           })}
@@ -387,7 +427,7 @@ export default function ParticipantsPage() {
                   </tfoot>
                 </table>
               </div>
-              <div className="flex gap-4 px-4 py-3 border-t border-white/30">
+              <div className="flex gap-4 px-4 py-3 border-t border-white/30 flex-wrap">
                 {Object.entries(STATUS_ICON).map(([status, { icon, color }]) => (
                   <div key={status} className="flex items-center gap-1">
                     <span className="text-[13px] font-black" style={{ color }}>{icon}</span>

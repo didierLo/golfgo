@@ -7,39 +7,89 @@ import { createClient } from '@/lib/supabase/client'
 function InviteYesContent() {
   const supabase = createClient()
   const searchParams = useSearchParams()
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
 
-  useEffect(() => { handleAccept() }, [])
+  type Step = 'choosing' | 'saving' | 'success' | 'error'
+  const [step,        setStep]        = useState<Step>('choosing')
+  const [holesPlayed, setHolesPlayed] = useState<9 | 18>(18)
 
-  async function handleAccept() {
-    const token = searchParams.get('token')
-    if (!token) { setStatus('error'); return }
+  const token = searchParams.get('token')
+
+  // Vérifie que le token existe dès le départ
+  useEffect(() => {
+    if (!token) setStep('error')
+  }, [token])
+
+  async function handleConfirm() {
+    if (!token) { setStep('error'); return }
+    setStep('saving')
 
     const { error } = await supabase
       .from('event_participants')
-      .update({ status: 'GOING', responded_at: new Date().toISOString() })
+      .update({
+        status:       'GOING',
+        holes_played: holesPlayed,
+        responded_at: new Date().toISOString(),
+      })
       .eq('invite_token', token)
 
-    setStatus(error ? 'error' : 'success')
+    setStep(error ? 'error' : 'success')
   }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 text-center">
       <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-sm w-full">
+
         {/* Logo */}
         <div className="flex items-center justify-center gap-0 mb-6">
           <span className="text-[22px] font-black text-[#185FA5] tracking-tight">Golf</span>
           <span className="text-[22px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
         </div>
 
-        {status === 'loading' && (
+        {/* ── Choix trous ── */}
+        {step === 'choosing' && (
+          <>
+            <div className="w-14 h-14 rounded-full bg-[#EBF3FC] flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">⛳</span>
+            </div>
+            <h1 className="text-[18px] font-black text-slate-900 mb-1">Tu participes !</h1>
+            <p className="text-[13px] text-slate-500 mb-6">Combien de trous vas-tu jouer ?</p>
+
+            <div className="flex gap-3 mb-6">
+              {([18, 9] as const).map(n => (
+                <button
+                  key={n}
+                  onClick={() => setHolesPlayed(n)}
+                  className={`flex-1 py-4 rounded-xl border-2 font-black text-[22px] transition-all ${
+                    holesPlayed === n
+                      ? 'border-[#185FA5] bg-[#EBF3FC] text-[#185FA5]'
+                      : 'border-slate-200 text-slate-400 hover:border-slate-300'
+                  }`}
+                >
+                  {n}
+                  <span className="block text-[11px] font-semibold mt-0.5">trous</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleConfirm}
+              className="w-full bg-[#185FA5] text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-[#0C447C] transition-colors"
+            >
+              Confirmer ma participation
+            </button>
+          </>
+        )}
+
+        {/* ── Sauvegarde ── */}
+        {step === 'saving' && (
           <>
             <div className="w-10 h-10 border-2 border-slate-200 border-t-[#185FA5] rounded-full animate-spin mx-auto mb-4" />
             <p className="text-[14px] text-slate-500">Confirmation en cours…</p>
           </>
         )}
 
-        {status === 'success' && (
+        {/* ── Succès ── */}
+        {step === 'success' && (
           <>
             <div className="w-14 h-14 rounded-full bg-[#EAF3DE] flex items-center justify-center mx-auto mb-4">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -47,11 +97,14 @@ function InviteYesContent() {
               </svg>
             </div>
             <h1 className="text-[18px] font-black text-slate-900 mb-2">Participation confirmée !</h1>
-            <p className="text-[13px] text-slate-600">Tu es inscrit(e) à l'événement. À bientôt sur le parcours ⛳</p>
+            <p className="text-[13px] text-slate-600">
+              Tu joues <strong>{holesPlayed} trous</strong>. À bientôt sur le parcours ⛳
+            </p>
           </>
         )}
 
-        {status === 'error' && (
+        {/* ── Erreur ── */}
+        {step === 'error' && (
           <>
             <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -62,6 +115,7 @@ function InviteYesContent() {
             <p className="text-[13px] text-slate-600">Ce lien est expiré ou invalide. Contacte l'organisateur.</p>
           </>
         )}
+
       </div>
     </div>
   )
