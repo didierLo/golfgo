@@ -5,29 +5,27 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 function InviteYesContent() {
-  const supabase = createClient()
+  const supabase   = createClient()
   const searchParams = useSearchParams()
 
   type Step = 'choosing' | 'saving' | 'success' | 'error'
   const [step,        setStep]        = useState<Step>('choosing')
   const [holesPlayed, setHolesPlayed] = useState<9 | 18>(18)
 
-  const token = searchParams.get('token')
-  // Si ?holes=9 dans l'URL (venu de l'email), on pré-sélectionne et on confirme directement
+  const token      = searchParams.get('token')
   const holesParam = searchParams.get('holes')
 
+  // Si ?holes= dans l'URL (venu de l'email), confirme directement
   useEffect(() => {
     if (!token) { setStep('error'); return }
     if (holesParam === '9' || holesParam === '18') {
       const h = holesParam === '9' ? 9 : 18
       setHolesPlayed(h)
-      // Confirme directement sans afficher l'écran de choix
-      handleConfirmWith(h)
+      confirmParticipation(token, h)
     }
-  }, [token, holesParam])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleConfirmWith(holes: 9 | 18) {
-    if (!token) { setStep('error'); return }
+  async function confirmParticipation(tok: string, holes: 9 | 18) {
     setStep('saving')
     const { error } = await supabase
       .from('event_participants')
@@ -36,12 +34,13 @@ function InviteYesContent() {
         holes_played: holes,
         responded_at: new Date().toISOString(),
       })
-      .eq('invite_token', token)
+      .eq('invite_token', tok)
     setStep(error ? 'error' : 'success')
   }
 
   async function handleConfirm() {
-    handleConfirmWith(holesPlayed)
+    if (!token) { setStep('error'); return }
+    await confirmParticipation(token, holesPlayed)
   }
 
   return (
@@ -54,7 +53,7 @@ function InviteYesContent() {
           <span className="text-[22px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
         </div>
 
-        {/* ── Choix trous (pas de param holes dans l'URL) ── */}
+        {/* Choix trous — affiché si pas de param holes dans l'URL */}
         {step === 'choosing' && (
           <>
             <div className="w-14 h-14 rounded-full bg-[#EBF3FC] flex items-center justify-center mx-auto mb-4">
@@ -84,7 +83,7 @@ function InviteYesContent() {
           </>
         )}
 
-        {/* ── Sauvegarde ── */}
+        {/* Sauvegarde */}
         {step === 'saving' && (
           <>
             <div className="w-10 h-10 border-2 border-slate-200 border-t-[#185FA5] rounded-full animate-spin mx-auto mb-4" />
@@ -92,7 +91,7 @@ function InviteYesContent() {
           </>
         )}
 
-        {/* ── Succès ── */}
+        {/* Succès */}
         {step === 'success' && (
           <>
             <div className="w-14 h-14 rounded-full bg-[#EAF3DE] flex items-center justify-center mx-auto mb-4">
@@ -107,7 +106,7 @@ function InviteYesContent() {
           </>
         )}
 
-        {/* ── Erreur ── */}
+        {/* Erreur */}
         {step === 'error' && (
           <>
             <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
