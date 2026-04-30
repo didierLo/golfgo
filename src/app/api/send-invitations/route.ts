@@ -38,84 +38,117 @@ function buildEmailHtml({
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Invitation — ${eventTitle}</title>
 </head>
-<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;padding:32px 16px;">
+<body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
         <!-- Header -->
         <tr>
-          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;vertical-align:middle;">
-            <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="36" height="36" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
-            <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
-            <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
+          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
+            <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="32" height="32" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
+            <span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
+            <span style="font-size:20px;font-weight:700;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
           </td>
         </tr>
 
         <!-- Body -->
         <tr>
-          <td style="background:#ffffff;padding:32px;">
+          <td style="background:#ffffff;padding:36px 32px;">
 
-            <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#111827;line-height:1.3;">
-              Invitation — ${eventTitle}
+            <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;line-height:1.3;">
+              Invitation
             </h1>
+            <p style="margin:0 0 28px;font-size:16px;font-weight:600;color:#185FA5;">
+              ${eventTitle}
+            </p>
 
             <!-- Infos event -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;margin-bottom:24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
               <tr><td style="padding:16px 20px;">
                 <table cellpadding="0" cellspacing="0">
                   <tr>
-                    <td style="padding:4px 0;font-size:13px;color:#6B7280;width:80px;">📅 Date</td>
-                    <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventDate} à ${eventTime}</td>
+                    <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
                   </tr>
                   ${eventLocation ? `
                   <tr>
-                    <td style="padding:4px 0;font-size:13px;color:#6B7280;">📍 Lieu</td>
-                    <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventLocation}</td>
+                    <td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td>
                   </tr>` : ''}
                 </table>
               </td></tr>
             </table>
 
             ${eventMessage ? `
-            <div style="margin-bottom:24px;">
-              <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">${eventMessage.replace(/\n/g, '<br/>')}</p>
+            <div style="margin-bottom:28px;">
+              <p style="margin:0;font-size:14px;color:#334155;line-height:1.9;">${eventMessage.replace(/\n/g, '<br/>')}</p>
             </div>` : ''}
 
-            <!-- 3 boutons réponse — style EventOverview -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-              <!-- Je participe 18 trous -->
+            <!-- Séparateur -->
+            <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
+
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">
+              Ta réponse
+            </p>
+
+            <!-- Bouton 18 trous -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr>
-                <td style="padding-bottom:8px;">
-                  <a href="${yes18Link}"
-                    style="display:block;width:100%;box-sizing:border-box;background:#F0FDF4;color:#166534;text-decoration:none;font-size:14px;font-weight:600;padding:13px 20px;border-radius:10px;border:2px solid #16A34A;text-align:center;">
-                    Je participe — 18 trous
+                <td style="border-radius:10px;overflow:hidden;">
+                  <a href="${yes18Link}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #16A34A;border-radius:10px;padding:14px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:15px;font-weight:600;color:#15803D;">
+                          Je participe — 18 trous
+                        </td>
+                        <td align="right" style="font-size:18px;">⛳</td>
+                      </tr>
+                    </table>
                   </a>
                 </td>
               </tr>
-              <!-- Je participe 9 trous -->
-              <tr>
-                <td style="padding-bottom:8px;">
-                  <a href="${yes9Link}"
-                    style="display:block;width:100%;box-sizing:border-box;background:#FFFBEB;color:#92400E;text-decoration:none;font-size:14px;font-weight:600;padding:13px 20px;border-radius:10px;border:2px solid #D97706;text-align:center;">
-                    Je participe — 9 trous
-                  </a>
-                </td>
-              </tr>
-              <!-- Je ne participe pas -->
+            </table>
+
+            <!-- Bouton 9 trous -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr>
                 <td>
-                  <a href="${noLink}"
-                    style="display:block;width:100%;box-sizing:border-box;background:#FFF5F5;color:#991B1B;text-decoration:none;font-size:14px;font-weight:600;padding:13px 20px;border-radius:10px;border:2px solid #DC2626;text-align:center;">
-                    Je ne participe pas
+                  <a href="${yes9Link}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #D97706;border-radius:10px;padding:14px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:15px;font-weight:600;color:#B45309;">
+                          Je participe — 9 trous
+                        </td>
+                        <td align="right" style="font-size:18px;">🏌️</td>
+                      </tr>
+                    </table>
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Bouton décliner -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <tr>
+                <td>
+                  <a href="${noLink}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:15px;font-weight:500;color:#94A3B8;">
+                          Je ne peux pas participer
+                        </td>
+                        <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
+                      </tr>
+                    </table>
                   </a>
                 </td>
               </tr>
             </table>
 
             <!-- Lien app -->
-            <p style="margin:0;font-size:13px;color:#6B7280;">
-              Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:underline;">voir les détails de l'événement</a> dans l'app.
+            <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
+              Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
             </p>
 
           </td>
@@ -123,9 +156,9 @@ function buildEmailHtml({
 
         <!-- Footer -->
         <tr>
-          <td style="background:#F9FAFB;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 12px 12px;padding:16px 32px;">
-            <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;">
-              Cet email t'a été envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#9CA3AF;">golfgo.be</a>
+          <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
+            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">
+              Cet email t'a été envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a>
             </p>
           </td>
         </tr>
