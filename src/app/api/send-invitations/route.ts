@@ -10,14 +10,11 @@ function formatDate(dateStr: string) {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 }
-
 function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString('fr-BE', {
-    hour: '2-digit', minute: '2-digit',
-    timeZone: 'UTC',
+    hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
   })
 }
-
 function applyTemplateVariables(text: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(
     (result, [key, value]) => result.replace(new RegExp(`{{${key}}}`, 'g'), value),
@@ -26,25 +23,12 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
 }
 
 function buildEmailHtml({
-  eventTitle,
-  eventDate,
-  eventTime,
-  eventLocation,
-  eventMessage,
-  yesLink,
-  yes9Link,
-  noLink,
-  eventLink,
+  eventTitle, eventDate, eventTime, eventLocation, eventMessage,
+  yes18Link, yes9Link, noLink, eventLink,
 }: {
-  eventTitle: string
-  eventDate: string
-  eventTime: string
-  eventLocation: string | null
-  eventMessage: string | null
-  yesLink: string
-  yes9Link: string
-  noLink: string
-  eventLink: string
+  eventTitle: string; eventDate: string; eventTime: string
+  eventLocation: string | null; eventMessage: string | null
+  yes18Link: string; yes9Link: string; noLink: string; eventLink: string
 }) {
   return `
 <!DOCTYPE html>
@@ -55,115 +39,107 @@ function buildEmailHtml({
   <title>Invitation — ${eventTitle}</title>
 </head>
 <body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;padding:32px 16px;">
-    <tr>
-      <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 
-          <!-- Header -->
-          <tr>
-            <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;vertical-align:middle;">
-              <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="36" height="36" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
-              <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
-              <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
-            </td>
-          </tr>
+        <!-- Header -->
+        <tr>
+          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;vertical-align:middle;">
+            <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="36" height="36" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
+            <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
+            <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
+          </td>
+        </tr>
 
-          <!-- Body -->
-          <tr>
-            <td style="background:#ffffff;padding:32px;">
+        <!-- Body -->
+        <tr>
+          <td style="background:#ffffff;padding:32px;">
 
-              <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#111827;line-height:1.3;">
-                Invitation — ${eventTitle}
-              </h1>
+            <h1 style="margin:0 0 24px;font-size:22px;font-weight:600;color:#111827;line-height:1.3;">
+              Invitation — ${eventTitle}
+            </h1>
 
-              <!-- Infos event -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;margin-bottom:24px;">
-                <tr>
-                  <td style="padding:16px 20px;">
-                    <table cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="padding:4px 0;font-size:13px;color:#6B7280;width:80px;">📅 Date</td>
-                        <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventDate} à ${eventTime}</td>
-                      </tr>
-                      ${eventLocation ? `
-                      <tr>
-                        <td style="padding:4px 0;font-size:13px;color:#6B7280;">📍 Lieu</td>
-                        <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventLocation}</td>
-                      </tr>` : ''}
-                    </table>
-                  </td>
-                </tr>
-              </table>
+            <!-- Infos event -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;margin-bottom:24px;">
+              <tr><td style="padding:16px 20px;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#6B7280;width:80px;">📅 Date</td>
+                    <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventDate} à ${eventTime}</td>
+                  </tr>
+                  ${eventLocation ? `
+                  <tr>
+                    <td style="padding:4px 0;font-size:13px;color:#6B7280;">📍 Lieu</td>
+                    <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;">${eventLocation}</td>
+                  </tr>` : ''}
+                </table>
+              </td></tr>
+            </table>
 
-              ${eventMessage ? `
-              <!-- Message personnalisé -->
-              <div style="margin-bottom:24px;padding:16px 20px;background:#ffffff;border-radius:8px;">
-                <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">${eventMessage.replace(/\n/g, '<br/>')}</p>
-              </div>` : ''}
+            ${eventMessage ? `
+            <div style="margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#111827;line-height:1.8;">${eventMessage.replace(/\n/g, '<br/>')}</p>
+            </div>` : ''}
 
-              <!-- Boutons réponse -->
-              <table cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
-                <tr>
-                  <td style="padding-right:12px;">
-                    <a href="${yesLink}"
-                      style="display:inline-block;background:#16A34A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;">
-                      ✓ Je participe
-                    </a>
-                  </td>
-                  <td>
-                    <a href="${noLink}"
-                      style="display:inline-block;background:#ffffff;color:#DC2626;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;border:1.5px solid #DC2626;">
-                      ✗ Je ne peux pas
-                    </a>
-                  </td>
-                </tr>
-              </table>
+            <!-- 3 boutons réponse — style EventOverview -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <!-- Je participe 18 trous -->
+              <tr>
+                <td style="padding-bottom:8px;">
+                  <a href="${yes18Link}"
+                    style="display:block;width:100%;box-sizing:border-box;background:#F0FDF4;color:#166534;text-decoration:none;font-size:14px;font-weight:600;padding:13px 20px;border-radius:10px;border:2px solid #16A34A;text-align:center;">
+                    Je participe — 18 trous
+                  </a>
+                </td>
+              </tr>
+              <!-- Je participe 9 trous -->
+              <tr>
+                <td style="padding-bottom:8px;">
+                  <a href="${yes9Link}"
+                    style="display:block;width:100%;box-sizing:border-box;background:#FFFBEB;color:#92400E;text-decoration:none;font-size:14px;font-weight:600;padding:13px 20px;border-radius:10px;border:2px solid #D97706;text-align:center;">
+                    Je participe — 9 trous
+                  </a>
+                </td>
+              </tr>
+              <!-- Je ne participe pas -->
+              <tr>
+                <td>
+                  <a href="${noLink}"
+                    style="display:block;width:100%;box-sizing:border-box;background:#FFF5F5;color:#991B1B;text-decoration:none;font-size:14px;font-weight:600;padding:13px 20px;border-radius:10px;border:2px solid #DC2626;text-align:center;">
+                    Je ne participe pas
+                  </a>
+                </td>
+              </tr>
+            </table>
 
-              <!-- Bouton 9 trous -->
-              <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-                <tr>
-                  <td>
-                    <a href="${yes9Link}"
-                      style="display:inline-block;background:#ffffff;color:#92400E;text-decoration:none;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;border:1.5px solid #D97706;">
-                      🏌️ Je participe — 9 trous seulement
-                    </a>
-                  </td>
-                </tr>
-              </table>
+            <!-- Lien app -->
+            <p style="margin:0;font-size:13px;color:#6B7280;">
+              Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:underline;">voir les détails de l'événement</a> dans l'app.
+            </p>
 
-              <!-- Lien voir event -->
-              <p style="margin:0;font-size:13px;color:#6B7280;">
-                Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:underline;">voir les détails de l'événement</a> dans l'app.
-              </p>
+          </td>
+        </tr>
 
-            </td>
-          </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#F9FAFB;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 12px 12px;padding:16px 32px;">
+            <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;">
+              Cet email t'a été envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#9CA3AF;">golfgo.be</a>
+            </p>
+          </td>
+        </tr>
 
-          <!-- Footer -->
-          <tr>
-            <td style="background:#F9FAFB;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 12px 12px;padding:16px 32px;">
-              <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;">
-                Cet email t'a été envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#9CA3AF;">golfgo.be</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
+      </table>
+    </td></tr>
   </table>
-
 </body>
-</html>
-  `.trim()
+</html>`.trim()
 }
 
 export async function POST(req: Request) {
   try {
     const { eventId, playerIds } = await req.json()
-
     if (!eventId || !playerIds?.length) {
       return Response.json({ success: false, error: 'eventId et playerIds requis' }, { status: 400 })
     }
@@ -173,9 +149,7 @@ export async function POST(req: Request) {
     const { data: event, error: evErr } = await supabase
       .from('events')
       .select('id, title, location, starts_at, group_id, email_message')
-      .eq('id', eventId)
-      .single()
-
+      .eq('id', eventId).single()
     if (evErr || !event) {
       return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
     }
@@ -183,108 +157,74 @@ export async function POST(req: Request) {
     const { data: groupData } = await supabase
       .from('groups')
       .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
-      .eq('id', event.group_id)
-      .eq('groups_players.role', 'owner')
-      .single()
+      .eq('id', event.group_id).eq('groups_players.role', 'owner').single()
 
     const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-    const ownerName = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
+    const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
 
     const { data: participants, error: pErr } = await supabase
       .from('event_participants')
       .select('player_id, invite_token, players(first_name, surname, email)')
-      .eq('event_id', eventId)
-      .in('player_id', playerIds)
-
-    if (pErr) {
-      return Response.json({ success: false, error: pErr.message }, { status: 500 })
-    }
+      .eq('event_id', eventId).in('player_id', playerIds)
+    if (pErr) return Response.json({ success: false, error: pErr.message }, { status: 500 })
 
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-    const eventLink = `${appUrl}/login`
+    const eventLink = `${appUrl}/groups/${event.group_id}/events/${eventId}`
     const eventDate = formatDate(event.starts_at)
     const eventTime = formatTime(event.starts_at)
 
     const subjectTemplate = groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}'
     const bodyTemplate    = groupData?.template_invitation_body    ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
 
-    let sent = 0
-    let skipped = 0
+    let sent = 0, skipped = 0
     const errors: string[] = []
 
     for (const p of participants || []) {
       const player = p.players as any
       if (!player?.email) { skipped++; continue }
-
       const token = p.invite_token
       if (!token) { skipped++; continue }
 
-      const yesLink    = `${appUrl}/invite/yes?token=${token}&holes=18`
+      const yes18Link  = `${appUrl}/invite/yes?token=${token}&holes=18`
       const yes9Link   = `${appUrl}/invite/yes?token=${token}&holes=9`
       const noLink     = `${appUrl}/invite/no?token=${token}`
       const playerName = `${player.first_name} ${player.surname}`
 
       const templateVars: Record<string, string> = {
-        player_name:       playerName,
-        player_first_name: player.first_name,
-        player_surname:    player.surname,
-        first_name:        player.first_name,
-        event_title:       event.title,
-        event_date:        eventDate,
-        event_time:        eventTime,
-        owner_name:        ownerName,
+        player_name: playerName, player_first_name: player.first_name,
+        player_surname: player.surname, first_name: player.first_name,
+        event_title: event.title, event_date: eventDate,
+        event_time: eventTime, owner_name: ownerName,
       }
 
-      const subject      = applyTemplateVariables(subjectTemplate, templateVars)
-      const resolvedBody = applyTemplateVariables(bodyTemplate, templateVars)
+      const subject       = applyTemplateVariables(subjectTemplate, templateVars)
+      const resolvedBody  = applyTemplateVariables(bodyTemplate, templateVars)
       const practicalNote = event.email_message?.trim()
-        ? applyTemplateVariables(event.email_message.trim(), templateVars)
-        : null
+        ? applyTemplateVariables(event.email_message.trim(), templateVars) : null
       const resolvedMessage = practicalNote ? `${resolvedBody}\n\n${practicalNote}` : resolvedBody
 
       if (!EMAIL_ENABLED) {
-        console.log('━━━ EMAIL PREVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-        console.log(`To:      ${player.email}`)
-        console.log(`Subject: ${subject}`)
-        console.log(`Yes:     ${yesLink}`)
-        console.log(`Yes 9T:  ${yes9Link}`)
-        console.log(`No:      ${noLink}`)
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-        sent++
-        continue
+        console.log(`[PREVIEW] To: ${player.email} | 18T: ${yes18Link} | 9T: ${yes9Link} | No: ${noLink}`)
+        sent++; continue
       }
 
       const html = buildEmailHtml({
-        eventTitle:    event.title,
-        eventDate,
-        eventTime,
-        eventLocation: event.location,
-        eventMessage:  resolvedMessage,
-        yesLink,
-        yes9Link,
-        noLink,
-        eventLink,
+        eventTitle: event.title, eventDate, eventTime,
+        eventLocation: event.location, eventMessage: resolvedMessage,
+        yes18Link, yes9Link, noLink, eventLink,
       })
 
       const { error: emailErr } = await resend.emails.send({
-        from:    'GolfGo <info@golfgo.be>',
-        to:      player.email,
-        subject,
-        html,
+        from: 'GolfGo <info@golfgo.be>', to: player.email, subject, html,
       })
 
-      if (emailErr) {
-        errors.push(`${playerName}: ${emailErr.message}`)
-      } else {
-        sent++
-      }
+      if (emailErr) { errors.push(`${playerName}: ${emailErr.message}`) }
+      else { sent++ }
       await sleep(EMAIL_SEND_DELAY_MS)
     }
 
     return Response.json({ success: true, sent, skipped, errors })
-
   } catch (error: any) {
-    console.error('EMAIL ERROR:', error)
     return Response.json({ success: false, error: error.message }, { status: 500 })
   }
 }

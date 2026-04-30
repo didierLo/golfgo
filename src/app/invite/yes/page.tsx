@@ -5,17 +5,17 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 function InviteYesContent() {
-  const supabase   = createClient()
+  const supabase     = createClient()
   const searchParams = useSearchParams()
 
   type Step = 'choosing' | 'saving' | 'success' | 'error'
   const [step,        setStep]        = useState<Step>('choosing')
   const [holesPlayed, setHolesPlayed] = useState<9 | 18>(18)
+  const [appLink,     setAppLink]     = useState<string | null>(null)
 
   const token      = searchParams.get('token')
   const holesParam = searchParams.get('holes')
 
-  // Si ?holes= dans l'URL (venu de l'email), confirme directement
   useEffect(() => {
     if (!token) { setStep('error'); return }
     if (holesParam === '9' || holesParam === '18') {
@@ -27,6 +27,14 @@ function InviteYesContent() {
 
   async function confirmParticipation(tok: string, holes: 9 | 18) {
     setStep('saving')
+
+    // Récupérer l'event_id pour construire le lien app
+    const { data: participant } = await supabase
+      .from('event_participants')
+      .select('event_id, events(group_id)')
+      .eq('invite_token', tok)
+      .maybeSingle()
+
     const { error } = await supabase
       .from('event_participants')
       .update({
@@ -35,7 +43,20 @@ function InviteYesContent() {
         responded_at: new Date().toISOString(),
       })
       .eq('invite_token', tok)
-    setStep(error ? 'error' : 'success')
+
+    if (error) {
+      setStep('error')
+      return
+    }
+
+    // Construire le lien vers la page overview de l'event
+    if (participant?.event_id && (participant?.events as any)?.group_id) {
+      const gid = (participant.events as any).group_id
+      const eid = participant.event_id
+      setAppLink(`/groups/${gid}/events/${eid}`)
+    }
+
+    setStep('success')
   }
 
   async function handleConfirm() {
@@ -53,7 +74,7 @@ function InviteYesContent() {
           <span className="text-[22px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
         </div>
 
-        {/* Choix trous — affiché si pas de param holes dans l'URL */}
+        {/* Choix trous */}
         {step === 'choosing' && (
           <>
             <div className="w-14 h-14 rounded-full bg-[#EBF3FC] flex items-center justify-center mx-auto mb-4">
@@ -100,9 +121,18 @@ function InviteYesContent() {
               </svg>
             </div>
             <h1 className="text-[18px] font-black text-slate-900 mb-2">Participation confirmée !</h1>
-            <p className="text-[13px] text-slate-600">
+            <p className="text-[13px] text-slate-600 mb-6">
               Tu joues <strong>{holesPlayed} trous</strong>. À bientôt sur le parcours ⛳
             </p>
+            {appLink && (
+              <a href={appLink}
+                className="inline-flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] transition-colors">
+                Voir l'événement
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </a>
+            )}
           </>
         )}
 
