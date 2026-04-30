@@ -20,13 +20,6 @@ type EventDetail = {
 }
 type ParticipationStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST' | null
 
-const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> = {
-  GOING:    { label: 'Confirmé',        bg: '#EAF3DE', text: '#3B6D11' },
-  INVITED:  { label: 'En attente',      bg: '#EBF3FC', text: '#0C447C' },
-  DECLINED: { label: 'Décliné',         bg: '#FCEBEB', text: '#A32D2D' },
-  WAITLIST: { label: "Liste d'attente", bg: '#FAEEDA', text: '#854F0B' },
-}
-
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
@@ -46,7 +39,6 @@ export default function EventOverviewPage() {
   const [participantCount, setParticipantCount] = useState(0)
   const [loading,          setLoading]          = useState(true)
   const [updating,         setUpdating]         = useState(false)
-  const [updatingHoles,    setUpdatingHoles]    = useState(false)
 
   useEffect(() => { loadData() }, [eventId])
 
@@ -54,7 +46,8 @@ export default function EventOverviewPage() {
     setLoading(true)
     const { data: eventData } = await supabase
       .from('events')
-      .select(`id, title, location, starts_at, ends_at, description, max_participants, competition_formats(name), courses(course_name, clubs(name))`)
+      .select(`id, title, location, starts_at, ends_at, description, max_participants,
+        competition_formats(name), courses(course_name, clubs(name))`)
       .eq('id', eventId).single()
     if (eventData) setEvent(eventData as any)
 
@@ -77,38 +70,34 @@ export default function EventOverviewPage() {
     setLoading(false)
   }
 
-  async function updateStatus(newStatus: 'GOING' | 'DECLINED') {
+  // Un seul appel pour status + holes
+  async function respond(newStatus: 'GOING' | 'DECLINED', holes?: 9 | 18) {
     if (!playerId) return
     setUpdating(true)
+    const update: any = { status: newStatus, responded_at: new Date().toISOString() }
+    if (holes !== undefined) update.holes_played = holes
+
     const { error } = await supabase.from('event_participants')
-      .update({ status: newStatus, responded_at: new Date().toISOString() })
-      .eq('event_id', eventId).eq('player_id', playerId)
+      .update(update).eq('event_id', eventId).eq('player_id', playerId)
+
     if (error) {
       toast.error('Erreur lors de la mise à jour')
     } else {
+      const wasGoing = status === 'GOING'
+      const nowGoing = newStatus === 'GOING'
       setStatus(newStatus)
-      toast.success(newStatus === 'GOING' ? 'Participation confirmée !' : 'Participation déclinée')
+      if (holes !== undefined) setHolesPlayed(holes)
       setParticipantCount(prev => {
-        if (newStatus === 'GOING') return prev + (status !== 'GOING' ? 1 : 0)
-        return prev - (status === 'GOING' ? 1 : 0)
+        if (nowGoing && !wasGoing) return prev + 1
+        if (!nowGoing && wasGoing) return prev - 1
+        return prev
       })
+      const msg = newStatus === 'DECLINED'
+        ? 'Participation déclinée'
+        : holes === 9 ? 'Inscrit — 9 trous ⛳' : 'Participation confirmée — 18 trous ⛳'
+      toast.success(msg)
     }
     setUpdating(false)
-  }
-
-  async function updateHoles(holes: 9 | 18) {
-    if (!playerId) return
-    setUpdatingHoles(true)
-    const { error } = await supabase.from('event_participants')
-      .update({ holes_played: holes })
-      .eq('event_id', eventId).eq('player_id', playerId)
-    if (error) {
-      toast.error('Erreur lors de la mise à jour')
-    } else {
-      setHolesPlayed(holes)
-      toast.success(holes === 9 ? '9 trous enregistré' : '18 trous enregistré')
-    }
-    setUpdatingHoles(false)
   }
 
   if (loading) return (
@@ -121,8 +110,12 @@ export default function EventOverviewPage() {
     <div className="p-6 text-[13px] text-slate-500">Événement introuvable</div>
   )
 
-  const s = status ? STATUS_STYLE[status] : null
-  const isFull = !!event.max_participants && participantCount >= event.max_participants && status !== ('GOING' as ParticipationStatus)
+  const isFull = !!event.max_participants && participantCount >= event.max_participants && status !== 'GOING'
+
+  // Quel bouton est actif
+  const active18 = status === 'GOING' && holesPlayed === 18
+  const active9  = status === 'GOING' && holesPlayed === 9
+  const activeNo = status === 'DECLINED'
 
   return (
     <div className="p-5 sm:p-6 max-w-xl">
@@ -190,19 +183,18 @@ export default function EventOverviewPage() {
           </svg>
           <span className="text-[13px] text-slate-700">
             <span className="font-black text-[#3B6D11]">{participantCount}</span>
-            {event.max_participants
-              ? <>
-                  {' '}/ {event.max_participants} place{event.max_participants !== 1 ? 's' : ''}
-                  {' — '}
-                  {(() => {
-                    const remaining = event.max_participants - participantCount
-                    return remaining > 0
-                      ? <span className="text-[#3B6D11] font-semibold">{remaining} restante{remaining !== 1 ? 's' : ''}</span>
-                      : <span className="text-[#A32D2D] font-semibold">Complet</span>
-                  })()}
-                </>
-              : <> participant{participantCount !== 1 ? 's' : ''} confirmé{participantCount !== 1 ? 's' : ''}</>
-            }
+            {event.max_participants ? (
+              <>
+                {' '}/ {event.max_participants} place{event.max_participants !== 1 ? 's' : ''}
+                {' — '}
+                {event.max_participants - participantCount > 0
+                  ? <span className="text-[#3B6D11] font-semibold">{event.max_participants - participantCount} restante{event.max_participants - participantCount !== 1 ? 's' : ''}</span>
+                  : <span className="text-[#A32D2D] font-semibold">Complet</span>
+                }
+              </>
+            ) : (
+              <> participant{participantCount !== 1 ? 's' : ''} confirmé{participantCount !== 1 ? 's' : ''}</>
+            )}
           </span>
         </div>
       </div>
@@ -213,66 +205,49 @@ export default function EventOverviewPage() {
           style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Ma participation</p>
 
-          {s && (
-            <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full mb-4"
-              style={{ background: s.bg, color: s.text }}>
-              {s.label}
-            </div>
-          )}
+          <div className="flex flex-col gap-2">
 
-          {/* Boutons GOING / DECLINED */}
-          <div className="flex gap-2 mb-4">
+            {/* Je participe — 18 trous */}
             <button
-              onClick={() => updateStatus('GOING')}
-              disabled={updating || status === 'GOING' || isFull}
-              title={isFull && status !== 'GOING' ? "L'événement est complet" : undefined}
-              className={`flex-1 text-[13px] font-semibold py-2.5 rounded-xl border transition-colors disabled:opacity-50 ${
-                status === 'GOING'
-                  ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
+              onClick={() => respond('GOING', 18)}
+              disabled={updating || active18 || isFull}
+              className={`w-full text-[13px] font-semibold py-2.5 rounded-xl border-2 transition-all disabled:cursor-default ${
+                active18
+                  ? 'bg-[#EAF3DE] border-[#3B6D11] text-[#3B6D11]'
                   : isFull
-                    ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                    : 'border-slate-200 text-slate-600 hover:bg-[#EAF3DE] hover:border-[#C0DD97] hover:text-[#3B6D11]'
+                    ? 'bg-slate-50 border-slate-200 text-slate-300'
+                    : 'border-slate-200 text-slate-600 hover:bg-[#EAF3DE] hover:border-[#3B6D11] hover:text-[#3B6D11]'
               }`}>
-              {status === 'GOING' ? 'Je participe ✓' : isFull ? 'Complet' : 'Je participe'}
+              {active18 ? '✓ Je participe — 18 trous' : isFull ? 'Complet' : 'Je participe — 18 trous'}
             </button>
-            <button onClick={() => updateStatus('DECLINED')} disabled={updating || status === 'DECLINED'}
-              className={`flex-1 text-[13px] font-semibold py-2.5 rounded-xl border transition-colors disabled:opacity-50 ${
-                status === 'DECLINED'
-                  ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
-                  : 'border-slate-200 text-slate-600 hover:bg-[#FCEBEB] hover:border-[#F7C1C1] hover:text-[#A32D2D]'
-              }`}>
-              Je ne participe pas
-            </button>
-          </div>
 
-          {/* Toggle 9/18 trous — uniquement si GOING */}
-          {status === 'GOING' && (
-            <div className="pt-3 border-t border-slate-100">
-              <p className="text-[11px] font-semibold text-slate-500 mb-2">Nombre de trous</p>
-              <div className="flex gap-2">
-                {([18, 9] as const).map(n => (
-                  <button key={n}
-                    onClick={() => updateHoles(n)}
-                    disabled={updatingHoles || holesPlayed === n}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 text-[13px] font-semibold transition-all disabled:cursor-default ${
-                      holesPlayed === n
-                        ? n === 18
-                          ? 'border-[#185FA5] bg-[#EBF3FC] text-[#185FA5]'
-                          : 'border-amber-400 bg-amber-50 text-amber-700'
-                        : 'border-slate-200 text-slate-400 hover:border-slate-300'
-                    }`}>
-                    {n} trous
-                    {holesPlayed === n && <span className="text-[10px]">✓</span>}
-                  </button>
-                ))}
-              </div>
-              {holesPlayed === 9 && (
-                <p className="text-[11px] text-amber-600 mt-2">
-                  Tu joueras les 9 premiers trous — l'organisateur en sera informé.
-                </p>
-              )}
-            </div>
-          )}
+            {/* Je participe — 9 trous */}
+            <button
+              onClick={() => respond('GOING', 9)}
+              disabled={updating || active9 || isFull}
+              className={`w-full text-[13px] font-semibold py-2.5 rounded-xl border-2 transition-all disabled:cursor-default ${
+                active9
+                  ? 'bg-amber-50 border-amber-400 text-amber-700'
+                  : isFull
+                    ? 'bg-slate-50 border-slate-200 text-slate-300'
+                    : 'border-slate-200 text-slate-600 hover:bg-amber-50 hover:border-amber-400 hover:text-amber-700'
+              }`}>
+              {active9 ? '✓ Je participe — 9 trous' : 'Je participe — 9 trous'}
+            </button>
+
+            {/* Je ne participe pas */}
+            <button
+              onClick={() => respond('DECLINED')}
+              disabled={updating || activeNo}
+              className={`w-full text-[13px] font-semibold py-2.5 rounded-xl border-2 transition-all disabled:cursor-default ${
+                activeNo
+                  ? 'bg-[#FCEBEB] border-[#A32D2D] text-[#A32D2D]'
+                  : 'border-slate-200 text-slate-600 hover:bg-[#FCEBEB] hover:border-[#A32D2D] hover:text-[#A32D2D]'
+              }`}>
+              {activeNo ? '✗ Je ne participe pas' : 'Je ne participe pas'}
+            </button>
+
+          </div>
         </div>
       )}
     </div>
