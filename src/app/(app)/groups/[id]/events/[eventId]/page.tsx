@@ -21,10 +21,10 @@ type EventDetail = {
 type ParticipationStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST' | null
 
 const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> = {
-  GOING:    { label: 'Confirmé',         bg: '#EAF3DE', text: '#3B6D11' },
-  INVITED:  { label: 'En attente',       bg: '#EBF3FC', text: '#0C447C' },
-  DECLINED: { label: 'Décliné',          bg: '#FCEBEB', text: '#A32D2D' },
-  WAITLIST: { label: "Liste d'attente",  bg: '#FAEEDA', text: '#854F0B' },
+  GOING:    { label: 'Confirmé',        bg: '#EAF3DE', text: '#3B6D11' },
+  INVITED:  { label: 'En attente',      bg: '#EBF3FC', text: '#0C447C' },
+  DECLINED: { label: 'Décliné',         bg: '#FCEBEB', text: '#A32D2D' },
+  WAITLIST: { label: "Liste d'attente", bg: '#FAEEDA', text: '#854F0B' },
 }
 
 function formatDate(d: string) {
@@ -36,15 +36,17 @@ function formatTime(d: string) {
 
 export default function EventOverviewPage() {
   const params  = useParams()
-  const groupId = params.id as string
+  const groupId = params.id      as string
   const eventId = params.eventId as string
 
-  const [event, setEvent]                 = useState<EventDetail | null>(null)
-  const [status, setStatus]               = useState<ParticipationStatus>(null)
-  const [playerId, setPlayerId]           = useState<string | null>(null)
+  const [event,            setEvent]            = useState<EventDetail | null>(null)
+  const [status,           setStatus]           = useState<ParticipationStatus>(null)
+  const [holesPlayed,      setHolesPlayed]      = useState<9 | 18>(18)
+  const [playerId,         setPlayerId]         = useState<string | null>(null)
   const [participantCount, setParticipantCount] = useState(0)
-  const [loading, setLoading]             = useState(true)
-  const [updating, setUpdating]           = useState(false)
+  const [loading,          setLoading]          = useState(true)
+  const [updating,         setUpdating]         = useState(false)
+  const [updatingHoles,    setUpdatingHoles]    = useState(false)
 
   useEffect(() => { loadData() }, [eventId])
 
@@ -63,8 +65,9 @@ export default function EventOverviewPage() {
       if (player) {
         setPlayerId(player.id)
         const { data: participation } = await supabase.from('event_participants')
-          .select('status').eq('event_id', eventId).eq('player_id', player.id).maybeSingle()
+          .select('status, holes_played').eq('event_id', eventId).eq('player_id', player.id).maybeSingle()
         setStatus((participation?.status as ParticipationStatus) ?? null)
+        setHolesPlayed((participation?.holes_played as 9 | 18) ?? 18)
       }
     }
 
@@ -93,6 +96,21 @@ export default function EventOverviewPage() {
     setUpdating(false)
   }
 
+  async function updateHoles(holes: 9 | 18) {
+    if (!playerId) return
+    setUpdatingHoles(true)
+    const { error } = await supabase.from('event_participants')
+      .update({ holes_played: holes })
+      .eq('event_id', eventId).eq('player_id', playerId)
+    if (error) {
+      toast.error('Erreur lors de la mise à jour')
+    } else {
+      setHolesPlayed(holes)
+      toast.success(holes === 9 ? '9 trous enregistré' : '18 trous enregistré')
+    }
+    setUpdatingHoles(false)
+  }
+
   if (loading) return (
     <div className="p-6 space-y-3 max-w-xl">
       {[1,2,3].map(i => <div key={i} className="h-16 bg-white/40 rounded-xl animate-pulse" />)}
@@ -116,9 +134,9 @@ export default function EventOverviewPage() {
       </div>
 
       {/* Infos */}
-      <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-6 flex flex-col gap-3.5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+      <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-6 flex flex-col gap-3.5"
+        style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
 
-        {/* Date */}
         <div className="flex items-start gap-3">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 mt-0.5 flex-shrink-0">
             <rect x="1" y="3" width="14" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/>
@@ -132,7 +150,6 @@ export default function EventOverviewPage() {
           </div>
         </div>
 
-        {/* Lieu */}
         {event.location && (
           <div className="flex items-center gap-3">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
@@ -143,7 +160,6 @@ export default function EventOverviewPage() {
           </div>
         )}
 
-        {/* Format */}
         {event.competition_formats?.name && (
           <div className="flex items-center gap-3">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
@@ -153,7 +169,6 @@ export default function EventOverviewPage() {
           </div>
         )}
 
-        {/* Parcours */}
         {event.courses?.course_name && (
           <div className="flex items-center gap-3">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
@@ -167,8 +182,7 @@ export default function EventOverviewPage() {
           </div>
         )}
 
-        {/* Participants confirmés */}
-       <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+        <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
             <circle cx="6" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
             <path d="M1 13c0-2.76 2.24-5 5-5a5 5 0 015 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
@@ -190,12 +204,13 @@ export default function EventOverviewPage() {
               : <> participant{participantCount !== 1 ? 's' : ''} confirmé{participantCount !== 1 ? 's' : ''}</>
             }
           </span>
+        </div>
       </div>
-     </div>
 
       {/* Ma participation */}
       {status !== null && (
-        <div className="rounded-xl border border-white/60 shadow-sm p-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+        <div className="rounded-xl border border-white/60 shadow-sm p-4"
+          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Ma participation</p>
 
           {s && (
@@ -205,7 +220,8 @@ export default function EventOverviewPage() {
             </div>
           )}
 
-          <div className="flex gap-2">
+          {/* Boutons GOING / DECLINED */}
+          <div className="flex gap-2 mb-4">
             <button
               onClick={() => updateStatus('GOING')}
               disabled={updating || status === 'GOING' || isFull}
@@ -217,7 +233,7 @@ export default function EventOverviewPage() {
                     ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                     : 'border-slate-200 text-slate-600 hover:bg-[#EAF3DE] hover:border-[#C0DD97] hover:text-[#3B6D11]'
               }`}>
-              {status === 'GOING' ? 'Je participe' : isFull ? 'Complet' : 'Je participe'}
+              {status === 'GOING' ? 'Je participe ✓' : isFull ? 'Complet' : 'Je participe'}
             </button>
             <button onClick={() => updateStatus('DECLINED')} disabled={updating || status === 'DECLINED'}
               className={`flex-1 text-[13px] font-semibold py-2.5 rounded-xl border transition-colors disabled:opacity-50 ${
@@ -228,6 +244,35 @@ export default function EventOverviewPage() {
               Je ne participe pas
             </button>
           </div>
+
+          {/* Toggle 9/18 trous — uniquement si GOING */}
+          {status === 'GOING' && (
+            <div className="pt-3 border-t border-slate-100">
+              <p className="text-[11px] font-semibold text-slate-500 mb-2">Nombre de trous</p>
+              <div className="flex gap-2">
+                {([18, 9] as const).map(n => (
+                  <button key={n}
+                    onClick={() => updateHoles(n)}
+                    disabled={updatingHoles || holesPlayed === n}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 text-[13px] font-semibold transition-all disabled:cursor-default ${
+                      holesPlayed === n
+                        ? n === 18
+                          ? 'border-[#185FA5] bg-[#EBF3FC] text-[#185FA5]'
+                          : 'border-amber-400 bg-amber-50 text-amber-700'
+                        : 'border-slate-200 text-slate-400 hover:border-slate-300'
+                    }`}>
+                    {n} trous
+                    {holesPlayed === n && <span className="text-[10px]">✓</span>}
+                  </button>
+                ))}
+              </div>
+              {holesPlayed === 9 && (
+                <p className="text-[11px] text-amber-600 mt-2">
+                  Tu joueras les 9 premiers trous — l'organisateur en sera informé.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -13,26 +13,35 @@ function InviteYesContent() {
   const [holesPlayed, setHolesPlayed] = useState<9 | 18>(18)
 
   const token = searchParams.get('token')
+  // Si ?holes=9 dans l'URL (venu de l'email), on pré-sélectionne et on confirme directement
+  const holesParam = searchParams.get('holes')
 
-  // Vérifie que le token existe dès le départ
   useEffect(() => {
-    if (!token) setStep('error')
-  }, [token])
+    if (!token) { setStep('error'); return }
+    if (holesParam === '9' || holesParam === '18') {
+      const h = holesParam === '9' ? 9 : 18
+      setHolesPlayed(h)
+      // Confirme directement sans afficher l'écran de choix
+      handleConfirmWith(h)
+    }
+  }, [token, holesParam])
 
-  async function handleConfirm() {
+  async function handleConfirmWith(holes: 9 | 18) {
     if (!token) { setStep('error'); return }
     setStep('saving')
-
     const { error } = await supabase
       .from('event_participants')
       .update({
         status:       'GOING',
-        holes_played: holesPlayed,
+        holes_played: holes,
         responded_at: new Date().toISOString(),
       })
       .eq('invite_token', token)
-
     setStep(error ? 'error' : 'success')
+  }
+
+  async function handleConfirm() {
+    handleConfirmWith(holesPlayed)
   }
 
   return (
@@ -45,7 +54,7 @@ function InviteYesContent() {
           <span className="text-[22px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
         </div>
 
-        {/* ── Choix trous ── */}
+        {/* ── Choix trous (pas de param holes dans l'URL) ── */}
         {step === 'choosing' && (
           <>
             <div className="w-14 h-14 rounded-full bg-[#EBF3FC] flex items-center justify-center mx-auto mb-4">
@@ -56,25 +65,20 @@ function InviteYesContent() {
 
             <div className="flex gap-3 mb-6">
               {([18, 9] as const).map(n => (
-                <button
-                  key={n}
-                  onClick={() => setHolesPlayed(n)}
+                <button key={n} onClick={() => setHolesPlayed(n)}
                   className={`flex-1 py-4 rounded-xl border-2 font-black text-[22px] transition-all ${
                     holesPlayed === n
                       ? 'border-[#185FA5] bg-[#EBF3FC] text-[#185FA5]'
                       : 'border-slate-200 text-slate-400 hover:border-slate-300'
-                  }`}
-                >
+                  }`}>
                   {n}
                   <span className="block text-[11px] font-semibold mt-0.5">trous</span>
                 </button>
               ))}
             </div>
 
-            <button
-              onClick={handleConfirm}
-              className="w-full bg-[#185FA5] text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-[#0C447C] transition-colors"
-            >
+            <button onClick={handleConfirm}
+              className="w-full bg-[#185FA5] text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-[#0C447C] transition-colors">
               Confirmer ma participation
             </button>
           </>
@@ -115,7 +119,6 @@ function InviteYesContent() {
             <p className="text-[13px] text-slate-600">Ce lien est expiré ou invalide. Contacte l'organisateur.</p>
           </>
         )}
-
       </div>
     </div>
   )

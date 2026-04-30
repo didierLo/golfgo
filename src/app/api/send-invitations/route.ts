@@ -32,6 +32,7 @@ function buildEmailHtml({
   eventLocation,
   eventMessage,
   yesLink,
+  yes9Link,
   noLink,
   eventLink,
 }: {
@@ -41,6 +42,7 @@ function buildEmailHtml({
   eventLocation: string | null
   eventMessage: string | null
   yesLink: string
+  yes9Link: string
   noLink: string
   eventLink: string
 }) {
@@ -102,7 +104,7 @@ function buildEmailHtml({
               </div>` : ''}
 
               <!-- Boutons réponse -->
-              <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
                 <tr>
                   <td style="padding-right:12px;">
                     <a href="${yesLink}"
@@ -114,6 +116,18 @@ function buildEmailHtml({
                     <a href="${noLink}"
                       style="display:inline-block;background:#ffffff;color:#DC2626;text-decoration:none;font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;border:1.5px solid #DC2626;">
                       ✗ Je ne peux pas
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Bouton 9 trous -->
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td>
+                    <a href="${yes9Link}"
+                      style="display:inline-block;background:#ffffff;color:#92400E;text-decoration:none;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;border:1.5px solid #D97706;">
+                      🏌️ Je participe — 9 trous seulement
                     </a>
                   </td>
                 </tr>
@@ -156,7 +170,6 @@ export async function POST(req: Request) {
 
     const supabase = await createServerClient()
 
-    // Charger l'event
     const { data: event, error: evErr } = await supabase
       .from('events')
       .select('id, title, location, starts_at, group_id, email_message')
@@ -167,7 +180,6 @@ export async function POST(req: Request) {
       return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
     }
 
-    // Charger le template du groupe + nom du owner
     const { data: groupData } = await supabase
       .from('groups')
       .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
@@ -176,11 +188,8 @@ export async function POST(req: Request) {
       .single()
 
     const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-    const ownerName = ownerPlayer
-      ? `${ownerPlayer.first_name} ${ownerPlayer.surname}`
-      : ''
+    const ownerName = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
 
-    // Charger les participants avec leurs tokens
     const { data: participants, error: pErr } = await supabase
       .from('event_participants')
       .select('player_id, invite_token, players(first_name, surname, email)')
@@ -196,9 +205,6 @@ export async function POST(req: Request) {
     const eventDate = formatDate(event.starts_at)
     const eventTime = formatTime(event.starts_at)
 
-    // Template depuis le groupe — pas de fallback hardcodé ici,
-    // le fallback est géré côté DEFAULTS dans communications/page.tsx
-    // et sauvegardé en base lors de la première visite.
     const subjectTemplate = groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}'
     const bodyTemplate    = groupData?.template_invitation_body    ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
 
@@ -213,7 +219,8 @@ export async function POST(req: Request) {
       const token = p.invite_token
       if (!token) { skipped++; continue }
 
-      const yesLink    = `${appUrl}/invite/yes?token=${token}`
+      const yesLink    = `${appUrl}/invite/yes?token=${token}&holes=18`
+      const yes9Link   = `${appUrl}/invite/yes?token=${token}&holes=9`
       const noLink     = `${appUrl}/invite/no?token=${token}`
       const playerName = `${player.first_name} ${player.surname}`
 
@@ -228,30 +235,19 @@ export async function POST(req: Request) {
         owner_name:        ownerName,
       }
 
-      const subject = applyTemplateVariables(subjectTemplate, templateVars)
-
-      // bodyTemplate = texte d'invitation principal (toujours affiché)
+      const subject      = applyTemplateVariables(subjectTemplate, templateVars)
       const resolvedBody = applyTemplateVariables(bodyTemplate, templateVars)
-
-      // email_message = note pratique optionnelle ajoutée EN PLUS du template
-      // (ex: "Rendez-vous au départ n°1") — jamais à la place
       const practicalNote = event.email_message?.trim()
         ? applyTemplateVariables(event.email_message.trim(), templateVars)
         : null
-
-      const resolvedMessage = practicalNote
-        ? `${resolvedBody}\n\n${practicalNote}`
-        : resolvedBody
+      const resolvedMessage = practicalNote ? `${resolvedBody}\n\n${practicalNote}` : resolvedBody
 
       if (!EMAIL_ENABLED) {
         console.log('━━━ EMAIL PREVIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━')
         console.log(`To:      ${player.email}`)
         console.log(`Subject: ${subject}`)
-        console.log(`Player:  ${playerName}`)
-        console.log(`Date:    ${eventDate} à ${eventTime}`)
-        if (event.location) console.log(`Lieu:    ${event.location}`)
-        console.log(`Message:\n${resolvedMessage}`)
         console.log(`Yes:     ${yesLink}`)
+        console.log(`Yes 9T:  ${yes9Link}`)
         console.log(`No:      ${noLink}`)
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
         sent++
@@ -265,6 +261,7 @@ export async function POST(req: Request) {
         eventLocation: event.location,
         eventMessage:  resolvedMessage,
         yesLink,
+        yes9Link,
         noLink,
         eventLink,
       })
@@ -277,7 +274,6 @@ export async function POST(req: Request) {
       })
 
       if (emailErr) {
-        console.error(`Email error for ${playerName}:`, emailErr)
         errors.push(`${playerName}: ${emailErr.message}`)
       } else {
         sent++
