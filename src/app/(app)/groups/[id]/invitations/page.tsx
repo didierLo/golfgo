@@ -74,7 +74,7 @@ function MemberSearchView({
   const memberInvitations = selectedMember
     ? invitations
         .filter(i => i.player_id === selectedMember.id)
-        .sort((a, b) => new Date(eventsMap[a.event_id]?.starts_at ?? 0).getTime() - new Date(eventsMap[b.event_id]?.starts_at ?? 0).getTime())
+        .sort((a, b) => new Date(eventsMap[b.event_id]?.starts_at ?? 0).getTime() - new Date(eventsMap[a.event_id]?.starts_at ?? 0).getTime())
     : []
 
   return (
