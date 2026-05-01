@@ -54,14 +54,14 @@ function formatTime(dateStr: string) {
 function getDayMonth(dateStr: string) {
   const d = new Date(dateStr)
   return {
-    day:   d.toLocaleDateString('fr-BE', { day: 'numeric',      timeZone: 'Europe/Brussels' }),
-    month: d.toLocaleDateString('fr-BE', { month: 'short',      timeZone: 'Europe/Brussels' }),
+    day:   d.toLocaleDateString('fr-BE', { day: 'numeric',      timeZone: 'UTC' }),
+    month: d.toLocaleDateString('fr-BE', { month: 'short',      timeZone: 'UTC' }),
   }
 }
 
 function formatDayFull(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-BE', {
-    weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Brussels'
+    weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
   })
 }
 
@@ -90,10 +90,10 @@ function downloadICS(e: MyEvent) {
 }
 
 function daysUntil(dateStr: string): number {
-  const nowStr = new Date().toLocaleDateString('fr-BE', { timeZone: 'Europe/Brussels' })
+  const nowStr = new Date().toLocaleDateString('fr-BE', { timeZone: 'UTC' })
   const [d1, m1, y1] = nowStr.split('/').map(Number)
   const now = new Date(y1, m1 - 1, d1)
-  const targetStr = new Date(dateStr).toLocaleDateString('fr-BE', { timeZone: 'Europe/Brussels' })
+  const targetStr = new Date(dateStr).toLocaleDateString('fr-BE', { timeZone: 'UTC' })
   const [d2, m2, y2] = targetStr.split('/').map(Number)
   const target = new Date(y2, m2 - 1, d2)
   return Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
@@ -178,7 +178,7 @@ function CalendarView({ events, onView }: { events: MyEvent[]; onView: (e: MyEve
   for (const e of events) {
     const d = new Date(e.events.starts_at)
     // Date locale Brussels
-    const key = d.toLocaleDateString('fr-BE', { timeZone: 'Europe/Brussels' })
+    const key = d.toLocaleDateString('fr-BE', { timeZone: 'UTC' })
       .split('/').reverse().join('-')          // dd/mm/yyyy → yyyy-mm-dd
       .replace(/(\d{4})-(\d{1,2})-(\d{1,2})/, (_, y, m, d) =>
         `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`)
