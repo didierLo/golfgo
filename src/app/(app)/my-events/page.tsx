@@ -415,8 +415,8 @@ export default function MyEventsPage() {
             <div className="mb-8">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
               <div className="flex flex-col gap-2">
-               {upcoming.map(e => (
-                 <EventCard key={e.event_id} event={e} onView={() => goToEvent(e)} onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />
+              {upcoming.map(e => (
+              <EventCard key={e.event_id} event={e} onView={() => goToEvent(e)} onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />
                 ))}
               </div>
             </div>
