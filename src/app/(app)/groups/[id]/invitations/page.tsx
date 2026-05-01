@@ -33,160 +33,154 @@ function sortByKey<T extends { first_name: string; surname: string }>(arr: T[], 
   return [...arr].sort((a, b) => a[key].localeCompare(b[key], 'fr', { sensitivity: 'base' }))
 }
 
-// ─── Vue "tous les events" : pills de joueurs ───────────────────────────────
+// ─── Vue "tous les events" : recherche membre + historique ──────────────────
 
-function PlayerPillsView({
+function MemberSearchView({
   invitations,
   eventsMap,
+  members,
   isOwner,
-  sortKey,
-  setSortKey,
   onCancel,
   cancelling,
 }: {
   invitations: Invitation[]
   eventsMap: Record<string, Event>
+  members: Member[]
   isOwner: boolean
-  sortKey: SortKey
-  setSortKey: (k: SortKey) => void
   onCancel: (ids: string[]) => Promise<void>
   cancelling: boolean
 }) {
-  // Construire la liste de joueurs uniques présents dans les invitations
-  const playerMap: Record<string, { id: string; first_name: string; surname: string }> = {}
-  invitations.forEach(inv => {
-    if (!playerMap[inv.player_id]) {
-      playerMap[inv.player_id] = {
-        id: inv.player_id,
-        first_name: inv.players?.first_name ?? '',
-        surname: inv.players?.surname ?? '',
-      }
-    }
-  })
-  const players = sortByKey(Object.values(playerMap), sortKey)
+  const [query, setQuery] = useState('')
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
+  const [open, setOpen] = useState(false)
 
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const suggestions = query.trim().length === 0 ? [] : members.filter(m => {
+    const full = `${m.first_name} ${m.surname} ${m.surname} ${m.first_name}`.toLowerCase()
+    return full.includes(query.toLowerCase())
+  }).slice(0, 6)
 
-  // Reset si les invitations changent
-  useEffect(() => { setSelectedPlayerId(null) }, [invitations.length])
+  function selectMember(m: Member) {
+    setSelectedMember(m)
+    setQuery(`${m.first_name} ${m.surname}`)
+    setOpen(false)
+  }
 
-  const selectedPlayer = selectedPlayerId ? playerMap[selectedPlayerId] : null
-  const playerInvitations = selectedPlayerId
-    ? invitations.filter(i => i.player_id === selectedPlayerId)
+  function clear() {
+    setSelectedMember(null)
+    setQuery('')
+    setOpen(false)
+  }
+
+  const memberInvitations = selectedMember
+    ? invitations
+        .filter(i => i.player_id === selectedMember.id)
         .sort((a, b) => new Date(eventsMap[a.event_id]?.starts_at ?? 0).getTime() - new Date(eventsMap[b.event_id]?.starts_at ?? 0).getTime())
     : []
 
-  if (players.length === 0) {
-    return (
-      <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
-        Aucune invitation
-      </div>
-    )
-  }
-
   return (
     <div>
-      {/* Sort + pills */}
-      <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-3"
-        style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+      {/* Champ recherche */}
+      <div className="relative mb-4">
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/60 shadow-sm"
+          style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            type="text"
+            value={query}
+            onChange={e => { setQuery(e.target.value); setSelectedMember(null); setOpen(true) }}
+            onFocus={() => { if (query && !selectedMember) setOpen(true) }}
+            placeholder="Rechercher un membre…"
+            className="flex-1 bg-transparent text-[13px] text-slate-900 placeholder-slate-400 outline-none"
+          />
+          {query && (
+            <button onClick={clear} className="text-slate-400 hover:text-slate-600 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
 
-        {/* Tri */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-semibold text-slate-500">{players.length} joueur{players.length > 1 ? 's' : ''}</span>
-          <div className="flex gap-1">
-            {(['first_name', 'surname'] as SortKey[]).map(k => (
-              <button key={k} onClick={() => setSortKey(k)}
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === k ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
-                {k === 'first_name' ? 'Prénom' : 'Nom'}
+        {/* Suggestions dropdown */}
+        {open && suggestions.length > 0 && (
+          <div className="absolute z-20 top-full left-0 right-0 mt-1 rounded-xl border border-white/60 shadow-lg overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+            {suggestions.map((m, i) => (
+              <button key={m.id} onClick={() => selectMember(m)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#EBF3FC]/60 transition-colors text-left ${i < suggestions.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] flex-shrink-0">
+                  {m.first_name[0]}{m.surname[0]}
+                </div>
+                <span className="text-[13px] text-slate-800">
+                  <span className="font-normal text-slate-400">{m.first_name} </span>
+                  <span className="font-semibold">{m.surname}</span>
+                </span>
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Pills */}
-        <div className="flex flex-wrap gap-2">
-          {players.map(p => {
-            const isSelected = selectedPlayerId === p.id
-            const invs = invitations.filter(i => i.player_id === p.id)
-            const goingCount = invs.filter(i => i.status === 'GOING').length
-            const invitedCount = invs.filter(i => i.status === 'INVITED').length
-
-            return (
-              <button key={p.id} onClick={() => setSelectedPlayerId(isSelected ? null : p.id)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[12px] font-semibold transition-all ${
-                  isSelected
-                    ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-md'
-                    : 'bg-white/60 text-slate-700 border-white/50 hover:bg-white/90 hover:border-slate-200'
-                }`}>
-                {/* Avatar */}
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${isSelected ? 'bg-white/20 text-white' : 'bg-[#EBF3FC] text-[#0C447C]'}`}>
-                  {p.first_name[0]}{p.surname[0]}
-                </span>
-                {sortKey === 'first_name'
-                  ? <>{p.first_name} <span className={`font-normal ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{p.surname}</span></>
-                  : <><span className={`font-normal ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{p.first_name}</span> {p.surname}</>
-                }
-                {/* Compteurs discrets */}
-                <span className={`text-[10px] font-normal ml-0.5 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
-                  {goingCount > 0 && `${goingCount}✓`}{goingCount > 0 && invitedCount > 0 && ' '}{invitedCount > 0 && `${invitedCount}?`}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+        )}
       </div>
 
-      {/* Détail joueur sélectionné */}
-      {selectedPlayer && (
+      {/* Résultat : historique du membre */}
+      {selectedMember && (
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
 
-          {/* Header joueur */}
+          {/* Header membre */}
           <div className="flex items-center gap-3 px-4 py-3 bg-[#EBF3FC]/60 border-b border-white/40">
             <div className="w-8 h-8 rounded-full bg-[#185FA5] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">
-              {selectedPlayer.first_name[0]}{selectedPlayer.surname[0]}
+              {selectedMember.first_name[0]}{selectedMember.surname[0]}
             </div>
             <div className="flex-1">
-              <p className="text-[13px] font-bold text-slate-900">
-                {selectedPlayer.first_name} {selectedPlayer.surname}
-              </p>
+              <p className="text-[13px] font-bold text-slate-900">{selectedMember.first_name} {selectedMember.surname}</p>
               <p className="text-[11px] text-slate-500">
-                {playerInvitations.length} participation{playerInvitations.length > 1 ? 's' : ''}
+                {memberInvitations.length === 0
+                  ? 'Aucune participation'
+                  : `${memberInvitations.length} event${memberInvitations.length > 1 ? 's' : ''}`}
               </p>
             </div>
-            <button onClick={() => setSelectedPlayerId(null)}
-              className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors px-2 py-1">
-              ✕
-            </button>
           </div>
 
-          {/* Liste des events de ce joueur */}
-          {playerInvitations.map((inv, i) => {
-            const evt = eventsMap[inv.event_id]
-            const isInvited = inv.status === 'INVITED'
-            return (
-              <div key={inv.id}
-                className={`flex items-center gap-3 px-4 py-3 ${i < playerInvitations.length - 1 ? 'border-b border-white/30' : ''}`}>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-slate-900 truncate">{evt?.title ?? '—'}</p>
-                  {evt && <p className="text-[11px] text-slate-500">{formatDateLong(evt.starts_at)}</p>}
-                  {inv.invited_at && <p className="text-[11px] text-slate-400">invité le {formatDate(inv.invited_at)}</p>}
+          {memberInvitations.length === 0 ? (
+            <div className="px-4 py-6 text-center text-[13px] text-slate-400">
+              Aucune invitation trouvée pour ce membre
+            </div>
+          ) : (
+            memberInvitations.map((inv, i) => {
+              const evt = eventsMap[inv.event_id]
+              const isInvited = inv.status === 'INVITED'
+              return (
+                <div key={inv.id}
+                  className={`flex items-center gap-3 px-4 py-3 ${i < memberInvitations.length - 1 ? 'border-b border-white/30' : ''}`}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-slate-900 truncate">{evt?.title ?? '—'}</p>
+                    {evt && <p className="text-[11px] text-slate-500">{formatDateLong(evt.starts_at)}</p>}
+                  </div>
+                  <Badge status={inv.status} />
+                  {isInvited && isOwner && (
+                    <button
+                      disabled={cancelling}
+                      onClick={async () => {
+                        if (!confirm('Annuler cette invitation ?')) return
+                        await onCancel([inv.id])
+                      }}
+                      className="ml-1 text-[11px] font-semibold text-red-400 hover:text-red-600 disabled:opacity-40 transition-colors px-2 py-1 rounded-lg hover:bg-red-50">
+                      Annuler
+                    </button>
+                  )}
                 </div>
-                <Badge status={inv.status} />
-                {isInvited && isOwner && (
-                  <button
-                    disabled={cancelling}
-                    onClick={async () => {
-                      if (!confirm('Annuler cette invitation ?')) return
-                      await onCancel([inv.id])
-                    }}
-                    className="ml-1 text-[11px] font-semibold text-red-400 hover:text-red-600 disabled:opacity-40 transition-colors px-2 py-1 rounded-lg hover:bg-red-50">
-                    Annuler
-                  </button>
-                )}
-              </div>
-            )
-          })}
+              )
+            })
+          )}
+        </div>
+      )}
+
+      {/* État vide initial */}
+      {!selectedMember && !query && (
+        <div className="text-center py-10 text-[13px] text-slate-400 border border-dashed border-slate-200 rounded-xl">
+          Tape le nom d'un membre pour voir ses participations
         </div>
       )}
     </div>
@@ -625,14 +619,13 @@ export default function InvitationsPage() {
         </div>
       )}
 
-      {/* ── Vue ALL : pills par joueur ── */}
+      {/* ── Vue ALL : recherche membre ── */}
       {eventFilter === 'ALL' ? (
-        <PlayerPillsView
+        <MemberSearchView
           invitations={invitations}
           eventsMap={eventsMap}
+          members={members}
           isOwner={isOwner}
-          sortKey={sortKey}
-          setSortKey={setSortKey}
           onCancel={handleCancelIds}
           cancelling={cancelling}
         />
