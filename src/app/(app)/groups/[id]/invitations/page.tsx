@@ -33,6 +33,168 @@ function sortByKey<T extends { first_name: string; surname: string }>(arr: T[], 
   return [...arr].sort((a, b) => a[key].localeCompare(b[key], 'fr', { sensitivity: 'base' }))
 }
 
+// ─── Vue "tous les events" : pills de joueurs ───────────────────────────────
+
+function PlayerPillsView({
+  invitations,
+  eventsMap,
+  isOwner,
+  sortKey,
+  setSortKey,
+  onCancel,
+  cancelling,
+}: {
+  invitations: Invitation[]
+  eventsMap: Record<string, Event>
+  isOwner: boolean
+  sortKey: SortKey
+  setSortKey: (k: SortKey) => void
+  onCancel: (ids: string[]) => Promise<void>
+  cancelling: boolean
+}) {
+  // Construire la liste de joueurs uniques présents dans les invitations
+  const playerMap: Record<string, { id: string; first_name: string; surname: string }> = {}
+  invitations.forEach(inv => {
+    if (!playerMap[inv.player_id]) {
+      playerMap[inv.player_id] = {
+        id: inv.player_id,
+        first_name: inv.players?.first_name ?? '',
+        surname: inv.players?.surname ?? '',
+      }
+    }
+  })
+  const players = sortByKey(Object.values(playerMap), sortKey)
+
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+
+  // Reset si les invitations changent
+  useEffect(() => { setSelectedPlayerId(null) }, [invitations.length])
+
+  const selectedPlayer = selectedPlayerId ? playerMap[selectedPlayerId] : null
+  const playerInvitations = selectedPlayerId
+    ? invitations.filter(i => i.player_id === selectedPlayerId)
+        .sort((a, b) => new Date(eventsMap[a.event_id]?.starts_at ?? 0).getTime() - new Date(eventsMap[b.event_id]?.starts_at ?? 0).getTime())
+    : []
+
+  if (players.length === 0) {
+    return (
+      <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+        Aucune invitation
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {/* Sort + pills */}
+      <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-3"
+        style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+
+        {/* Tri */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-semibold text-slate-500">{players.length} joueur{players.length > 1 ? 's' : ''}</span>
+          <div className="flex gap-1">
+            {(['first_name', 'surname'] as SortKey[]).map(k => (
+              <button key={k} onClick={() => setSortKey(k)}
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === k ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                {k === 'first_name' ? 'Prénom' : 'Nom'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Pills */}
+        <div className="flex flex-wrap gap-2">
+          {players.map(p => {
+            const isSelected = selectedPlayerId === p.id
+            const invs = invitations.filter(i => i.player_id === p.id)
+            const goingCount = invs.filter(i => i.status === 'GOING').length
+            const invitedCount = invs.filter(i => i.status === 'INVITED').length
+
+            return (
+              <button key={p.id} onClick={() => setSelectedPlayerId(isSelected ? null : p.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[12px] font-semibold transition-all ${
+                  isSelected
+                    ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-md'
+                    : 'bg-white/60 text-slate-700 border-white/50 hover:bg-white/90 hover:border-slate-200'
+                }`}>
+                {/* Avatar */}
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${isSelected ? 'bg-white/20 text-white' : 'bg-[#EBF3FC] text-[#0C447C]'}`}>
+                  {p.first_name[0]}{p.surname[0]}
+                </span>
+                {sortKey === 'first_name'
+                  ? <>{p.first_name} <span className={`font-normal ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{p.surname}</span></>
+                  : <><span className={`font-normal ${isSelected ? 'text-white/70' : 'text-slate-400'}`}>{p.first_name}</span> {p.surname}</>
+                }
+                {/* Compteurs discrets */}
+                <span className={`text-[10px] font-normal ml-0.5 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>
+                  {goingCount > 0 && `${goingCount}✓`}{goingCount > 0 && invitedCount > 0 && ' '}{invitedCount > 0 && `${invitedCount}?`}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Détail joueur sélectionné */}
+      {selectedPlayer && (
+        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+
+          {/* Header joueur */}
+          <div className="flex items-center gap-3 px-4 py-3 bg-[#EBF3FC]/60 border-b border-white/40">
+            <div className="w-8 h-8 rounded-full bg-[#185FA5] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">
+              {selectedPlayer.first_name[0]}{selectedPlayer.surname[0]}
+            </div>
+            <div className="flex-1">
+              <p className="text-[13px] font-bold text-slate-900">
+                {selectedPlayer.first_name} {selectedPlayer.surname}
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {playerInvitations.length} participation{playerInvitations.length > 1 ? 's' : ''}
+              </p>
+            </div>
+            <button onClick={() => setSelectedPlayerId(null)}
+              className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors px-2 py-1">
+              ✕
+            </button>
+          </div>
+
+          {/* Liste des events de ce joueur */}
+          {playerInvitations.map((inv, i) => {
+            const evt = eventsMap[inv.event_id]
+            const isInvited = inv.status === 'INVITED'
+            return (
+              <div key={inv.id}
+                className={`flex items-center gap-3 px-4 py-3 ${i < playerInvitations.length - 1 ? 'border-b border-white/30' : ''}`}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-slate-900 truncate">{evt?.title ?? '—'}</p>
+                  {evt && <p className="text-[11px] text-slate-500">{formatDateLong(evt.starts_at)}</p>}
+                  {inv.invited_at && <p className="text-[11px] text-slate-400">invité le {formatDate(inv.invited_at)}</p>}
+                </div>
+                <Badge status={inv.status} />
+                {isInvited && isOwner && (
+                  <button
+                    disabled={cancelling}
+                    onClick={async () => {
+                      if (!confirm('Annuler cette invitation ?')) return
+                      await onCancel([inv.id])
+                    }}
+                    className="ml-1 text-[11px] font-semibold text-red-400 hover:text-red-600 disabled:opacity-40 transition-colors px-2 py-1 rounded-lg hover:bg-red-50">
+                    Annuler
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Page principale ─────────────────────────────────────────────────────────
+
 export default function InvitationsPage() {
   const params   = useParams()
   const groupId  = params.id as string
@@ -64,7 +226,6 @@ export default function InvitationsPage() {
     return () => window.removeEventListener('focus', handleFocus)
   }, [groupId])
 
-  // Charger les participants existants quand on passe en mode renvoyer
   useEffect(() => {
     if (!resendMode || !selectedEvent) { setResendParticipants([]); return }
     supabase
@@ -193,6 +354,13 @@ export default function InvitationsPage() {
     setCancelling(false)
   }
 
+  async function handleCancelIds(ids: string[]) {
+    setCancelling(true)
+    const { error } = await supabase.from('event_participants').delete().in('id', ids)
+    if (error) { toast.error(error.message) } else { toast.success(`${ids.length} invitation(s) annulée(s)`); loadData() }
+    setCancelling(false)
+  }
+
   function toggleCancel(id: string) { setSelectedToCancel(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]) }
   function toggleCancelAll() {
     const cancellable = filteredInvited.map(i => i.id)
@@ -277,7 +445,6 @@ export default function InvitationsPage() {
           <div className="mb-4">
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Événement</label>
             {resendMode ? (
-              /* En mode renvoyer : tous les events (passés inclus) */
               <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)}
                 className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
                 <option value="">— choisir un événement —</option>
@@ -286,7 +453,6 @@ export default function InvitationsPage() {
                   .map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
               </select>
             ) : (
-              /* En mode invite : uniquement les events à venir */
               events.length === 0 ? (
                 <p className="text-[12px] text-slate-500">Aucun événement à venir</p>
               ) : (
@@ -332,7 +498,6 @@ export default function InvitationsPage() {
             </div>
 
             {resendMode ? (
-              /* Liste participants existants */
               !selectedEvent ? (
                 <p className="text-[12px] text-slate-400 px-1">Sélectionne d'abord un événement</p>
               ) : sortedResendParticipants.length === 0 ? (
@@ -362,7 +527,6 @@ export default function InvitationsPage() {
                 </div>
               )
             ) : (
-              /* Liste membres du groupe */
               <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
                 {sortedMembers.map((m, i) => (
                   <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
@@ -385,7 +549,7 @@ export default function InvitationsPage() {
             )}
           </div>
 
-          {/* Toggle email (mode invite uniquement) */}
+          {/* Toggle email */}
           {!resendMode && (
             <div className="flex items-start gap-3 mb-4 p-3.5 bg-white/30 rounded-xl border border-white/50">
               <button type="button" onClick={() => setSendEmail(v => !v)}
@@ -437,7 +601,7 @@ export default function InvitationsPage() {
               Voir les participants →
             </a>
           )}
-          {selectedToCancel.length > 0 && isOwner && (
+          {selectedToCancel.length > 0 && isOwner && eventFilter !== 'ALL' && (
             <button onClick={handleCancelSelected} disabled={cancelling}
               className="text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors">
               {cancelling ? 'Annulation…' : `Annuler (${selectedToCancel.length})`}
@@ -446,7 +610,7 @@ export default function InvitationsPage() {
         </div>
       </div>
 
-      {/* Bandeau event */}
+      {/* Bandeau event (vue filtrée par event) */}
       {displayedEvent && (
         <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm flex items-center justify-between" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div>
@@ -461,59 +625,70 @@ export default function InvitationsPage() {
         </div>
       )}
 
-      {/* Liste invitations */}
-      {sortedFiltered.length === 0 ? (
-        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
-          Aucune invitation pour cet événement
-        </div>
+      {/* ── Vue ALL : pills par joueur ── */}
+      {eventFilter === 'ALL' ? (
+        <PlayerPillsView
+          invitations={invitations}
+          eventsMap={eventsMap}
+          isOwner={isOwner}
+          sortKey={sortKey}
+          setSortKey={setSortKey}
+          onCancel={handleCancelIds}
+          cancelling={cancelling}
+        />
       ) : (
-        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-          {/* Header liste avec tri */}
-          <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
-            {filteredInvited.length > 0 && isOwner && (
-              <input type="checkbox" checked={allCancelSelected} onChange={toggleCancelAll} className="rounded accent-[#185FA5]" />
-            )}
-            <span className="text-[11px] font-semibold text-slate-500 flex-1">
-              {selectedToCancel.length > 0 ? `${selectedToCancel.length} sélectionnée(s)` : 'Participant'}
-            </span>
-            <div className="flex gap-1">
-              <button onClick={() => setSortKey('first_name')}
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
-                Prénom
-              </button>
-              <button onClick={() => setSortKey('surname')}
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
-                Nom
-              </button>
-            </div>
+        /* ── Vue filtrée par event : liste classique ── */
+        sortedFiltered.length === 0 ? (
+          <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+            Aucune invitation pour cet événement
           </div>
-
-          {sortedFiltered.map((inv, i) => {
-            const evt = eventsMap[inv.event_id]
-            const isInvited = inv.status === 'INVITED'
-            return (
-              <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''} ${i < sortedFiltered.length - 1 ? 'border-b border-white/30' : ''}`}>
-                {isInvited && isOwner
-                  ? <input type="checkbox" checked={selectedToCancel.includes(inv.id)} onChange={() => toggleCancel(inv.id)} className="rounded accent-[#185FA5] flex-shrink-0" />
-                  : <div className="w-4 flex-shrink-0" />}
-                <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
-                  {inv.players?.first_name[0]}{inv.players?.surname[0]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-slate-900">
-                    {sortKey === 'first_name'
-                      ? <>{inv.players?.first_name} <span className="font-normal text-slate-500">{inv.players?.surname}</span></>
-                      : <><span className="font-normal text-slate-500">{inv.players?.first_name}</span> {inv.players?.surname}</>
-                    }
-                  </div>
-                  {evt && eventFilter === 'ALL' && <div className="text-[11px] text-slate-500">{evt.title} · {formatDate(evt.starts_at)}</div>}
-                  {inv.invited_at && <div className="text-[11px] text-slate-400">invité le {formatDate(inv.invited_at)}</div>}
-                </div>
-                <Badge status={inv.status} />
+        ) : (
+          <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+            {/* Header liste avec tri */}
+            <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
+              {filteredInvited.length > 0 && isOwner && (
+                <input type="checkbox" checked={allCancelSelected} onChange={toggleCancelAll} className="rounded accent-[#185FA5]" />
+              )}
+              <span className="text-[11px] font-semibold text-slate-500 flex-1">
+                {selectedToCancel.length > 0 ? `${selectedToCancel.length} sélectionnée(s)` : 'Participant'}
+              </span>
+              <div className="flex gap-1">
+                <button onClick={() => setSortKey('first_name')}
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                  Prénom
+                </button>
+                <button onClick={() => setSortKey('surname')}
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                  Nom
+                </button>
               </div>
-            )
-          })}
-        </div>
+            </div>
+
+            {sortedFiltered.map((inv, i) => {
+              const isInvited = inv.status === 'INVITED'
+              return (
+                <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''} ${i < sortedFiltered.length - 1 ? 'border-b border-white/30' : ''}`}>
+                  {isInvited && isOwner
+                    ? <input type="checkbox" checked={selectedToCancel.includes(inv.id)} onChange={() => toggleCancel(inv.id)} className="rounded accent-[#185FA5] flex-shrink-0" />
+                    : <div className="w-4 flex-shrink-0" />}
+                  <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
+                    {inv.players?.first_name[0]}{inv.players?.surname[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-semibold text-slate-900">
+                      {sortKey === 'first_name'
+                        ? <>{inv.players?.first_name} <span className="font-normal text-slate-500">{inv.players?.surname}</span></>
+                        : <><span className="font-normal text-slate-500">{inv.players?.first_name}</span> {inv.players?.surname}</>
+                      }
+                    </div>
+                    {inv.invited_at && <div className="text-[11px] text-slate-400">invité le {formatDate(inv.invited_at)}</div>}
+                  </div>
+                  <Badge status={inv.status} />
+                </div>
+              )
+            })}
+          </div>
+        )
       )}
     </div>
   )
