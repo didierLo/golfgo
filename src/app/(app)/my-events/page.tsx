@@ -68,7 +68,10 @@ function formatDayFull(dateStr: string) {
 function generateICS(title: string, starts_at: string, location: string | null): string {
   const start = new Date(starts_at)
   const end   = new Date(start.getTime() + 4 * 60 * 60 * 1000)
-  const fmt   = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+  const fmt = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00`
+    }
   return [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
     `DTSTART:${fmt(start)}`,
