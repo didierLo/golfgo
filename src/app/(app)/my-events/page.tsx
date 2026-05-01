@@ -58,6 +58,36 @@ function getDayMonth(dateStr: string) {
   }
 }
 
+function formatDayFull(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('fr-BE', {
+    weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Brussels'
+  })
+}
+
+function generateICS(title: string, starts_at: string, location: string | null): string {
+  const start = new Date(starts_at)
+  const end   = new Date(start.getTime() + 4 * 60 * 60 * 1000)
+  const fmt   = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+  return [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
+    `DTSTART:${fmt(start)}`,
+    `DTEND:${fmt(end)}`,
+    `SUMMARY:${title}`,
+    location ? `LOCATION:${location}` : '',
+    'END:VEVENT', 'END:VCALENDAR',
+  ].filter(Boolean).join('\r\n')
+}
+
+function downloadICS(e: MyEvent) {
+  const blob = new Blob([generateICS(e.events.title, e.events.starts_at, e.events.location)], { type: 'text/calendar' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
+  a.download = `${e.events.title.replace(/\s+/g, '_')}.ics`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function daysUntil(dateStr: string): number {
   const nowStr = new Date().toLocaleDateString('fr-BE', { timeZone: 'Europe/Brussels' })
   const [d1, m1, y1] = nowStr.split('/').map(Number)
@@ -70,21 +100,24 @@ function daysUntil(dateStr: string): number {
 
 // ─── EventCard ────────────────────────────────────────────────────────────────
 
-function EventCard({ event: e, onView, past = false }: { event: MyEvent; onView: () => void; past?: boolean }) {
+function EventCard({ event: e, onView, onICS, past = false }: { event: MyEvent; onView: () => void; onICS: () => void; past?: boolean }) {
   const groupColor = e.events.groups?.color ?? '#378ADD'
   const { day, month } = getDayMonth(e.events.starts_at)
   return (
-    <div
-      onClick={onView}
-      className={`bg-white border rounded-xl flex items-center gap-3 px-4 py-3 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}
-    >
-      <div className="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0"
+    <div className={`bg-white border rounded-xl flex items-center gap-3 px-4 py-3 hover:border-slate-300 hover:shadow-sm transition-all ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}>
+      {/* Date badge — cliquable vers l'event */}
+      <div onClick={onView} className="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 cursor-pointer"
         style={{ background: `${groupColor}18` }}>
         <span className="text-[13px] font-black leading-none" style={{ color: groupColor }}>{day}</span>
         <span className="text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5" style={{ color: groupColor }}>{month}</span>
       </div>
-      <div className="flex-1 min-w-0">
+
+      {/* Infos — cliquable vers l'event */}
+      <div onClick={onView} className="flex-1 min-w-0 cursor-pointer">
         <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">{e.events.title}</div>
+        <div className="text-[11.5px] text-slate-500 mt-0.5 truncate capitalize">
+          {formatDayFull(e.events.starts_at)}
+        </div>
         <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
           <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: groupColor }} />
           <span className="truncate">{e.events.groups?.name}</span>
@@ -101,7 +134,22 @@ function EventCard({ event: e, onView, past = false }: { event: MyEvent; onView:
           </span>
         )}
       </div>
-      <Badge status={e.status} />
+
+      {/* Badge + bouton calendrier */}
+      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+        <Badge status={e.status} />
+        <button
+          onClick={e => { e.stopPropagation(); onICS() }}
+          title="Ajouter à mon calendrier"
+          className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#185FA5] hover:bg-blue-50 transition-colors">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="2" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+            <path d="M1 6h14" stroke="currentColor" strokeWidth="1.4"/>
+            <path d="M5 1v3M11 1v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+            <path d="M5 10h2M9 10h2M5 12.5h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
     </div>
   )
 }
