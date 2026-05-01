@@ -74,8 +74,8 @@ function generateICS(title: string, starts_at: string, location: string | null):
     }
   return [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
-    `DTSTART:${fmt(start)}`,
-    `DTEND:${fmt(end)}`,
+    `DTSTART;TZID=Europe/Brussels:${fmt(start)}`,
+    `DTEND;TZID=Europe/Brussels:${fmt(end)}`,
     `SUMMARY:${title}`,
     location ? `LOCATION:${location}` : '',
     'END:VEVENT', 'END:VCALENDAR',
