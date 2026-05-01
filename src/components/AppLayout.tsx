@@ -377,12 +377,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
           </Link>
         ))}
-        <div className="mx-5 my-1 h-px bg-slate-100" />
-        <Link href="/settings" onClick={() => setDrawerOpen(false)} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors">
-          <span style={{ color: isActive('/settings') ? '#185FA5' : '#888780', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{Icons.settings}</span>
-          <span style={{ fontSize: 15, fontWeight: isActive('/settings') ? 700 : 600, color: isActive('/settings') ? '#185FA5' : '#1e293b' }}>Settings</span>
-          {isActive('/settings') && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
-        </Link>
         <div style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 8 }} />
       </div>
 
