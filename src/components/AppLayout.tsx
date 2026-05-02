@@ -171,14 +171,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const eventsListActive = !isAnyOwner ? false : !!gid && (pathname === `/groups/${gid}/events` || pathname === `/groups/${gid}/events/add`)
 
   const organiserDrawerItems = [
-    { href: groupsHref,         icon: Icons.groups,         label: 'Groups',         color: '#7F77DD', active: isGroupsActive },
-    { href: eventsHref,         icon: Icons.events,         label: 'Events',         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: eventsListActive },
-    { href: invitationsHref,    icon: Icons.invitations,    label: 'Invitations',    color: '#0C447C', active: isActive(invitationsHref) },
-    { href: flightsHref,        icon: Icons.flights,        label: 'Flights',        color: '#EF9F27', active: !!eid && isActive(flightsHref) },
-    { href: resultsHref,        icon: Icons.results,        label: 'Results',        color: '#3B6D11', active: !!eid && isActive(resultsHref) },
-    { href: clubsHref,          icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
-    { href: communicationsHref, icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
-  ]
+  { href: groupsHref,                   icon: Icons.groups,         label: 'Groups',         color: '#7F77DD', active: isGroupsActive },
+  { href: eventsHref,                   icon: Icons.events,         label: 'Events',         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: eventsListActive },
+  { href: invitationsHref ?? '/groups', icon: Icons.invitations,    label: 'Invitations',    color: '#0C447C', active: !!invitationsHref && isActive(invitationsHref) },
+  { href: flightsHref ?? '/groups',     icon: Icons.flights,        label: 'Flights',        color: '#EF9F27', active: !!flightsHref && isActive(flightsHref) },
+  { href: resultsHref ?? '/groups',     icon: Icons.results,        label: 'Results',        color: '#3B6D11', active: !!resultsHref && isActive(resultsHref) },
+  { href: clubsHref,                    icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
+  { href: communicationsHref,           icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
+]
+  
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
@@ -385,8 +386,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
           { href: '/my-events',     icon: Icons.myEvents,    label: 'My Events',    color: '#185FA5' },
-          { href: participantsHref, icon: Icons.participants, label: 'Participants', color: '#7F77DD' },
-          { href: teesheetHref,     icon: Icons.teesheet,    label: 'Teesheet',     color: '#1D9E75' },
+          { href: participantsHref ?? '/groups', icon: Icons.participants, label: 'Participants', color: '#7F77DD' },
+          { href: teesheetHref ?? '/groups',     icon: Icons.teesheet,     label: 'Teesheet',     color: '#1D9E75' },
           { href: '/scorecard',     icon: Icons.scorecard,   label: 'Scorecard',    color: '#D85A30' },
         ].map(item => {
           const active = isActive(item.href)
