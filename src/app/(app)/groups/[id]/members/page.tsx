@@ -17,19 +17,33 @@ export default function MembersPage() {
   const params  = useParams()
   const groupId = params.id as string
 
-  const [members, setMembers] = useState<Member[]>([])
-  const [loading, setLoading] = useState(true)
-  const [sortKey, setSortKey] = useState<SortKey>('surname')
-  const [copied,  setCopied]  = useState(false)
+  const [members,  setMembers]  = useState<Member[]>([])
+  const [loading,  setLoading]  = useState(true)
+  const [sortKey,  setSortKey]  = useState<SortKey>('surname')
+  const [copied,   setCopied]   = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [toast,    setToast]    = useState<string | null>(null)
 
   useEffect(() => { if (!groupId) return; loadMembers() }, [groupId])
 
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
+
   async function loadMembers() {
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: player } = await supabase.from('players').select('id').eq('user_id', user!.id).single()
+
     const { data, error } = await supabase
       .from('groups_players')
       .select(`role, player:players(id, surname, first_name, whs)`)
       .eq('group_id', groupId)
     if (error) { console.error(error); return }
+
+    const myRow = (data || []).find((row: any) => row.player?.id === player?.id)
+    setUserRole(myRow?.role ?? null)
+
     setMembers((data || []).map((row: any) => ({ ...row.player, role: row.role })))
     setLoading(false)
   }
@@ -41,46 +55,23 @@ export default function MembersPage() {
   async function removeMember(playerId: string) {
     if (!confirm('Retirer ce joueur du groupe ? Ses participations aux événements futurs seront également supprimées.')) return
 
-    // 1. Events futurs du groupe
     const now = new Date().toISOString()
     const { data: futureEvents } = await supabase
-      .from('events')
-      .select('id')
-      .eq('group_id', groupId)
-      .gte('starts_at', now)
+      .from('events').select('id').eq('group_id', groupId).gte('starts_at', now)
 
     const futureEventIds = (futureEvents ?? []).map(e => e.id)
 
     if (futureEventIds.length > 0) {
-      // 2. Supprimer de event_participants
-      await supabase.from('event_participants')
-        .delete()
-        .eq('player_id', playerId)
-        .in('event_id', futureEventIds)
+      await supabase.from('event_participants').delete().eq('player_id', playerId).in('event_id', futureEventIds)
 
-      // 3. Trouver les flights de ces events
-      const { data: flights } = await supabase
-        .from('flights')
-        .select('id')
-        .in('event_id', futureEventIds)
-
+      const { data: flights } = await supabase.from('flights').select('id').in('event_id', futureEventIds)
       const flightIds = (flights ?? []).map(f => f.id)
-
-      // 4. Supprimer de flight_players
       if (flightIds.length > 0) {
-        await supabase.from('flight_players')
-          .delete()
-          .eq('player_id', playerId)
-          .in('flight_id', flightIds)
+        await supabase.from('flight_players').delete().eq('player_id', playerId).in('flight_id', flightIds)
       }
     }
 
-    // 5. Retirer du groupe
-    const { error } = await supabase.from('groups_players')
-      .delete()
-      .eq('group_id', groupId)
-      .eq('player_id', playerId)
-
+    const { error } = await supabase.from('groups_players').delete().eq('group_id', groupId).eq('player_id', playerId)
     if (error) { alert(error.message); return }
     loadMembers()
   }
@@ -167,6 +158,17 @@ export default function MembersPage() {
 
   return (
     <div className="p-5 sm:p-6">
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="#EF9F27" strokeWidth="1.5"/>
+            <path d="M8 5v3.5M8 11h.01" stroke="#EF9F27" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          {toast}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Members</h1>
@@ -191,8 +193,13 @@ export default function MembersPage() {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Imprimer
           </button>
-          <button onClick={() => router.push(`/groups/${groupId}/members/add`)}
-            className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-semibold px-4 py-2 rounded-xl hover:bg-[#0C447C] transition-colors">
+          <button onClick={() => {
+              if (userRole !== 'owner') { showToast('Tu dois être Admin pour utiliser cette fonction'); return }
+              router.push(`/groups/${groupId}/members/add`)
+            }}
+            className={`flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl transition-colors ${
+              userRole === 'owner' ? 'bg-[#185FA5] text-white hover:bg-[#0C447C]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+            }`}>
             + Add member
           </button>
         </div>
@@ -252,12 +259,22 @@ export default function MembersPage() {
               </div>
 
               <div className="flex justify-end gap-1">
-                <button onClick={() => router.push(`/players/${member.id}/edit?groupId=${groupId}`)}
-                  className="text-[11px] font-semibold text-slate-600 border border-white/50 px-2.5 py-1.5 rounded-lg hover:bg-white/30 transition-colors">
+                <button onClick={() => {
+                    if (userRole !== 'owner') { showToast('Tu dois être Admin pour utiliser cette fonction'); return }
+                    router.push(`/players/${member.id}/edit?groupId=${groupId}`)
+                  }}
+                  className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
+                    userRole === 'owner' ? 'text-slate-600 border-white/50 hover:bg-white/30' : 'text-slate-300 border-slate-100 cursor-not-allowed'
+                  }`}>
                   Edit
                 </button>
-                <button onClick={() => removeMember(member.id)}
-                  className="text-[11px] font-semibold text-red-500 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
+                <button onClick={() => {
+                    if (userRole !== 'owner') { showToast('Tu dois être Admin pour utiliser cette fonction'); return }
+                    removeMember(member.id)
+                  }}
+                  className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
+                    userRole === 'owner' ? 'text-red-500 border-red-200 hover:bg-red-50' : 'text-red-200 border-red-100 cursor-not-allowed'
+                  }`}>
                   ✕
                 </button>
               </div>
