@@ -31,13 +31,46 @@ export default function GroupsPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  async function loadGroups() {
-    setLoading(true)
-    const { data, error } = await supabase.from('group_dashboard_view').select('*').order('name')
-    if (error) { console.error(error); setLoading(false); return }
-    setGroups(data ?? [])
-    setLoading(false)
-  }
+async function loadGroups() {
+  setLoading(true)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { setLoading(false); return }
+
+  const { data: player } = await supabase
+    .from('players')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!player) { setLoading(false); return }
+
+  const { data, error } = await supabase
+    .from('groups_players')
+    .select(`
+      role,
+      groups (
+        id, name, color,
+        members_count:groups_players(count),
+        events_count:events(count),
+        next_event:events(starts_at)
+      )
+    `)
+    .eq('player_id', player.id)
+    .order('name', { foreignTable: 'groups' })
+
+  if (error) { console.error(error); setLoading(false); return }
+  setGroups((data ?? []).map((row: any) => ({
+    ...row.groups,
+    role: row.role,
+    members_count: row.groups.members_count?.[0]?.count ?? 0,
+    events_count: row.groups.events_count?.[0]?.count ?? 0,
+    next_event: row.groups.next_event
+      ?.filter((e: any) => e.starts_at >= new Date().toISOString())
+      ?.sort((a: any, b: any) => a.starts_at.localeCompare(b.starts_at))?.[0]
+      ?.starts_at ?? null,
+  })))
+  setLoading(false)
+}
 
   async function deleteGroup(id: string, role: string | null) {
     if (role !== 'owner') {

@@ -157,10 +157,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const eid            = nearestEventId
   const isAnyOwner     = groups.some(g => g.role === 'owner')
 
-  const eventsHref         = isAnyOwner ? (gid ? `/groups/${gid}/events`         : '/groups') : '/not-owner'
-  const communicationsHref = isAnyOwner ? (gid ? `/groups/${gid}/communications` : '/groups') : '/not-owner'
-  const groupsHref         = '/groups'
-  const clubsHref          = isAnyOwner ? '/admin/clubs' : '/not-owner'
+  const eventsHref         = gid ? `/groups/${gid}/events`         : '/groups'
+const communicationsHref = gid ? `/groups/${gid}/communications` : '/groups'
+const groupsHref         = '/groups'
+const clubsHref          = '/admin/clubs'
   const participantsHref   = gid && eid ? `/groups/${gid}/events/${eid}/participants` : '/groups'
   const teesheetHref       = gid && eid ? `/groups/${gid}/events/${eid}/teesheet`     : '/groups'
   const invitationsHref    = gid        ? `/groups/${gid}/invitations`                : '/groups'
