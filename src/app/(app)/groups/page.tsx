@@ -41,7 +41,8 @@ async function loadGroups() {
     .select('id')
     .eq('user_id', user.id)
     .single()
-
+  console.log('user.id:', user.id)
+  console.log('player:', player)
   if (!player) { setLoading(false); return }
 
   const { data, error } = await supabase
