@@ -9,6 +9,7 @@ const supabase = createClient()
 type Group = {
   id: string; name: string; color: string | null
   members_count: number; events_count: number; next_event: string | null
+  role: string | null
 }
 
 const FALLBACK_COLORS = ['#378ADD', '#EF9F27', '#7F77DD', '#1D9E75', '#D85A30', '#D4537E']
@@ -21,8 +22,14 @@ export default function GroupsPage() {
   const router = useRouter()
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => { loadGroups() }, [])
+
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
 
   async function loadGroups() {
     setLoading(true)
@@ -32,11 +39,23 @@ export default function GroupsPage() {
     setLoading(false)
   }
 
-  async function deleteGroup(id: string) {
+  async function deleteGroup(id: string, role: string | null) {
+    if (role !== 'owner') {
+      showToast('Tu dois être Admin pour utiliser cette fonction')
+      return
+    }
     if (!confirm('Supprimer ce groupe ?')) return
     const { error } = await supabase.from('groups').delete().eq('id', id)
     if (error) { alert(error.message); return }
     loadGroups()
+  }
+
+  function editGroup(id: string, role: string | null) {
+    if (role !== 'owner') {
+      showToast('Tu dois être Admin pour utiliser cette fonction')
+      return
+    }
+    router.push(`/groups/${id}/edit`)
   }
 
   if (loading) return (
@@ -45,7 +64,6 @@ export default function GroupsPage() {
     </div>
   )
 
-  // Empty state
   if (groups.length === 0) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
       <div className="w-16 h-16 rounded-full bg-[#EBF3FC] flex items-center justify-center mb-5">
@@ -69,6 +87,18 @@ export default function GroupsPage() {
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="#EF9F27" strokeWidth="1.5"/>
+            <path d="M8 5v3.5M8 11h.01" stroke="#EF9F27" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          {toast}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Mes groupes</h1>
@@ -83,6 +113,7 @@ export default function GroupsPage() {
       <div className="flex flex-col gap-2">
         {groups.map((group, index) => {
           const color = group.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+          const isOwner = group.role === 'owner'
           return (
             <div key={group.id} className="rounded-xl border border-white/60 shadow-sm hover:border-slate-300 transition-colors" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div className="px-4 py-3 flex items-center gap-3 cursor-pointer"
@@ -100,12 +131,22 @@ export default function GroupsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-                  <button onClick={() => router.push(`/groups/${group.id}/edit`)}
-                    className="text-[11px] font-semibold text-slate-600 border border-white/50 px-2.5 py-1.5 rounded-lg hover:bg-white/30 transition-colors">
+                  <button
+                    onClick={() => editGroup(group.id, group.role)}
+                    className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
+                      isOwner
+                        ? 'text-slate-600 border-white/50 hover:bg-white/30'
+                        : 'text-slate-300 border-slate-100 cursor-not-allowed'
+                    }`}>
                     Edit
                   </button>
-                  <button onClick={() => deleteGroup(group.id)}
-                    className="text-[11px] font-semibold text-red-500 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
+                  <button
+                    onClick={() => deleteGroup(group.id, group.role)}
+                    className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
+                      isOwner
+                        ? 'text-red-500 border-red-200 hover:bg-red-50'
+                        : 'text-red-200 border-red-100 cursor-not-allowed'
+                    }`}>
                     ✕
                   </button>
                 </div>
