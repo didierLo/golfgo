@@ -60,6 +60,7 @@ async function loadGroups() {
     .order('name', { foreignTable: 'groups' })
 
   if (error) { console.error(error); setLoading(false); return }
+  console.log('data brut:', JSON.stringify(data))
   setGroups((data ?? []).map((row: any) => ({
     ...row.groups,
     role: row.role,
