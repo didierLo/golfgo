@@ -441,7 +441,9 @@ export default function CommunicationsPage() {
               </div>
               <div className="mb-3">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Sujet</label>
-                <input type="text" value={commSubject} onChange={e => setCommSubject(e.target.value)} placeholder="Sujet de l'email..." className={inputClass} />
+               <input type="text" value={commSubject} onChange={e => setCommSubject(e.target.value)}
+                      readOnly={!isOwner}
+                      placeholder="Sujet de l'email..." className={inputClass} />
               </div>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="text-[11px] font-semibold text-slate-400">Insérer :</span>
@@ -454,8 +456,9 @@ export default function CommunicationsPage() {
               </div>
               <div className="mb-3">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Corps du message</label>
-                <textarea value={commBody} onChange={e => setCommBody(e.target.value)} rows={10}
-                  placeholder="Écris ton message ici..." className={`${textareaClass} font-mono leading-relaxed`} />
+            <textarea value={commBody} onChange={e => setCommBody(e.target.value)} rows={10}
+                      readOnly={!isOwner}
+                      placeholder="Écris ton message ici..." className={`${textareaClass} font-mono leading-relaxed`} />
               </div>
               {selectedMembers.length > 0 && (commSubject || commBody) && (
                 <div>
