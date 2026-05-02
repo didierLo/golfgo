@@ -317,13 +317,7 @@ export default function CommunicationsPage() {
     </div>
   )
 
-  if (!isOwner) return (
-    <div className="p-5 sm:p-6">
-      <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
-        Seul l'organisateur peut accéder à cette section
-      </div>
-    </div>
-  )
+  
 
   return (
     <div className="p-5 sm:p-6 max-w-3xl">
@@ -481,8 +475,10 @@ export default function CommunicationsPage() {
               <p className="text-[12px] text-slate-500">
                 {selectedIds.size === 0 ? 'Aucun destinataire' : `${selectedIds.size} destinataire${selectedIds.size > 1 ? 's' : ''}`}
               </p>
-              <button onClick={handleSend} disabled={sending || selectedIds.size === 0 || !commSubject.trim() || !commBody.trim()}
-                className="flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
+             <button onClick={handleSend} disabled={sending || selectedIds.size === 0 || !commSubject.trim() || !commBody.trim() || !isOwner}
+              className={`flex items-center gap-2 text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors ${
+                isOwner ? 'bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-40' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }`}>
                 {sending
                   ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Envoi...</>
                   : <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Envoyer</>
