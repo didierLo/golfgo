@@ -172,7 +172,7 @@ export default function FlightsPage() {
       )}
 
       {/* ── Carte Paramètres ── */}
-      <div className={`rounded-2xl border border-white/60 shadow-sm mb-6 overflow-hidden ${!isOwner ? 'opacity-60' : ''}`}
+      <div className={`rounded-2xl border border-white/60 shadow-sm mb-6 overflow-hidden ${!isOwner ? 'opacity-80' : ''}`}
         style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
