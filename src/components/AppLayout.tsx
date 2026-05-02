@@ -159,7 +159,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const eventsHref         = isAnyOwner ? (gid ? `/groups/${gid}/events`         : '/groups') : '/not-owner'
   const communicationsHref = isAnyOwner ? (gid ? `/groups/${gid}/communications` : '/groups') : '/not-owner'
-  const groupsHref         = isAnyOwner ? '/groups' : '/not-owner'
+  const groupsHref         = '/groups'
   const clubsHref          = isAnyOwner ? '/admin/clubs' : '/not-owner'
   const participantsHref   = gid && eid ? `/groups/${gid}/events/${eid}/participants` : '/groups'
   const teesheetHref       = gid && eid ? `/groups/${gid}/events/${eid}/teesheet`     : '/groups'
