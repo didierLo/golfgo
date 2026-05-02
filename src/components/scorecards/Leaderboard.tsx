@@ -12,9 +12,10 @@ type LeaderboardEntry = {
 type Props = {
   eventId: string; scorecardId: string; players: Player[]
   holes: ScoringHole[]; eventFormat: 'stroke' | 'stableford'
+  isOwner: boolean
 }
 
-export default function Leaderboard({ eventId, scorecardId, players, holes, eventFormat }: Props) {
+export default function Leaderboard({ eventId, scorecardId, players, holes, eventFormat, isOwner }: Props) {
   const supabase = createClient()
   const isStableford = eventFormat === 'stableford'
 
