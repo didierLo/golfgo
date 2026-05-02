@@ -45,15 +45,15 @@ async function loadGroups() {
   console.log('player:', player)
   if (!player) { setLoading(false); return }
 
-  const { data, error } = await supabase
+ const { data, error } = await supabase
     .from('groups_players')
     .select(`
       role,
       groups (
         id, name, color,
         members_count:groups_players(count),
-        events_count:events(count),
-        next_event:events(starts_at)
+        events_count:events!events_group_id_fkey(count),
+        next_event:events!events_group_id_fkey(starts_at)
       )
     `)
     .eq('player_id', player.id)
