@@ -58,7 +58,7 @@ function MemberSearchView({
     <div>
       <div className="relative mb-4">
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/60 shadow-sm"
-          style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
@@ -77,7 +77,7 @@ function MemberSearchView({
         </div>
         {open && suggestions.length > 0 && (
           <div className="absolute z-20 top-full left-0 right-0 mt-1 rounded-xl border border-white/60 shadow-lg overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+            style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             {suggestions.map((m, i) => (
               <button key={m.id} onClick={() => selectMember(m)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#EBF3FC]/60 transition-colors text-left ${i < suggestions.length - 1 ? 'border-b border-slate-100' : ''}`}>
