@@ -42,6 +42,12 @@ export default function FlightsPage() {
   const [dragOverFlight, setDragOverFlight] = useState<number | null>(null)
   const [dragOverPlayer, setDragOverPlayer] = useState<string | null>(null)
   const [manualEdits,    setManualEdits]    = useState(false)
+  const [adminToast, setAdminToast] = useState<string | null>(null)
+
+  function showAdminToast() {
+  setAdminToast('Tu dois être Admin pour utiliser cette fonction')
+  setTimeout(() => setAdminToast(null), 3000)
+    }
 
   useEffect(() => { loadData() }, [])
   useEffect(() => { if (!groupId) return; loadConstraints(); loadPastFlights() }, [groupId])
@@ -152,129 +158,131 @@ export default function FlightsPage() {
     </div>
   )
 
-  return (
+ return (
     <div className="p-5 sm:p-6 max-w-4xl">
 
-      {!isOwner && (
-        <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
-          Vue en lecture seule — seul l'organisateur peut générer et modifier les flights
+      {adminToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="#EF9F27" strokeWidth="1.5"/>
+            <path d="M8 5v3.5M8 11h.01" stroke="#EF9F27" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          {adminToast}
         </div>
       )}
 
       {/* ── Carte Paramètres ── */}
-      {isOwner && (
-        <div className="rounded-2xl border border-white/60 shadow-sm mb-6 overflow-hidden"
-          style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+      <div className={`rounded-2xl border border-white/60 shadow-sm mb-6 overflow-hidden ${!isOwner ? 'opacity-60' : ''}`}
+        style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
-          {/* Header carte */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">Paramètres</span>
-            <div className="flex items-center gap-2">
-              <a href={`/groups/${groupId}/events/${eventId}/flights/history`}
-                className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors flex items-center gap-1">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 5h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
-                Matrice
-              </a>
-              <span className="text-slate-200 text-[10px]">·</span>
-              <a href={`/groups/${groupId}/constraints`}
-                className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors">
-                Contraintes
-              </a>
-            </div>
-          </div>
-
-          {/* Contrôles */}
-          <div className="px-5 py-4">
-            <div className="flex flex-wrap gap-x-6 gap-y-4 items-end mb-4">
-
-              {/* Taille flight */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Taille flight</label>
-                <div className="flex gap-1 p-0.5 bg-slate-100 rounded-xl">
-                  {[2, 3, 4].map(n => (
-                    <button key={n} onClick={() => setFlightSize(n)}
-                      className={`w-9 h-8 rounded-lg text-[13px] font-bold transition-all ${
-                        flightSize === n ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Historique */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Historique</label>
-                <select value={historyWindow} onChange={e => setHistoryWindow(Number(e.target.value))}
-                  className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20">
-                  <option value={0}>Aucun</option>
-                  <option value={30}>30 jours</option>
-                  <option value={90}>3 mois</option>
-                  <option value={180}>6 mois</option>
-                  <option value={365}>1 an</option>
-                </select>
-              </div>
-
-              {/* Itérations */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Itérations</label>
-                <input type="number" value={iterations} onChange={e => setIterations(Number(e.target.value))}
-                  className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 w-24" />
-              </div>
-
-              {/* Équilibrer WHS */}
-              <label className="flex items-center gap-2 cursor-pointer mb-1">
-                <div onClick={() => setBalanceWHS(v => !v)}
-                  className={`w-9 h-5 rounded-full flex items-center px-0.5 transition-colors cursor-pointer ${balanceWHS ? 'bg-[#185FA5]' : 'bg-slate-200'}`}>
-                  <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${balanceWHS ? 'translate-x-4' : 'translate-x-0'}`} />
-                </div>
-                <span className="text-[13px] font-medium text-slate-700">Équilibrer WHS</span>
-              </label>
-
-            </div>
-
-            {/* Toggle 9 trous — toujours visible si has9holers */}
-            {has9holers && (
-              <div className="flex items-center gap-4 py-3 px-4 rounded-xl mb-4"
-                style={{ background: 'rgba(254,243,199,0.6)', border: '1px solid rgba(217,119,6,0.2)' }}>
-                <div>
-                  <p className="text-[12px] font-bold text-amber-800">
-                    {players9.length} joueur{players9.length > 1 ? 's' : ''} joue{players9.length === 1 ? '' : 'nt'} 9 trous
-                  </p>
-                  <p className="text-[11px] text-amber-600 mt-0.5">Comment les intégrer aux flights ?</p>
-                </div>
-                <div className="ml-auto flex gap-1 p-0.5 bg-amber-100 rounded-xl">
-                  <button onClick={() => setHolesMode('mixed')}
-                    className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
-                      holesMode === 'mixed' ? 'bg-white text-slate-800 shadow-sm' : 'text-amber-700 hover:text-amber-900'}`}>
-                    Mélangés
-                  </button>
-                  <button onClick={() => setHolesMode('separated')}
-                    className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
-                      holesMode === 'separated' ? 'bg-white text-slate-800 shadow-sm' : 'text-amber-700 hover:text-amber-900'}`}>
-                    Séparés
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex items-center justify-end gap-2">
-              <button onClick={remove}
-                className="text-[12px] font-semibold px-3 py-2 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
-                Effacer
-              </button>
-              <button onClick={handleSave} disabled={saving || flights.length === 0}
-                className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-colors">
-                {saving ? 'Saving...' : 'Sauvegarder'}
-              </button>
-              <button onClick={handleGenerate} disabled={generating}
-                className="text-[12px] font-semibold px-5 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-60 transition-colors shadow-sm">
-                {generating ? 'Génération...' : 'Générer'}
-              </button>
-            </div>
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">Paramètres</span>
+          <div className="flex items-center gap-2">
+            <a href={`/groups/${groupId}/events/${eventId}/flights/history`}
+              className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 5h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+              Matrice
+            </a>
+            <span className="text-slate-200 text-[10px]">·</span>
+            <a href={`/groups/${groupId}/constraints`}
+              className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors">
+              Contraintes
+            </a>
           </div>
         </div>
-      )}
+
+        <div className="px-5 py-4">
+          <div className="flex flex-wrap gap-x-6 gap-y-4 items-end mb-4">
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Taille flight</label>
+              <div className="flex gap-1 p-0.5 bg-slate-100 rounded-xl">
+                {[2, 3, 4].map(n => (
+                  <button key={n} onClick={() => isOwner ? setFlightSize(n) : showAdminToast()}
+                    className={`w-9 h-8 rounded-lg text-[13px] font-bold transition-all ${
+                      flightSize === n ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                    } ${!isOwner ? 'cursor-not-allowed' : ''}`}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Historique</label>
+              <select value={historyWindow} onChange={e => isOwner ? setHistoryWindow(Number(e.target.value)) : showAdminToast()}
+                disabled={!isOwner}
+                className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 disabled:cursor-not-allowed">
+                <option value={0}>Aucun</option>
+                <option value={30}>30 jours</option>
+                <option value={90}>3 mois</option>
+                <option value={180}>6 mois</option>
+                <option value={365}>1 an</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Itérations</label>
+              <input type="number" value={iterations} onChange={e => isOwner ? setIterations(Number(e.target.value)) : showAdminToast()}
+                disabled={!isOwner}
+                className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 w-24 disabled:cursor-not-allowed" />
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer mb-1">
+              <div onClick={() => isOwner ? setBalanceWHS(v => !v) : showAdminToast()}
+                className={`w-9 h-5 rounded-full flex items-center px-0.5 transition-colors ${balanceWHS ? 'bg-[#185FA5]' : 'bg-slate-200'} ${!isOwner ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${balanceWHS ? 'translate-x-4' : 'translate-x-0'}`} />
+              </div>
+              <span className="text-[13px] font-medium text-slate-700">Équilibrer WHS</span>
+            </label>
+
+          </div>
+
+          {has9holers && (
+            <div className="flex items-center gap-4 py-3 px-4 rounded-xl mb-4"
+              style={{ background: 'rgba(254,243,199,0.6)', border: '1px solid rgba(217,119,6,0.2)' }}>
+              <div>
+                <p className="text-[12px] font-bold text-amber-800">
+                  {players9.length} joueur{players9.length > 1 ? 's' : ''} joue{players9.length === 1 ? '' : 'nt'} 9 trous
+                </p>
+                <p className="text-[11px] text-amber-600 mt-0.5">Comment les intégrer aux flights ?</p>
+              </div>
+              <div className="ml-auto flex gap-1 p-0.5 bg-amber-100 rounded-xl">
+                <button onClick={() => isOwner ? setHolesMode('mixed') : showAdminToast()}
+                  className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
+                    holesMode === 'mixed' ? 'bg-white text-slate-800 shadow-sm' : 'text-amber-700 hover:text-amber-900'
+                  } ${!isOwner ? 'cursor-not-allowed' : ''}`}>
+                  Mélangés
+                </button>
+                <button onClick={() => isOwner ? setHolesMode('separated') : showAdminToast()}
+                  className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${
+                    holesMode === 'separated' ? 'bg-white text-slate-800 shadow-sm' : 'text-amber-700 hover:text-amber-900'
+                  } ${!isOwner ? 'cursor-not-allowed' : ''}`}>
+                  Séparés
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2">
+            <button onClick={() => isOwner ? remove() : showAdminToast()}
+              className={`text-[12px] font-semibold px-3 py-2 rounded-xl transition-colors ${
+                isOwner ? 'text-slate-500 hover:text-slate-700 hover:bg-slate-100' : 'text-slate-300 cursor-not-allowed'}`}>
+              Effacer
+            </button>
+            <button onClick={() => isOwner ? handleSave() : showAdminToast()} disabled={saving || flights.length === 0}
+              className={`text-[12px] font-semibold px-3 py-2 rounded-xl border transition-colors disabled:opacity-40 ${
+                isOwner ? 'border-slate-200 text-slate-700 hover:bg-slate-50' : 'border-slate-100 text-slate-300 cursor-not-allowed'}`}>
+              {saving ? 'Saving...' : 'Sauvegarder'}
+            </button>
+            <button onClick={() => isOwner ? handleGenerate() : showAdminToast()} disabled={generating}
+              className={`text-[12px] font-semibold px-5 py-2 rounded-xl text-white disabled:opacity-60 transition-colors shadow-sm ${
+                isOwner ? 'bg-[#185FA5] hover:bg-[#0C447C]' : 'bg-slate-300 cursor-not-allowed'}`}>
+              {generating ? 'Génération...' : 'Générer'}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* ── Joueurs confirmés ── */}
       <div className="mb-6">
@@ -358,7 +366,7 @@ export default function FlightsPage() {
                         className={`bg-white border rounded-xl overflow-hidden transition-all ${
                           isDragTarget ? 'border-[#185FA5] shadow-[0_0_0_2px_rgba(24,95,165,0.15)] scale-[1.01]' : 'border-slate-200'}`}
                         onDragOver={e => onDragOverFlight(e, flight.flight_no)}
-                        onDrop={e => onDropOnFlight(e, flight.flight_no)}
+                        onDrop={e => isOwner ? onDropOnFlight(e, flight.flight_no) : undefined}
                         onDragLeave={() => { setDragOverFlight(null); setDragOverPlayer(null) }}>
 
                         <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100">
@@ -429,7 +437,6 @@ export default function FlightsPage() {
         )}
       </div>
 
-      {/* Ghost drag overlay */}
       {dragState && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
           <div className="flex items-center gap-2 bg-slate-900 text-white text-[12px] font-semibold px-4 py-2.5 rounded-xl shadow-xl">
@@ -443,5 +450,4 @@ export default function FlightsPage() {
         </div>
       )}
     </div>
-  )
-}
+  )}
