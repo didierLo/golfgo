@@ -158,14 +158,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isAnyOwner     = groups.some(g => g.role === 'owner')
 
   const eventsHref         = gid ? `/groups/${gid}/events`         : '/groups'
-const communicationsHref = gid ? `/groups/${gid}/communications` : '/groups'
-const groupsHref         = '/groups'
-const clubsHref          = '/admin/clubs'
-  const participantsHref   = gid && eid ? `/groups/${gid}/events/${eid}/participants` : '/groups'
-  const teesheetHref       = gid && eid ? `/groups/${gid}/events/${eid}/teesheet`     : '/groups'
-  const invitationsHref    = gid        ? `/groups/${gid}/invitations`                : '/groups'
-  const flightsHref        = gid && eid ? `/groups/${gid}/events/${eid}/flights`      : '/groups'
-  const resultsHref        = gid && eid ? `/groups/${gid}/events/${eid}/results`      : '/groups'
+  const communicationsHref = gid ? `/groups/${gid}/communications` : '/groups'
+  const groupsHref         = '/groups'
+  const clubsHref          = '/admin/clubs'
+  const participantsHref = gid && eid ? `/groups/${gid}/events/${eid}/participants` : null
+  const teesheetHref     = gid && eid ? `/groups/${gid}/events/${eid}/teesheet`     : null
+  const invitationsHref  = gid        ? `/groups/${gid}/invitations`                : null
+  const flightsHref      = gid && eid ? `/groups/${gid}/events/${eid}/flights`      : null
+  const resultsHref      = gid && eid ? `/groups/${gid}/events/${eid}/results`      : null
 
   // Active checks pour Events (liste) — pas sur sous-pages
   const eventsListActive = !isAnyOwner ? false : !!gid && (pathname === `/groups/${gid}/events` || pathname === `/groups/${gid}/events/add`)
@@ -297,24 +297,24 @@ const clubsHref          = '/admin/clubs'
 
       <div className="flex flex-1 max-w-[1280px] w-full mx-auto">
 
-        {/* Sidebar desktop */}
+     {/* Sidebar desktop */}
         <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <SidebarSection label="PLAY" emoji="⛳">
-            <NavItem href="/my-events"       icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
-            <NavItem href={participantsHref}  icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={isActive(participantsHref)} />
-            <NavItem href={teesheetHref}     icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={isActive(teesheetHref)} />
-            <NavItem href="/scorecard"       icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
+            <NavItem href="/my-events"                icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
+            <NavItem href={participantsHref ?? '/groups'} icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={!!participantsHref && isActive(participantsHref)} />
+            <NavItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={!!teesheetHref && isActive(teesheetHref)} />
+            <NavItem href="/scorecard"                icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
           </SidebarSection>
           <div className="mx-2 my-3 h-px bg-slate-100" />
           <SidebarSection label="ORGANISER" emoji="🏆">
-            <NavItem href={groupsHref}         icon={Icons.groups}         iconColor="#7F77DD" label="Groups"         active={isGroupsActive} />
-            <NavItem href={eventsHref}         icon={Icons.events}         iconColor="#185FA5" label="Events"         active={eventsListActive} />
-            <NavItem href={invitationsHref}    icon={Icons.invitations}    iconColor="#0C447C" label="Invitations"    active={isActive(invitationsHref)} />
-            <NavItem href={flightsHref}        icon={Icons.flights}        iconColor="#EF9F27" label="Flights"        active={!!eid && isActive(flightsHref)} />
-            <NavItem href={resultsHref}        icon={Icons.results}        iconColor="#3B6D11" label="Results"        active={!!eid && isActive(resultsHref)} />
-            <NavItem href={clubsHref}          icon={Icons.clubs}          iconColor="#D4537E" label="Clubs"          active={isAnyOwner && isActive('/admin/clubs')} />
-            <NavItem href={communicationsHref} icon={Icons.communications} iconColor="#D4537E" label="Communications" active={!!gid && isActive(`/groups/${gid}/communications`)} />
+            <NavItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label="Groups"         active={isGroupsActive} />
+            <NavItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label="Events"         active={eventsListActive} />
+            <NavItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label="Invitations"    active={!!invitationsHref && isActive(invitationsHref)} />
+            <NavItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label="Flights"        active={!!flightsHref && isActive(flightsHref)} />
+            <NavItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label="Results"        active={!!resultsHref && isActive(resultsHref)} />
+            <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label="Clubs"          active={isAnyOwner && isActive('/admin/clubs')} />
+            <NavItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label="Communications" active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </SidebarSection>
           <div className="mt-auto">
             <div className="mx-2 mb-3 h-px bg-slate-100" />
@@ -326,20 +326,20 @@ const clubsHref          = '/admin/clubs'
         <aside className="hidden sm:flex lg:hidden w-[60px] flex-shrink-0 flex-col items-center py-5 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href="/my-events"       icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
-            <NavIconItem href={participantsHref}  icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={isActive(participantsHref)} />
-            <NavIconItem href={teesheetHref}     icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={isActive(teesheetHref)} />
-            <NavIconItem href="/scorecard"       icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
+            <NavIconItem href="/my-events"                    icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
+            <NavIconItem href={participantsHref ?? '/groups'} icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={!!participantsHref && isActive(participantsHref)} />
+            <NavIconItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={!!teesheetHref && isActive(teesheetHref)} />
+            <NavIconItem href="/scorecard"                    icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
           </div>
           <div className="w-8 h-px bg-slate-100 my-2" />
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href={groupsHref}         icon={Icons.groups}         iconColor="#7F77DD" label="Groups"         active={isGroupsActive} />
-            <NavIconItem href={eventsHref}         icon={Icons.events}         iconColor="#185FA5" label="Events"         active={eventsListActive} />
-            <NavIconItem href={invitationsHref}    icon={Icons.invitations}    iconColor="#0C447C" label="Invitations"    active={isActive(invitationsHref)} />
-            <NavIconItem href={flightsHref}        icon={Icons.flights}        iconColor="#EF9F27" label="Flights"        active={!!eid && isActive(flightsHref)} />
-            <NavIconItem href={resultsHref}        icon={Icons.results}        iconColor="#3B6D11" label="Results"        active={!!eid && isActive(resultsHref)} />
-            <NavIconItem href={clubsHref}          icon={Icons.clubs}          iconColor="#D4537E" label="Clubs"          active={isAnyOwner && isActive('/admin/clubs')} />
-            <NavIconItem href={communicationsHref} icon={Icons.communications} iconColor="#D4537E" label="Communications" active={!!gid && isActive(`/groups/${gid}/communications`)} />
+            <NavIconItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label="Groups"         active={isGroupsActive} />
+            <NavIconItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label="Events"         active={eventsListActive} />
+            <NavIconItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label="Invitations"    active={!!invitationsHref && isActive(invitationsHref)} />
+            <NavIconItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label="Flights"        active={!!flightsHref && isActive(flightsHref)} />
+            <NavIconItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label="Results"        active={!!resultsHref && isActive(resultsHref)} />
+            <NavIconItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label="Clubs"          active={isAnyOwner && isActive('/admin/clubs')} />
+            <NavIconItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label="Communications" active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </div>
           <div className="mt-auto flex flex-col items-center gap-1 w-full px-2.5">
             <div className="w-8 h-px bg-slate-100 mb-2" />
