@@ -20,8 +20,9 @@ function formatDate(dateStr: string) {
 
 function isPast(dateStr: string) { return new Date(dateStr) < new Date() }
 
-function EventCard({ event, groupId, goingCount, onDelete }: {
-  event: EventRow; groupId: string; goingCount: number; onDelete: (id: string) => void
+function EventCard({ event, groupId, goingCount, onDelete, isOwner, onNotOwner }: {
+  event: EventRow; groupId: string; goingCount: number
+  onDelete: (id: string) => void; isOwner: boolean; onNotOwner: () => void
 }) {
   const base = `/groups/${groupId}/events/${event.id}`
   const past = isPast(event.starts_at)
@@ -44,12 +45,18 @@ function EventCard({ event, groupId, goingCount, onDelete }: {
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
-            <a href={`${base}/edit`}
-              className="text-[11px] font-semibold text-slate-600 border border-slate-200 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+            <a href={isOwner ? `${base}/edit` : '#'}
+              onClick={e => { if (!isOwner) { e.preventDefault(); onNotOwner() } }}
+              className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
+                isOwner ? 'text-slate-600 border-slate-200 hover:bg-slate-50' : 'text-slate-300 border-slate-100 cursor-not-allowed'
+              }`}>
               Edit
             </a>
-            <button onClick={() => onDelete(event.id)}
-              className="text-[11px] font-semibold text-red-500 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition-colors">
+            <button
+              onClick={() => isOwner ? onDelete(event.id) : onNotOwner()}
+              className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
+                isOwner ? 'text-red-500 border-red-200 hover:bg-red-50' : 'text-red-200 border-red-100 cursor-not-allowed'
+              }`}>
               ✕
             </button>
           </div>
@@ -66,11 +73,29 @@ export default function EventsPage() {
   const [events,      setEvents]      = useState<EventRow[]>([])
   const [goingCounts, setGoingCounts] = useState<Record<string, number>>({})
   const [loading,     setLoading]     = useState(true)
+  const [isOwner,     setIsOwner]     = useState(false)
+  const [toast,       setToast]       = useState<string | null>(null)
 
   useEffect(() => { if (!groupId) return; fetchData() }, [groupId])
 
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
+
   async function fetchData() {
     setLoading(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
+      if (player) {
+        const { data: gp } = await supabase.from('groups_players').select('role')
+          .eq('group_id', groupId).eq('player_id', player.id).single()
+        setIsOwner(gp?.role === 'owner')
+      }
+    }
+
     const { data, error } = await supabase
       .from('events')
       .select(`id, title, location, starts_at, max_participants, competition_formats(name)`)
@@ -108,22 +133,36 @@ export default function EventsPage() {
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="#EF9F27" strokeWidth="1.5"/>
+            <path d="M8 5v3.5M8 11h.01" stroke="#EF9F27" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          {toast}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Events</h1>
           <p className="text-[13px] text-slate-600 mt-0.5">{upcoming.length} à venir · {past.length} passés</p>
         </div>
-        <a href={`/groups/${groupId}/events/add`}
-          className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-semibold px-4 py-2 rounded-xl hover:bg-[#0C447C] transition-colors">
+        <button
+          onClick={() => isOwner ? window.location.href = `/groups/${groupId}/events/add` : showToast('Tu dois être Admin pour utiliser cette fonction')}
+          className={`flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl transition-colors ${
+            isOwner ? 'bg-[#185FA5] text-white hover:bg-[#0C447C]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+          }`}>
           + New event
-        </a>
+        </button>
       </div>
 
       {upcoming.length > 0 && (
         <div className="mb-8">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
           <div className="flex flex-col gap-2">
-            {upcoming.map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
+            {upcoming.map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} isOwner={isOwner} onNotOwner={() => showToast('Tu dois être Admin pour utiliser cette fonction')} />)}
           </div>
         </div>
       )}
@@ -132,7 +171,7 @@ export default function EventsPage() {
         <div>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Passés</p>
           <div className="flex flex-col gap-2">
-            {past.slice().reverse().map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} />)}
+            {past.slice().reverse().map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} isOwner={isOwner} onNotOwner={() => showToast('Tu dois être Admin pour utiliser cette fonction')} />)}
           </div>
         </div>
       )}
