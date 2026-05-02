@@ -58,7 +58,7 @@ function MemberSearchView({
     <div>
       <div className="relative mb-4">
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/60 shadow-sm"
-          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
@@ -77,7 +77,7 @@ function MemberSearchView({
         </div>
         {open && suggestions.length > 0 && (
           <div className="absolute z-20 top-full left-0 right-0 mt-1 rounded-xl border border-white/60 shadow-lg overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+            style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             {suggestions.map((m, i) => (
               <button key={m.id} onClick={() => selectMember(m)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#EBF3FC]/60 transition-colors text-left ${i < suggestions.length - 1 ? 'border-b border-slate-100' : ''}`}>
@@ -96,7 +96,7 @@ function MemberSearchView({
 
       {selectedMember && (
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div className="flex items-center gap-3 px-4 py-3 bg-[#EBF3FC]/60 border-b border-white/40">
             <div className="w-8 h-8 rounded-full bg-[#185FA5] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">
               {selectedMember.first_name[0]}{selectedMember.surname[0]}
@@ -357,7 +357,7 @@ export default function InvitationsPage() {
 
       {/* Formulaire — toujours visible, désactivé si non-owner */}
       <div className={`rounded-xl border border-white/60 shadow-sm p-5 mb-6 ${!isOwner ? 'opacity-60' : ''}`}
-        style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+        style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
 
         <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-5">
           <button type="button" onClick={() => switchMode('invite')}
@@ -540,7 +540,7 @@ export default function InvitationsPage() {
 
       {displayedEvent && (
         <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm flex items-center justify-between"
-          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div>
             <p className="text-[13px] font-bold text-slate-900">{displayedEvent.title}</p>
             <p className="text-[11px] text-slate-500">{formatDateLong(displayedEvent.starts_at)}</p>
@@ -565,7 +565,7 @@ export default function InvitationsPage() {
           </div>
         ) : (
           <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+            style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
               {filteredInvited.length > 0 && isOwner && (
                 <input type="checkbox" checked={allCancelSelected} onChange={toggleCancelAll} className="rounded accent-[#185FA5]" />
