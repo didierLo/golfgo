@@ -13,7 +13,6 @@ type Invitation = {
 }
 type Event  = { id: string; title: string; starts_at: string }
 type Member = { id: string; first_name: string; surname: string; email: string | null }
-
 type SortKey = 'first_name' | 'surname'
 
 const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> = {
@@ -28,27 +27,15 @@ function Badge({ status }: { status: string }) {
 }
 function formatDate(d: string) { return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short', year: 'numeric' }) }
 function formatDateLong(d: string) { return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) }
-
 function sortByKey<T extends { first_name: string; surname: string }>(arr: T[], key: SortKey): T[] {
   return [...arr].sort((a, b) => a[key].localeCompare(b[key], 'fr', { sensitivity: 'base' }))
 }
 
-// ─── Vue "tous les events" : recherche membre + historique ──────────────────
-
 function MemberSearchView({
-  invitations,
-  eventsMap,
-  members,
-  isOwner,
-  onCancel,
-  cancelling,
+  invitations, eventsMap, members, isOwner, onCancel, cancelling,
 }: {
-  invitations: Invitation[]
-  eventsMap: Record<string, Event>
-  members: Member[]
-  isOwner: boolean
-  onCancel: (ids: string[]) => Promise<void>
-  cancelling: boolean
+  invitations: Invitation[]; eventsMap: Record<string, Event>; members: Member[]
+  isOwner: boolean; onCancel: (ids: string[]) => Promise<void>; cancelling: boolean
 }) {
   const [query, setQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
@@ -59,41 +46,27 @@ function MemberSearchView({
     return full.includes(query.toLowerCase())
   }).slice(0, 6)
 
-  function selectMember(m: Member) {
-    setSelectedMember(m)
-    setQuery(`${m.first_name} ${m.surname}`)
-    setOpen(false)
-  }
-
-  function clear() {
-    setSelectedMember(null)
-    setQuery('')
-    setOpen(false)
-  }
+  function selectMember(m: Member) { setSelectedMember(m); setQuery(`${m.first_name} ${m.surname}`); setOpen(false) }
+  function clear() { setSelectedMember(null); setQuery(''); setOpen(false) }
 
   const memberInvitations = selectedMember
-    ? invitations
-        .filter(i => i.player_id === selectedMember.id)
+    ? invitations.filter(i => i.player_id === selectedMember.id)
         .sort((a, b) => new Date(eventsMap[b.event_id]?.starts_at ?? 0).getTime() - new Date(eventsMap[a.event_id]?.starts_at ?? 0).getTime())
     : []
 
   return (
     <div>
-      {/* Champ recherche */}
       <div className="relative mb-4">
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/60 shadow-sm"
           style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
-          <input
-            type="text"
-            value={query}
+          <input type="text" value={query}
             onChange={e => { setQuery(e.target.value); setSelectedMember(null); setOpen(true) }}
             onFocus={() => { if (query && !selectedMember) setOpen(true) }}
             placeholder="Rechercher un membre…"
-            className="flex-1 bg-transparent text-[13px] text-slate-900 placeholder-slate-400 outline-none"
-          />
+            className="flex-1 bg-transparent text-[13px] text-slate-900 placeholder-slate-400 outline-none" />
           {query && (
             <button onClick={clear} className="text-slate-400 hover:text-slate-600 transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,8 +75,6 @@ function MemberSearchView({
             </button>
           )}
         </div>
-
-        {/* Suggestions dropdown */}
         {open && suggestions.length > 0 && (
           <div className="absolute z-20 top-full left-0 right-0 mt-1 rounded-xl border border-white/60 shadow-lg overflow-hidden"
             style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
@@ -123,12 +94,9 @@ function MemberSearchView({
         )}
       </div>
 
-      {/* Résultat : historique du membre */}
       {selectedMember && (
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-
-          {/* Header membre */}
           <div className="flex items-center gap-3 px-4 py-3 bg-[#EBF3FC]/60 border-b border-white/40">
             <div className="w-8 h-8 rounded-full bg-[#185FA5] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">
               {selectedMember.first_name[0]}{selectedMember.surname[0]}
@@ -136,36 +104,26 @@ function MemberSearchView({
             <div className="flex-1">
               <p className="text-[13px] font-bold text-slate-900">{selectedMember.first_name} {selectedMember.surname}</p>
               <p className="text-[11px] text-slate-500">
-                {memberInvitations.length === 0
-                  ? 'Aucune participation'
-                  : `${memberInvitations.length} event${memberInvitations.length > 1 ? 's' : ''}`}
+                {memberInvitations.length === 0 ? 'Aucune participation' : `${memberInvitations.length} event${memberInvitations.length > 1 ? 's' : ''}`}
               </p>
             </div>
           </div>
-
           {memberInvitations.length === 0 ? (
-            <div className="px-4 py-6 text-center text-[13px] text-slate-400">
-              Aucune invitation trouvée pour ce membre
-            </div>
+            <div className="px-4 py-6 text-center text-[13px] text-slate-400">Aucune invitation trouvée pour ce membre</div>
           ) : (
             memberInvitations.map((inv, i) => {
               const evt = eventsMap[inv.event_id]
               const isInvited = inv.status === 'INVITED'
               return (
-                <div key={inv.id}
-                  className={`flex items-center gap-3 px-4 py-3 ${i < memberInvitations.length - 1 ? 'border-b border-white/30' : ''}`}>
+                <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${i < memberInvitations.length - 1 ? 'border-b border-white/30' : ''}`}>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-slate-900 truncate">{evt?.title ?? '—'}</p>
                     {evt && <p className="text-[11px] text-slate-500">{formatDateLong(evt.starts_at)}</p>}
                   </div>
                   <Badge status={inv.status} />
                   {isInvited && isOwner && (
-                    <button
-                      disabled={cancelling}
-                      onClick={async () => {
-                        if (!confirm('Annuler cette invitation ?')) return
-                        await onCancel([inv.id])
-                      }}
+                    <button disabled={cancelling}
+                      onClick={async () => { if (!confirm('Annuler cette invitation ?')) return; await onCancel([inv.id]) }}
                       className="ml-1 text-[11px] font-semibold text-red-400 hover:text-red-600 disabled:opacity-40 transition-colors px-2 py-1 rounded-lg hover:bg-red-50">
                       Annuler
                     </button>
@@ -177,7 +135,6 @@ function MemberSearchView({
         </div>
       )}
 
-      {/* État vide initial */}
       {!selectedMember && !query && (
         <div className="text-center py-10 text-[13px] text-slate-400 border border-dashed border-slate-200 rounded-xl">
           Tape le nom d'un membre pour voir ses participations
@@ -186,8 +143,6 @@ function MemberSearchView({
     </div>
   )
 }
-
-// ─── Page principale ─────────────────────────────────────────────────────────
 
 export default function InvitationsPage() {
   const params   = useParams()
@@ -205,13 +160,18 @@ export default function InvitationsPage() {
   const [selectedEvent, setSelectedEvent]       = useState('')
   const [selectedPlayers, setSelectedPlayers]   = useState<string[]>([])
   const [sendEmail, setSendEmail]               = useState(false)
-  const [showForm, setShowForm]                 = useState(true)
   const [resendMode, setResendMode]             = useState(false)
   const [resendParticipants, setResendParticipants] = useState<Invitation[]>([])
   const [eventFilter, setEventFilter]           = useState<string>('ALL')
   const [selectedToCancel, setSelectedToCancel] = useState<string[]>([])
   const [cancelling, setCancelling]             = useState(false)
   const [sortKey, setSortKey]                   = useState<SortKey>('surname')
+  const [adminToast, setAdminToast]             = useState<string | null>(null)
+
+  function showAdminToast() {
+    setAdminToast('Tu dois être Admin pour utiliser cette fonction')
+    setTimeout(() => setAdminToast(null), 3000)
+  }
 
   useEffect(() => { if (groupId) loadData() }, [groupId, pathname])
   useEffect(() => {
@@ -222,22 +182,23 @@ export default function InvitationsPage() {
 
   useEffect(() => {
     if (!resendMode || !selectedEvent) { setResendParticipants([]); return }
-    supabase
-      .from('event_participants')
+    supabase.from('event_participants')
       .select('id, player_id, status, event_id, players(first_name, surname, email)')
       .eq('event_id', selectedEvent)
-      .then(({ data }) => {
-        setResendParticipants((data || []) as any)
-        setSelectedPlayers([])
-      })
+      .then(({ data }) => { setResendParticipants((data || []) as any); setSelectedPlayers([]) })
   }, [resendMode, selectedEvent])
 
   async function loadData() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    const { data: gp } = await supabase.from('groups_players').select('role')
-      .eq('group_id', groupId).eq('user_id', user?.id).single()
-    setIsOwner(gp?.role === 'owner')
+    if (user) {
+      const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
+      if (player) {
+        const { data: gp } = await supabase.from('groups_players').select('role')
+          .eq('group_id', groupId).eq('player_id', player.id).single()
+        setIsOwner(gp?.role === 'owner')
+      }
+    }
 
     const { data: evts } = await supabase.from('events').select('id, title, starts_at')
       .eq('group_id', groupId).order('starts_at', { ascending: true })
@@ -264,6 +225,7 @@ export default function InvitationsPage() {
   }
 
   async function handleSend() {
+    if (!isOwner) { showAdminToast(); return }
     if (!selectedEvent || selectedPlayers.length === 0) { toast('Sélectionne un event et au moins un joueur'); return }
     setSending(true)
     try {
@@ -276,24 +238,15 @@ export default function InvitationsPage() {
         toast(`Déjà invités — ignorés : ${names}`, { duration: 4000 })
       }
       if (toInvite.length === 0) { toast.error('Tous les joueurs sélectionnés sont déjà invités'); setSending(false); return }
-
       const rows = toInvite.map(playerId => ({
-        event_id: selectedEvent,
-        player_id: playerId,
-        status: 'INVITED',
-        invited_at: new Date().toISOString(),
-        registration_source: sendEmail ? 'email' : 'manual',
+        event_id: selectedEvent, player_id: playerId, status: 'INVITED',
+        invited_at: new Date().toISOString(), registration_source: sendEmail ? 'email' : 'manual',
         invite_token: crypto.randomUUID(),
       }))
       const { error: insertError } = await supabase.from('event_participants').insert(rows)
       if (insertError) throw new Error(insertError.message)
-
       if (sendEmail) {
-        const res = await fetch('/api/send-invitations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }),
-        })
+        const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }) })
         if (!res.ok) throw new Error('Erreur envoi email')
         toast.success(`${toInvite.length} invitation(s) envoyée(s) par email`)
       } else {
@@ -301,45 +254,32 @@ export default function InvitationsPage() {
       }
       setSelectedPlayers([])
       window.location.href = `/groups/${groupId}/events`
-    } catch (e: any) {
-      toast.error(e.message ?? 'Erreur')
-    } finally { setSending(false) }
+    } catch (e: any) { toast.error(e.message ?? 'Erreur') }
+    finally { setSending(false) }
   }
 
   async function handleResend() {
+    if (!isOwner) { showAdminToast(); return }
     if (!selectedEvent || selectedPlayers.length === 0) return
     setResending(true)
     try {
-      const { error: upsertErr } = await supabase
-        .from('event_participants')
-        .upsert(
-          selectedPlayers.map(playerId => ({
-            event_id:            selectedEvent,
-            player_id:           playerId,
-            status:              'INVITED',
-            invited_at:          new Date().toISOString(),
-            registration_source: 'email',
-          })),
-          { onConflict: 'event_id,player_id' }
-        )
+      const { error: upsertErr } = await supabase.from('event_participants').upsert(
+        selectedPlayers.map(playerId => ({ event_id: selectedEvent, player_id: playerId, status: 'INVITED', invited_at: new Date().toISOString(), registration_source: 'email' })),
+        { onConflict: 'event_id,player_id' }
+      )
       if (upsertErr) throw new Error(upsertErr.message)
-
-      const res = await fetch('/api/send-invitations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId: selectedEvent, playerIds: selectedPlayers }),
-      })
+      const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: selectedPlayers }) })
       if (!res.ok) throw new Error('Erreur envoi email')
       toast.success(`${selectedPlayers.length} invitation(s) renvoyée(s)`)
       setSelectedPlayers([])
       setResendMode(false)
       loadData()
-    } catch (e: any) {
-      toast.error(e.message ?? 'Erreur')
-    } finally { setResending(false) }
+    } catch (e: any) { toast.error(e.message ?? 'Erreur') }
+    finally { setResending(false) }
   }
 
   async function handleCancelSelected() {
+    if (!isOwner) { showAdminToast(); return }
     if (selectedToCancel.length === 0) return
     if (!confirm(`Annuler ${selectedToCancel.length} invitation(s) ?`)) return
     setCancelling(true)
@@ -349,6 +289,7 @@ export default function InvitationsPage() {
   }
 
   async function handleCancelIds(ids: string[]) {
+    if (!isOwner) { showAdminToast(); return }
     setCancelling(true)
     const { error } = await supabase.from('event_participants').delete().in('id', ids)
     if (error) { toast.error(error.message) } else { toast.success(`${ids.length} invitation(s) annulée(s)`); loadData() }
@@ -360,11 +301,13 @@ export default function InvitationsPage() {
     const cancellable = filteredInvited.map(i => i.id)
     setSelectedToCancel(selectedToCancel.length === cancellable.length ? [] : cancellable)
   }
-  function togglePlayer(id: string) { setSelectedPlayers(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]) }
-
+  function togglePlayer(id: string) {
+    if (!isOwner) { showAdminToast(); return }
+    setSelectedPlayers(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id])
+  }
   function switchMode(mode: 'invite' | 'resend') {
-    setResendMode(mode === 'resend')
-    setSelectedPlayers([])
+    if (!isOwner) { showAdminToast(); return }
+    setResendMode(mode === 'resend'); setSelectedPlayers([])
   }
 
   const filtered        = invitations.filter(i => eventFilter === 'ALL' || i.event_id === eventFilter)
@@ -392,6 +335,16 @@ export default function InvitationsPage() {
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
+      {adminToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="#EF9F27" strokeWidth="1.5"/>
+            <path d="M8 5v3.5M8 11h.01" stroke="#EF9F27" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          {adminToast}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -400,179 +353,166 @@ export default function InvitationsPage() {
             {invitations.filter(i => i.status === 'INVITED').length} invited · {invitations.filter(i => i.status === 'GOING').length} going
           </p>
         </div>
-
       </div>
 
-      {/* Formulaire */}
-      {showForm && isOwner && (
-        <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+      {/* Formulaire — toujours visible, désactivé si non-owner */}
+      <div className={`rounded-xl border border-white/60 shadow-sm p-5 mb-6 ${!isOwner ? 'opacity-60' : ''}`}
+        style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
 
-          {/* Toggle invite / renvoyer */}
-          <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-5">
-            <button type="button"
-              onClick={() => switchMode('invite')}
-              className={`flex-1 text-[12px] font-semibold py-1.5 rounded-lg transition-colors ${!resendMode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-              Nouvelles invitations
-            </button>
-            <button type="button"
-              onClick={() => switchMode('resend')}
-              className={`flex-1 text-[12px] font-semibold py-1.5 rounded-lg transition-colors ${resendMode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-              Renvoyer
-            </button>
+        <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-5">
+          <button type="button" onClick={() => switchMode('invite')}
+            className={`flex-1 text-[12px] font-semibold py-1.5 rounded-lg transition-colors ${!resendMode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'} ${!isOwner ? 'cursor-not-allowed' : ''}`}>
+            Nouvelles invitations
+          </button>
+          <button type="button" onClick={() => switchMode('resend')}
+            className={`flex-1 text-[12px] font-semibold py-1.5 rounded-lg transition-colors ${resendMode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'} ${!isOwner ? 'cursor-not-allowed' : ''}`}>
+            Renvoyer
+          </button>
+        </div>
+
+        {resendMode && (
+          <div className="mb-4 px-3.5 py-3 rounded-xl bg-amber-50 border border-amber-200">
+            <p className="text-[12px] text-amber-700 leading-relaxed">
+              Le statut des joueurs sélectionnés sera remis à <strong>invited</strong> et un nouvel email leur sera envoyé.
+            </p>
           </div>
+        )}
 
-          {/* Avertissement mode renvoyer */}
-          {resendMode && (
-            <div className="mb-4 px-3.5 py-3 rounded-xl bg-amber-50 border border-amber-200">
-              <p className="text-[12px] text-amber-700 leading-relaxed">
-                Le statut des joueurs sélectionnés sera remis à <strong>invited</strong> et un nouvel email leur sera envoyé.
-              </p>
-            </div>
-          )}
-
-          {/* Sélecteur event */}
-          <div className="mb-4">
-            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Événement</label>
-            {resendMode ? (
-              <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)}
-                className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-                <option value="">— choisir un événement —</option>
-                {Object.values(eventsMap)
-                  .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
-                  .map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
-              </select>
+        <div className="mb-4">
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Événement</label>
+          {resendMode ? (
+            <select value={selectedEvent} onChange={e => isOwner ? setSelectedEvent(e.target.value) : showAdminToast()}
+              disabled={!isOwner}
+              className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 disabled:cursor-not-allowed">
+              <option value="">— choisir un événement —</option>
+              {Object.values(eventsMap).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+                .map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
+            </select>
+          ) : (
+            events.length === 0 ? (
+              <p className="text-[12px] text-slate-500">Aucun événement à venir</p>
             ) : (
-              events.length === 0 ? (
-                <p className="text-[12px] text-slate-500">Aucun événement à venir</p>
-              ) : (
-                <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)}
-                  className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-                  {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
-                </select>
-              )
-            )}
+              <select value={selectedEvent} onChange={e => isOwner ? setSelectedEvent(e.target.value) : showAdminToast()}
+                disabled={!isOwner}
+                className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 disabled:cursor-not-allowed">
+                {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
+              </select>
+            )
+          )}
+        </div>
+
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <label className="text-[12px] font-semibold text-slate-600">
+                {resendMode ? 'Participants' : 'Joueurs'} ({selectedPlayers.length} sélectionnés)
+              </label>
+              {!resendMode && (
+                <div className="flex gap-1">
+                  <button type="button" onClick={() => setSortKey('first_name')}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                    Prénom
+                  </button>
+                  <button type="button" onClick={() => setSortKey('surname')}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
+                    Nom
+                  </button>
+                </div>
+              )}
+            </div>
+            <button type="button"
+              onClick={() => {
+                if (!isOwner) { showAdminToast(); return }
+                if (resendMode) {
+                  setSelectedPlayers(sortedResendParticipants.filter(p => p.players?.email).map(p => p.player_id))
+                } else {
+                  setSelectedPlayers(members.map(m => m.id))
+                }
+              }}
+              className={`text-[11px] font-semibold text-[#185FA5] hover:underline ${!isOwner ? 'cursor-not-allowed opacity-50' : ''}`}>
+              Tout sélectionner
+            </button>
           </div>
 
-          {/* Liste joueurs */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <label className="text-[12px] font-semibold text-slate-600">
-                  {resendMode ? 'Participants' : 'Joueurs'} ({selectedPlayers.length} sélectionnés)
-                </label>
-                {!resendMode && (
-                  <div className="flex gap-1">
-                    <button type="button" onClick={() => setSortKey('first_name')}
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'first_name' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
-                      Prénom
-                    </button>
-                    <button type="button" onClick={() => setSortKey('surname')}
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors ${sortKey === 'surname' ? 'bg-[#185FA5] text-white' : 'bg-white/60 text-slate-500 hover:bg-white/80'}`}>
-                      Nom
-                    </button>
-                  </div>
-                )}
-              </div>
-              <button type="button"
-                onClick={() => {
-                  if (resendMode) {
-                    setSelectedPlayers(sortedResendParticipants.filter(p => p.players?.email).map(p => p.player_id))
-                  } else {
-                    setSelectedPlayers(members.map(m => m.id))
-                  }
-                }}
-                className="text-[11px] font-semibold text-[#185FA5] hover:underline">
-                Tout sélectionner
-              </button>
-            </div>
-
-            {resendMode ? (
-              !selectedEvent ? (
-                <p className="text-[12px] text-slate-400 px-1">Sélectionne d'abord un événement</p>
-              ) : sortedResendParticipants.length === 0 ? (
-                <p className="text-[12px] text-slate-400 px-1">Aucun participant pour cet événement</p>
-              ) : (
-                <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
-                  {sortedResendParticipants.map((p, i) => (
-                    <label key={p.player_id}
-                      className={`flex items-center gap-3 px-3 py-2.5 hover:bg-white/30 transition-colors ${i < sortedResendParticipants.length - 1 ? 'border-b border-white/30' : ''} ${!p.players?.email ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
-                      <input type="checkbox"
-                        disabled={!p.players?.email}
-                        checked={selectedPlayers.includes(p.player_id)}
-                        onChange={() => togglePlayer(p.player_id)}
-                        className="rounded accent-[#185FA5]" />
-                      <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] flex-shrink-0">
-                        {p.players?.first_name[0]}{p.players?.surname[0]}
-                      </div>
-                      <span className="text-[13px] font-medium text-slate-800 flex-1">
-                        {p.players?.first_name} {p.players?.surname}
-                      </span>
-                      <Badge status={p.status} />
-                      {!p.players?.email && (
-                        <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>
-                      )}
-                    </label>
-                  ))}
-                </div>
-              )
+          {resendMode ? (
+            !selectedEvent ? (
+              <p className="text-[12px] text-slate-400 px-1">Sélectionne d'abord un événement</p>
+            ) : sortedResendParticipants.length === 0 ? (
+              <p className="text-[12px] text-slate-400 px-1">Aucun participant pour cet événement</p>
             ) : (
               <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
-                {sortedMembers.map((m, i) => (
-                  <label key={m.id} className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
-                    <input type="checkbox" checked={selectedPlayers.includes(m.id)} onChange={() => togglePlayer(m.id)} className="rounded accent-[#185FA5]" />
-                    <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C]">
-                      {m.first_name[0]}{m.surname[0]}
+                {sortedResendParticipants.map((p, i) => (
+                  <label key={p.player_id}
+                    className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${i < sortedResendParticipants.length - 1 ? 'border-b border-white/30' : ''} ${!p.players?.email || !isOwner ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-white/30'}`}>
+                    <input type="checkbox" disabled={!p.players?.email || !isOwner}
+                      checked={selectedPlayers.includes(p.player_id)} onChange={() => togglePlayer(p.player_id)}
+                      className="rounded accent-[#185FA5]" />
+                    <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] flex-shrink-0">
+                      {p.players?.first_name[0]}{p.players?.surname[0]}
                     </div>
-                    <span className="text-[13px] font-medium text-slate-800 flex-1">
-                      {sortKey === 'first_name'
-                        ? <>{m.first_name} <span className="font-normal text-slate-500">{m.surname}</span></>
-                        : <><span className="font-normal text-slate-500">{m.first_name}</span> {m.surname}</>
-                      }
-                    </span>
-                    {m.email
-                      ? <span className="text-[11px] text-slate-400 truncate max-w-[140px]">{m.email}</span>
-                      : <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>}
+                    <span className="text-[13px] font-medium text-slate-800 flex-1">{p.players?.first_name} {p.players?.surname}</span>
+                    <Badge status={p.status} />
+                    {!p.players?.email && <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>}
                   </label>
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* Toggle email */}
-          {!resendMode && (
-            <div className="flex items-start gap-3 mb-4 p-3.5 bg-white/30 rounded-xl border border-white/50">
-              <button type="button" onClick={() => setSendEmail(v => !v)}
-                style={{ backgroundColor: sendEmail ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
-                className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
-                <div style={{ transform: sendEmail ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
-                  className="w-4 h-4 rounded-full bg-white shadow-sm" />
-              </button>
-              <div>
-                <p className="text-[13px] font-semibold text-slate-800">Envoyer un email d'invitation</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  {sendEmail ? 'Les joueurs recevront un email avec un lien pour répondre' : 'Les joueurs sont enregistrés sans notification email'}
-                </p>
-              </div>
+            )
+          ) : (
+            <div className="border border-white/50 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+              {sortedMembers.map((m, i) => (
+                <label key={m.id}
+                  className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''} ${!isOwner ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-white/30'}`}>
+                  <input type="checkbox" disabled={!isOwner}
+                    checked={selectedPlayers.includes(m.id)} onChange={() => togglePlayer(m.id)}
+                    className="rounded accent-[#185FA5]" />
+                  <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C]">
+                    {m.first_name[0]}{m.surname[0]}
+                  </div>
+                  <span className="text-[13px] font-medium text-slate-800 flex-1">
+                    {sortKey === 'first_name'
+                      ? <>{m.first_name} <span className="font-normal text-slate-500">{m.surname}</span></>
+                      : <><span className="font-normal text-slate-500">{m.first_name}</span> {m.surname}</>}
+                  </span>
+                  {m.email
+                    ? <span className="text-[11px] text-slate-400 truncate max-w-[140px]">{m.email}</span>
+                    : <span className="text-[11px] text-amber-500 font-medium">pas d'email</span>}
+                </label>
+              ))}
             </div>
           )}
-
-          {/* Bouton submit */}
-          {resendMode ? (
-            <button onClick={handleResend}
-              disabled={resending || selectedPlayers.length === 0 || !selectedEvent}
-              className="bg-amber-500 text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-amber-600 disabled:opacity-40 transition-colors">
-              {resending ? 'Envoi…' : `Renvoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
-            </button>
-          ) : (
-            <button onClick={handleSend} disabled={sending || selectedPlayers.length === 0 || !selectedEvent}
-              className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-              {sending ? 'En cours…' : sendEmail
-                ? `Envoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`
-                : `Enregistrer sans email${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
-            </button>
-          )}
         </div>
-      )}
+
+        {!resendMode && (
+          <div className="flex items-start gap-3 mb-4 p-3.5 bg-white/30 rounded-xl border border-white/50">
+            <button type="button" onClick={() => { if (!isOwner) { showAdminToast(); return }; setSendEmail(v => !v) }}
+              style={{ backgroundColor: sendEmail ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
+              className={`mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 ${!isOwner ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+              <div style={{ transform: sendEmail ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
+                className="w-4 h-4 rounded-full bg-white shadow-sm" />
+            </button>
+            <div>
+              <p className="text-[13px] font-semibold text-slate-800">Envoyer un email d'invitation</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {sendEmail ? 'Les joueurs recevront un email avec un lien pour répondre' : 'Les joueurs sont enregistrés sans notification email'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {resendMode ? (
+          <button onClick={handleResend} disabled={resending || selectedPlayers.length === 0 || !selectedEvent || !isOwner}
+            className={`text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-40 ${isOwner ? 'bg-amber-500 hover:bg-amber-600' : 'bg-slate-300 cursor-not-allowed'}`}>
+            {resending ? 'Envoi…' : `Renvoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
+          </button>
+        ) : (
+          <button onClick={handleSend} disabled={sending || selectedPlayers.length === 0 || !selectedEvent || !isOwner}
+            className={`text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-40 ${isOwner ? 'bg-[#185FA5] hover:bg-[#0C447C]' : 'bg-slate-300 cursor-not-allowed'}`}>
+            {sending ? 'En cours…' : sendEmail
+              ? `Envoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`
+              : `Enregistrer sans email${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
+          </button>
+        )}
+      </div>
 
       {/* Filtres */}
       <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
@@ -582,7 +522,6 @@ export default function InvitationsPage() {
           {Object.values(eventsMap).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
             .map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}
         </select>
-
         <div className="flex items-center gap-2">
           {eventFilter !== 'ALL' && (
             <a href={`/groups/${groupId}/events/${eventFilter}/participants`}
@@ -599,9 +538,9 @@ export default function InvitationsPage() {
         </div>
       </div>
 
-      {/* Bandeau event (vue filtrée par event) */}
       {displayedEvent && (
-        <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm flex items-center justify-between" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+        <div className="mb-3 px-4 py-3 rounded-xl border border-white/60 shadow-sm flex items-center justify-between"
+          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div>
             <p className="text-[13px] font-bold text-slate-900">{displayedEvent.title}</p>
             <p className="text-[11px] text-slate-500">{formatDateLong(displayedEvent.starts_at)}</p>
@@ -614,25 +553,19 @@ export default function InvitationsPage() {
         </div>
       )}
 
-      {/* ── Vue ALL : recherche membre ── */}
       {eventFilter === 'ALL' ? (
         <MemberSearchView
-          invitations={invitations}
-          eventsMap={eventsMap}
-          members={members}
-          isOwner={isOwner}
-          onCancel={handleCancelIds}
-          cancelling={cancelling}
+          invitations={invitations} eventsMap={eventsMap} members={members}
+          isOwner={isOwner} onCancel={handleCancelIds} cancelling={cancelling}
         />
       ) : (
-        /* ── Vue filtrée par event : liste classique ── */
         sortedFiltered.length === 0 ? (
           <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
             Aucune invitation pour cet événement
           </div>
         ) : (
-          <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-            {/* Header liste avec tri */}
+          <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
             <div className="flex items-center gap-3 px-4 py-2.5 bg-white/30 border-b border-white/40">
               {filteredInvited.length > 0 && isOwner && (
                 <input type="checkbox" checked={allCancelSelected} onChange={toggleCancelAll} className="rounded accent-[#185FA5]" />
@@ -651,7 +584,6 @@ export default function InvitationsPage() {
                 </button>
               </div>
             </div>
-
             {sortedFiltered.map((inv, i) => {
               const isInvited = inv.status === 'INVITED'
               return (
@@ -666,8 +598,7 @@ export default function InvitationsPage() {
                     <div className="text-[13px] font-semibold text-slate-900">
                       {sortKey === 'first_name'
                         ? <>{inv.players?.first_name} <span className="font-normal text-slate-500">{inv.players?.surname}</span></>
-                        : <><span className="font-normal text-slate-500">{inv.players?.first_name}</span> {inv.players?.surname}</>
-                      }
+                        : <><span className="font-normal text-slate-500">{inv.players?.first_name}</span> {inv.players?.surname}</>}
                     </div>
                     {inv.invited_at && <div className="text-[11px] text-slate-400">invité le {formatDate(inv.invited_at)}</div>}
                   </div>
