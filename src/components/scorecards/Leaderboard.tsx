@@ -12,10 +12,10 @@ type LeaderboardEntry = {
 type Props = {
   eventId: string; scorecardId: string; players: Player[]
   holes: ScoringHole[]; eventFormat: 'stroke' | 'stableford'
-  isOwner: boolean
+  isOwner?: boolean
 }
 
-export default function Leaderboard({ eventId, scorecardId, players, holes, eventFormat, isOwner }: Props) {
+export default function Leaderboard({ eventId, scorecardId, players, holes, eventFormat, isOwner = false }: Props) {
   const supabase = createClient()
   const isStableford = eventFormat === 'stableford'
 
@@ -62,8 +62,10 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
         <h3 className="text-[15px] font-black text-slate-900">Leaderboard</h3>
         <div className="flex items-center gap-2">
           {saveMsg && <span className="text-[12px] font-semibold text-[#3B6D11]">{saveMsg}</span>}
-          <button onClick={handleSaveLeaderboard} disabled={saving}
-            className="text-[12px] font-semibold bg-slate-900 text-white px-3 py-1.5 rounded-xl disabled:opacity-50 hover:bg-slate-700 transition-colors">
+          <button onClick={handleSaveLeaderboard} disabled={saving || !isOwner}
+            className={`text-[12px] font-semibold px-3 py-1.5 rounded-xl disabled:opacity-50 transition-colors ${
+              isOwner ? 'bg-slate-900 text-white hover:bg-slate-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+            }`}>
             {saving ? 'Saving…' : 'Save leaderboard'}
           </button>
         </div>

@@ -115,6 +115,7 @@ export default function LeaderboardPage() {
           players={players}
           holes={holes}
           eventFormat={eventFormat}
+         
         />
       ) : (
         <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
