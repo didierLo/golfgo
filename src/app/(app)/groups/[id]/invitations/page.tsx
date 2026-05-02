@@ -400,12 +400,7 @@ export default function InvitationsPage() {
             {invitations.filter(i => i.status === 'INVITED').length} invited · {invitations.filter(i => i.status === 'GOING').length} going
           </p>
         </div>
-        {isOwner && (
-          <button onClick={() => setShowForm(v => !v)}
-            className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-semibold px-4 py-2 rounded-xl hover:bg-[#0C447C] transition-colors">
-            {showForm ? 'Fermer' : '+ Inviter'}
-          </button>
-        )}
+
       </div>
 
       {/* Formulaire */}
