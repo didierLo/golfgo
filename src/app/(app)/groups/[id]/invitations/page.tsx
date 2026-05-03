@@ -43,6 +43,7 @@ function MemberSearchView({
   const [open, setOpen]                     = useState(false)
   const [showPreview, setShowPreview]       = useState(false)
 
+
   const suggestions = query.trim().length === 0 ? [] : members.filter(m => {
     const full = `${m.first_name} ${m.surname} ${m.surname} ${m.first_name}`.toLowerCase()
     return full.includes(query.toLowerCase())
