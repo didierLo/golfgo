@@ -16,7 +16,7 @@ type Participant = {
 }
 type Event     = { id: string; title: string; starts_at: string }
 type Member    = { id: string; first_name: string; surname: string }
-type SortField = 'name' | 'status' | 'whs'
+type SortField = 'name' | 'status' | 'whs' | 'holes'
 type ViewMode  = 'list' | 'overview'
 
 const STATUS_STYLE: Record<string, { label: string; bg: string; text: string }> = {
@@ -137,6 +137,17 @@ export default function ParticipantsPage() {
     loadParticipants(selectedEventId)
   }
 
+  async function toggleHoles(playerId: string, current: number | null) {
+    const next = (!current || current === 18) ? 9 : 18
+    await supabase.from('event_participants')
+      .update({ holes_played: next })
+      .eq('event_id', selectedEventId).eq('player_id', playerId)
+    // optimistic update
+    setParticipants(prev => prev.map(p =>
+      p.player_id === playerId ? { ...p, holes_played: next } : p
+    ))
+  }
+
   async function removeParticipant(playerId: string) {
     if (!confirm('Retirer ce joueur de l\'événement ?')) return
     await supabase.from('event_participants').delete()
@@ -159,6 +170,7 @@ export default function ParticipantsPage() {
     }
     if (sortField === 'whs')    return ((a.players.whs ?? 999) - (b.players.whs ?? 999)) * dir
     if (sortField === 'status') return ((statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)) * dir
+    if (sortField === 'holes')  return ((a.holes_played ?? 18) - (b.holes_played ?? 18)) * dir
     return 0
   })
 
@@ -166,7 +178,7 @@ export default function ParticipantsPage() {
   const going   = participants.filter(p => p.status === 'GOING')
   const going18 = going.filter(p => !p.holes_played || p.holes_played === 18)
   const going9  = going.filter(p => p.holes_played === 9)
-  const invited = participants.filter(p => p.status === 'INVITED').length
+  const invited  = participants.filter(p => p.status === 'INVITED').length
   const declined = participants.filter(p => p.status === 'DECLINED').length
   const has9holers = going9.length > 0
 
@@ -235,8 +247,6 @@ export default function ParticipantsPage() {
 
           {/* Stats cards */}
           <div className="flex gap-3 mb-5 flex-wrap">
-
-            {/* Going 18T */}
             <div className="border border-[#C0DD97] rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
               style={{ background: '#EAF3DE' }}>
               <span className="text-[20px] font-black text-[#3B6D11]">{going18.length}</span>
@@ -244,8 +254,6 @@ export default function ParticipantsPage() {
                 {has9holers ? 'going 18T' : 'going'}
               </span>
             </div>
-
-            {/* Going 9T — affiché uniquement si au moins 1 */}
             {has9holers && (
               <div className="border border-amber-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
                 style={{ background: '#FEF3C7' }}>
@@ -253,19 +261,16 @@ export default function ParticipantsPage() {
                 <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide whitespace-nowrap">going 9T</span>
               </div>
             )}
-
             <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
               style={{ background: '#EBF3FC' }}>
               <span className="text-[20px] font-black text-[#0C447C]">{invited}</span>
               <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">invited</span>
             </div>
-
             <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
               style={{ background: '#FCEBEB' }}>
               <span className="text-[20px] font-black text-[#A32D2D]">{declined}</span>
               <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">declined</span>
             </div>
-
             <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
               style={{ background: '#F1F5F9' }}>
               <span className="text-[20px] font-black text-slate-700">{participants.length}</span>
@@ -281,13 +286,14 @@ export default function ParticipantsPage() {
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
 
+              {/* Header */}
               <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_60px_80px_130px_100px_160px_32px]'
-                  : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_60px_80px_130px_100px]'
+                  ? 'grid-cols-[1fr_70px_55px_70px_32px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px_160px_32px]'
+                  : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
               }`}>
                 <SortBtn field="name"   label="Joueur" />
-                <span className="text-[12px] font-semibold text-slate-400 hidden sm:block text-center">Trous</span>
+                <SortBtn field="holes"  label="Trous" />
                 <SortBtn field="whs"    label="WHS" />
                 <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
@@ -304,19 +310,33 @@ export default function ParticipantsPage() {
                   <div key={p.player_id}
                     className={`grid gap-4 px-4 py-3 items-center ${
                       isOwner
-                        ? 'grid-cols-[1fr_55px_70px_32px] sm:grid-cols-[1fr_60px_80px_130px_100px_160px_32px]'
-                        : 'grid-cols-[1fr_55px_70px] sm:grid-cols-[1fr_60px_80px_130px_100px]'
+                        ? 'grid-cols-[1fr_70px_55px_70px_32px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px_160px_32px]'
+                        : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-[13px] font-semibold text-slate-900 truncate">
                         {p.players.first_name} {p.players.surname}
                       </span>
-                      <span className="sm:hidden"><HolesBadge holes={p.holes_played} /></span>
                     </div>
 
-                    <div className="hidden sm:flex justify-center">
-                      <HolesBadge holes={p.holes_played} />
+                    {/* Trous — cliquable si owner et status GOING */}
+                    <div className="flex justify-start">
+                      {isOwner && p.status === 'GOING' ? (
+                        <button
+                          type="button"
+                          onClick={() => toggleHoles(p.player_id, p.holes_played)}
+                          title="Cliquer pour basculer 9T / 18T"
+                          className={`text-[11px] font-bold px-2 py-1 rounded-lg border transition-colors ${
+                            p.holes_played === 9
+                              ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100'
+                              : 'bg-white/60 border-slate-200 text-slate-400 hover:border-amber-300 hover:text-amber-600'
+                          }`}>
+                          {p.holes_played === 9 ? '9T' : '18T'}
+                        </button>
+                      ) : (
+                        <HolesBadge holes={p.holes_played} />
+                      )}
                     </div>
 
                     <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
