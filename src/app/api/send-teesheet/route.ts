@@ -5,7 +5,7 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
-type FlightPlayer = { id: string; first_name: string; surname: string; whs: number | null }
+type FlightPlayer = { id: string; first_name: string; surname: string; whs: number | null; holes_played?: number | null }
 type Flight = { flight_number: number; start_time: string; players: FlightPlayer[] }
 
 function buildTeesheetEmail({
@@ -30,18 +30,21 @@ function buildTeesheetEmail({
     const borderColor = isMyFlight ? '#185FA5' : '#E5E7EB'
 
     const playersHtml = flight.players.map((p, i) => {
-      const isMe = `${p.first_name} ${p.surname}` === playerName
-      return `
-        <tr style="border-bottom: 1px solid #F3F4F6;">
-          <td style="padding: 10px 16px; font-size: 13px; color: ${isMe ? '#185FA5' : '#374151'}; font-weight: ${isMe ? '600' : '400'};">
-            ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}
-          </td>
-          <td style="padding: 10px 16px; font-size: 12px; color: #9CA3AF; text-align: right;">
-            ${p.whs !== null ? `WHS ${p.whs}` : ''}
-          </td>
-        </tr>
-      `
-    }).join('')
+    const isMe = `${p.first_name} ${p.surname}` === playerName
+    const badge9T = p.holes_played === 9
+      ? `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#FEF3C7;color:#B45309;margin-left:6px;">9T</span>`
+      : ''
+    return `
+      <tr style="border-bottom: 1px solid #F3F4F6;">
+        <td style="padding: 10px 16px; font-size: 13px; color: ${isMe ? '#185FA5' : '#374151'}; font-weight: ${isMe ? '600' : '400'};">
+          ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}${badge9T}
+        </td>
+        <td style="padding: 10px 16px; font-size: 12px; color: #9CA3AF; text-align: right;">
+          ${p.whs !== null ? `WHS ${p.whs}` : ''}
+        </td>
+      </tr>
+    `
+  }).join('')
 
     return `
       <div style="margin-bottom: 16px; border: 1.5px solid ${borderColor}; border-radius: 10px; overflow: hidden;">

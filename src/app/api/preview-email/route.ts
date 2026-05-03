@@ -95,14 +95,18 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
     const borderColor = isMyFlight ? '#185FA5'  : '#E5E7EB'
     const playersHtml = flight.players.map((p, i) => {
       const isMe = `${p.first_name} ${p.surname}` === playerName
-      return `<tr style="border-bottom:1px solid #F3F4F6;">
-        <td style="padding:10px 16px;font-size:13px;color:${isMe ? '#185FA5' : '#374151'};font-weight:${isMe ? '600' : '400'};">
-          ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}
-        </td>
-        <td style="padding:10px 16px;font-size:12px;color:#9CA3AF;text-align:right;">${p.whs !== null ? `WHS ${p.whs}` : ''}</td>
-      </tr>`
-    }).join('')
-    return `<div style="margin-bottom:16px;border:1.5px solid ${borderColor};border-radius:10px;overflow:hidden;">
+      const badge9T = (p as any).holes_played === 9
+        ? `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#FEF3C7;color:#B45309;margin-left:6px;">9T</span>`
+        : ''
+      return `
+        <tr style="border-bottom:1px solid #F3F4F6;">
+          <td style="padding:10px 16px;font-size:13px;color:${isMe ? '#185FA5' : '#374151'};font-weight:${isMe ? '600' : '400'};">
+            ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}${badge9T}
+          </td>
+          <td style="padding:10px 16px;font-size:12px;color:#9CA3AF;text-align:right;">${p.whs !== null ? `WHS ${p.whs}` : ''}</td>
+        </tr>`
+       }).join('')
+     return `<div style="margin-bottom:16px;border:1.5px solid ${borderColor};border-radius:10px;overflow:hidden;">
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr style="background:${headerBg};">
           <td style="padding:10px 16px;font-size:13px;font-weight:600;color:${headerText};">
