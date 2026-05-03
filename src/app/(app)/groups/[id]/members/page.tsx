@@ -235,7 +235,7 @@ export default function MembersPage() {
             <div key={member.id}
               className={`grid grid-cols-[1fr_60px_80px_100px] gap-3 px-4 py-3 items-center hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
 
-              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push(`/players/${member.id}`)}>
+              <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push(`/players/${member.id}/edit?groupId=${groupId}`)}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
                   style={{ background: member.role === 'guest' ? '#FEF3C7' : '#EBF3FC', color: member.role === 'guest' ? '#92400E' : '#0C447C' }}>
                   {member.first_name[0]}{member.surname[0]}
