@@ -289,7 +289,7 @@ export default function ParticipantsPage() {
               {/* Header */}
               <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[1fr_70px_55px_70px_32px] sm:grid-cols-[1fr_70px_60px_80px_130px_55px_200px_32px]'
+                  ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_70px_60px_80px_130px_55px_240px]'
                   : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
               }`}>
                 <SortBtn field="name"   label="Joueur" />
@@ -298,7 +298,6 @@ export default function ParticipantsPage() {
                 <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
                 {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
-                {isOwner && <span />}
               </div>
 
               {displayed.length === 0 ? (
@@ -310,12 +309,12 @@ export default function ParticipantsPage() {
                   <div key={p.player_id}
                     className={`grid gap-4 px-4 py-3 items-center ${
                       isOwner
-                        ? 'grid-cols-[1fr_70px_55px_70px_32px] sm:grid-cols-[1fr_70px_60px_80px_130px_55px_200px_32px]'
+                        ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_70px_60px_80px_130px_55px_240px]'
                         : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[13px] font-semibold text-slate-900 truncate">
+                      <span className="text-[13px] font-semibold text-slate-800 truncate">
                         {p.players.first_name} {p.players.surname}
                       </span>
                     </div>
@@ -344,26 +343,13 @@ export default function ParticipantsPage() {
                     <div><Badge status={p.status} /></div>
 
                     {isOwner && (
-                      <div className="hidden sm:flex justify-end gap-1 flex-wrap">
-                        {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
-                          <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
-                            className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
-                              p.status === s
-                                ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
-                                : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
-                                :                   'bg-[#EBF3FC] border-[#B5D4F4] text-[#0C447C]'
-                                : 'border-slate-200 text-slate-400 hover:bg-white/30'
-                            }`}>
-                            {s === 'GOING' ? 'Yes' : s === 'DECLINED' ? 'No' : 'Reset'}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {isOwner && (
+                     <div className="hidden sm:flex justify-end items-center gap-1">
+                      {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => ( ... ))}
                       <button type="button" onClick={() => removeParticipant(p.player_id)}
-                        className="text-slate-300 hover:text-red-400 transition-colors text-[18px] leading-none text-center">
+                        className="text-slate-300 hover:text-red-400 transition-colors text-[18px] leading-none ml-1">
                         ×
                       </button>
+                    </div>
                     )}
                   </div>
                 ))
@@ -386,7 +372,7 @@ export default function ParticipantsPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
               <div className="overflow-x-auto">
                 <table className="w-full text-[12px] border-collapse">
                   <thead>
