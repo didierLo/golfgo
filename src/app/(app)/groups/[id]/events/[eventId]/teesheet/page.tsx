@@ -10,7 +10,7 @@ import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 
 const supabase = createClient()
 
-type FlightPlayer = { id: string; first_name: string; surname: string; whs: number | null }
+type FlightPlayer = { id: string; first_name: string; surname: string; whs: number | null; holes_played?: number | null }
 type Flight = { flight_number: number; players: FlightPlayer[] }
 
 export default function TeeSheetPage() {
@@ -35,7 +35,6 @@ export default function TeeSheetPage() {
   const [emailEnabled, setEmailEnabled] = useState(false)
   const [showPreview, setShowPreview]   = useState(false)
 
-  // Initialise avec l'event futur le plus proche si pas d'eventId dans la route
   useEffect(() => {
     if (!eventIdFromRoute && nearestEventId && !nearestLoading) {
       setSelectedEventId(nearestEventId)
@@ -56,14 +55,27 @@ export default function TeeSheetPage() {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
       }))
     }
+
     const { data: flightsData, error: fErr } = await supabase
       .from('flights')
       .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
       .eq('event_id', evId).order('flight_number')
     if (fErr) { setError(fErr.message); setLoading(false); return }
+
+    // Charger holes_played depuis event_participants
+    const { data: participants } = await supabase
+      .from('event_participants')
+      .select('player_id, holes_played')
+      .eq('event_id', evId)
+    const holesMap: Record<string, number | null> = {}
+    participants?.forEach(p => { holesMap[p.player_id] = p.holes_played })
+
     const built: Flight[] = (flightsData || []).map((f: any) => ({
       flight_number: f.flight_number,
-      players: (f.flight_players || []).map((fp: any) => fp.players).filter(Boolean),
+      players: (f.flight_players || []).map((fp: any) => ({
+        ...fp.players,
+        holes_played: holesMap[fp.player_id] ?? null,
+      })).filter(Boolean),
     }))
     built.sort((a, b) => a.players.length - b.players.length)
     const renumbered = built.map((f, i) => ({ ...f, flight_number: i + 1 }))
@@ -176,13 +188,17 @@ export default function TeeSheetPage() {
           <div className="flex gap-2">
             <button onClick={() => setShowPreview(true)} disabled={!emailEnabled}
               className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
-                emailEnabled ? 'border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer' : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+                emailEnabled
+                  ? 'border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer'
+                  : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
               }`}>
               👁 Aperçu
             </button>
             <button type="button" onClick={canSend ? handleSendEmail : undefined} disabled={!canSend}
               className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
-                canSend ? 'border-[#185FA5] text-[#185FA5] hover:bg-blue-50 cursor-pointer' : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+                canSend
+                  ? 'border-[#185FA5] text-[#185FA5] hover:bg-blue-50 cursor-pointer'
+                  : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
               }`}>
               {sending ? 'Envoi…' : '✉ Envoyer'}
             </button>
@@ -213,9 +229,12 @@ export default function TeeSheetPage() {
               <div className="divide-y divide-slate-100">
                 {flight.players.map((p, i) => (
                   <div key={p.id} className="flex items-center justify-between px-4 py-2.5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <span className="text-[11px] text-slate-300 w-4">{i + 1}</span>
                       <span className="text-[13px] font-semibold text-slate-800">{p.first_name} {p.surname}</span>
+                      {p.holes_played === 9 && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700">9T</span>
+                      )}
                     </div>
                     {p.whs !== null && (
                       <span className="text-[11px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-lg font-mono">
@@ -228,6 +247,25 @@ export default function TeeSheetPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Modal aperçu email */}
+      {showPreview && (
+        <EmailPreviewModal
+          onClose={() => setShowPreview(false)}
+          onConfirm={() => { setShowPreview(false); handleSendEmail() }}
+          confirmLabel="Envoyer la tee sheet"
+          loading={sending}
+          fetchPreview={() => fetch('/api/preview-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'teesheet',
+              eventId: selectedEventId,
+              flights: flights.map((f, i) => ({ ...f, start_time: getFlightTime(i) })),
+            }),
+          }).then(r => r.json())}
+        />
       )}
 
       <style jsx global>{`
