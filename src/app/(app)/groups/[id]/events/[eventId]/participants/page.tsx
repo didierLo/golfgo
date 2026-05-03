@@ -289,7 +289,7 @@ export default function ParticipantsPage() {
               {/* Header */}
               <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_70px_60px_80px_130px_55px_260px]'
+                  ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px_260px]'
                   : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
               }`}>
                 <SortBtn field="name"   label="Joueur" />
@@ -309,7 +309,7 @@ export default function ParticipantsPage() {
                   <div key={p.player_id}
                     className={`grid gap-4 px-4 py-3 items-center ${
                       isOwner
-                        ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_70px_60px_80px_130px_55px_260px]'
+                        ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px_260px]'
                         : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
