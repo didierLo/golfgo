@@ -18,6 +18,23 @@ const STATUS_STYLE = {
   EXISTS: { label: 'Existant',    bg: '#F1F5F9', text: '#64748B' },
 }
 
+// ─── Template download ─────────────────────────────────────────────────────────
+
+function downloadTemplate() {
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['federal_no', 'first_name', 'surname', 'whs', 'email', 'phone', 'home_club'],
+    ['BEL123456', 'Jean', 'DUPONT', 12.4, 'jean.dupont@email.com', '+32470123456', 'Royal Golf Club'],
+    ['BEL789012', 'Marie', 'MARTIN', 8.1, 'marie.martin@email.com', '+32499876543', 'Golf de Falnuée'],
+  ])
+  ws['!cols'] = [
+    { wch: 14 }, { wch: 15 }, { wch: 15 },
+    { wch: 8  }, { wch: 28 }, { wch: 16 }, { wch: 25 },
+  ]
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Joueurs')
+  XLSX.writeFile(wb, 'template_joueurs_golfgo.xlsx')
+}
+
 function normalizeColumn(name: string) {
   const n = name.toLowerCase()
   if (n.includes('federal') || n.includes('licence') || n.includes('license')) return 'federal_no'
@@ -103,8 +120,27 @@ export default function ImportPlayers() {
   const updateCount = preview.filter(p => p.status === 'UPDATE').length
   const existsCount = preview.filter(p => p.status === 'EXISTS').length
 
+
   return (
     <div className="flex flex-col gap-4">
+
+    {/* Template download */}
+    <div className="flex items-center justify-between">
+      <p className="text-[12px] text-slate-500">
+        Fédération belge ou fichier custom — télécharge le template si besoin.
+      </p>
+      <button
+        type="button"
+        onClick={downloadTemplate}
+        className="flex items-center gap-1.5 text-[12px] font-medium text-[#185FA5] hover:text-[#0C447C] border border-[#185FA5]/30 hover:border-[#185FA5] px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap"
+      >
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2v8M5 7l3 3 3-3M3 13h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        Template Excel
+      </button>
+    </div>
+
       <div>
         <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Fichier CSV / XLS / XLSX</label>
         <input type="file" accept=".csv,.xls,.xlsx" onChange={handleFile}
