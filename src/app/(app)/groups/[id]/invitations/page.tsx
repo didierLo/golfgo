@@ -260,7 +260,7 @@ export default function InvitationsPage() {
         registration_source: sendEmail ? 'email' : 'manual',
         invite_token: crypto.randomUUID(),
         // 9T seulement si toggle activé pour ce joueur (et mode sans email)
-        holes_played: (!sendEmail && holesMap[playerId] === 9) ? 9 : null,
+        holes_played: (!sendEmail && holesMap[playerId] === 9) ? 9 : 18,
       }))
 
       const { error: insertError } = await supabase.from('event_participants').insert(rows)
@@ -287,7 +287,7 @@ export default function InvitationsPage() {
     setResending(true)
     try {
       const { error: upsertErr } = await supabase.from('event_participants').upsert(
-        selectedPlayers.map(playerId => ({ event_id: selectedEvent, player_id: playerId, status: 'INVITED', invited_at: new Date().toISOString(), registration_source: 'email' })),
+        selectedPlayers.map(playerId => ({ event_id: selectedEvent, player_id: playerId, status: 'INVITED', invited_at: new Date().toISOString(), registration_source: 'email', holes_played: 18,})),
         { onConflict: 'event_id,player_id' }
       )
       if (upsertErr) throw new Error(upsertErr.message)
