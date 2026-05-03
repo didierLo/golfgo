@@ -41,7 +41,7 @@ function MemberSearchView({
   const [query, setQuery]                   = useState('')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [open, setOpen]                     = useState(false)
-  const [showPreview, setShowPreview]       = useState(false)
+ 
 
 
   const suggestions = query.trim().length === 0 ? [] : members.filter(m => {
@@ -172,6 +172,7 @@ export default function InvitationsPage() {
   const [cancelling, setCancelling]             = useState(false)
   const [sortKey, setSortKey]                   = useState<SortKey>('surname')
   const [adminToast, setAdminToast]             = useState<string | null>(null)
+  const [showPreview, setShowPreview]       = useState(false)
 
   function showAdminToast() {
     setAdminToast('Tu dois être Admin pour utiliser cette fonction')
