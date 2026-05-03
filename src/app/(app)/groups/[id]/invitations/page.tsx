@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
+import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 
 const supabase = createClient()
 
@@ -37,9 +38,10 @@ function MemberSearchView({
   invitations: Invitation[]; eventsMap: Record<string, Event>; members: Member[]
   isOwner: boolean; onCancel: (ids: string[]) => Promise<void>; cancelling: boolean
 }) {
-  const [query, setQuery] = useState('')
+  const [query, setQuery]                   = useState('')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]                     = useState(false)
+  const [showPreview, setShowPreview]       = useState(false)
 
   const suggestions = query.trim().length === 0 ? [] : members.filter(m => {
     const full = `${m.first_name} ${m.surname} ${m.surname} ${m.first_name}`.toLowerCase()
@@ -540,17 +542,46 @@ export default function InvitationsPage() {
         )}
 
         {resendMode ? (
-          <button onClick={handleResend} disabled={resending || selectedPlayers.length === 0 || !selectedEvent || !isOwner}
-            className={`text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-40 ${isOwner ? 'bg-amber-500 hover:bg-amber-600' : 'bg-slate-300 cursor-not-allowed'}`}>
-            {resending ? 'Envoi…' : `Renvoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
-          </button>
-        ) : (
-          <button onClick={handleSend} disabled={sending || selectedPlayers.length === 0 || !selectedEvent || !isOwner}
-            className={`text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-40 ${isOwner ? 'bg-[#185FA5] hover:bg-[#0C447C]' : 'bg-slate-300 cursor-not-allowed'}`}>
-            {sending ? 'En cours…' : sendEmail
-              ? `Envoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`
-              : `Enregistrer sans email${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
-          </button>
+  <>
+    <button onClick={() => setShowPreview(true)}
+      disabled={selectedPlayers.length === 0 || !selectedEvent || !isOwner}
+      className={`text-[13px] font-semibold px-5 py-2.5 rounded-xl border transition-colors disabled:opacity-40 mr-2 ${isOwner ? 'border-amber-400 text-amber-600 hover:bg-amber-50' : 'border-slate-200 text-slate-300 cursor-not-allowed'}`}>
+      👁 Aperçu
+    </button>
+    <button onClick={handleResend} disabled={resending || selectedPlayers.length === 0 || !selectedEvent || !isOwner}
+      className={`text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-40 ${isOwner ? 'bg-amber-500 hover:bg-amber-600' : 'bg-slate-300 cursor-not-allowed'}`}>
+      {resending ? 'Envoi…' : `Renvoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
+    </button>
+  </>
+) : (
+  <div className="flex gap-2 items-center flex-wrap">
+    {sendEmail && (
+      <button onClick={() => setShowPreview(true)}
+        disabled={selectedPlayers.length === 0 || !selectedEvent || !isOwner}
+        className={`text-[13px] font-semibold px-5 py-2.5 rounded-xl border transition-colors disabled:opacity-40 ${isOwner ? 'border-[#185FA5] text-[#185FA5] hover:bg-blue-50' : 'border-slate-200 text-slate-300 cursor-not-allowed'}`}>
+        👁 Aperçu
+      </button>
+    )}
+    <button onClick={handleSend} disabled={sending || selectedPlayers.length === 0 || !selectedEvent || !isOwner}
+      className={`text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-40 ${isOwner ? 'bg-[#185FA5] hover:bg-[#0C447C]' : 'bg-slate-300 cursor-not-allowed'}`}>
+      {sending ? 'En cours…' : sendEmail
+        ? `Envoyer${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`
+        : `Enregistrer sans email${selectedPlayers.length > 0 ? ` (${selectedPlayers.length})` : ''}`}
+    </button>
+  </div>
+)}
+
+        {showPreview && (
+          <EmailPreviewModal
+            onClose={() => setShowPreview(false)}
+            onConfirm={() => { setShowPreview(false); resendMode ? handleResend() : handleSend() }}
+            confirmLabel={resendMode ? `Renvoyer (${selectedPlayers.length})` : `Envoyer (${selectedPlayers.length})`}
+            loading={sending || resending}
+            fetchPreview={() => fetch('/api/preview-email', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'invitation', eventId: selectedEvent }),
+            }).then(r => r.json())}
+          />
         )}
       </div>
 

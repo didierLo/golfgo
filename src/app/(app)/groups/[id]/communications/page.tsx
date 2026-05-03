@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import toast from 'react-hot-toast'
+import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 
 const supabase = createClient()
 
@@ -128,6 +129,7 @@ export default function CommunicationsPage() {
   const [activeCommTpl, setActiveCommTpl] = useState<string | null>(null)
   const [sending,       setSending]       = useState(false)
   const [preview,       setPreview]       = useState(false)
+  const [showPreview,   setShowPreview]   = useState(false)
 
   // ── Load ─────────────────────────────────────────────────────────────────
 
@@ -474,20 +476,40 @@ export default function CommunicationsPage() {
                 </div>
               )}
             </div>
-            <div className="px-5 py-4 bg-slate-50/50 flex items-center justify-between gap-4">
-              <p className="text-[12px] text-slate-500">
-                {selectedIds.size === 0 ? 'Aucun destinataire' : `${selectedIds.size} destinataire${selectedIds.size > 1 ? 's' : ''}`}
-              </p>
-             <button onClick={handleSend} disabled={sending || selectedIds.size === 0 || !commSubject.trim() || !commBody.trim() || !isOwner}
-              className={`flex items-center gap-2 text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors ${
-                isOwner ? 'bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-40' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-              }`}>
-                {sending
-                  ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Envoi...</>
-                  : <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Envoyer</>
-                }
-              </button>
-            </div>
+              <div className="px-5 py-4 bg-slate-50/50 flex items-center justify-between gap-4">
+                <p className="text-[12px] text-slate-500">
+                  {selectedIds.size === 0 ? 'Aucun destinataire' : `${selectedIds.size} destinataire${selectedIds.size > 1 ? 's' : ''}`}
+                </p>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowPreview(true)}
+                    disabled={selectedIds.size === 0 || !commSubject.trim() || !commBody.trim() || !isOwner}
+                    className="text-[13px] font-semibold px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors">
+                    👁 Aperçu
+                  </button>
+                  <button onClick={handleSend} disabled={sending || selectedIds.size === 0 || !commSubject.trim() || !commBody.trim() || !isOwner}
+                    className={`flex items-center gap-2 text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors ${
+                      isOwner ? 'bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-40' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    }`}>
+                    {sending
+                      ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Envoi...</>
+                      : <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Envoyer</>
+                    }
+                  </button>
+                </div>
+              </div>
+
+              {showPreview && (
+                <EmailPreviewModal
+                  onClose={() => setShowPreview(false)}
+                  onConfirm={() => { setShowPreview(false); handleSend() }}
+                  confirmLabel={`Envoyer (${selectedIds.size})`}
+                  loading={sending}
+                  fetchPreview={() => fetch('/api/preview-email', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'communication', subject: commSubject, body: commBody, groupId, eventId: filterEventId || null }),
+                  }).then(r => r.json())}
+                />
+              )}
           </div>
         </div>
       )}

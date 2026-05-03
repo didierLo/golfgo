@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import EventPillSelector, { useNearestEvent } from '@/components/events/EventPillSelector'
 import toast from 'react-hot-toast'
+import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 
 const supabase = createClient()
 
@@ -32,6 +33,7 @@ export default function TeeSheetPage() {
   const [error, setError]               = useState<string | null>(null)
   const [sending, setSending]           = useState(false)
   const [emailEnabled, setEmailEnabled] = useState(false)
+  const [showPreview, setShowPreview]   = useState(false)
 
   // Initialise avec l'event futur le plus proche si pas d'eventId dans la route
   useEffect(() => {
@@ -171,14 +173,20 @@ export default function TeeSheetPage() {
               </p>
             </div>
           </div>
-          <button type="button" onClick={canSend ? handleSendEmail : undefined} disabled={!canSend}
-            className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
-              canSend
-                ? 'border-[#185FA5] text-[#185FA5] hover:bg-blue-50 cursor-pointer'
-                : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
-            }`}>
-            {sending ? 'Envoi…' : '✉ Envoyer'}
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setShowPreview(true)} disabled={!emailEnabled}
+              className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
+                emailEnabled ? 'border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer' : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+              }`}>
+              👁 Aperçu
+            </button>
+            <button type="button" onClick={canSend ? handleSendEmail : undefined} disabled={!canSend}
+              className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
+                canSend ? 'border-[#185FA5] text-[#185FA5] hover:bg-blue-50 cursor-pointer' : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+              }`}>
+              {sending ? 'Envoi…' : '✉ Envoyer'}
+            </button>
+          </div>
         </div>
       )}
 
