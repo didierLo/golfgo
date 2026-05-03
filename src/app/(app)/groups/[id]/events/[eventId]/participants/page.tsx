@@ -344,7 +344,19 @@ export default function ParticipantsPage() {
 
                     {isOwner && (
                      <div className="hidden sm:flex justify-end items-center gap-1">
-                      {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => ( ... ))}
+                     {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
+                      <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
+                        className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
+                          p.status === s
+                            ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
+                            : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
+                            :                   'bg-[#EBF3FC] border-[#B5D4F4] text-[#0C447C]'
+                            : 'border-slate-200 text-slate-400 hover:bg-white/30'
+                        }`}>
+                        {s === 'GOING' ? 'Yes' : s === 'DECLINED' ? 'No' : 'Reset'}
+                      </button>
+                    ))}
+
                       <button type="button" onClick={() => removeParticipant(p.player_id)}
                         className="text-slate-300 hover:text-red-400 transition-colors text-[18px] leading-none ml-1">
                         ×
