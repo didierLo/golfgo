@@ -128,7 +128,7 @@ export default function AddMemberPage() {
     {/* Header */}
 <div className="mb-6">
   <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter un membre</h1>
-  <p className="text-[13px] text-gray-900 mt-0.5">Recherche un joueur existant ou crée-en un nouveau</p>
+  <p className="text-[13px] text-black mt-0.5">Recherche un joueur existant ou crée-en un nouveau</p>
 </div>
 
 {/* 3 boutons modes */}
@@ -137,7 +137,7 @@ export default function AddMemberPage() {
   {/* Depuis une liste */}
   <button
     onClick={() => setIsListModalOpen(true)}
-    className="flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
+    className="flex flex-col items-center gap-2 px-2 py-3 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
     style={{
       background: 'rgba(255,255,255,0.85)',
       backdropFilter: 'blur(20px)',
@@ -428,7 +428,7 @@ export default function AddMemberPage() {
 
       {/* Navigation */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
-        <a href={`/groups/${groupId}/members`} className="text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors">← Retour aux membres</a>
+        <a href={`/groups/${groupId}/members`} className="text-[13px] font-medium text-slate-500 hover:text-black transition-colors">← Retour aux membres</a>
         {addedCount > 0 && <a href={`/groups/${groupId}/events`} className="text-[13px] font-semibold text-[#185FA5] hover:underline">Continuer vers les événements →</a>}
       </div>
 
