@@ -163,24 +163,19 @@ export default function ScorecardsPage() {
           const { count } = await supabase.from('scorecard_players').select('*', { count: 'exact', head: true }).eq('scorecard_id', scId)
           if (count === 0) await supabase.from('scorecard_players').insert(built.map((p, i) => ({ scorecard_id: scId, player_id: p.id, position: i + 1 })))
         }
-       const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
+        const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
           .eq('scorecard_id', scId).eq('event_id', eventId).in('player_id', built.map(p => p.id))
         const map: ScoreMap = {}
         built.forEach(p => { map[p.id] = {} })
-        holesData?.forEach(h => {
-          built.forEach(p => { map[p.id][h.hole_number] = h.par })
-        })
         scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
         setScores(map)
-              }
+      }
     } catch (e: any) {
       setError(e.message ?? 'Erreur lors du chargement')
     } finally {
       setScorecardLoading(false)
     }
   }
-
-
 
   async function handleTeeChange(playerId: string, teeId: string) {
     if (!isOwner) return
@@ -252,8 +247,8 @@ export default function ScorecardsPage() {
       )}
 
       {/* Club & Parcours */}
-     <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6"
-       style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+      <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6"
+        style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Club & Parcours</p>
 
         <div className="mb-4">
@@ -337,7 +332,7 @@ export default function ScorecardsPage() {
 
           {/* Bandeau joueur actif */}
           {activePlayer && (
-           <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5"
+            <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5"
               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div className="flex items-center gap-3 flex-wrap mb-3">
                 <div className="flex-1 min-w-0">
@@ -384,7 +379,7 @@ export default function ScorecardsPage() {
             </div>
           )}
 
-         {/* Scorecard */}
+          {/* Scorecard */}
           {activePlayer ? (
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>

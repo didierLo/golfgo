@@ -4,9 +4,12 @@ import { ScorecardCell } from './ScorecardCell'
 import type { Hole, Player, ScoreMap } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
 
 type Props = {
-  holes: Hole[]; player: Player; scores: ScoreMap
+  holes: Hole[]
+  player: Player
+  scores: ScoreMap
   setScores: React.Dispatch<React.SetStateAction<ScoreMap>>
-  eventFormat: 'stroke' | 'stableford'; readOnly?: boolean
+  eventFormat: 'stroke' | 'stableford'
+  readOnly?: boolean
 }
 
 function strokesReceived(phcp: number, strokeIndex: number): number {
@@ -20,64 +23,38 @@ function stablefordPoints(brut: number, par: number, recv: number): number {
   return Math.max(0, par - (brut - recv) + 2)
 }
 
+function subtotals(holesList: Hole[], player: Player, scores: ScoreMap, eventFormat: 'stroke' | 'stableford') {
+  let parSum = 0, brutSum = 0, netSum = 0, ptsSum = 0, count = 0
+  holesList.forEach(h => {
+    parSum += h.par
+    const brut = scores[player.id]?.[h.hole_number] ?? null
+    if (brut != null) {
+      const recv = strokesReceived(player.phcp, h.stroke_index)
+      const net  = brut - recv
+      const pts  = stablefordPoints(brut, h.par, recv)
+      brutSum += brut; netSum += net; ptsSum += pts; count++
+    }
+  })
+  return { parSum, brutSum: count ? brutSum : null, netSum: count ? netSum : null, ptsSum: count ? ptsSum : null }
+}
+
 export default function ScorecardTable({ holes, player, scores, setScores, eventFormat, readOnly = false }: Props) {
   const isStableford = eventFormat === 'stableford'
   const front9 = holes.filter(h => h.hole_number <= 9)
   const back9  = holes.filter(h => h.hole_number > 9)
 
   function updateScore(hole: number, delta: number, par: number) {
-  if (readOnly) return
-  setScores(prev => {
-    const current = prev[player.id]?.[hole] ?? par
-    return { ...prev, [player.id]: { ...prev[player.id], [hole]: Math.max(1, current + delta) } }
-  })
-}
-
-  function holeStats(h: Hole) {
-    const brut = scores[player.id]?.[h.hole_number] ?? null
-    const recv = strokesReceived(player.phcp, h.stroke_index)
-    const net  = brut != null ? brut - recv : null
-    const pts  = brut != null ? stablefordPoints(brut, h.par, recv) : null
-    return { brut, recv, net, pts, siMark: '*'.repeat(recv) }
-  }
-
-  function subtotals(holesList: Hole[]) {
-    let parSum = 0, brutSum = 0, netSum = 0, ptsSum = 0, count = 0
-    holesList.forEach(h => {
-      parSum += h.par
-      const { brut, net, pts } = holeStats(h)
-      if (brut != null) { brutSum += brut; netSum += net!; ptsSum += pts!; count++ }
+    if (readOnly) return
+    setScores(prev => {
+      const current = prev[player.id]?.[hole] ?? par
+      return { ...prev, [player.id]: { ...prev[player.id], [hole]: Math.max(1, current + delta) } }
     })
-    return { parSum, brutSum: count ? brutSum : null, netSum: count ? netSum : null, ptsSum: count ? ptsSum : null }
   }
 
-  const outTotals = subtotals(front9)
-  const inTotals  = subtotals(back9)
-  const totTotals = subtotals(holes)
+  const outTotals = subtotals(front9, player, scores, eventFormat)
+  const inTotals  = subtotals(back9,  player, scores, eventFormat)
+  const totTotals = subtotals(holes,  player, scores, eventFormat)
   const netLabel  = isStableford ? 'Pts' : 'Net'
-
-  function HoleRow({ h }: { h: Hole }) {
-    const { brut, siMark, net, pts } = holeStats(h)
-    return (
-      <tr className="border-b border-white/30 hover:bg-white/30 transition-colors">
-        <td className="py-2 text-center font-black text-slate-800 text-[13px] pl-3">{h.hole_number}</td>
-        <td className="py-2 text-center text-slate-600 text-[13px]">{h.par}</td>
-        <td className="py-2 text-center text-slate-500 text-[12px]">{h.stroke_index}</td>
-       <td className="py-1 text-center text-[13px] font-black text-black w-4">{siMark}</td>
-        <td className="py-1" colSpan={3}>
-          <ScorecardCell 
-            value={brut} 
-            defaultValue={h.par}  // ← nouveau
-            onDecrement={() => updateScore(h.hole_number, -1, h.par)}  // ← passer h.par
-            onIncrement={() => updateScore(h.hole_number, +1, h.par)} 
-            readOnly={readOnly} 
-          />
-        </td>
-        <td className="py-2 text-center text-slate-600 text-[13px]">{brut ?? 0}</td>
-        <td className="py-2 text-center text-slate-600 text-[13px]">{isStableford ? (pts ?? 0) : (net ?? 0)}</td>
-      </tr>
-    )
-  }
 
   return (
     <div className="overflow-x-auto -mx-4 px-4">
@@ -95,10 +72,16 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
           </tr>
         </thead>
         <tbody>
-          {front9.map(h => <HoleRow key={h.hole_number} h={h} />)}
+          {front9.map(h => (
+            <HoleRow key={h.hole_number} h={h} player={player} scores={scores}
+              onUpdate={updateScore} eventFormat={eventFormat} readOnly={readOnly} />
+          ))}
           <SubtotalRow label="OUT" parSum={outTotals.parSum} count={front9.length}
             brutSum={outTotals.brutSum} netSum={isStableford ? outTotals.ptsSum : outTotals.netSum} />
-          {back9.map(h => <HoleRow key={h.hole_number} h={h} />)}
+          {back9.map(h => (
+            <HoleRow key={h.hole_number} h={h} player={player} scores={scores}
+              onUpdate={updateScore} eventFormat={eventFormat} readOnly={readOnly} />
+          ))}
           <SubtotalRow label="IN" parSum={inTotals.parSum} count={back9.length}
             brutSum={inTotals.brutSum} netSum={isStableford ? inTotals.ptsSum : inTotals.netSum} />
           <SubtotalRow label="TOT" parSum={totTotals.parSum} count={holes.length}
@@ -109,8 +92,51 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
   )
 }
 
+// ─── HoleRow — défini EN DEHORS de ScorecardTable ────────────────────────────
+
+type HoleRowProps = {
+  h: Hole
+  player: Player
+  scores: ScoreMap
+  onUpdate: (hole: number, delta: number, par: number) => void
+  eventFormat: 'stroke' | 'stableford'
+  readOnly: boolean
+}
+
+function HoleRow({ h, player, scores, onUpdate, eventFormat, readOnly }: HoleRowProps) {
+  const isStableford = eventFormat === 'stableford'
+  const brut = scores[player.id]?.[h.hole_number] ?? null
+  const recv = strokesReceived(player.phcp, h.stroke_index)
+  const net  = brut != null ? brut - recv : null
+  const pts  = brut != null ? stablefordPoints(brut, h.par, recv) : null
+  const siMark = '*'.repeat(recv)
+
+  return (
+    <tr className="border-b border-white/30 hover:bg-white/30 transition-colors">
+      <td className="py-2 text-center font-black text-slate-800 text-[13px] pl-3">{h.hole_number}</td>
+      <td className="py-2 text-center text-slate-600 text-[13px]">{h.par}</td>
+      <td className="py-2 text-center text-slate-500 text-[12px]">{h.stroke_index}</td>
+      <td className="py-1 text-center text-[13px] font-black text-black w-4">{siMark}</td>
+      <td className="py-1" colSpan={3}>
+        <ScorecardCell
+          value={brut}
+          defaultValue={h.par}
+          onDecrement={() => onUpdate(h.hole_number, -1, h.par)}
+          onIncrement={() => onUpdate(h.hole_number, +1, h.par)}
+          readOnly={readOnly}
+        />
+      </td>
+      <td className="py-2 text-center text-slate-600 text-[13px]">{brut ?? 0}</td>
+      <td className="py-2 text-center text-slate-600 text-[13px]">{isStableford ? (pts ?? 0) : (net ?? 0)}</td>
+    </tr>
+  )
+}
+
+// ─── SubtotalRow ──────────────────────────────────────────────────────────────
+
 function SubtotalRow({ label, parSum, count, brutSum, netSum, isTot = false }: {
-  label: string; parSum: number; count: number; brutSum: number | null; netSum: number | null; isTot?: boolean
+  label: string; parSum: number; count: number
+  brutSum: number | null; netSum: number | null; isTot?: boolean
 }) {
   return (
     <tr className={`border-b text-[13px] font-bold ${isTot ? 'bg-slate-200' : 'bg-slate-100'}`}>

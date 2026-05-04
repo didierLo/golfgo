@@ -45,6 +45,36 @@ export default function MyScorecardPage() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scoresRef = useRef<ScoreMap>({})
 
+  // ── autoSave défini au niveau du composant ──────────────────────────────────
+  const autoSave = useCallback(async (newScores: ScoreMap, pId: string, evId: string, scId: string) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    setSaveStatus('saving')
+    saveTimer.current = setTimeout(async () => {
+      try {
+        const rows = Object.entries(newScores).flatMap(([playerId, holes]) =>
+          Object.entries(holes).filter(([, strokes]) => strokes != null).map(([hole, strokes]) => ({
+            scorecard_id: scId, event_id: evId, player_id: playerId, hole: Number(hole), strokes: strokes as number,
+          }))
+        )
+        if (rows.length > 0) {
+          await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+        }
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } catch { setSaveStatus('error') }
+    }, 800)
+  }, [])
+
+  // ── handleSetScores défini au niveau du composant ───────────────────────────
+  function handleSetScores(newScores: ScoreMap | ((prev: ScoreMap) => ScoreMap)) {
+    setScores(prev => {
+      const updated = typeof newScores === 'function' ? newScores(prev) : newScores
+      scoresRef.current = updated
+      if (scorecardId && eventId && playerId) autoSave(updated, playerId, eventId, scorecardId)
+      return updated
+    })
+  }
+
   useEffect(() => { init() }, [])
 
   async function init() {
@@ -124,49 +154,14 @@ export default function MyScorecardPage() {
     }
     setScorecardId(scId)
 
-   if (scId && flightPlayerIds.length > 0) {
-  const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
-    .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', flightPlayerIds)
-  const map: ScoreMap = {}
-  sorted.forEach(p => { map[p.id] = {} })
-  
-  // Pré-remplir avec le par
-  const holesSnapshot = holesData?.length ? holesData : fallbackHoles()
-  sorted.forEach(p => {
-    holesSnapshot.forEach(h => { map[p.id][h.hole_number] = h.par })
-  })
-  
-  // Les vrais scores écrasent le par
-  scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-  setScores(map); scoresRef.current = map
-}
-
-  const autoSave = useCallback(async (newScores: ScoreMap, pId: string, evId: string, scId: string) => {
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    setSaveStatus('saving')
-    saveTimer.current = setTimeout(async () => {
-      try {
-        const rows = Object.entries(newScores).flatMap(([playerId, holes]) =>
-          Object.entries(holes).filter(([, strokes]) => strokes != null).map(([hole, strokes]) => ({
-            scorecard_id: scId, event_id: evId, player_id: playerId, hole: Number(hole), strokes: strokes as number,
-          }))
-        )
-        if (rows.length > 0) {
-          await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
-        }
-        setSaveStatus('saved')
-        setTimeout(() => setSaveStatus('idle'), 2000)
-      } catch { setSaveStatus('error') }
-    }, 800)
-  }, [])
-
-  function handleSetScores(newScores: ScoreMap | ((prev: ScoreMap) => ScoreMap)) {
-    setScores(prev => {
-      const updated = typeof newScores === 'function' ? newScores(prev) : newScores
-      scoresRef.current = updated
-      if (scorecardId && eventId && playerId) autoSave(updated, playerId, eventId, scorecardId)
-      return updated
-    })
+    if (scId && flightPlayerIds.length > 0) {
+      const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
+        .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', flightPlayerIds)
+      const map: ScoreMap = {}
+      sorted.forEach(p => { map[p.id] = {} })
+      scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+      setScores(map); scoresRef.current = map
+    }
   }
 
   if (loading) return (
@@ -278,4 +273,4 @@ export default function MyScorecardPage() {
       )}
     </div>
   )
-}}
+}
