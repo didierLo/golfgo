@@ -45,7 +45,7 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
 
   function updateScore(hole: number, delta: number, par: number) {
     if (readOnly) return
-    setScores(prev => {
+   setScores((prev: ScoreMap) => {
       const current = prev[player.id]?.[hole] ?? par
       return { ...prev, [player.id]: { ...prev[player.id], [hole]: Math.max(1, current + delta) } }
     })
