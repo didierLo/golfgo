@@ -142,7 +142,6 @@ export default function ParticipantsPage() {
     await supabase.from('event_participants')
       .update({ holes_played: next })
       .eq('event_id', selectedEventId).eq('player_id', playerId)
-    // optimistic update
     setParticipants(prev => prev.map(p =>
       p.player_id === playerId ? { ...p, holes_played: next } : p
     ))
@@ -174,7 +173,6 @@ export default function ParticipantsPage() {
     return 0
   })
 
-  // Stats
   const going   = participants.filter(p => p.status === 'GOING')
   const going18 = going.filter(p => !p.holes_played || p.holes_played === 18)
   const going9  = going.filter(p => p.holes_played === 9)
@@ -297,7 +295,11 @@ export default function ParticipantsPage() {
                 <SortBtn field="whs"    label="WHS" />
                 <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">Répondu le</span>
                 <SortBtn field="status" label="Statut" />
-                {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
+                {isOwner && (
+                  <span className="text-[12px] font-semibold text-slate-400 hidden sm:flex justify-end items-center">
+                    Actions
+                  </span>
+                )}
               </div>
 
               {displayed.length === 0 ? (
@@ -343,25 +345,24 @@ export default function ParticipantsPage() {
                     <div><Badge status={p.status} /></div>
 
                     {isOwner && (
-                     <div className="hidden sm:flex justify-end items-center gap-1">
-                     {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
-                      <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
-                        className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
-                          p.status === s
-                            ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
-                            : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
-                            :                   'bg-[#EBF3FC] border-[#B5D4F4] text-[#0C447C]'
-                            : 'border-slate-200 text-slate-400 hover:bg-white/30'
-                        }`}>
-                        {s === 'GOING' ? 'Yes' : s === 'DECLINED' ? 'No' : 'Reset'}
-                      </button>
-                    ))}
-
-                      <button type="button" onClick={() => removeParticipant(p.player_id)}
-                        className="text-[11px] font-semibold px-2 py-1 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors ml-2">
-                        ✕
-                      </button>
-                    </div>
+                      <div className="hidden sm:flex justify-end items-center gap-1">
+                        {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
+                          <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
+                            className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
+                              p.status === s
+                                ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
+                                : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
+                                :                   'bg-[#EBF3FC] border-[#B5D4F4] text-[#0C447C]'
+                                : 'border-slate-200 text-slate-400 hover:bg-white/30'
+                            }`}>
+                            {s === 'GOING' ? 'Yes' : s === 'DECLINED' ? 'No' : 'Reset'}
+                          </button>
+                        ))}
+                        <button type="button" onClick={() => removeParticipant(p.player_id)}
+                          className="text-[11px] font-semibold px-2 py-1 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors ml-2">
+                          ✕
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))
