@@ -1,7 +1,7 @@
 'use client'
 
 import { ScorecardCell } from './ScorecardCell'
-import type { Hole, Player, ScoreMap } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
+import type { Hole, Player, ScoreMap } from './scorecard-types'
 
 type Props = {
   holes: Hole[]

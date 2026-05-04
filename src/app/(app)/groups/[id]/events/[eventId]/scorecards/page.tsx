@@ -5,13 +5,13 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import ScorecardTable from '@/components/scorecards/ScorecardTable'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
+import { computePhcp } from '@/components/scorecards/scorecard-types'
 
 const supabase = createClient()
 
-export type Hole    = { hole_number: number; par: number; stroke_index: number }
-export type TeeInfo = { id: string; tee_name: string; par_total: number; course_rating: number; slope: number }
-export type Player  = { id: string; first_name: string; surname: string; whs: number; tee_id: string | null; tee?: TeeInfo; phcp: number }
-export type ScoreMap = Record<string, Record<number, number | null>>
+export type { Hole, TeeInfo, Player, ScoreMap }
+export { computePhcp }
 
 export function computePhcp(whs: number, tee?: TeeInfo): number {
   if (!tee) return Math.round(whs)

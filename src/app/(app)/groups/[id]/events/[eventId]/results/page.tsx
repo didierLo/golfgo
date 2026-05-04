@@ -6,8 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import ScorecardTable from '@/components/scorecards/ScorecardTable'
 import Leaderboard from '@/components/scorecards/Leaderboard'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
-import { computePhcp } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
-import type { Hole, TeeInfo, Player, ScoreMap } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
+import { computePhcp } from '@/components/scorecards/scorecard-types'
+import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
 
 const supabase = createClient()
 
