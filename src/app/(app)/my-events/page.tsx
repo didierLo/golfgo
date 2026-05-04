@@ -54,8 +54,8 @@ function formatTime(dateStr: string) {
 function getDayMonth(dateStr: string) {
   const d = new Date(dateStr)
   return {
-    day:   d.toLocaleDateString('fr-BE', { day: 'numeric',      timeZone: 'UTC' }),
-    month: d.toLocaleDateString('fr-BE', { month: 'short',      timeZone: 'UTC' }),
+    day:   d.toLocaleDateString('fr-BE', { day: 'numeric', timeZone: 'UTC' }),
+    month: d.toLocaleDateString('fr-BE', { month: 'short', timeZone: 'UTC' }),
   }
 }
 
@@ -65,13 +65,32 @@ function formatDayFull(dateStr: string) {
   })
 }
 
+// ── Clé yyyy-mm-dd à partir d'un starts_at UTC ─────────────────────────────
+// On lit directement les composantes UTC pour éviter tout décalage timezone.
+function toDateKey(dateStr: string): string {
+  const d = new Date(dateStr)
+  const y = d.getUTCFullYear()
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(d.getUTCDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+// Clé du jour local (Brussels) pour "aujourd'hui"
+function todayKey(): string {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 function generateICS(title: string, starts_at: string, location: string | null): string {
   const start = new Date(starts_at)
   const end   = new Date(start.getTime() + 4 * 60 * 60 * 1000)
   const fmt = (d: Date) => {
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00`
-    }
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00`
+  }
   return [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
     `DTSTART;TZID=Europe/Brussels:${fmt(start)}`,
@@ -93,30 +112,28 @@ function downloadICS(e: MyEvent) {
 }
 
 function daysUntil(dateStr: string): number {
-  const nowStr = new Date().toLocaleDateString('fr-BE', { timeZone: 'UTC' })
-  const [d1, m1, y1] = nowStr.split('/').map(Number)
-  const now = new Date(y1, m1 - 1, d1)
-  const targetStr = new Date(dateStr).toLocaleDateString('fr-BE', { timeZone: 'UTC' })
-  const [d2, m2, y2] = targetStr.split('/').map(Number)
-  const target = new Date(y2, m2 - 1, d2)
-  return Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  const now    = new Date(); now.setHours(0, 0, 0, 0)
+  const target = new Date(dateStr)
+  const utcTarget = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), target.getUTCDate()))
+  const utcNow    = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+  return Math.round((utcTarget.getTime() - utcNow.getTime()) / (1000 * 60 * 60 * 24))
 }
 
 // ─── EventCard ────────────────────────────────────────────────────────────────
 
-function EventCard({ event: e, onView, onICS, past = false }: { event: MyEvent; onView: () => void; onICS: () => void; past?: boolean }) {
+function EventCard({ event: e, onView, onICS, past = false }: {
+  event: MyEvent; onView: () => void; onICS: () => void; past?: boolean
+}) {
   const groupColor = e.events.groups?.color ?? '#378ADD'
   const { day, month } = getDayMonth(e.events.starts_at)
   return (
     <div className={`bg-white border rounded-xl flex items-center gap-3 px-4 py-3 hover:border-slate-300 hover:shadow-sm transition-all ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}>
-      {/* Date badge — cliquable vers l'event */}
       <div onClick={onView} className="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 cursor-pointer"
         style={{ background: `${groupColor}18` }}>
         <span className="text-[13px] font-black leading-none" style={{ color: groupColor }}>{day}</span>
         <span className="text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5" style={{ color: groupColor }}>{month}</span>
       </div>
 
-      {/* Infos — cliquable vers l'event */}
       <div onClick={onView} className="flex-1 min-w-0 cursor-pointer">
         <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">{e.events.title}</div>
         <div className="text-[11.5px] text-slate-500 mt-0.5 truncate capitalize">
@@ -139,11 +156,10 @@ function EventCard({ event: e, onView, onICS, past = false }: { event: MyEvent; 
         )}
       </div>
 
-      {/* Badge + bouton calendrier */}
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
         <Badge status={e.status} />
         <button
-          onClick={e => { e.stopPropagation(); onICS() }}
+          onClick={ev => { ev.stopPropagation(); onICS() }}
           title="Ajouter à mon calendrier"
           className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#185FA5] hover:bg-blue-50 transition-colors">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -166,25 +182,18 @@ const DAYS_FR   = ['Lu','Ma','Me','Je','Ve','Sa','Di']
 function CalendarView({ events, onView }: { events: MyEvent[]; onView: (e: MyEvent) => void }) {
   const today = new Date()
   const [year,  setYear]  = useState(today.getFullYear())
-  const [month, setMonth] = useState(today.getMonth())  // 0-based
+  const [month, setMonth] = useState(today.getMonth())
 
   const firstDay = new Date(year, month, 1)
   const lastDay  = new Date(year, month + 1, 0)
-
-  // Lundi = 0
   const startOffset = (firstDay.getDay() + 6) % 7
   const totalCells  = startOffset + lastDay.getDate()
   const totalRows   = Math.ceil(totalCells / 7)
 
-  // Index events par jour (yyyy-mm-dd)
+  // Index events par dateKey yyyy-mm-dd (UTC)
   const eventsByDay: Record<string, MyEvent[]> = {}
   for (const e of events) {
-    const d = new Date(e.events.starts_at)
-    // Date locale Brussels
-    const key = d.toLocaleDateString('fr-BE', { timeZone: 'UTC' })
-      .split('/').reverse().join('-')          // dd/mm/yyyy → yyyy-mm-dd
-      .replace(/(\d{4})-(\d{1,2})-(\d{1,2})/, (_, y, m, d) =>
-        `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`)
+    const key = toDateKey(e.events.starts_at)
     if (!eventsByDay[key]) eventsByDay[key] = []
     eventsByDay[key].push(e)
   }
@@ -192,7 +201,7 @@ function CalendarView({ events, onView }: { events: MyEvent[]; onView: (e: MyEve
   function prevMonth() { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }
   function nextMonth() { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }
 
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+  const tKey = todayKey()
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
@@ -222,11 +231,11 @@ function CalendarView({ events, onView }: { events: MyEvent[]; onView: (e: MyEve
           const dayNum = idx - startOffset + 1
           const isValid = dayNum >= 1 && dayNum <= lastDay.getDate()
           const dateKey = isValid
-            ? `${year}-${String(month+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`
+            ? `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
             : null
           const dayEvents = dateKey ? (eventsByDay[dateKey] ?? []) : []
-          const isToday   = dateKey === todayKey
-          const isPast    = isValid && new Date(year, month, dayNum) < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+          const isToday   = dateKey === tKey
+          const isPast    = isValid && dateKey! < tKey
 
           return (
             <div key={idx}
@@ -335,17 +344,13 @@ export default function MyEventsPage() {
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
-      {/* ── Header + toggle ─────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between mb-5">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">My Events</h1>
           <p className="text-[13px] text-slate-900 mt-0.5">{upcoming.length} à venir · {past.length} passés</p>
         </div>
-
-        {/* Toggle Liste / Calendrier */}
         <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
-          <button
-            onClick={() => setView('list')}
+          <button onClick={() => setView('list')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${view === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <rect x="1" y="2"  width="3" height="3" rx="0.5" fill="currentColor"/>
@@ -357,8 +362,7 @@ export default function MyEventsPage() {
             </svg>
             Liste
           </button>
-          <button
-            onClick={() => setView('calendar')}
+          <button onClick={() => setView('calendar')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${view === 'calendar' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
@@ -373,7 +377,6 @@ export default function MyEventsPage() {
         </div>
       </div>
 
-      {/* ── Stat cards (vue liste uniquement) ───────────────────────────────── */}
       {view === 'list' && events.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="rounded-xl border border-white/60 shadow-sm p-3.5"
@@ -407,20 +410,19 @@ export default function MyEventsPage() {
         </div>
       )}
 
-      {/* ── Vue Calendrier ──────────────────────────────────────────────────── */}
       {view === 'calendar' && (
         <CalendarView events={sorted} onView={goToEvent} />
       )}
 
-      {/* ── Vue Liste ───────────────────────────────────────────────────────── */}
       {view === 'list' && (
         <>
           {upcoming.length > 0 && (
             <div className="mb-8">
               <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">À venir</p>
               <div className="flex flex-col gap-2">
-              {upcoming.map(e => (
-              <EventCard key={e.event_id} event={e} onView={() => goToEvent(e)} onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />
+                {upcoming.map(e => (
+                  <EventCard key={e.event_id} event={e} onView={() => goToEvent(e)}
+                    onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />
                 ))}
               </div>
             </div>
@@ -430,7 +432,10 @@ export default function MyEventsPage() {
             <div>
               <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">Passés</p>
               <div className="flex flex-col gap-2">
-               {past.slice().reverse().map(e => <EventCard key={e.event_id} event={e} past onView={() => goToEvent(e)} onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />)}
+                {past.slice().reverse().map(e => (
+                  <EventCard key={e.event_id} event={e} past onView={() => goToEvent(e)}
+                    onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />
+                ))}
               </div>
             </div>
           )}
@@ -444,7 +449,6 @@ export default function MyEventsPage() {
           )}
         </>
       )}
-
     </div>
   )
 }
