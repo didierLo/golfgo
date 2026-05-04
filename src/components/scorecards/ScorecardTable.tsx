@@ -56,6 +56,8 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
   const totTotals = subtotals(holes,  player, scores, eventFormat)
   const netLabel  = isStableford ? 'Pts' : 'Net'
 
+console.log('readOnly:', readOnly, 'player:', player?.id)
+
   return (
     <div className="overflow-x-auto -mx-4 px-4">
       {readOnly && <p className="text-[11px] text-slate-400 mb-2 italic">Lecture seule</p>}
