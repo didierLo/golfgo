@@ -280,18 +280,128 @@ export default function AddMemberPage() {
       )}
 
       {/* Boutons créer */}
-      {!showCreate && (
-        <div className="flex flex-col gap-2">
-          <button onClick={() => { setShowCreate(true); setGuestMode(false); const parts = search.trim().split(' '); if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') })) }}
-            className="w-full text-[13px] font-semibold py-3 rounded-xl border border-dashed border-slate-300 text-slate-500 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
-            + Créer un nouveau joueur
-          </button>
-          <button onClick={() => { setShowCreate(true); setGuestMode(true); const parts = search.trim().split(' '); if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') })) }}
-            className="w-full text-[13px] font-semibold py-3 rounded-xl border border-dashed border-amber-300 text-amber-600 hover:border-amber-500 hover:bg-amber-50/50 transition-colors">
-            + Ajouter un visiteur <span className="text-[11px] font-normal text-amber-400">(sans compte, sans n° fédéral)</span>
-          </button>
+ {!showCreate && (
+  <div className="flex flex-col gap-2">
+
+    {/* Rechercher */}
+    <div
+      className="rounded-2xl border p-4"
+      style={{
+        background: 'rgba(255,255,255,0.82)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderColor: 'rgba(255,255,255,0.9)',
+        boxShadow: '0 1px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+      }}>
+      <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+        Rechercher par nom ou n° fédéral
+      </label>
+      <input
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder="Ex: Dupont ou 123456"
+        className={inputClass}
+        autoFocus
+      />
+      {results.length > 0 && (
+        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden mt-3"
+          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          {results.map((p, i) => {
+            const addedRole = added[p.id]
+            return (
+              <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${i < results.length - 1 ? 'border-b border-white/30' : ''}`}>
+                <div className="w-8 h-8 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
+                  {p.first_name[0]}{p.surname[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-semibold text-slate-900">{p.first_name} {p.surname}</div>
+                  <div className="text-[11px] text-slate-500">
+                    {p.federal_no && `Fédéral ${p.federal_no}`}{p.whs != null && ` · WHS ${p.whs}`}
+                  </div>
+                </div>
+                {addedRole ? (
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full"
+                    style={addedRole === 'guest' ? { background: '#FEF3C7', color: '#92400E' } : { background: '#EAF3DE', color: '#3B6D11' }}>
+                    ✓ {addedRole === 'guest' ? 'Visiteur' : 'Membre'}
+                  </span>
+                ) : (
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    <button onClick={() => addExisting(p.id, 'member')} disabled={loadingKey === `${p.id}-member`}
+                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] disabled:opacity-50 transition-colors whitespace-nowrap">
+                      {loadingKey === `${p.id}-member` ? '…' : 'Membre'}
+                    </button>
+                    <button onClick={() => addExisting(p.id, 'guest')} disabled={loadingKey === `${p.id}-guest`}
+                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-amber-400 text-amber-700 bg-white hover:bg-amber-50 disabled:opacity-50 transition-colors whitespace-nowrap">
+                      {loadingKey === `${p.id}-guest` ? '…' : 'Visiteur'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
+      {search.length >= 2 && results.length === 0 && (
+        <div className="text-center py-4 text-[13px] text-slate-500 mt-2">
+          Aucun joueur trouvé pour "{search}"
+        </div>
+      )}
+    </div>
+
+    {/* Créer un nouveau joueur */}
+    <button
+      onClick={() => {
+        setShowCreate(true); setGuestMode(false)
+        const parts = search.trim().split(' ')
+        if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') }))
+      }}
+      className="w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all hover:scale-[1.01] active:scale-[0.99]"
+      style={{
+        background: 'rgba(235,243,252,0.60)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderColor: 'rgba(24,95,165,0.18)',
+        boxShadow: '0 1px 8px rgba(24,95,165,0.07), inset 0 1px 0 rgba(255,255,255,0.7)',
+      }}>
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{ background: 'rgba(24,95,165,0.12)' }}>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+          <path d="M10 4v12M4 10h12" stroke="#185FA5" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <span className="text-[13px] font-semibold text-[#185FA5]">Créer un nouveau joueur</span>
+    </button>
+
+    {/* Ajouter un visiteur */}
+    <button
+      onClick={() => {
+        setShowCreate(true); setGuestMode(true)
+        const parts = search.trim().split(' ')
+        if (parts.length >= 2) setForm(f => ({ ...f, first_name: parts[0], surname: parts.slice(1).join(' ') }))
+      }}
+      className="w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all hover:scale-[1.01] active:scale-[0.99]"
+      style={{
+        background: 'rgba(254,243,199,0.55)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderColor: 'rgba(217,119,6,0.20)',
+        boxShadow: '0 1px 8px rgba(217,119,6,0.07), inset 0 1px 0 rgba(255,255,255,0.6)',
+      }}>
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{ background: 'rgba(217,119,6,0.12)' }}>
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="7" r="3.5" stroke="#B45309" strokeWidth="1.7"/>
+          <path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="#B45309" strokeWidth="1.7" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <span className="text-[13px] font-semibold text-amber-700">Ajouter un visiteur</span>
+        <span className="text-[11px] text-amber-500 ml-2">sans compte, sans n° fédéral</span>
+      </div>
+    </button>
+
+  </div>
+)}
 
       {/* Formulaire création */}
       {showCreate && (
