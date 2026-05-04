@@ -126,10 +126,16 @@ export default function AddMemberPage() {
     <div className="p-5 sm:p-6 max-w-xl">
 
     {/* Header */}
-<div className="mb-6">
-  <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter un membre</h1>
-  <p className="text-[13px] text-black mt-0.5">Recherche un joueur existant ou crée-en un nouveau</p>
-</div>
+  <div className="mb-6">
+    <div className="flex items-start justify-between mb-1">
+      <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter un membre</h1>
+      <a href={`/groups/${groupId}/members`}
+        className="text-[12px] font-semibold text-slate-500 hover:text-slate-700 transition-colors mt-1">
+        ← Membres
+      </a>
+    </div>
+    <p className="text-[13px] text-slate-600">Recherche un joueur existant ou crée-en un nouveau</p>
+  </div>
 
 {/* 3 boutons modes */}
 <div className="grid grid-cols-3 gap-3 mb-6">
@@ -192,26 +198,22 @@ export default function AddMemberPage() {
         XLSX.writeFile(wb, 'template_joueurs_golfgo.xlsx')
       })
     }}
-    className="flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
-    style={{
-      background: 'rgba(254,243,199,0.65)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      borderColor: 'rgba(217,119,6,0.20)',
-      boxShadow: '0 2px 16px rgba(217,119,6,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
-    }}>
-    <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-      style={{ background: 'rgba(217,119,6,0.12)' }}>
-      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-        <rect x="3" y="2" width="14" height="16" rx="2" stroke="#B45309" strokeWidth="1.7"/>
-        <path d="M7 7h6M7 10h6M7 13h4" stroke="#B45309" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M13 1v4h4" stroke="#B45309" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+   className="flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
+  style={{
+    background: 'rgba(24,95,165,0.22)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    borderColor: 'rgba(24,95,165,0.35)',
+    boxShadow: '0 1px 8px rgba(24,95,165,0.14), inset 0 1px 0 rgba(255,255,255,0.4)',
+  }}>
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+        <rect x="3" y="2" width="14" height="16" rx="2" stroke="#0C447C" strokeWidth="1.7"/>
+        <path d="M7 7h6M7 10h6M7 13h4" stroke="#0C447C" strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
-    </div>
-    <span className="text-[11px] font-bold text-amber-700 text-center leading-tight">Template XLS</span>
-  </button>
+      <span className="text-[12px] font-semibold text-[#0C447C]">Template XLS</span>
+    </button>
 
-</div>
+    </div>
       {/* Confirmation */}
       {addedCount > 0 && (
         <div className="mb-4 px-4 py-3 bg-[#EAF3DE] border border-[#C0DD97] rounded-xl text-[12px] font-semibold text-[#3B6D11]">
@@ -336,7 +338,7 @@ export default function AddMemberPage() {
       </div>
       <div>
         <span className="text-[13px] font-semibold text-amber-700">Ajouter un visiteur</span>
-        <span className="text-[11px] text-amber-500 ml-2">sans compte, sans n° fédéral</span>
+       
       </div>
     </button>
 
@@ -427,7 +429,7 @@ export default function AddMemberPage() {
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+     <div className="flex items-center justify-between mt-6">
         <a href={`/groups/${groupId}/members`} className="text-[13px] font-medium text-slate-500 hover:text-black transition-colors">← Retour aux membres</a>
         {addedCount > 0 && <a href={`/groups/${groupId}/events`} className="text-[13px] font-semibold text-[#185FA5] hover:underline">Continuer vers les événements →</a>}
       </div>
