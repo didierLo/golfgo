@@ -66,7 +66,7 @@ export default function AddGroupPage() {
 
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            Description <span className="text-slate-400 font-normal">— optionnel</span>
+            Description <span className="text-slate-400 font-normal"> </span>
           </label>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
             rows={2} placeholder="Ex: Groupe de golf du jeudi soir"

@@ -133,7 +133,7 @@ function EventCard({ event: e, onView, onICS, past = false }: { event: MyEvent; 
           <span className={`text-[11px] font-medium ${
             (e.events.max_participants - (e.goingCount ?? 0)) <= 0 ? 'text-red-400'
             : (e.events.max_participants - (e.goingCount ?? 0)) <= 3 ? 'text-amber-500'
-            : 'text-slate-400'}`}>
+            : 'text-slate-800'}`}>
             {Math.max(0, e.events.max_participants - (e.goingCount ?? 0))} places dispo
           </span>
         )}
@@ -339,7 +339,7 @@ export default function MyEventsPage() {
       <div className="flex items-start justify-between mb-5">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">My Events</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">{upcoming.length} à venir · {past.length} passés</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">{upcoming.length} à venir · {past.length} passés</p>
         </div>
 
         {/* Toggle Liste / Calendrier */}
@@ -417,7 +417,7 @@ export default function MyEventsPage() {
         <>
           {upcoming.length > 0 && (
             <div className="mb-8">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
+              <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">À venir</p>
               <div className="flex flex-col gap-2">
               {upcoming.map(e => (
               <EventCard key={e.event_id} event={e} onView={() => goToEvent(e)} onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />
@@ -428,7 +428,7 @@ export default function MyEventsPage() {
 
           {past.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Passés</p>
+              <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">Passés</p>
               <div className="flex flex-col gap-2">
                {past.slice().reverse().map(e => <EventCard key={e.event_id} event={e} past onView={() => goToEvent(e)} onICS={() => { downloadICS(e); toast.success('Ajouté à ton calendrier !') }} />)}
               </div>
