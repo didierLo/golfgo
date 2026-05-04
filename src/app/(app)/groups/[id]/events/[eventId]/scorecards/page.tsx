@@ -13,10 +13,6 @@ const supabase = createClient()
 export type { Hole, TeeInfo, Player, ScoreMap }
 export { computePhcp }
 
-export function computePhcp(whs: number, tee?: TeeInfo): number {
-  if (!tee) return Math.round(whs)
-  return Math.round(whs * (tee.slope / 113) + tee.course_rating - tee.par_total)
-}
 
 function fallbackHoles(): Hole[] {
   return Array.from({ length: 18 }, (_, i) => ({
