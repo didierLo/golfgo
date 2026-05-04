@@ -124,15 +124,22 @@ export default function MyScorecardPage() {
     }
     setScorecardId(scId)
 
-    if (scId && flightPlayerIds.length > 0) {
-      const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
-        .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', flightPlayerIds)
-      const map: ScoreMap = {}
-      sorted.forEach(p => { map[p.id] = {} })
-      scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-      setScores(map); scoresRef.current = map
-    }
-  }
+   if (scId && flightPlayerIds.length > 0) {
+  const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
+    .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', flightPlayerIds)
+  const map: ScoreMap = {}
+  sorted.forEach(p => { map[p.id] = {} })
+  
+  // Pré-remplir avec le par
+  const holesSnapshot = holesData?.length ? holesData : fallbackHoles()
+  sorted.forEach(p => {
+    holesSnapshot.forEach(h => { map[p.id][h.hole_number] = h.par })
+  })
+  
+  // Les vrais scores écrasent le par
+  scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+  setScores(map); scoresRef.current = map
+}
 
   const autoSave = useCallback(async (newScores: ScoreMap, pId: string, evId: string, scId: string) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)

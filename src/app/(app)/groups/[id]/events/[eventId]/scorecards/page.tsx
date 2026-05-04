@@ -158,18 +158,22 @@ export default function ScorecardsPage() {
         }
       }
 
-      if (scId && built.length > 0) {
-        if (isOwner) {
-          const { count } = await supabase.from('scorecard_players').select('*', { count: 'exact', head: true }).eq('scorecard_id', scId)
-          if (count === 0) await supabase.from('scorecard_players').insert(built.map((p, i) => ({ scorecard_id: scId, player_id: p.id, position: i + 1 })))
-        }
-        const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
-          .eq('scorecard_id', scId).eq('event_id', eventId).in('player_id', built.map(p => p.id))
-        const map: ScoreMap = {}
-        built.forEach(p => { map[p.id] = {} })
-        scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-        setScores(map)
-      }
+        if (scId && flightPlayerIds.length > 0) {
+      const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
+        .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', flightPlayerIds)
+      const map: ScoreMap = {}
+      sorted.forEach(p => { map[p.id] = {} })
+      
+      // Pré-remplir avec le par
+      const holesSnapshot = holesData?.length ? holesData : fallbackHoles()
+      sorted.forEach(p => {
+        holesSnapshot.forEach(h => { map[p.id][h.hole_number] = h.par })
+      })
+      
+      // Les vrais scores écrasent le par
+      scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+      setScores(map); scoresRef.current = map
+    }
     } catch (e: any) {
       setError(e.message ?? 'Erreur lors du chargement')
     } finally {
