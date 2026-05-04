@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import ScorecardTable from '@/components/scorecards/ScorecardTable'
@@ -12,6 +12,7 @@ import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/sc
 const supabase = createClient()
 
 type EventOption = { id: string; title: string; starts_at: string }
+type Tab = 'scorecards' | 'leaderboard'
 
 // ─── EventPill ────────────────────────────────────────────────────────────────
 
@@ -20,16 +21,12 @@ function EventPill({ events, selectedId, onSelect }: {
 }) {
   const selected = events.find(e => e.id === selectedId)
   const [open, setOpen] = useState(false)
-
   if (events.length === 0) return null
-
   return (
     <div className="relative">
-      <button
-        onClick={() => setOpen(v => !v)}
+      <button onClick={() => setOpen(v => !v)}
         className="flex items-center gap-2 bg-white/80 border border-white/60 rounded-full pl-3 pr-2.5 py-1.5 shadow-sm hover:bg-white transition-all"
-        style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
-      >
+        style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
         <span className="text-[12px] font-semibold text-slate-800 leading-none truncate max-w-[200px]">
           {selected?.title ?? '—'}
         </span>
@@ -37,7 +34,6 @@ function EventPill({ events, selectedId, onSelect }: {
           <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
-
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
@@ -75,11 +71,7 @@ function EventPill({ events, selectedId, onSelect }: {
   )
 }
 
-// ─── View toggle ──────────────────────────────────────────────────────────────
-
-type Tab = 'scorecards' | 'leaderboard'
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fallbackHoles(): Hole[] {
   return Array.from({ length: 18 }, (_, i) => ({
@@ -97,6 +89,10 @@ function findDefaultTee(teesData: TeeInfo[], color: string, gender?: string): Te
     teesData.find(t => t.tee_name.toLowerCase().includes(c))
   )
 }
+
+const POLL_INTERVAL_MS = 30_000
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ResultsPage() {
   const params  = useParams()
@@ -117,23 +113,60 @@ export default function ResultsPage() {
   const [scorecardId,    setScorecardId]    = useState<string | null>(null)
   const [eventFormat,    setEventFormat]    = useState<'stroke' | 'stableford'>('stableford')
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null)
+  const [savingSc,       setSavingSc]       = useState(false)
+  const [saveMsgSc,      setSaveMsgSc]      = useState('')
+  const [lastRefresh,    setLastRefresh]    = useState<Date | null>(null)
 
-  // Charger tous les events du groupe
+  // Refs stables pour le polling
+  const scIdRef      = useRef<string | null>(null)
+  const playersRef   = useRef<Player[]>([])
+  const selectedRef  = useRef(selectedId)
+  const scoresRef    = useRef<ScoreMap>({})
+  const pollTimer    = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => { selectedRef.current = selectedId }, [selectedId])
+
+  // ── Charger les events ───────────────────────────────────────────────────
   useEffect(() => {
-    async function loadEvents() {
-      const { data } = await supabase.from('events').select('id, title, starts_at')
-        .eq('group_id', groupId).order('starts_at', { ascending: false })
-      setEvents(data ?? [])
-    }
-    loadEvents()
+    supabase.from('events').select('id, title, starts_at')
+      .eq('group_id', groupId).order('starts_at', { ascending: false })
+      .then(({ data }) => setEvents(data ?? []))
   }, [groupId])
 
-  // Charger scorecard quand selectedId change
+  // ── Charger scorecard + démarrer polling quand l'event change ───────────
   useEffect(() => {
     if (!selectedId) return
     loadScorecard(selectedId)
-  }, [selectedId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+    // Polling toutes les 30s — uniquement les scores (léger)
+    if (pollTimer.current) clearInterval(pollTimer.current)
+    pollTimer.current = setInterval(() => refreshScores(), POLL_INTERVAL_MS)
+
+    return () => { if (pollTimer.current) clearInterval(pollTimer.current) }
+  }, [selectedId])
+
+  // ── Refresh scores uniquement (appelé par le polling) ───────────────────
+  async function refreshScores() {
+    const scId    = scIdRef.current
+    const players = playersRef.current
+    if (!scId || players.length === 0) return
+
+    const evId = selectedRef.current
+    const { data: scoresData } = await supabase.from('scores')
+      .select('player_id, hole, strokes')
+      .eq('scorecard_id', scId)
+      .eq('event_id', evId)
+      .in('player_id', players.map(p => p.id))
+
+    const map: ScoreMap = {}
+    players.forEach(p => { map[p.id] = {} })
+    scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+    setScores(map)
+    scoresRef.current = map
+    setLastRefresh(new Date())
+  }
+
+  // ── Chargement complet ───────────────────────────────────────────────────
   async function loadScorecard(evtId: string) {
     setLoading(true)
     try {
@@ -142,14 +175,14 @@ export default function ResultsPage() {
       setEventFormat((event?.competition_format as any)?.scoring_type ?? 'stableford')
 
       let holesData: Hole[] = fallbackHoles()
-      let teesData:  TeeInfo[] = []
+      let teesData: TeeInfo[] = []
 
       if (event?.course_id) {
-        const { data: h } = await supabase.from('course_holes').select('hole_number, par, stroke_index')
-          .eq('course_id', event.course_id).order('hole_number')
+        const { data: h } = await supabase.from('course_holes')
+          .select('hole_number, par, stroke_index').eq('course_id', event.course_id).order('hole_number')
         if (h?.length) holesData = h
-        const { data: t } = await supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
-          .eq('course_id', event.course_id).order('tee_name')
+        const { data: t } = await supabase.from('course_tees')
+          .select('id, tee_name, par_total, course_rating, slope').eq('course_id', event.course_id).order('tee_name')
         teesData = t ?? []
       }
       setHoles(holesData)
@@ -157,6 +190,7 @@ export default function ResultsPage() {
       const { data: existing } = await supabase.from('scorecards').select('id').eq('event_id', evtId).maybeSingle()
       const scId = existing?.id ?? null
       setScorecardId(scId)
+      scIdRef.current = scId
 
       const { data: participants } = await supabase.from('event_participants')
         .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
@@ -173,6 +207,7 @@ export default function ResultsPage() {
         return { id: p.id, first_name: p.first_name, surname: p.surname, whs: p.whs ?? 0, tee_id: teeId, tee, phcp: computePhcp(p.whs ?? 0, tee) }
       })
       setPlayers(built)
+      playersRef.current = built
       if (built.length > 0) setActivePlayerId(built[0].id)
 
       if (scId && built.length > 0) {
@@ -182,14 +217,43 @@ export default function ResultsPage() {
         built.forEach(p => { map[p.id] = {} })
         scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
         setScores(map)
+        scoresRef.current = map
       } else {
         setScores({})
+        scoresRef.current = {}
       }
+      setLastRefresh(new Date())
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
 
-  const activePlayer = players.find(p => p.id === activePlayerId) ?? null
+  // ── Save Scorecard ────────────────────────────────────────────────────────
+  async function handleSaveScorecard() {
+    if (!scorecardId) return
+    setSavingSc(true); setSaveMsgSc('')
+    try {
+      const rows = playersRef.current.flatMap(player =>
+        Object.entries(scoresRef.current[player.id] ?? {})
+          .filter(([, s]) => s != null)
+          .map(([hole, strokes]) => ({
+            scorecard_id: scorecardId,
+            event_id:     selectedId,
+            player_id:    player.id,
+            hole:         Number(hole),
+            strokes:      strokes as number,
+            saved_at:     new Date().toISOString(),
+          }))
+      )
+      if (rows.length > 0) {
+        await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+      }
+      setSaveMsgSc('✓ Sauvegardé')
+    } catch { setSaveMsgSc('Erreur') }
+    finally { setSavingSc(false); setTimeout(() => setSaveMsgSc(''), 3000) }
+  }
+
+  const activePlayer   = players.find(p => p.id === activePlayerId) ?? null
+  const selectedEvent  = events.find(e => e.id === selectedId)
 
   if (roleLoading) return (
     <div className="p-6 space-y-3 max-w-2xl">
@@ -206,7 +270,8 @@ export default function ResultsPage() {
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Results</h1>
           <p className="text-[13px] text-slate-600 mt-0.5">{players.length} joueurs · {eventFormat}</p>
         </div>
-        <EventPill events={events} selectedId={selectedId} onSelect={id => { setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`) }} />
+        <EventPill events={events} selectedId={selectedId}
+          onSelect={id => { setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`) }} />
       </div>
 
       {/* Tab toggle */}
@@ -235,6 +300,10 @@ export default function ResultsPage() {
                 holes={holes}
                 eventFormat={eventFormat}
                 isOwner={isOwner}
+                eventTitle={selectedEvent?.title}
+                eventDate={selectedEvent?.starts_at
+                  ? new Date(selectedEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+                  : undefined}
               />
             ) : (
               <div className="text-center py-16 text-slate-500 border border-dashed border-slate-200 rounded-xl">
@@ -254,6 +323,30 @@ export default function ResultsPage() {
               </div>
             ) : (
               <>
+                {/* Toolbar */}
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  {/* Dernière mise à jour */}
+                  {lastRefresh && (
+                    <span className="text-[11px] text-slate-400">
+                      Mis à jour {lastRefresh.toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit' })}
+                      <span className="text-slate-300"> · 30s</span>
+                    </span>
+                  )}
+                  <div className="flex items-center gap-2 ml-auto">
+                    {saveMsgSc && <span className="text-[12px] font-semibold text-[#3B6D11]">{saveMsgSc}</span>}
+                    {isOwner && (
+                      <button onClick={handleSaveScorecard} disabled={savingSc}
+                        className="text-[12px] font-semibold px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors">
+                        {savingSc ? 'Saving…' : 'Save scorecard'}
+                      </button>
+                    )}
+                    <button onClick={() => window.print()}
+                      className="text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                      🖨 Imprimer
+                    </button>
+                  </div>
+                </div>
+
                 {/* Sélecteur joueur */}
                 <div className="flex gap-2 items-center mb-5 flex-wrap">
                   {players.map(p => {
@@ -282,7 +375,7 @@ export default function ResultsPage() {
                   </div>
                 )}
 
-                {/* Scorecard */}
+                {/* Scorecard — lecture seule, rafraîchie par polling */}
                 {activePlayer && (
                   <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
                     style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
@@ -290,9 +383,9 @@ export default function ResultsPage() {
                       holes={holes}
                       player={activePlayer}
                       scores={scores}
-                      setScores={isOwner ? setScores : () => {}}
+                      setScores={() => {}}
                       eventFormat={eventFormat}
-                      readOnly={!isOwner}
+                      readOnly={true}
                     />
                   </div>
                 )}
@@ -301,6 +394,14 @@ export default function ResultsPage() {
           )}
         </>
       )}
+
+      <style jsx global>{`
+        @media print {
+          nav, header, aside { display: none !important; }
+          body { background: white; margin: 0; }
+          .p-5 { padding: 24px 32px; }
+        }
+      `}</style>
     </div>
   )
 }
