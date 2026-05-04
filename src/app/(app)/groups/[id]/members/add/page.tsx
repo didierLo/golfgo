@@ -128,7 +128,7 @@ export default function AddMemberPage() {
     {/* Header */}
 <div className="mb-6">
   <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter un membre</h1>
-  <p className="text-[13px] text-slate-600 mt-0.5">Recherche un joueur existant ou crée-en un nouveau</p>
+  <p className="text-[13px] text-gray-900 mt-0.5">Recherche un joueur existant ou crée-en un nouveau</p>
 </div>
 
 {/* 3 boutons modes */}
