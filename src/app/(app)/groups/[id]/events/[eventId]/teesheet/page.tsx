@@ -143,7 +143,7 @@ export default function TeeSheetPage() {
       <div className="flex items-start justify-between mb-4 flex-wrap gap-3 print:hidden">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Tee Sheet</h1>
-          {eventDate && <p className="text-[12px] text-slate-500 mt-0.5">{eventDate}</p>}
+         {/*{eventDate && <p className="text-[12px] text-slate-500 mt-0.5">{eventDate}</p>}"*/}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <label className="text-[12px] font-semibold text-slate-600">Intervalle</label>
