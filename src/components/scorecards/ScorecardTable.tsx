@@ -25,13 +25,13 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
   const front9 = holes.filter(h => h.hole_number <= 9)
   const back9  = holes.filter(h => h.hole_number > 9)
 
-  function updateScore(hole: number, delta: number) {
-    if (readOnly) return
-    setScores(prev => {
-      const current = prev[player.id]?.[hole] ?? 0
-      return { ...prev, [player.id]: { ...prev[player.id], [hole]: Math.max(1, current + delta) } }
-    })
-  }
+  function updateScore(hole: number, delta: number, par: number) {
+  if (readOnly) return
+  setScores(prev => {
+    const current = prev[player.id]?.[hole] ?? par
+    return { ...prev, [player.id]: { ...prev[player.id], [hole]: Math.max(1, current + delta) } }
+  })
+}
 
   function holeStats(h: Hole) {
     const brut = scores[player.id]?.[h.hole_number] ?? null
@@ -65,7 +65,13 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
         <td className="py-2 text-center text-slate-500 text-[12px]">{h.stroke_index}</td>
        <td className="py-1 text-center text-[13px] font-black text-black w-4">{siMark}</td>
         <td className="py-1" colSpan={3}>
-          <ScorecardCell value={brut} onDecrement={() => updateScore(h.hole_number, -1)} onIncrement={() => updateScore(h.hole_number, +1)} readOnly={readOnly} />
+          <ScorecardCell 
+            value={brut} 
+            defaultValue={h.par}  // ← nouveau
+            onDecrement={() => updateScore(h.hole_number, -1, h.par)}  // ← passer h.par
+            onIncrement={() => updateScore(h.hole_number, +1, h.par)} 
+            readOnly={readOnly} 
+          />
         </td>
         <td className="py-2 text-center text-slate-600 text-[13px]">{brut ?? 0}</td>
         <td className="py-2 text-center text-slate-600 text-[13px]">{isStableford ? (pts ?? 0) : (net ?? 0)}</td>
