@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import BulkAddPlayersModal from '@/components/players/BulkAddPlayersModal'
 import ImportPlayers from '@/components/players/ImportPlayers'
+import * as XLSX from 'xlsx'
 
 const supabase = createClient()
 const inputClass = "w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm"
@@ -124,24 +125,93 @@ export default function AddMemberPage() {
   return (
     <div className="p-5 sm:p-6 max-w-xl">
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter un membre</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">Recherche un joueur existant ou crée-en un nouveau</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => setIsListModalOpen(true)}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
-            Depuis une liste
-          </button>
-          <button onClick={() => setShowImport(true)}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
-            Importer XLS
-          </button>
-        </div>
-      </div>
+    {/* Header */}
+<div className="mb-6">
+  <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter un membre</h1>
+  <p className="text-[13px] text-slate-600 mt-0.5">Recherche un joueur existant ou crée-en un nouveau</p>
+</div>
 
+{/* 3 boutons modes */}
+<div className="grid grid-cols-3 gap-3 mb-6">
+
+  {/* Depuis une liste */}
+  <button
+    onClick={() => setIsListModalOpen(true)}
+    className="flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
+    style={{
+      background: 'rgba(255,255,255,0.85)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderColor: 'rgba(255,255,255,0.9)',
+      boxShadow: '0 2px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+    }}>
+    <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+      style={{ background: 'rgba(24,95,165,0.10)' }}>
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+        <path d="M4 5h12M4 10h12M4 15h7" stroke="#185FA5" strokeWidth="1.7" strokeLinecap="round"/>
+      </svg>
+    </div>
+    <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">Depuis une liste</span>
+  </button>
+
+  {/* Importer XLS */}
+  <button
+    onClick={() => setShowImport(true)}
+    className="flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
+    style={{
+      background: 'rgba(235,243,252,0.70)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderColor: 'rgba(24,95,165,0.18)',
+      boxShadow: '0 2px 16px rgba(24,95,165,0.08), inset 0 1px 0 rgba(255,255,255,0.7)',
+    }}>
+    <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+      style={{ background: 'rgba(24,95,165,0.13)' }}>
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+        <path d="M10 3v9M7 9l3 3 3-3" stroke="#185FA5" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M4 14v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1" stroke="#185FA5" strokeWidth="1.7" strokeLinecap="round"/>
+      </svg>
+    </div>
+    <span className="text-[11px] font-bold text-[#185FA5] text-center leading-tight">Importer XLS</span>
+  </button>
+
+  {/* Template XLS */}
+  <button
+    onClick={() => {
+      // télécharge le template via ImportPlayers — on importe la fonction directement
+      import('@/components/players/ImportPlayers').then(() => {
+        const XLSX = require('xlsx')
+        const ws = XLSX.utils.aoa_to_sheet([
+          ['federal_no','first_name','surname','whs','email','phone','home_club'],
+          ['BEL123456','Jean','DUPONT',12.4,'jean.dupont@email.com','+32470123456','Royal Golf Club'],
+          ['BEL789012','Marie','MARTIN',8.1,'marie.martin@email.com','+32499876543','Golf de Falnuée'],
+        ])
+        ws['!cols'] = [{wch:14},{wch:15},{wch:15},{wch:8},{wch:28},{wch:16},{wch:25}]
+        const wb = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(wb, ws, 'Joueurs')
+        XLSX.writeFile(wb, 'template_joueurs_golfgo.xlsx')
+      })
+    }}
+    className="flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
+    style={{
+      background: 'rgba(254,243,199,0.65)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderColor: 'rgba(217,119,6,0.20)',
+      boxShadow: '0 2px 16px rgba(217,119,6,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+    }}>
+    <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+      style={{ background: 'rgba(217,119,6,0.12)' }}>
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+        <rect x="3" y="2" width="14" height="16" rx="2" stroke="#B45309" strokeWidth="1.7"/>
+        <path d="M7 7h6M7 10h6M7 13h4" stroke="#B45309" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M13 1v4h4" stroke="#B45309" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </div>
+    <span className="text-[11px] font-bold text-amber-700 text-center leading-tight">Template XLS</span>
+  </button>
+
+</div>
       {/* Confirmation */}
       {addedCount > 0 && (
         <div className="mb-4 px-4 py-3 bg-[#EAF3DE] border border-[#C0DD97] rounded-xl text-[12px] font-semibold text-[#3B6D11]">
