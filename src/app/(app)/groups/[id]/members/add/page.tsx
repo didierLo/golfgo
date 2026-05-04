@@ -130,7 +130,7 @@ export default function AddMemberPage() {
     <div className="flex items-start justify-between mb-1">
       <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter un membre</h1>
       <a href={`/groups/${groupId}/members`}
-        className="text-[12px] font-semibold text-slate-500 hover:text-slate-700 transition-colors mt-1">
+        className="text-[12px] font-semibold text-slate-900 hover:text-slate-700 transition-colors mt-1">
         ← Membres
       </a>
     </div>
@@ -160,7 +160,7 @@ export default function AddMemberPage() {
     <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">Depuis une liste</span>
   </button>
 
-  {/* Importer XLS */}
+  {/* Importer XLSX*/}
   <button
     onClick={() => setShowImport(true)}
     className="flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -178,10 +178,10 @@ export default function AddMemberPage() {
         <path d="M4 14v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1" stroke="#185FA5" strokeWidth="1.7" strokeLinecap="round"/>
       </svg>
     </div>
-    <span className="text-[11px] font-bold text-[#185FA5] text-center leading-tight">Importer XLS</span>
+    <span className="text-[11px] font-bold text-[#185FA5] text-center leading-tight">Importer xlsx</span>
   </button>
 
-  {/* Template XLS */}
+  {/* Template XLSX */}
   <button
     onClick={() => {
       // télécharge le template via ImportPlayers — on importe la fonction directement
@@ -198,20 +198,28 @@ export default function AddMemberPage() {
         XLSX.writeFile(wb, 'template_joueurs_golfgo.xlsx')
       })
     }}
-   className="flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
-  style={{
-    background: 'rgba(24,95,165,0.22)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    borderColor: 'rgba(24,95,165,0.35)',
-    boxShadow: '0 1px 8px rgba(24,95,165,0.14), inset 0 1px 0 rgba(255,255,255,0.4)',
-  }}>
-      <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-        <rect x="3" y="2" width="14" height="16" rx="2" stroke="#0C447C" strokeWidth="1.7"/>
-        <path d="M7 7h6M7 10h6M7 13h4" stroke="#0C447C" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-      <span className="text-[12px] font-semibold text-[#0C447C]">Template XLS</span>
-    </button>
+
+      className="flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border transition-all hover:scale-[1.02] active:scale-[0.98]"
+      style={{
+        background: 'rgba(59,130,246,0.08)', // bleu léger
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderColor: 'rgba(255,255,255,0.9)',
+        boxShadow: '0 2px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+      }}
+    >
+  <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+    style={{ background: 'rgba(59,130,246,0.15)' }}>
+    
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+      <path d="M6 2h5l3 3v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" stroke="#3B82F6" strokeWidth="1.5"/>
+    </svg>
+  </div>
+
+  <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">
+    Template xlsx
+  </span>
+</button>
 
     </div>
       {/* Confirmation */}
