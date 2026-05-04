@@ -184,35 +184,39 @@ function ConstraintSection({
   onRemove: (id: string) => void
 }) {
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-2 mb-1">
-        <p className="text-[14px] font-bold text-slate-800">{title}</p>
+    <div
+      className="mb-6 rounded-xl border overflow-hidden"
+      style={{ borderColor: color.border }}
+    >
+      {/* ── En-tête de la carte ── */}
+      <div
+        className="flex items-center justify-between px-5 py-3"
+        style={{ background: color.bg, borderBottom: `1px solid ${color.border}` }}
+      >
+        <div>
+          <p className="text-[14px] font-bold" style={{ color: color.text }}>{title}</p>
+          <p className="text-[12px] mt-0.5" style={{ color: color.text, opacity: 0.75 }}>{description}</p>
+        </div>
         <span
-          className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-          style={{ background: color.bg, color: color.text }}
+          className="text-[11px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
+          style={{ background: 'white', color: color.text, border: `1px solid ${color.border}` }}
         >
           {pairs.length}
         </span>
       </div>
-      <p className="text-[12px] text-slate-600 mb-3">{description}</p>
 
-      {pairs.length === 0 ? (
-        <div className="text-[12px] text-slate-500 border border-dashed border-slate-200 rounded-xl px-4 py-3">
-          Aucune contrainte {label}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {pairs.map(p => (
+      {/* ── Corps de la carte ── */}
+      <div className="bg-white p-3 flex flex-col gap-2">
+        {pairs.length === 0 ? (
+          <div className="text-[12px] text-slate-500 border border-dashed border-slate-200 rounded-lg px-4 py-3 text-center">
+            Aucune contrainte {label}
+          </div>
+        ) : (
+          pairs.map(p => (
             <div
               key={p.id}
-              className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3"
+              className="flex items-center gap-3 border border-slate-100 rounded-lg px-4 py-2.5"
             >
-              <span
-                className="text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
-                style={{ background: color.bg, color: color.text, border: `1px solid ${color.border}` }}
-              >
-                {label}
-              </span>
               <span className="text-[13px] font-medium text-slate-800 flex-1">
                 {p.players_a?.[0]?.first_name} {p.players_a?.[0]?.surname}
                 <span className="text-slate-400 mx-2">×</span>
@@ -225,9 +229,9 @@ function ConstraintSection({
                 Retirer
               </button>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   )
 }
