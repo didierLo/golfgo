@@ -41,38 +41,72 @@ export default function MyScorecardPage() {
   const [holes, setHoles]                   = useState<Hole[]>([])
   const [scores, setScores]                 = useState<ScoreMap>({})
   const [scorecardId, setScorecardId]       = useState<string | null>(null)
+  const [saving, setSaving]                 = useState(false)
   const [saveStatus, setSaveStatus]         = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const scoresRef = useRef<ScoreMap>({})
 
-  // ── autoSave défini au niveau du composant ──────────────────────────────────
+  const scoresRef     = useRef<ScoreMap>({})
+  const scorecardRef  = useRef<string | null>(null)
+  const eventRef      = useRef<string | null>(null)
+  const playerRef     = useRef<string | null>(null)
+
+  // ── Auto-save dans scores (brouillon live, inchangé) ─────────────────────
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const autoSave = useCallback(async (newScores: ScoreMap, pId: string, evId: string, scId: string) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
-    setSaveStatus('saving')
     saveTimer.current = setTimeout(async () => {
       try {
         const rows = Object.entries(newScores).flatMap(([playerId, holes]) =>
           Object.entries(holes).filter(([, strokes]) => strokes != null).map(([hole, strokes]) => ({
-            scorecard_id: scId, event_id: evId, player_id: playerId, hole: Number(hole), strokes: strokes as number,
+            scorecard_id: scId, event_id: evId, player_id: playerId,
+            hole: Number(hole), strokes: strokes as number,
           }))
         )
         if (rows.length > 0) {
           await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
         }
-        setSaveStatus('saved')
-        setTimeout(() => setSaveStatus('idle'), 2000)
-      } catch { setSaveStatus('error') }
+      } catch (e) { console.error('auto-save error', e) }
     }, 800)
   }, [])
 
-  // ── handleSetScores défini au niveau du composant ───────────────────────────
   function handleSetScores(newScores: ScoreMap | ((prev: ScoreMap) => ScoreMap)) {
     setScores(prev => {
       const updated = typeof newScores === 'function' ? newScores(prev) : newScores
       scoresRef.current = updated
-      if (scorecardId && eventId && playerId) autoSave(updated, playerId, eventId, scorecardId)
+      const scId = scorecardRef.current
+      const evId = eventRef.current
+      const pId  = playerRef.current
+      if (scId && evId && pId) autoSave(updated, pId, evId, scId)
       return updated
     })
+  }
+
+  // ── Save manuel → saved_scorecards ───────────────────────────────────────
+  async function handleSave() {
+    const scId = scorecardRef.current
+    const evId = eventRef.current
+    if (!scId || !evId) return
+    setSaving(true); setSaveStatus('saving')
+    try {
+      const rows = Object.entries(scoresRef.current).flatMap(([playerId, holeScores]) =>
+        Object.entries(holeScores)
+          .filter(([, strokes]) => strokes != null)
+          .map(([hole, strokes]) => ({
+            scorecard_id: scId,
+            event_id:     evId,
+            player_id:    playerId,
+            hole:         Number(hole),
+            strokes:      strokes as number,
+            saved_at:     new Date().toISOString(),
+          }))
+      )
+      if (rows.length > 0) {
+        await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+      }
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    } catch { setSaveStatus('error') }
+    finally { setSaving(false) }
   }
 
   useEffect(() => { init() }, [])
@@ -86,6 +120,7 @@ export default function MyScorecardPage() {
       .select('id, first_name, surname').eq('user_id', session.user.id).single()
     if (!p) { setError('Profil joueur introuvable'); setLoading(false); return }
     setPlayerId(p.id)
+    playerRef.current = p.id
 
     const { data: participations } = await supabase.from('event_participants')
       .select('event_id, tee_id').eq('player_id', p.id).eq('status', 'GOING')
@@ -107,6 +142,7 @@ export default function MyScorecardPage() {
     setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
     setClubName((event.courses as any)?.clubs?.name ?? '')
     setCourseName((event.courses as any)?.course_name ?? '')
+    eventRef.current = event.id
 
     if (!event.course_id) { setError('Aucun parcours configuré pour cet événement'); setLoading(false); return }
     await loadScorecardData(event.id, event.course_id, p.id, myTeeId)
@@ -146,6 +182,7 @@ export default function MyScorecardPage() {
     const sorted = [...built.filter(p => p.id === pId), ...built.filter(p => p.id !== pId)]
     setFlightPlayers(sorted); setActivePlayerId(pId)
 
+    // Scorecard id
     const { data: sc } = await supabase.from('scorecards').select('id').eq('event_id', evId).maybeSingle()
     let scId = sc?.id ?? null
     if (!scId) {
@@ -153,15 +190,36 @@ export default function MyScorecardPage() {
       scId = created?.id ?? null
     }
     setScorecardId(scId)
+    scorecardRef.current = scId
 
-    if (scId && flightPlayerIds.length > 0) {
-      const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
-        .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', flightPlayerIds)
-      const map: ScoreMap = {}
-      sorted.forEach(p => { map[p.id] = {} })
-      scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-      setScores(map); scoresRef.current = map
-    }
+    if (!scId) return
+
+    // ── Charger les scores : saved_scorecards en priorité, sinon scores ──────
+    // 1. Chercher une sauvegarde manuelle existante
+    const { data: savedData } = await supabase.from('saved_scorecards')
+      .select('player_id, hole, strokes')
+      .eq('scorecard_id', scId)
+      .eq('event_id', evId)
+      .in('player_id', flightPlayerIds)
+
+    // 2. Fallback sur les scores live si pas de sauvegarde
+    const { data: liveData } = await supabase.from('scores')
+      .select('player_id, hole, strokes')
+      .eq('scorecard_id', scId)
+      .eq('event_id', evId)
+      .in('player_id', flightPlayerIds)
+
+    // saved_scorecards l'emporte trou par trou
+    const map: ScoreMap = {}
+    sorted.forEach(p => { map[p.id] = {} })
+
+    // D'abord les scores live comme base
+    liveData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+    // Puis les scores sauvegardés par-dessus (priorité)
+    savedData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+
+    setScores(map)
+    scoresRef.current = map
   }
 
   if (loading) return (
@@ -189,23 +247,26 @@ export default function MyScorecardPage() {
     <div className="p-5 sm:p-6 max-w-2xl">
 
       {/* Header */}
-      <div className="mb-5 flex items-start justify-between">
+      <div className="mb-5 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{eventTitle}</h1>
-          <p className="text-[18px] text-slate-900 mt-0.5">{formatDate(eventDate)}</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">{formatDate(eventDate)}</p>
           {(clubName || courseName) && (
-            <p className="text-[18px] text-slate-900 mt-0.5">{clubName}{courseName && ` · ${courseName}`}</p>
+            <p className="text-[13px] text-slate-500 mt-0.5">{clubName}{courseName && ` · ${courseName}`}</p>
           )}
         </div>
-        <div className="flex-shrink-0 mt-1">
-          {saveStatus === 'saving' && (
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-              <div className="w-3 h-3 border-2 border-slate-300 border-t-[#185FA5] rounded-full animate-spin" />
-              Sauvegarde…
-            </div>
-          )}
+
+        {/* Bouton Save + statut */}
+        <div className="flex-shrink-0 flex flex-col items-end gap-1 mt-1">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors">
+            {saving ? 'Saving…' : '💾 Save'}
+          </button>
           {saveStatus === 'saved'  && <span className="text-[11px] text-[#3B6D11] font-semibold">✓ Sauvegardé</span>}
-          {saveStatus === 'error'  && <span className="text-[11px] text-red-500 font-semibold">Erreur de sauvegarde</span>}
+          {saveStatus === 'error'  && <span className="text-[11px] text-red-500 font-semibold">Erreur</span>}
+          {saveStatus === 'saving' && <span className="text-[11px] text-slate-400">Sauvegarde…</span>}
         </div>
       </div>
 
