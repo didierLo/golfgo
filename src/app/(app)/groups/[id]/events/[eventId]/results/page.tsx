@@ -282,7 +282,7 @@ export default function ResultsPage() {
                   </div>
                 )}
 
-                {/* Scorecard (lecture seule) */}
+                {/* Scorecard */}
                 {activePlayer && (
                   <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
                     style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
@@ -290,9 +290,9 @@ export default function ResultsPage() {
                       holes={holes}
                       player={activePlayer}
                       scores={scores}
-                      setScores={() => {}}
+                      setScores={isOwner ? setScores : () => {}}
                       eventFormat={eventFormat}
-                      readOnly
+                      readOnly={!isOwner}
                     />
                   </div>
                 )}
