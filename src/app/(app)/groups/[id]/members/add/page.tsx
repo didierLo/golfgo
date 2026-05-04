@@ -219,66 +219,6 @@ export default function AddMemberPage() {
         </div>
       )}
 
-      {/* Recherche */}
-      <div className="mb-4">
-        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Rechercher par nom ou n° fédéral</label>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Ex: Dupont ou 123456" className={inputClass} autoFocus />
-      </div>
-
-      {/* Résultats */}
-      {results.length > 0 && (
-        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden mb-4"
-          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-          {results.map((p, i) => {
-            const addedRole = added[p.id]
-            return (
-              <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${i < results.length - 1 ? 'border-b border-white/30' : ''}`}>
-                <div className="w-8 h-8 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
-                  {p.first_name[0]}{p.surname[0]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-slate-900">{p.first_name} {p.surname}</div>
-                  <div className="text-[11px] text-slate-500">
-                    {p.federal_no && `Fédéral ${p.federal_no}`}{p.whs != null && ` · WHS ${p.whs}`}
-                  </div>
-                </div>
-
-                {addedRole ? (
-                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full"
-                    style={addedRole === 'guest'
-                      ? { background: '#FEF3C7', color: '#92400E' }
-                      : { background: '#EAF3DE', color: '#3B6D11' }}>
-                    ✓ {addedRole === 'guest' ? 'Visiteur' : 'Membre'}
-                  </span>
-                ) : (
-                  <div className="flex gap-1.5 flex-shrink-0">
-                    <button
-                      onClick={() => addExisting(p.id, 'member')}
-                      disabled={loadingKey === `${p.id}-member`}
-                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] disabled:opacity-50 transition-colors whitespace-nowrap">
-                      {loadingKey === `${p.id}-member` ? '…' : 'Membre'}
-                    </button>
-                    <button
-                      onClick={() => addExisting(p.id, 'guest')}
-                      disabled={loadingKey === `${p.id}-guest`}
-                      className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-amber-400 text-amber-700 bg-white hover:bg-amber-50 disabled:opacity-50 transition-colors whitespace-nowrap">
-                      {loadingKey === `${p.id}-guest` ? '…' : 'Visiteur'}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Aucun résultat */}
-      {search.length >= 2 && results.length === 0 && !showCreate && (
-        <div className="text-center py-6 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl mb-4">
-          Aucun joueur trouvé pour "{search}"
-        </div>
-      )}
-
       {/* Boutons créer */}
  {!showCreate && (
   <div className="flex flex-col gap-2">
