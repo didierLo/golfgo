@@ -201,266 +201,149 @@ export default function ParticipantsPage() {
   )
 
   return (
-    <div className="p-5 sm:p-6">
+  <div className="p-5 sm:p-6">
 
-      {/* Toggle vue */}
-      <div className="flex items-center gap-4 mb-5">
-        <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
-          <button type="button" onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
-              viewMode === 'list' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
-            Par événement
+    {/* Toggle */}
+    <div className="flex items-center gap-4 mb-5">
+      <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
+        <button onClick={() => setViewMode('list')}
+          className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold ${
+            viewMode === 'list' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400'
+          }`}>
+          Par événement
+        </button>
+
+        {isOwner && (
+          <button onClick={() => setViewMode('overview')}
+            className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold ${
+              viewMode === 'overview' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400'
+            }`}>
+            Vue d'ensemble
           </button>
-          {isOwner && (
-            <button type="button" onClick={() => setViewMode('overview')}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
-                viewMode === 'overview' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
-              Vue d'ensemble
-            </button>
-          )}
-        </div>
-        {viewMode === 'list' && (
-          <a href={`/groups/${groupId}/invitations`}
-            className="text-[12px] font-semibold text-[#185FA5] hover:underline whitespace-nowrap ml-auto">
-            ← Invitations
-          </a>
         )}
       </div>
 
-      {/* ── VUE PAR ÉVÉNEMENT ── */}
-      {viewMode === 'list' && (
-        <>
-          <div className="mb-5">
-            <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-              className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 w-full max-w-sm">
-              {events.map(e => (
-                <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>
-              ))}
-            </select>
-          </div>
-
-          {!isOwner && (
-            <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
-              Vue en lecture seule — seul l'organisateur peut modifier les participations
-            </div>
-          )}
-
-          {/* Stats cards */}
-          <div className="flex gap-3 mb-5 flex-wrap">
-            <div className="border border-[#C0DD97] rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
-              style={{ background: '#EAF3DE' }}>
-              <span className="text-[20px] font-black text-[#3B6D11]">{going18.length}</span>
-              <span className="text-[10px] font-semibold text-[#3B6D11] uppercase tracking-wide whitespace-nowrap">
-                {has9holers ? 'going 18T' : 'going'}
-              </span>
-            </div>
-            {has9holers && (
-              <div className="border border-amber-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
-                style={{ background: '#FEF3C7' }}>
-                <span className="text-[20px] font-black text-amber-700">{going9.length}</span>
-                <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide whitespace-nowrap">going 9T</span>
-              </div>
-            )}
-            <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
-              style={{ background: '#EBF3FC' }}>
-              <span className="text-[20px] font-black text-[#0C447C]">{invited}</span>
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">invited</span>
-            </div>
-            <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
-              style={{ background: '#FCEBEB' }}>
-              <span className="text-[20px] font-black text-[#A32D2D]">{declined}</span>
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">declined</span>
-            </div>
-            <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]"
-              style={{ background: '#F1F5F9' }}>
-              <span className="text-[20px] font-black text-slate-700">{participants.length}</span>
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">total</span>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="space-y-2">
-              {[1,2,3,4].map(i => <div key={i} className="h-12 bg-white/40 rounded-xl animate-pulse" />)}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-
-              {/* Header */}
-              <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
-                isOwner
-                  ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_90px_60px_80px_130px_100px_260px]'
-                  : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
-              }`}>
-                <SortBtn field="name"   label="Joueur" />
-                <SortBtn field="holes"  label="Trous" />
-                <SortBtn field="whs"    label="WHS" />
-                <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">Répondu le</span>
-                <SortBtn field="status" label="Statut" />
-                {isOwner && <span className="text-[12px] font-semibold text-slate-400 text-right hidden sm:block">Actions</span>}
-              </div>
-
-              {displayed.length === 0 ? (
-                <div className="px-4 py-10 text-center text-[13px] text-slate-500">
-                  Aucun participant — envoie des invitations depuis la page Invitations
-                </div>
-              ) : (
-                displayed.map((p, i) => (
-                  <div key={p.player_id}
-                    className={`grid gap-4 px-4 py-3 items-center ${
-                      isOwner
-                        ? 'grid-cols-[1fr_70px_55px_55px] sm:grid-cols-[1fr_90px_60px_80px_130px_100px_260px]'
-                        : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_130px_100px]'
-                    } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
-
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[13px] font-semibold text-slate-800 truncate">
-                        {p.players.first_name} {p.players.surname}
-                      </span>
-                    </div>
-
-                    {/* Trous — cliquable si owner et status GOING */}
-                    <div className="flex justify-start">
-                      {isOwner && p.status === 'GOING' ? (
-                        <button
-                          type="button"
-                          onClick={() => toggleHoles(p.player_id, p.holes_played)}
-                          title="Cliquer pour basculer 9T / 18T"
-                          className={`text-[11px] font-bold px-2 py-1 rounded-lg border transition-colors ${
-                            p.holes_played === 9
-                              ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100'
-                              : 'bg-white/60 border-slate-200 text-slate-400 hover:border-amber-300 hover:text-amber-600'
-                          }`}>
-                          {p.holes_played === 9 ? '9T' : '18T'}
-                        </button>
-                      ) : (
-                        <HolesBadge holes={p.holes_played} />
-                      )}
-                    </div>
-
-                    <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
-                    <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
-                    <div><Badge status={p.status} /></div>
-
-                    {isOwner && (
-                     <div className="hidden sm:flex justify-end items-center gap-1">
-                     {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
-                      <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
-                        className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
-                          p.status === s
-                            ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
-                            : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
-                            :                   'bg-[#EBF3FC] border-[#B5D4F4] text-[#0C447C]'
-                            : 'border-slate-200 text-slate-400 hover:bg-white/30'
-                        }`}>
-                        {s === 'GOING' ? 'Yes' : s === 'DECLINED' ? 'No' : 'Reset'}
-                      </button>
-                    ))}
-
-                      <button type="button" onClick={() => removeParticipant(p.player_id)}
-                        className="text-[11px] font-semibold px-2 py-1 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors ml-2">
-                        ✕
-                      </button>
-                    </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* ── VUE D'ENSEMBLE ── */}
-      {viewMode === 'overview' && isOwner && (
-        <>
-          {overviewLoading ? (
-            <div className="space-y-2">
-              {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-white/40 rounded-xl animate-pulse" />)}
-            </div>
-          ) : upcomingEvents.length === 0 ? (
-            <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
-              Aucun événement à venir
-            </div>
-          ) : (
-            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-              <div className="overflow-x-auto">
-                <table className="w-full text-[12px] border-collapse">
-                  <thead>
-                    <tr className="bg-white/30 border-b border-white/40">
-                      <th className="px-4 py-3 text-left font-semibold text-slate-600 sticky left-0 bg-white/40 min-w-[160px]">Membre</th>
-                      {upcomingEvents.map(e => (
-                        <th key={e.id} className="px-3 py-3 text-center font-semibold text-slate-500 min-w-[100px]">
-                          <div className="text-[11px] text-slate-700 font-semibold truncate max-w-[90px]">{e.title}</div>
-                          <div className="text-[10px] text-slate-400 font-normal">{formatDateShort(e.starts_at)}</div>
-                        </th>
-                      ))}
-                      <th className="px-3 py-3 text-center font-semibold text-slate-400 min-w-[60px]">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allMembers.map((member, i) => {
-                      const memberStatuses = statusMatrix[member.id] ?? {}
-                      const goingCount = Object.values(memberStatuses).filter(s => s === 'GOING').length
-                      return (
-                        <tr key={member.id}
-                          className={`border-b border-white/30 hover:bg-white/30 ${i % 2 === 0 ? '' : 'bg-white/20'}`}>
-                          <td className="px-4 py-3 font-semibold text-slate-900 sticky left-0 bg-white/60">
-                            {member.first_name} {member.surname}
-                          </td>
-                          {upcomingEvents.map(e => {
-                            const status = memberStatuses[e.id]
-                            const icon = status ? STATUS_ICON[status] : null
-                            return (
-                              <td key={e.id} className="px-3 py-3 text-center">
-                                {icon
-                                  ? <span className="text-[14px] font-black" style={{ color: icon.color }}>{icon.icon}</span>
-                                  : <span className="text-slate-200 text-[14px]">—</span>}
-                              </td>
-                            )
-                          })}
-                          <td className="px-3 py-3 text-center">
-                            <span className={`text-[12px] font-semibold ${goingCount > 0 ? 'text-[#3B6D11]' : 'text-slate-300'}`}>
-                              {goingCount}/{upcomingEvents.length}
-                            </span>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                  <tfoot>
-                    <tr className="bg-slate-100 border-t border-slate-200">
-                      <td className="px-4 py-2.5 text-[11px] font-bold text-slate-600 sticky left-0 bg-slate-100">Going</td>
-                      {upcomingEvents.map(e => {
-                        const count = allMembers.filter(m => statusMatrix[m.id]?.[e.id] === 'GOING').length
-                        return (
-                          <td key={e.id} className="px-3 py-2.5 text-center">
-                            <span className="text-[12px] font-bold text-[#3B6D11]">{count}</span>
-                          </td>
-                        )
-                      })}
-                      <td />
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-              <div className="flex gap-4 px-4 py-3 border-t border-white/30 flex-wrap">
-                {Object.entries(STATUS_ICON).map(([status, { icon, color }]) => (
-                  <div key={status} className="flex items-center gap-1">
-                    <span className="text-[13px] font-black" style={{ color }}>{icon}</span>
-                    <span className="text-[11px] text-slate-500">{STATUS_STYLE[status]?.label}</span>
-                  </div>
-                ))}
-                <div className="flex items-center gap-1">
-                  <span className="text-[13px] text-slate-200">—</span>
-                  <span className="text-[11px] text-slate-500">non invité</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+      <a href={`/groups/${groupId}/invitations`}
+        className="text-[12px] font-semibold text-black ml-auto">
+        ← Invitations
+      </a>
     </div>
-  )
+
+    {/* Select event */}
+    <div className="mb-5">
+      <select
+        value={selectedEventId}
+        onChange={e => setSelectedEventId(e.target.value)}
+        className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 w-full max-w-sm"
+      >
+        {events.map(e => (
+          <option key={e.id} value={e.id}>
+            {e.title} — {formatDate(e.starts_at)}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* TABLE */}
+    <div
+      className="rounded-xl border border-white/60 overflow-hidden"
+      style={{
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'blur(10px)',
+      }}
+    >
+
+      {/* HEADER */}
+      <div className={`grid gap-3 px-4 py-3 bg-white/40 border-b border-white/40 ${
+        isOwner
+          ? 'grid-cols-[minmax(220px,2fr)_70px_60px_110px_110px_180px]'
+          : 'grid-cols-[minmax(220px,2fr)_70px_60px_110px_110px]'
+      }`}>
+        <span className="text-[12px] font-semibold text-slate-500">Joueur</span>
+        <span className="text-[12px] font-semibold text-slate-500">Trous</span>
+        <span className="text-[12px] font-semibold text-slate-500">WHS</span>
+        <span className="text-[12px] font-semibold text-slate-500">Répondu</span>
+        <span className="text-[12px] font-semibold text-slate-500">Statut</span>
+        {isOwner && (
+          <span className="text-[12px] font-semibold text-slate-500 text-right">
+            Actions
+          </span>
+        )}
+      </div>
+
+      {/* ROWS */}
+      {displayed.map((p, i) => (
+        <div
+          key={p.player_id}
+          className={`grid gap-3 px-4 py-3 items-center ${
+            isOwner
+              ? 'grid-cols-[minmax(220px,2fr)_70px_60px_110px_110px_180px]'
+              : 'grid-cols-[minmax(220px,2fr)_70px_60px_110px_110px]'
+          } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}
+        >
+
+          {/* NOM */}
+          <div className="min-w-0">
+            <span className="text-[13px] font-semibold text-slate-900 truncate">
+              {p.players.first_name} {p.players.surname}
+            </span>
+          </div>
+
+          {/* TROUS */}
+          <div>
+            {isOwner && p.status === 'GOING' ? (
+              <button
+                onClick={() => toggleHoles(p.player_id, p.holes_played)}
+                className="text-[11px] px-2 py-1 rounded-lg border"
+              >
+                {p.holes_played === 9 ? '9T' : '18T'}
+              </button>
+            ) : (
+              <span className="text-[11px] text-slate-500">
+                {p.holes_played === 9 ? '9T' : ''}
+              </span>
+            )}
+          </div>
+
+          {/* WHS */}
+          <div className="text-[13px] text-slate-700">
+            {p.players.whs ?? '—'}
+          </div>
+
+          {/* DATE */}
+          <div className="text-[11px] text-slate-500">
+            {formatResponded(p.responded_at)}
+          </div>
+
+          {/* STATUS */}
+          <div>
+            <Badge status={p.status} />
+          </div>
+
+          {/* ACTIONS */}
+          {isOwner && (
+            <div className="flex justify-end gap-0.5">
+              {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
+                <button
+                  key={s}
+                  onClick={() => updateStatus(p.player_id, s)}
+                  className="text-[10px] px-1.5 py-0.5 rounded-md border"
+                >
+                  {s === 'GOING' ? 'Yes' : s === 'DECLINED' ? 'No' : 'Reset'}
+                </button>
+              ))}
+
+              <button
+                onClick={() => removeParticipant(p.player_id)}
+                className="text-[10px] px-1.5 py-0.5 rounded-md border border-red-200 text-red-400"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)
 }
