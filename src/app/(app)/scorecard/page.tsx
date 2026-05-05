@@ -11,12 +11,7 @@ type Hole     = { hole_number: number; par: number; stroke_index: number }
 type Player   = { id: string; first_name: string; surname: string; whs: number; tee_id: string | null; tee?: TeeInfo; phcp: number }
 type ScoreMap = Record<string, Record<number, number | null>>
 
-type EventItem = {
-  id: string
-  title: string
-  starts_at: string
-  isPast: boolean
-}
+type EventItem = { id: string; title: string; starts_at: string; isPast: boolean }
 
 function computePhcp(whs: number, tee?: TeeInfo): number {
   if (!tee) return Math.round(whs)
@@ -34,50 +29,44 @@ function formatDate(d: string) {
 }
 
 function formatShortDate(d: string) {
-  return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short' })
+  return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function twoMonthsAgo(): string {
-  const d = new Date()
-  d.setMonth(d.getMonth() - 2)
-  d.setHours(0, 0, 0, 0)
-  return d.toISOString()
+  const d = new Date(); d.setMonth(d.getMonth() - 2); d.setHours(0,0,0,0); return d.toISOString()
 }
 
+const selectClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
+
 export default function MyScorecardPage() {
-  const [playerId, setPlayerId]               = useState<string | null>(null)
-  const [loading, setLoading]                 = useState(true)
+  const [playerId, setPlayerId]                 = useState<string | null>(null)
+  const [loading, setLoading]                   = useState(true)
   const [scorecardLoading, setScorecardLoading] = useState(false)
-  const [error, setError]                     = useState<string | null>(null)
+  const [error, setError]                       = useState<string | null>(null)
 
-  // Event pill
-  const [allEvents, setAllEvents]             = useState<EventItem[]>([])
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [allEvents, setAllEvents]               = useState<EventItem[]>([])
+  const [selectedEventId, setSelectedEventId]   = useState<string | null>(null)
 
-  // Scorecard data
-  const [eventTitle, setEventTitle]           = useState('')
-  const [eventDate, setEventDate]             = useState('')
-  const [eventFormat, setEventFormat]         = useState<'stroke' | 'stableford'>('stableford')
-  const [clubName, setClubName]               = useState('')
-  const [courseName, setCourseName]           = useState('')
-  const [flightPlayers, setFlightPlayers]     = useState<Player[]>([])
-  const [activePlayerId, setActivePlayerId]   = useState<string | null>(null)
-  const [holes, setHoles]                     = useState<Hole[]>([])
-  const [scores, setScores]                   = useState<ScoreMap>({})
-  const [saving, setSaving]                   = useState(false)
-  const [saveStatus, setSaveStatus]           = useState<'idle' | 'saving' | 'sent' | 'error'>('idle')
+  const [eventTitle, setEventTitle]             = useState('')
+  const [eventDate, setEventDate]               = useState('')
+  const [eventFormat, setEventFormat]           = useState<'stroke' | 'stableford'>('stableford')
+  const [clubName, setClubName]                 = useState('')
+  const [courseName, setCourseName]             = useState('')
+  const [flightPlayers, setFlightPlayers]       = useState<Player[]>([])
+  const [activePlayerId, setActivePlayerId]     = useState<string | null>(null)
+  const [holes, setHoles]                       = useState<Hole[]>([])
+  const [scores, setScores]                     = useState<ScoreMap>({})
+  const [saving, setSaving]                     = useState(false)
+  const [saveStatus, setSaveStatus]             = useState<'idle' | 'saving' | 'sent' | 'error'>('idle')
 
-  // Lock states
-  const [isPastEvent, setIsPastEvent]         = useState(false)  // date passed
-  const [isValidated, setIsValidated]         = useState(false)  // owner clôturé
+  const [isPastEvent, setIsPastEvent]           = useState(false)
+  const [isValidated, setIsValidated]           = useState(false)
 
   const scoresRef    = useRef<ScoreMap>({})
   const scorecardRef = useRef<string | null>(null)
   const eventRef     = useRef<string | null>(null)
   const playerRef    = useRef<string | null>(null)
-
-  // ── Auto-save draft → `scores` ──────────────────────────────────────────
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const saveTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const autoSave = useCallback(async (newScores: ScoreMap, evId: string, scId: string) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
@@ -95,7 +84,6 @@ export default function MyScorecardPage() {
     }, 800)
   }, [])
 
-  // Read-only when past OR validated by owner
   const isReadOnly = isPastEvent || isValidated
 
   function handleSetScores(newScores: ScoreMap | ((prev: ScoreMap) => ScoreMap)) {
@@ -103,18 +91,14 @@ export default function MyScorecardPage() {
     setScores(prev => {
       const updated = typeof newScores === 'function' ? newScores(prev) : newScores
       scoresRef.current = updated
-      const scId = scorecardRef.current
-      const evId = eventRef.current
+      const scId = scorecardRef.current; const evId = eventRef.current
       if (scId && evId) autoSave(updated, evId, scId)
       return updated
     })
   }
 
-  // ── Push to Scorecards → `saved_scorecards` ─────────────────────────────
-  // Blocked when scorecard is validated (leaderboard established).
   async function handlePushToScorecards() {
-    const scId = scorecardRef.current
-    const evId = eventRef.current
+    const scId = scorecardRef.current; const evId = eventRef.current
     if (!scId || !evId || isValidated) return
     setSaving(true); setSaveStatus('saving')
     try {
@@ -133,7 +117,7 @@ export default function MyScorecardPage() {
     finally { setSaving(false) }
   }
 
-  // ── Bootstrap: load player + events in 2-month window ──────────────────
+  // ── Bootstrap ────────────────────────────────────────────────────────────
   useEffect(() => { init() }, [])
 
   async function init() {
@@ -144,8 +128,7 @@ export default function MyScorecardPage() {
     const { data: p } = await supabase.from('players')
       .select('id, first_name, surname').eq('user_id', session.user.id).single()
     if (!p) { setError('Profil joueur introuvable'); setLoading(false); return }
-    setPlayerId(p.id)
-    playerRef.current = p.id
+    setPlayerId(p.id); playerRef.current = p.id
 
     const { data: participations } = await supabase.from('event_participants')
       .select('event_id').eq('player_id', p.id).eq('status', 'GOING')
@@ -153,12 +136,13 @@ export default function MyScorecardPage() {
 
     const eventIds = participations.map(x => x.event_id)
 
-    // 2-month lookback + all future
+    // Ascending order: past events first, upcoming at the bottom — so nearest upcoming
+    // is the last non-past item; we find it with items.find(e => !e.isPast)
     const { data: eventsData } = await supabase.from('events')
       .select('id, title, starts_at')
       .in('id', eventIds)
       .gte('starts_at', twoMonthsAgo())
-      .order('starts_at', { ascending: false })
+      .order('starts_at', { ascending: true })
 
     if (!eventsData?.length) { setError('Aucun événement dans les 2 derniers mois'); setLoading(false); return }
 
@@ -169,13 +153,12 @@ export default function MyScorecardPage() {
     }))
     setAllEvents(items)
 
-    // Default: nearest upcoming, else most recent past
-    const defaultEvent = items.find(e => !e.isPast) ?? items[0]
-    setSelectedEventId(defaultEvent.id)
+    // Default: nearest upcoming; fallback to most recent past (last item)
+    const nearest = items.find(e => !e.isPast) ?? items[items.length - 1]
+    setSelectedEventId(nearest.id)
     setLoading(false)
   }
 
-  // ── Reload when selected event changes ──────────────────────────────────
   useEffect(() => {
     if (!selectedEventId || !playerId) return
     loadEvent(selectedEventId, playerId)
@@ -183,8 +166,8 @@ export default function MyScorecardPage() {
 
   async function loadEvent(evId: string, pId: string) {
     setScorecardLoading(true); setError(null); setSaveStatus('idle')
+    setFlightPlayers([]); setActivePlayerId(null); setHoles([]); setScores({})
     const now = new Date()
-
     try {
       const { data: participations } = await supabase.from('event_participants')
         .select('event_id, tee_id').eq('player_id', pId).eq('status', 'GOING')
@@ -197,10 +180,8 @@ export default function MyScorecardPage() {
       if (!event) { setError('Événement introuvable'); return }
 
       setIsPastEvent(new Date(event.starts_at) < now)
-
       const myTeeId = participations?.find(p => p.event_id === event.id)?.tee_id ?? null
-      setEventTitle(event.title)
-      setEventDate(event.starts_at)
+      setEventTitle(event.title); setEventDate(event.starts_at)
       setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
       setClubName((event.courses as any)?.clubs?.name ?? '')
       setCourseName((event.courses as any)?.course_name ?? '')
@@ -208,9 +189,7 @@ export default function MyScorecardPage() {
 
       if (!event.course_id) { setError('Aucun parcours configuré'); return }
       await loadScorecardData(event.id, event.course_id, pId, myTeeId)
-    } finally {
-      setScorecardLoading(false)
-    }
+    } finally { setScorecardLoading(false) }
   }
 
   async function loadScorecardData(evId: string, courseId: string, pId: string, myTeeId: string | null) {
@@ -221,7 +200,6 @@ export default function MyScorecardPage() {
     const { data: teesData } = await supabase.from('course_tees')
       .select('id, tee_name, par_total, course_rating, slope').eq('course_id', courseId)
 
-    // Flight members
     const { data: myFlight } = await supabase.from('flight_players')
       .select('flights(id, event_id)').eq('player_id', pId)
     const myFlightRow = (myFlight || []).find((f: any) => f.flights?.event_id === evId)
@@ -240,48 +218,35 @@ export default function MyScorecardPage() {
       const pl = ep.players
       const teeId = ep.tee_id ?? myTeeId ?? null
       const tee = (teesData || []).find(t => t.id === teeId)
-      return {
-        id: pl.id, first_name: pl.first_name, surname: pl.surname,
-        whs: pl.whs ?? 0, tee_id: teeId, tee,
-        phcp: computePhcp(pl.whs ?? 0, tee),
-      }
+      return { id: pl.id, first_name: pl.first_name, surname: pl.surname, whs: pl.whs ?? 0, tee_id: teeId, tee, phcp: computePhcp(pl.whs ?? 0, tee) }
     })
 
     const sorted = [...built.filter(p => p.id === pId), ...built.filter(p => p.id !== pId)]
-    setFlightPlayers(sorted)
-    setActivePlayerId(pId)
+    setFlightPlayers(sorted); setActivePlayerId(pId)
 
-    // Scorecard + check validation status
     const { data: sc } = await supabase.from('scorecards')
       .select('id, validated_at').eq('event_id', evId).maybeSingle()
     let scId = sc?.id ?? null
     if (!scId) {
-      const { data: created } = await supabase.from('scorecards')
-        .insert({ event_id: evId }).select('id').single()
+      const { data: created } = await supabase.from('scorecards').insert({ event_id: evId }).select('id').single()
       scId = created?.id ?? null
     }
     scorecardRef.current = scId
     setIsValidated(!!sc?.validated_at)
-
     if (!scId) return
 
-    // Scores: saved_scorecards overrides live scores
     const { data: savedData } = await supabase.from('saved_scorecards')
-      .select('player_id, hole, strokes')
-      .eq('scorecard_id', scId).eq('event_id', evId)
+      .select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', evId)
       .in('player_id', flightPlayerIds)
-
     const { data: liveData } = await supabase.from('scores')
-      .select('player_id, hole, strokes')
-      .eq('scorecard_id', scId).eq('event_id', evId)
+      .select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', evId)
       .in('player_id', flightPlayerIds)
 
     const map: ScoreMap = {}
     sorted.forEach(p => { map[p.id] = {} })
     liveData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
     savedData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-    setScores(map)
-    scoresRef.current = map
+    setScores(map); scoresRef.current = map
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -306,50 +271,32 @@ export default function MyScorecardPage() {
   )
 
   const activePlayer = flightPlayers.find(p => p.id === activePlayerId) ?? null
-  const upcomingEvents = allEvents.filter(e => !e.isPast)
-  const pastEvents     = allEvents.filter(e => e.isPast)
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
-      {/* ── Event pill selector ─────────────────────────────────────────── */}
+      {/* ── Event dropdown (same style as Scorecards) ─────────────────────── */}
       {allEvents.length > 0 && (
-        <div className="mb-5 rounded-xl border border-white/60 shadow-sm p-4"
-          style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Événements</p>
-
-          {upcomingEvents.length > 0 && (
-            <div className={pastEvents.length > 0 ? 'mb-3' : ''}>
-              <p className="text-[10px] text-slate-400 font-semibold mb-2 uppercase tracking-wide">À venir</p>
-              <div className="flex gap-2 flex-wrap">
-                {upcomingEvents.map(e => (
-                  <EventPill key={e.id} event={e}
-                    isSelected={selectedEventId === e.id}
-                    onSelect={() => setSelectedEventId(e.id)} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {pastEvents.length > 0 && (
-            <div className={upcomingEvents.length > 0 ? 'pt-3 border-t border-slate-100' : ''}>
-              <p className="text-[10px] text-slate-400 font-semibold mb-2 uppercase tracking-wide">
-                {upcomingEvents.length > 0 ? '2 derniers mois' : 'Récents'}
-              </p>
-              <div className="flex gap-2 flex-wrap">
-                {pastEvents.map(e => (
-                  <EventPill key={e.id} event={e}
-                    isSelected={selectedEventId === e.id}
-                    onSelect={() => setSelectedEventId(e.id)} />
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5"
+          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+            Événement
+          </label>
+          <select
+            value={selectedEventId ?? ''}
+            onChange={e => setSelectedEventId(e.target.value)}
+            className={selectClass}>
+            {allEvents.map(e => (
+              <option key={e.id} value={e.id}>
+                {e.title} · {formatShortDate(e.starts_at)}{e.isPast ? ' ✓' : ''}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="mb-5 flex items-start justify-between gap-3">
+      {/* ── Event header + send button ───────────────────────────────────── */}
+      <div className="flex items-start justify-between gap-3 mb-5">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{eventTitle}</h1>
           {eventDate && <p className="text-[13px] text-slate-500 mt-0.5">{formatDate(eventDate)}</p>}
@@ -360,33 +307,22 @@ export default function MyScorecardPage() {
           )}
         </div>
 
-        {/* Right-side action area */}
         <div className="flex-shrink-0 flex flex-col items-end gap-1.5 mt-1">
           {isValidated ? (
-            // Scorecard clôturé par l'owner — plus d'envoi possible
             <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
               <span className="text-[13px]">🏆</span>
-              <span className="text-[11px] font-bold text-amber-700">Scorecards clôturé</span>
+              <span className="text-[11px] font-bold text-amber-700">Clôturé</span>
             </div>
-          ) : isPastEvent ? (
-            // Event passed but not yet validated — can still send
-            <>
-              <button onClick={handlePushToScorecards} disabled={saving}
-                className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
-                <UploadIcon />
-                {saving ? 'Envoi…' : 'Envoyer aux Scorecards'}
-              </button>
-              <span className="text-[10px] text-slate-400 font-medium">Partie terminée · lecture seule</span>
-              <SaveFeedback status={saveStatus} />
-            </>
           ) : (
-            // Active event — full edit + send
             <>
               <button onClick={handlePushToScorecards} disabled={saving}
                 className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
                 <UploadIcon />
                 {saving ? 'Envoi…' : 'Envoyer aux Scorecards'}
               </button>
+              {isPastEvent && (
+                <span className="text-[10px] text-slate-400 font-medium">Partie terminée · lecture seule</span>
+              )}
               <SaveFeedback status={saveStatus} />
             </>
           )}
@@ -397,14 +333,13 @@ export default function MyScorecardPage() {
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600">{error}</div>
       )}
 
-      {/* Scorecard loading skeleton */}
       {scorecardLoading && (
         <div className="space-y-2 mb-4">
           {[1,2,3].map(i => <div key={i} className="h-10 bg-white/40 rounded-xl animate-pulse" />)}
         </div>
       )}
 
-      {/* ── Flight selector ─────────────────────────────────────────────── */}
+      {/* ── Flight selector ──────────────────────────────────────────────── */}
       {!scorecardLoading && flightPlayers.length > 1 && (
         <div className="mb-5 rounded-xl border border-white/60 shadow-sm p-4"
           style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
@@ -413,15 +348,13 @@ export default function MyScorecardPage() {
             {flightPlayers.map(p => {
               const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
               const isActive = p.id === activePlayerId
-              const isMe = p.id === playerId
+              const isMe     = p.id === playerId
               return (
                 <button key={p.id} onClick={() => setActivePlayerId(p.id)}
                   title={`${p.first_name} ${p.surname}`}
                   className="flex flex-col items-center gap-1 transition-all">
                   <div className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 flex items-center justify-center transition-all ${
-                    isActive
-                      ? 'bg-[#185FA5] text-white border-[#185FA5]'
-                      : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
+                    isActive ? 'bg-[#185FA5] text-white border-[#185FA5]' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
                   }`}>
                     {initials}
                   </div>
@@ -461,12 +394,8 @@ export default function MyScorecardPage() {
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <ScorecardTable
-            holes={holes}
-            player={activePlayer}
-            scores={scores}
-            setScores={handleSetScores}
-            eventFormat={eventFormat}
-            readOnly={isReadOnly}
+            holes={holes} player={activePlayer} scores={scores}
+            setScores={handleSetScores} eventFormat={eventFormat} readOnly={isReadOnly}
           />
         </div>
       )}
@@ -481,32 +410,6 @@ export default function MyScorecardPage() {
   )
 }
 
-// ─── EventPill ────────────────────────────────────────────────────────────────
-
-function EventPill({ event, isSelected, onSelect }: {
-  event: EventItem; isSelected: boolean; onSelect: () => void
-}) {
-  return (
-    <button onClick={onSelect}
-      className={`flex flex-col items-start px-3 py-1.5 rounded-xl border text-left transition-all ${
-        isSelected
-          ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm'
-          : event.isPast
-            ? 'bg-white/70 text-slate-500 border-slate-200 hover:border-slate-300'
-            : 'bg-white text-slate-700 border-slate-200 hover:border-[#185FA5]'
-      }`}>
-      <span className={`text-[12px] font-bold leading-tight ${isSelected ? 'text-white' : ''}`}>
-        {event.title}
-      </span>
-      <span className={`text-[10px] mt-0.5 ${isSelected ? 'text-blue-200' : 'text-slate-400'}`}>
-        {formatShortDate(event.starts_at)}
-      </span>
-    </button>
-  )
-}
-
-// ─── Small helpers ────────────────────────────────────────────────────────────
-
 function UploadIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -519,13 +422,9 @@ function UploadIcon() {
 function SaveFeedback({ status }: { status: 'idle' | 'saving' | 'sent' | 'error' }) {
   if (status === 'idle') return null
   return (
-    <span className={`text-[11px] font-semibold ${
-      status === 'sent'   ? 'text-[#3B6D11]' :
-      status === 'error'  ? 'text-red-500'   :
-      'text-slate-400'
-    }`}>
+    <span className={`text-[11px] font-semibold ${status === 'error' ? 'text-red-500' : 'text-slate-900'}`}>
       {status === 'sent'   && '✓ Envoyé aux Scorecards'}
-      {status === 'error'  && 'Erreur lors de l\'envoi'}
+      {status === 'error'  && "Erreur lors de l'envoi"}
       {status === 'saving' && 'Envoi en cours…'}
     </span>
   )

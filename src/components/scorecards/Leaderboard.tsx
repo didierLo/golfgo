@@ -103,7 +103,13 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2 no-print">
           <h3 className="text-[15px] font-black text-slate-900">Leaderboard</h3>
           <div className="flex items-center gap-2 flex-wrap">
-            {saveMsgLb && <span className="text-[12px] font-semibold text-[#3B6D11]">{saveMsgLb}</span>}
+            {saveMsgLb && (
+              <span className={`text-[12px] font-semibold ${
+                saveMsgLb === 'Erreur' ? 'text-red-500' : 'text-slate-900'
+              }`}>
+                {saveMsgLb}
+              </span>
+            )}
             <button onClick={handleSaveLeaderboard} disabled={savingLb || !isOwner}
               className={`text-[12px] font-semibold px-3 py-1.5 rounded-xl disabled:opacity-50 transition-colors ${
                 isOwner ? 'bg-slate-900 text-white hover:bg-slate-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
