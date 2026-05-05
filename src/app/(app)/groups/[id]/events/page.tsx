@@ -160,7 +160,7 @@ export default function EventsPage() {
 
       {upcoming.length > 0 && (
         <div className="mb-8">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">À venir</p>
+          <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">À venir</p>
           <div className="flex flex-col gap-2">
             {upcoming.map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} isOwner={isOwner} onNotOwner={() => showToast('Tu dois être Admin pour utiliser cette fonction')} />)}
           </div>
@@ -169,7 +169,7 @@ export default function EventsPage() {
 
       {past.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Passés</p>
+          <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">Passés</p>
           <div className="flex flex-col gap-2">
             {past.slice().reverse().map(e => <EventCard key={e.id} event={e} groupId={groupId} goingCount={goingCounts[e.id] ?? 0} onDelete={deleteEvent} isOwner={isOwner} onNotOwner={() => showToast('Tu dois être Admin pour utiliser cette fonction')} />)}
           </div>

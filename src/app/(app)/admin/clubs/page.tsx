@@ -7,7 +7,7 @@ export default function ClubsPage() {
 
       <div className="mb-6">
         <h1 className="text-[18px] font-medium text-gray-900">Clubs & Parcours</h1>
-        <p className="text-[13px] text-gray-400 mt-0.5">Gérer les clubs et parcours disponibles</p>
+        <p className="text-[13px] text-gray-900 mt-0.5">Gérer les clubs et parcours disponibles</p>
       </div>
 
       {/* Import XLS */}
