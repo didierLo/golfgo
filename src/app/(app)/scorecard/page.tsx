@@ -24,10 +24,6 @@ function fallbackHoles(): Hole[] {
   }))
 }
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long' })
-}
-
 function formatShortDate(d: string) {
   return new Date(d).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short', year: 'numeric' })
 }
@@ -275,7 +271,10 @@ export default function MyScorecardPage() {
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
-      {/* ── Event dropdown (same style as Scorecards) ─────────────────────── */}
+      {/* ── Page header ──────────────────────────────────────────────────── */}
+      <h1 className="text-[22px] font-black text-slate-900 tracking-tight mb-4">Scorecard</h1>
+
+      {/* ── Event dropdown ────────────────────────────────────────────────── */}
       {allEvents.length > 0 && (
         <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
@@ -292,41 +291,34 @@ export default function MyScorecardPage() {
               </option>
             ))}
           </select>
-        </div>
-      )}
-
-      {/* ── Event header + send button ───────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-3 mb-5">
-        <div>
-          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{eventTitle}</h1>
-          {eventDate && <p className="text-[13px] text-slate-500 mt-0.5">{formatDate(eventDate)}</p>}
           {(clubName || courseName) && (
-            <p className="text-[14px] text-slate-700 font-medium mt-0.5">
+            <p className="text-[12px] text-slate-500 mt-2.5 font-medium">
               {clubName}{courseName && ` · ${courseName}`}
             </p>
           )}
         </div>
+      )}
 
-        <div className="flex-shrink-0 flex flex-col items-end gap-1.5 mt-1">
-          {isValidated ? (
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
-              <span className="text-[13px]">🏆</span>
-              <span className="text-[11px] font-bold text-amber-700">Clôturé</span>
-            </div>
-          ) : (
-            <>
-              <button onClick={handlePushToScorecards} disabled={saving}
-                className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
-                <UploadIcon />
-                {saving ? 'Envoi…' : 'Envoyer aux Scorecards'}
-              </button>
-              {isPastEvent && (
-                <span className="text-[10px] text-slate-400 font-medium">Partie terminée · lecture seule</span>
-              )}
-              <SaveFeedback status={saveStatus} />
-            </>
-          )}
-        </div>
+      {/* ── Send button row ───────────────────────────────────────────────── */}
+      <div className="flex items-center justify-end gap-2 mb-5">
+        {isValidated ? (
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+            <span className="text-[13px]">🏆</span>
+            <span className="text-[11px] font-bold text-amber-700">Clôturé</span>
+          </div>
+        ) : (
+          <>
+            <SaveFeedback status={saveStatus} />
+            {isPastEvent && (
+              <span className="text-[10px] text-slate-400 font-medium">Lecture seule</span>
+            )}
+            <button onClick={handlePushToScorecards} disabled={saving}
+              className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
+              <UploadIcon />
+              {saving ? 'Envoi…' : 'Envoyer aux Scorecards'}
+            </button>
+          </>
+        )}
       </div>
 
       {error && selectedEventId && (
