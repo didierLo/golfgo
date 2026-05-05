@@ -146,7 +146,7 @@ export default function TeeSheetPage() {
          {/*{eventDate && <p className="text-[12px] text-slate-500 mt-0.5">{eventDate}</p>}"*/}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <label className="text-[12px] font-semibold text-slate-600">Intervalle</label>
+          <label className="text-[12px] font-semibold text-slate-900">Intervalle</label>
           <select value={interval} onChange={e => setInterval(Number(e.target.value))}
             className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
             {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{v} min</option>)}

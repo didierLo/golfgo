@@ -58,7 +58,7 @@ export default function EditGroupPage() {
     <div className="p-5 sm:p-6 max-w-lg">
       <div className="mb-6">
         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Modifier le groupe</h1>
-        <p className="text-[13px] text-slate-600 mt-0.5">{name}</p>
+        <p className="text-[13px] text-slate-900 mt-0.5">{name}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

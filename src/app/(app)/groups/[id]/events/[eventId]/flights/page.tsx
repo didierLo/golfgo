@@ -286,9 +286,9 @@ export default function FlightsPage() {
 
       {/* ── Joueurs confirmés ── */}
       <div className="mb-6">
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+        <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">
           Joueurs confirmés ({players.length})
-          {has9holers && <span className="ml-2 text-amber-600 normal-case font-semibold text-[10px]">· {players9.length} jouent 9T</span>}
+          {has9holers && <span className="ml-2 text-amber-900 normal-case font-semibold text-[10px]">· {players9.length} jouent 9T</span>}
         </p>
         <div className="flex flex-wrap gap-2">
           {players.length === 0 && <p className="text-[13px] text-slate-500">Aucun joueur confirmé (GOING)</p>}

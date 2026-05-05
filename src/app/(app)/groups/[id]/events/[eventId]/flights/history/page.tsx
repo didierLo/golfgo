@@ -158,7 +158,7 @@ export default function FlightHistoryPage() {
       <div className="flex items-start justify-between mb-5 gap-4 flex-wrap">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Historique flights</h1>
-          <p className="text-[13px] text-slate-500 mt-0.5">Co-participations · hover pour corriger manuellement</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">Co-participations · hover pour corriger manuellement</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {hasEdits && (

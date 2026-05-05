@@ -98,7 +98,7 @@ export default function LeaderboardPage() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-[16px] font-black text-slate-900">{clubName}</h2>
-            <p className="text-[13px] text-slate-600">{courseName}</p>
+            <p className="text-[13px] text-slate-900">{courseName}</p>
           </div>
           <span className="text-[11px] font-semibold px-3 py-1 rounded-full bg-[#E6F1FB] text-[#0C447C]">
             {eventFormat === 'stableford' ? 'Stableford' : 'Stroke play'}

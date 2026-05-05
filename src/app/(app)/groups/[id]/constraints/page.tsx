@@ -83,7 +83,7 @@ export default function ConstraintsPage() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="mb-6">
         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Flight constraints</h1>
-        <p className="text-[13px] text-slate-600 mt-0.5">
+        <p className="text-[13px] text-slate-900 mt-0.5">
           Définir les paires à éviter ou à favoriser lors de la génération des flights
         </p>
       </div>

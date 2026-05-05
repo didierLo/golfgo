@@ -238,7 +238,7 @@ export default function ScorecardsPage() {
       {!isOwner && (
         <div className="mb-4 px-4 py-3 rounded-xl border border-blue-200/60 text-[12px] text-blue-700 font-medium"
           style={{ background: "rgba(219,234,254,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
-          Vue en lecture seule — seul l'organisateur peut modifier les scorecards
+          Vue en lecture seule
         </div>
       )}
 

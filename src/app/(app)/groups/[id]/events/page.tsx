@@ -147,7 +147,7 @@ export default function EventsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Events</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">{upcoming.length} à venir · {past.length} passés</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">{upcoming.length} à venir · {past.length} passés</p>
         </div>
         <button
           onClick={() => isOwner ? window.location.href = `/groups/${groupId}/events/add` : showToast('Tu dois être Admin pour utiliser cette fonction')}

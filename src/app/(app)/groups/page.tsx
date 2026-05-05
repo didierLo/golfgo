@@ -137,7 +137,8 @@ async function loadGroups() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Mes groupes</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">{groups.length} groupe{groups.length !== 1 ? 's' : ''}</p>
+          <p className="text-[16px] text-slate-9
+          00 mt-0.5">{groups.length} groupe{groups.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => router.push('/groups/add')}
           className="flex items-center gap-1.5 bg-[#185FA5] text-white text-[13px] font-semibold px-4 py-2 rounded-xl hover:bg-[#0C447C] transition-colors">

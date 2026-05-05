@@ -250,9 +250,9 @@ export default function MyScorecardPage() {
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{eventTitle}</h1>
-          <p className="text-[13px] text-slate-900 mt-0.5">{formatDate(eventDate)}</p>
+          <p className="text-[16px] text-slate-900 mt-0.5">{formatDate(eventDate)}</p>
           {(clubName || courseName) && (
-            <p className="text-[13px] text-slate-500 mt-0.5">{clubName}{courseName && ` · ${courseName}`}</p>
+            <p className="text-[16px] text-slate-900 mt-0.5">{clubName}{courseName && ` · ${courseName}`}</p>
           )}
         </div>
 

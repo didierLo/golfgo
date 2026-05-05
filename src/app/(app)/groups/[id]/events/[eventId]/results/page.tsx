@@ -268,7 +268,7 @@ export default function ResultsPage() {
       <div className="flex items-start justify-between mb-5 gap-3 flex-wrap">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Results</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">{players.length} joueurs · {eventFormat}</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">{players.length} joueurs · {eventFormat}</p>
         </div>
         <EventPill events={events} selectedId={selectedId}
           onSelect={id => { setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`) }} />

@@ -123,7 +123,7 @@ export default function EventOverviewPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{event.title}</h1>
-        {event.description && <p className="text-[13px] text-slate-600 mt-1">{event.description}</p>}
+        {event.description && <p className="text-[13px] text-slate-900 mt-1">{event.description}</p>}
       </div>
 
       {/* Infos */}

@@ -121,7 +121,7 @@ export default function EditPlayerPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Modifier le joueur</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">{form.first_name} {form.surname}</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">{form.first_name} {form.surname}</p>
         </div>
       </div>
 

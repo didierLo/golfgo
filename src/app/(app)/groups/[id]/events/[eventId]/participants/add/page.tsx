@@ -61,7 +61,7 @@ export default function AddParticipantsPage() {
 
       <div className="mb-6">
         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Ajouter des participants</h1>
-        <p className="text-[13px] text-slate-600 mt-0.5">{players.length} membres disponibles</p>
+        <p className="text-[13px] text-slate-900 mt-0.5">{players.length} membres disponibles</p>
       </div>
 
       {/* Select all */}

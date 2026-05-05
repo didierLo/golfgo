@@ -74,7 +74,7 @@ export default function PaymentsPage() {
 
       {!isOwner && (
         <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
-          Vue en lecture seule — seul l'organisateur peut modifier les paiements
+          Vue en lecture seule
         </div>
       )}
 

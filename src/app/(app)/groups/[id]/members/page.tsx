@@ -172,7 +172,7 @@ export default function MembersPage() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">Members</h1>
-          <p className="text-[13px] text-slate-600 mt-0.5">{members.length} membre{members.length !== 1 ? 's' : ''}</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">{members.length} membre{members.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex gap-2 flex-wrap justify-end">
           <a href={`/groups/${groupId}/constraints`}
