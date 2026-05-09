@@ -24,11 +24,12 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
 
 function buildEmailHtml({
   eventTitle, eventDate, eventTime, eventLocation, eventMessage,
-  yes18Link, yes9Link, noLink, eventLink,
+  yes18Link, yes9frontLink, yes9backLink, noLink, eventLink,
 }: {
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null
-  yes18Link: string; yes9Link: string; noLink: string; eventLink: string
+  yes18Link: string; yes9frontLink: string; yes9backLink: string
+  noLink: string; eventLink: string
 }) {
   return `
 <!DOCTYPE html>
@@ -85,68 +86,81 @@ function buildEmailHtml({
               <p style="margin:0;font-size:14px;color:#334155;line-height:1.9;">${eventMessage.replace(/\n/g, '<br/>')}</p>
             </div>` : ''}
 
-            <!-- Séparateur -->
             <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
 
             <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">
               Ta réponse
             </p>
 
-            <!-- Bouton 18 trous -->
+            <!-- 18 trous -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-              <tr>
-                <td style="border-radius:10px;overflow:hidden;">
-                  <a href="${yes18Link}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #16A34A;border-radius:10px;padding:14px 20px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="font-size:15px;font-weight:600;color:#15803D;">
-                          Je participe — 18 trous
-                        </td>
-                        <td align="right" style="font-size:18px;">⛳</td>
-                      </tr>
-                    </table>
-                  </a>
-                </td>
-              </tr>
+              <tr><td>
+                <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:22px;width:36px;">⛳</td>
+                      <td style="padding-left:12px;">
+                        <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
+                        <div style="font-size:12px;color:#16A34A;margin-top:2px;">18 trous · Parcours complet</div>
+                      </td>
+                      <td align="right" style="font-size:20px;">→</td>
+                    </tr>
+                  </table>
+                </a>
+              </td></tr>
             </table>
 
-            <!-- Bouton 9 trous -->
+            <!-- 9 trous Front -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-              <tr>
-                <td>
-                  <a href="${yes9Link}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #D97706;border-radius:10px;padding:14px 20px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="font-size:15px;font-weight:600;color:#B45309;">
-                          Je participe — 9 trous
-                        </td>
-                        <td align="right" style="font-size:18px;">🏌️</td>
-                      </tr>
-                    </table>
-                  </a>
-                </td>
-              </tr>
+              <tr><td>
+                <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:#FEF9C3;border:2px solid #CA8A04;border-radius:12px;padding:16px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:22px;width:36px;">🌅</td>
+                      <td style="padding-left:12px;">
+                        <div style="font-size:15px;font-weight:700;color:#92400E;">Je participe</div>
+                        <div style="font-size:12px;color:#B45309;margin-top:2px;">9 trous Front · Trous 1–9</div>
+                      </td>
+                      <td align="right" style="font-size:20px;">→</td>
+                    </tr>
+                  </table>
+                </a>
+              </td></tr>
             </table>
 
-            <!-- Bouton décliner -->
+            <!-- 9 trous Back -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+              <tr><td>
+                <a href="${yes9backLink}" style="display:block;text-decoration:none;background:#FFEDD5;border:2px solid #EA580C;border-radius:12px;padding:16px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:22px;width:36px;">🌇</td>
+                      <td style="padding-left:12px;">
+                        <div style="font-size:15px;font-weight:700;color:#9A3412;">Je participe</div>
+                        <div style="font-size:12px;color:#C2410C;margin-top:2px;">9 trous Back · Trous 10–18</div>
+                      </td>
+                      <td align="right" style="font-size:20px;">→</td>
+                    </tr>
+                  </table>
+                </a>
+              </td></tr>
+            </table>
+
+            <!-- Décliner -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-              <tr>
-                <td>
-                  <a href="${noLink}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px 20px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="font-size:15px;font-weight:500;color:#94A3B8;">
-                          Je ne peux pas participer
-                        </td>
-                        <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
-                      </tr>
-                    </table>
-                  </a>
-                </td>
-              </tr>
+              <tr><td>
+                <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:22px;width:36px;">😔</td>
+                      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+                      <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
+                    </tr>
+                  </table>
+                </a>
+              </td></tr>
             </table>
 
-            <!-- Lien app -->
             <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
               Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
             </p>
@@ -218,10 +232,11 @@ export async function POST(req: Request) {
       const token = p.invite_token
       if (!token) { skipped++; continue }
 
-      const yes18Link  = `${appUrl}/invite/yes?token=${token}&holes=18`
-      const yes9Link   = `${appUrl}/invite/yes?token=${token}&holes=9`
-      const noLink     = `${appUrl}/invite/no?token=${token}`
-      const playerName = `${player.first_name} ${player.surname}`
+      const yes18Link    = `${appUrl}/invite/yes?token=${token}&holes=18`
+      const yes9frontLink = `${appUrl}/invite/yes?token=${token}&holes=9&section=out`
+      const yes9backLink  = `${appUrl}/invite/yes?token=${token}&holes=9&section=in`
+      const noLink       = `${appUrl}/invite/no?token=${token}`
+      const playerName   = `${player.first_name} ${player.surname}`
 
       const templateVars: Record<string, string> = {
         player_name: playerName, player_first_name: player.first_name,
@@ -230,21 +245,21 @@ export async function POST(req: Request) {
         event_time: eventTime, owner_name: ownerName,
       }
 
-      const subject       = applyTemplateVariables(subjectTemplate, templateVars)
-      const resolvedBody  = applyTemplateVariables(bodyTemplate, templateVars)
+      const subject      = applyTemplateVariables(subjectTemplate, templateVars)
+      const resolvedBody = applyTemplateVariables(bodyTemplate, templateVars)
       const practicalNote = event.email_message?.trim()
         ? applyTemplateVariables(event.email_message.trim(), templateVars) : null
       const resolvedMessage = practicalNote ? `${resolvedBody}\n\n${practicalNote}` : resolvedBody
 
       if (!EMAIL_ENABLED) {
-        console.log(`[PREVIEW] To: ${player.email} | 18T: ${yes18Link} | 9T: ${yes9Link} | No: ${noLink}`)
+        console.log(`[PREVIEW] To: ${player.email} | 18T: ${yes18Link} | 9F: ${yes9frontLink} | 9B: ${yes9backLink} | No: ${noLink}`)
         sent++; continue
       }
 
       const html = buildEmailHtml({
         eventTitle: event.title, eventDate, eventTime,
         eventLocation: event.location, eventMessage: resolvedMessage,
-        yes18Link, yes9Link, noLink, eventLink,
+        yes18Link, yes9frontLink, yes9backLink, noLink, eventLink,
       })
 
       const { error: emailErr } = await resend.emails.send({

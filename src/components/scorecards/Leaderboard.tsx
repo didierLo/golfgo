@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getStablefordTotal, getBrutTotal, getNetTotal, type ScoringHole, type ScoringScore } from '@/lib/golf/scoring/stableford'
-import type { Player } from '@/app/(app)/groups/[id]/events/[eventId]/scorecards/page'
+import type { Player } from '@/components/scorecards/scorecard-types'
 
 type LeaderboardEntry = {
   player: Player; holesPlayed: number; brut: number; net: number; pts: number; score: number

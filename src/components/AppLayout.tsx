@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
+import { useLocale } from 'next-intl'
+import { usePathname as useNextPathname } from 'next/navigation'
 
 interface Group       { id: string; name: string; color: string; role: 'owner' | 'member' }
 interface CurrentUser { initials: string; name: string }
@@ -41,21 +44,23 @@ const Icons = {
 }
 
 function NavItem({ href, icon, label, active, muted, iconColor }: { href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean; iconColor?: string }) {
+  const t = useTranslations()
   return (
     <Link href={href} className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-semibold transition-all duration-150 ${active ? 'bg-[#185FA5] text-white shadow-sm shadow-blue-900/20' : muted ? 'text-slate-400 hover:text-slate-500 hover:bg-slate-100/60' : 'text-slate-900 hover:text-black hover:bg-slate-100/80'}`}>
       <span className="flex-shrink-0 transition-transform duration-150 group-hover:scale-110" style={{ color: active ? 'white' : muted ? '#CBD5E1' : (iconColor ?? '#185FA5') }}>{icon}</span>
       <span className="flex-1 leading-none">{label}</span>
-      {muted && <span className="text-[9px] text-slate-400 font-normal tracking-wide uppercase">bientôt</span>}
+      {muted && <span className="text-[9px] text-slate-400 font-normal tracking-wide uppercase">{t('nav.soon')}</span>}
     </Link>
   )
 }
 
 function NavIconItem({ href, icon, label, active, muted, iconColor }: { href: string; icon: React.ReactNode; label: string; active: boolean; muted?: boolean; iconColor?: string }) {
+  const t = useTranslations()
   return (
     <Link href={href} title={label} className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-150 ${active ? 'bg-[#185FA5] text-white shadow-sm shadow-blue-900/20' : muted ? 'text-slate-300 hover:text-slate-400 hover:bg-slate-100/60' : 'hover:bg-blue-50'}`}>
       <span className="transition-transform duration-150 group-hover:scale-110" style={{ color: active ? 'white' : muted ? '#CBD5E1' : (iconColor ?? '#185FA5') }}>{icon}</span>
       <span className="pointer-events-none absolute left-full ml-2 z-50 whitespace-nowrap rounded-lg bg-slate-900 text-white text-[11px] font-semibold px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-lg">
-        {label}{muted && <span className="ml-1 text-slate-400">(bientôt)</span>}
+        {label}{muted && <span className="ml-1 text-slate-400">({t('nav.soon')})</span>}
       </span>
     </Link>
   )
@@ -76,13 +81,14 @@ function GroupDot({ color, size = 8 }: { color: string; size?: number }) {
   return <span className="rounded-full flex-shrink-0 ring-2 ring-white" style={{ width: size, height: size, background: color, display: 'inline-block' }} />
 }
 
-// Pages Organiser où le back button s'affiche
 const ORGANISER_SEGMENTS = ['/events/', '/invitations', '/flights', '/results', '/participants', '/teesheet', '/scorecards', '/leaderboard', '/communications']
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
+  const t        = useTranslations()
+  const locale   = useLocale()
 
   const [groups,            setGroups]            = useState<Group[]>([])
   const [activeGroup,       setActiveGroup]       = useState<Group | null>(null)
@@ -167,19 +173,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const flightsHref      = gid && eid ? `/groups/${gid}/events/${eid}/flights`      : null
   const resultsHref      = gid && eid ? `/groups/${gid}/events/${eid}/results`      : null
 
-  // Active checks pour Events (liste) — pas sur sous-pages
   const eventsListActive = !isAnyOwner ? false : !!gid && (pathname === `/groups/${gid}/events` || pathname === `/groups/${gid}/events/add`)
 
   const organiserDrawerItems = [
-  { href: groupsHref,                   icon: Icons.groups,         label: 'Groups',         color: '#7F77DD', active: isGroupsActive },
-  { href: eventsHref,                   icon: Icons.events,         label: 'Events',         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: eventsListActive },
-  { href: invitationsHref ?? '/groups', icon: Icons.invitations,    label: 'Invitations',    color: '#0C447C', active: !!invitationsHref && isActive(invitationsHref) },
-  { href: flightsHref ?? '/groups',     icon: Icons.flights,        label: 'Flights',        color: '#EF9F27', active: !!flightsHref && isActive(flightsHref) },
-  { href: resultsHref ?? '/groups',     icon: Icons.results,        label: 'Results',        color: '#3B6D11', active: !!resultsHref && isActive(resultsHref) },
-  { href: clubsHref,                    icon: Icons.clubs,          label: 'Clubs',          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
-  { href: communicationsHref,           icon: Icons.communications, label: 'Communications', color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
-]
-  
+    { href: groupsHref,                   icon: Icons.groups,         label: t('nav.groups'),         color: '#7F77DD', active: isGroupsActive },
+    { href: eventsHref,                   icon: Icons.events,         label: t('nav.events'),         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: eventsListActive },
+    { href: invitationsHref ?? '/groups', icon: Icons.invitations,    label: t('nav.invitations'),    color: '#0C447C', active: !!invitationsHref && isActive(invitationsHref) },
+    { href: flightsHref ?? '/groups',     icon: Icons.flights,        label: t('nav.flights'),        color: '#EF9F27', active: !!flightsHref && isActive(flightsHref) },
+    { href: resultsHref ?? '/groups',     icon: Icons.results,        label: t('nav.results'),        color: '#3B6D11', active: !!resultsHref && isActive(resultsHref) },
+    { href: clubsHref,                    icon: Icons.clubs,          label: t('nav.clubs'),          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
+    { href: communicationsHref,           icon: Icons.communications, label: t('nav.communications'), color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
+  ]
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
@@ -202,12 +206,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="w-px h-full bg-white/30 flex-shrink-0 self-stretch" />
           <div className="flex items-center gap-3 flex-1 px-4">
 
-            {/* Back button — sm+ uniquement, pages Organiser */}
             {showBack && (
               <button onClick={() => router.back()}
                 className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all flex-shrink-0">
                 {Icons.back}
-                <span>Retour</span>
+                <span>{t('nav.back')}</span>
               </button>
             )}
 
@@ -224,7 +227,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 {groupSwitcherOpen && (
                   <div className="absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
                     <div className="px-4 pt-2 pb-3 border-b border-slate-100">
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Mes groupes</span>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('nav.myGroups')}</span>
                     </div>
                     <div className="py-1 max-h-64 overflow-y-auto">
                       {groups.map(group => (
@@ -233,7 +236,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                           <GroupDot color={group.color} size={10} />
                           <span className="text-[13.5px] text-slate-800 font-medium flex-1 truncate">{group.name}</span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${group.role === 'owner' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
-                            {group.role === 'owner' ? 'Admin' : 'Membre'}
+                            {group.role === 'owner' ? t('nav.admin') : t('nav.member')}
                           </span>
                           {activeGroup.id === group.id && <span className="text-[#185FA5] flex-shrink-0">{Icons.check}</span>}
                         </button>
@@ -244,7 +247,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         <Link href="/groups/add" onClick={() => setGroupSwitcherOpen(false)}
                           className="flex items-center gap-2 text-[13px] text-[#185FA5] font-semibold hover:text-[#0C447C] transition-colors py-1">
                           <span className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[#185FA5]">{Icons.plus}</span>
-                          Nouveau groupe
+                          {t('nav.newGroup')}
                         </Link>
                       </div>
                     )}
@@ -254,7 +257,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             ) : (
               <Link href="/groups/add" className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 border-dashed rounded-full px-3 py-1.5 transition-colors">
                 <span className="text-white/50">{Icons.plus}</span>
-                <span className="text-[13px] text-white/60 font-medium leading-none">Créer un groupe</span>
+                <span className="text-[13px] text-white/60 font-medium leading-none">{t('nav.createGroup')}</span>
               </Link>
             )}
 
@@ -274,15 +277,42 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Link href="/settings" onClick={() => setAvatarMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
                       <span className="text-slate-400">{Icons.settings}</span>
-                      <span className="text-[13px] text-slate-700 font-medium">Settings</span>
+                      <span className="text-[13px] text-slate-700 font-medium">{t('nav.settings')}</span>
                     </Link>
+                    <div className="px-4 py-2.5">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Language</p>
+                    <div className="flex gap-1">
+                      {[
+                        { code: 'fr', label: '🇫🇷 FR' },
+                        { code: 'en', label: '🇬🇧 EN' },
+                        { code: 'nl', label: '🇳🇱 NL' },
+                        { code: 'de', label: '🇩🇪 DE' },
+                        { code: 'es', label: '🇪🇸 ES' },
+                      ].map(lang => (
+                        <button key={lang.code}
+                          onClick={() => {
+                            const segments = pathname.split('/')
+                            segments[1] = lang.code
+                            window.location.href = segments.join('/')
+                            setAvatarMenuOpen(false)
+                          }}
+                          className={`text-[11px] font-semibold px-2 py-1 rounded-lg transition-colors ${
+                            locale === lang.code
+                              ? 'bg-[#185FA5] text-white'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}>
+                          {lang.label}
+                        </button>
+                      ))}
+                    </div>
+</div>
                     <div className="mx-3 my-1 h-px bg-slate-100" />
                     <button onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors">
                       <span className="text-red-400">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M10 11l3-3-3-3M13 8H6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       </span>
-                      <span className="text-[13px] text-red-500 font-semibold">Se déconnecter</span>
+                      <span className="text-[13px] text-red-500 font-semibold">{t('nav.signOut')}</span>
                     </button>
                   </div>
                 )}
@@ -298,54 +328,48 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1 max-w-[1280px] w-full mx-auto">
 
-     {/* Sidebar desktop */}
+        {/* Sidebar desktop */}
         <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
-          <SidebarSection label="PLAY" emoji="⛳">
-            <NavItem href="/my-events"                icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
-            <NavItem href={participantsHref ?? '/groups'} icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={!!participantsHref && isActive(participantsHref)} />
-            <NavItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={!!teesheetHref && isActive(teesheetHref)} />
-            <NavItem href="/scorecard"                icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
+          <SidebarSection label={t('nav.play')} emoji="⛳">
+            <NavItem href="/my-events"                    icon={Icons.myEvents}     iconColor="#185FA5" label={t('nav.myEvents')}    active={isActive('/my-events')} />
+            <NavItem href={participantsHref ?? '/groups'} icon={Icons.participants} iconColor="#7F77DD" label={t('nav.participants')} active={!!participantsHref && isActive(participantsHref)} />
+            <NavItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label={t('nav.teesheet')}     active={!!teesheetHref && isActive(teesheetHref)} />
+            <NavItem href="/scorecard"                    icon={Icons.scorecard}    iconColor="#D85A30" label={t('nav.scorecard')}    active={isActive('/scorecard')} />
           </SidebarSection>
           <div className="mx-2 my-3 h-px bg-slate-100" />
-          <SidebarSection label="ORGANISER" emoji="🏆">
-            <NavItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label="Groups"         active={isGroupsActive} />
-            <NavItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label="Events"         active={eventsListActive} />
-            <NavItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label="Invitations"    active={!!invitationsHref && isActive(invitationsHref)} />
-            <NavItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label="Flights"        active={!!flightsHref && isActive(flightsHref)} />
-            <NavItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label="Results"        active={!!resultsHref && isActive(resultsHref)} />
-            <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label="Clubs"          active={isAnyOwner && isActive('/admin/clubs')} />
-            <NavItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label="Communications" active={!!gid && isActive(`/groups/${gid}/communications`)} />
+          <SidebarSection label={t('nav.organiser')} emoji="🏆">
+            <NavItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label={t('nav.groups')}         active={isGroupsActive} />
+            <NavItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label={t('nav.events')}         active={eventsListActive} />
+            <NavItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label={t('nav.invitations')}    active={!!invitationsHref && isActive(invitationsHref)} />
+            <NavItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
+            <NavItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
+            <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
+            <NavItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </SidebarSection>
-          <div className="mt-auto">
-            <div className="mx-2 mb-3 h-px bg-slate-100" />
-            <NavItem href="/settings" icon={Icons.settings} iconColor="#888780" label="Settings" active={isActive('/settings')} muted />
-          </div>
+     
         </aside>
 
         {/* Sidebar tablette */}
         <aside className="hidden sm:flex lg:hidden w-[60px] flex-shrink-0 flex-col items-center py-5 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href="/my-events"                    icon={Icons.myEvents}     iconColor="#185FA5" label="My Events"    active={isActive('/my-events')} />
-            <NavIconItem href={participantsHref ?? '/groups'} icon={Icons.participants} iconColor="#7F77DD" label="Participants" active={!!participantsHref && isActive(participantsHref)} />
-            <NavIconItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label="Teesheet"     active={!!teesheetHref && isActive(teesheetHref)} />
-            <NavIconItem href="/scorecard"                    icon={Icons.scorecard}    iconColor="#D85A30" label="Scorecard"    active={isActive('/scorecard')} />
+            <NavIconItem href="/my-events"                    icon={Icons.myEvents}     iconColor="#185FA5" label={t('nav.myEvents')}    active={isActive('/my-events')} />
+            <NavIconItem href={participantsHref ?? '/groups'} icon={Icons.participants} iconColor="#7F77DD" label={t('nav.participants')} active={!!participantsHref && isActive(participantsHref)} />
+            <NavIconItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label={t('nav.teesheet')}     active={!!teesheetHref && isActive(teesheetHref)} />
+            <NavIconItem href="/scorecard"                    icon={Icons.scorecard}    iconColor="#D85A30" label={t('nav.scorecard')}    active={isActive('/scorecard')} />
           </div>
           <div className="w-8 h-px bg-slate-100 my-2" />
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
-            <NavIconItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label="Groups"         active={isGroupsActive} />
-            <NavIconItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label="Events"         active={eventsListActive} />
-            <NavIconItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label="Invitations"    active={!!invitationsHref && isActive(invitationsHref)} />
-            <NavIconItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label="Flights"        active={!!flightsHref && isActive(flightsHref)} />
-            <NavIconItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label="Results"        active={!!resultsHref && isActive(resultsHref)} />
-            <NavIconItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label="Clubs"          active={isAnyOwner && isActive('/admin/clubs')} />
-            <NavIconItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label="Communications" active={!!gid && isActive(`/groups/${gid}/communications`)} />
+            <NavIconItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label={t('nav.groups')}         active={isGroupsActive} />
+            <NavIconItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label={t('nav.events')}         active={eventsListActive} />
+            <NavIconItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label={t('nav.invitations')}    active={!!invitationsHref && isActive(invitationsHref)} />
+            <NavIconItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
+            <NavIconItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
+            <NavIconItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
+            <NavIconItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </div>
-          <div className="mt-auto flex flex-col items-center gap-1 w-full px-2.5">
-            <div className="w-8 h-px bg-slate-100 mb-2" />
-            <NavIconItem href="/settings" icon={Icons.settings} iconColor="#888780" label="Settings" active={isActive('/settings')} muted />
-          </div>
+          
         </aside>
 
         <main className="flex-1 overflow-y-auto pb-20 sm:pb-0 min-h-0 relative" style={{ background: 'transparent' }}>
@@ -360,12 +384,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {drawerOpen && <div className="sm:hidden fixed inset-0 z-30" onClick={() => setDrawerOpen(false)} />}
 
-      {/* Drawer mobile — inchangé */}
+      {/* Drawer mobile */}
       <div className={`sm:hidden fixed bottom-[57px] left-0 right-0 z-40 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
         style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderRadius: '20px 20px 0 0', borderTop: '0.5px solid rgba(0,0,0,0.1)', boxShadow: '0 -8px 32px rgba(0,0,0,0.12)' }}>
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-slate-300" /></div>
         <div className="px-5 py-2 border-b border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Organiser 🏆</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('nav.organiser')} 🏆</p>
         </div>
         {organiserDrawerItems.map(item => (
           <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
@@ -381,14 +405,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 8 }} />
       </div>
 
-      {/* Bottom nav mobile — inchangé */}
+      {/* Bottom nav mobile */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
         style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
-          { href: '/my-events',     icon: Icons.myEvents,    label: 'My Events',    color: '#185FA5' },
-          { href: participantsHref ?? '/groups', icon: Icons.participants, label: 'Participants', color: '#7F77DD' },
-          { href: teesheetHref ?? '/groups',     icon: Icons.teesheet,     label: 'Teesheet',     color: '#1D9E75' },
-          { href: '/scorecard',     icon: Icons.scorecard,   label: 'Scorecard',    color: '#D85A30' },
+          { href: '/my-events',                  icon: Icons.myEvents,    label: t('nav.myEvents'),    color: '#185FA5' },
+          { href: participantsHref ?? '/groups', icon: Icons.participants, label: t('nav.participants'), color: '#7F77DD' },
+          { href: teesheetHref ?? '/groups',     icon: Icons.teesheet,     label: t('nav.teesheet'),     color: '#1D9E75' },
+          { href: '/scorecard',                  icon: Icons.scorecard,   label: t('nav.scorecard'),   color: '#D85A30' },
         ].map(item => {
           const active = isActive(item.href)
           return (

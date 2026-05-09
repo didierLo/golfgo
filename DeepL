@@ -1,0 +1,2171 @@
+Script started on Fri May  8 07:27:00 2026
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+[?1034hbash-3.2$ 
+bash-3.2$ 
+bash-3.2$ f[Knode scripts/translate.cjs
+
+✅ fr.json — déjà à jour
+
+🌍 Traduction vers ES (3 sections manquantes)...
+  invitations.title: "Invitations" → "Invitaciones"
+  invitations.subtitle: "{invited} invited · {going} going" → "{invited} Invitado · {going} Asistiré"
+  invitations.newInvitations: "New invitations" → "Nuevas invitaciones"
+  invitations.resend: "Resend" → "Reenviar"
+  invitations.resendWarning: "Selected players will be reset to invited status and a new email will be sent." → "Los jugadores seleccionados volverán a tener el estatus de «invitado» y se les enviará un nuevo correo electrónico."
+  invitations.event: "Event" → "Evento"
+  invitations.chooseEvent: "— choose an event —" → "— Elige un evento —"
+  invitations.noUpcomingEvents: "No upcoming events" → "No hay eventos próximos"
+  invitations.players: "Players" → "Jugadores"
+  invitations.participants: "Participants" → "Participantes"
+  invitations.selected: "{count} selected" → "{count} seleccionado"
+  invitations.selectAll: "Select all" → "Seleccionar todo"
+  invitations.firstName: "First name" → "Nombre"
+  invitations.lastName: "Last name" → "Apellido"
+  invitations.noEmail: "no email" → "sin correo electrónico"
+  invitations.noParticipants: "No participants for this event" → "No hay participantes para este evento"
+  invitations.sendEmail: "Send invitation email" → "Enviar correo electrónico de invitación"
+  invitations.sendEmailDesc: "Players will receive an email with a link to respond" → "Los jugadores recibirán un correo electrónico con un enlace para responder"
+  invitations.noEmailDesc: "Players are registered without notification — 9H/18H toggle available per player" → "Los jugadores se inscriben automáticamente — Opción de alternar entre 9 hoyos y 18 hoyos disponible para cada jugador"
+  invitations.preview: "👁 Preview" → "👁 Vista previa"
+  invitations.send: "Send" → "Enviar"
+  invitations.sendCount: "Send ({count})" → "Enviar ({count})"
+  invitations.saveNoEmail: "Register without email" → "Registrarse sin correo electrónico"
+  invitations.saveNoEmailCount: "Register without email ({count})" → "Registrarse sin correo electrónico ({count})"
+  invitations.resendCount: "Resend ({count})" → "Reenviar ({count})"
+  invitations.sending: "Sending..." → "Enviando..."
+  invitations.alreadyInvited: "Already invited — skipped: {names}" → "Ya invitado — omitido: {names}"
+  invitations.allAlreadyInvited: "All selected players are already invited" → "Todos los jugadores seleccionados ya han sido invitados"
+  invitations.added: "{count} player(s) added" → "{count} se han añadido jugadores"
+  invitations.added9T: "{count} player(s) added including {nb} in 9H" → "{count} Se han añadido jugadores, entre ellos{nb}, en la 9.ª hora"
+  invitations.invitationsSent: "{count} invitation(s) sent by email" → "{count} invitación(es) enviada(s) por correo electrónico"
+  invitations.resendSuccess: "{count} invitation(s) resent" → "{count} invitación(es) reenviada(s)"
+  invitations.cancelConfirm: "Cancel {count} invitation(s)?" → "¿Desea cancelar una o varias invitaciones de «{count}»?"
+  invitations.cancelSuccess: "{count} invitation(s) cancelled" → "{count} invitación(es) cancelada(s)"
+  invitations.cancelOne: "Cancel" → "Cancelar"
+  invitations.cancelOneConfirm: "Cancel this invitation?" → "¿Quieres cancelar esta invitación?"
+  invitations.cancelled: "Cancelling..." → "Cancelando..."
+  invitations.cancelSelected: "Cancel ({count})" → "Cancelar ({count})"
+  invitations.allEvents: "All events" → "Todos los eventos"
+  invitations.viewParticipants: "View participants →" → "Ver participantes →"
+  invitations.noInvitations: "No invitations for this event" → "No hay invitaciones para este evento"
+  invitations.search: "Search a member..." → "Buscar a un miembro..."
+  invitations.noParticipationsFound: "No invitations found for this member" → "No se han encontrado invitaciones para este miembro"
+  invitations.noParticipations: "No participations" → "No hay participaciones"
+  invitations.eventsCount: "{count} event(s)" → "{count} evento(s)"
+  invitations.typeToSearch: "Type a member name to see their participations" → "Escribe el nombre de un miembro para ver sus participaciones"
+  invitations.invited: "Invited on {date}" → "Invitado en «{date}»"
+  invitations.adminOnly: "You must be Admin to use this feature" → "Debes ser administrador para utilizar esta función"
+  members.title: "Members" → "Miembros"
+  members.subtitle: "{count} member(s)" → "{count} miembro(s)"
+  members.constraints: "Constraints" → "Restricciones"
+  members.copy: "Copy" → "Copiar"
+  members.copied: "Copied!" → "¡Copiado!"
+  members.print: "Print" → "Imprimir"
+  members.addMember: "+ Add member" → "+ Añadir miembro"
+  members.noMembers: "No members in this group" → "No hay miembros en este grupo"
+  members.member: "Member" → "Miembro"
+  members.whs: "WHS" → "WHS"
+  members.status: "Status" → "Estado"
+  members.actions: "Actions" → "Acciones"
+  members.firstName: "First name" → "Nombre"
+  members.lastName: "Last name" → "Apellido"
+  members.admin: "Admin" → "Admin"
+  members.visitor: "Visitor" → "Visitante"
+  members.removeConfirm: "Remove this player from the group? Their participations in future events will also be deleted." → "¿Quieres eliminar a este jugador del grupo? Sus participaciones en futuros eventos también se eliminarán."
+  members.adminOnly: "You must be Admin to use this feature" → "Debes ser administrador para utilizar esta función"
+  addMember.title: "Add a member" → "Añadir un miembro"
+  addMember.back: "← Members" → "← Miembros"
+  addMember.subtitle: "Search for an existing player or create a new one" → "Busca un jugador ya existente o crea uno nuevo"
+  addMember.fromList: "From a list" → "De una lista"
+  addMember.importXlsx: "Import xlsx" → "Importar xlsx"
+  addMember.templateXlsx: "Template xlsx" → "Plantilla xlsx"
+  addMember.added: "✓ {count} member(s) added to the group" → "✓ Se han añadido miembros de «{count}» al grupo"
+  addMember.searchLabel: "Search by name or federal number" → "Buscar por nombre o número de identificación fiscal"
+  addMember.searchPlaceholder: "E.g.: Dupont or 123456" → "Por ejemplo: Dupont o 123456"
+  addMember.noResults: "No player found for "{query}"" → "No se ha encontrado ningún jugador para «{query}»"
+  addMember.member: "Member" → "Miembro"
+  addMember.visitor: "Visitor" → "Visitante"
+  addMember.newPlayer: "New player" → "Nuevo jugador"
+  addMember.newVisitor: "New visitor" → "Nuevo visitante"
+  addMember.createPlayer: "+ Create a new player" → "+ Crear un nuevo jugador"
+  addMember.createVisitor: "Add a visitor" → "Añadir un visitante"
+  addMember.cancel: "Cancel" → "Cancelar"
+  addMember.firstName: "First name *" → "Nombre *"
+  addMember.lastName: "Last name *" → "Apellido *"
+  addMember.federalNo: "Federal no." → "N.º federal"
+  addMember.federalNoRequired: "Federal no. *" → "N.º federal *"
+  addMember.federalNoOptional: "optional" → "opcional"
+  addMember.whs: "WHS" → "WHS"
+  addMember.email: "Email" → "Correo electrónico"
+  addMember.phone: "Phone" → "Teléfono"
+  addMember.genderTee: "Gender and default tee" → "Género y camiseta básica"
+  addMember.male: "Male" → "Hombre"
+  addMember.female: "Female" → "Mujer"
+  addMember.teeNote: "Male → Yellow · Female → Red · editable per event" → "Hombre → Amarillo · Mujer → Rojo · Editable por evento"
+  addMember.nameRequired: "Last name and first name required" → "Es obligatorio indicar el apellido y el nombre"
+  addMember.federalRequired: "Federal number required" → "Se requiere un número de identificación fiscal"
+  addMember.errorPlayer: "Error creating player" → "Error al crear el reproductor"
+  addMember.saving: "Creating..." → "Generando..."
+  addMember.saveGuest: "Add as visitor" → "Añadir como visitante"
+  addMember.saveMember: "Create and add to group" → "Crear y añadir a un grupo"
+  addMember.backToMembers: "← Back to members" → "← Volver a los miembros"
+  addMember.continueToEvents: "Continue to events →" → "Ver más eventos →"
+  addMember.alreadyMember: "This player is already in this group as {role}" → "Este jugador ya forma parte de este grupo como «{role}»"
+  addMember.importTitle: "Import players" → "Jugadores extranjeros"
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (3 sections manquantes)...
+  invitations.title: "Invitations" → "Einladungen"
+  invitations.subtitle: "{invited} invited · {going} going" → "{invited} eingeladen · {going} geht"
+  invitations.newInvitations: "New invitations" → "Neue Einladungen"
+  invitations.resend: "Resend" → "Erneut senden"
+  invitations.resendWarning: "Selected players will be reset to invited status and a new email will be sent." → "Die ausgewählten Spieler werden wieder auf den Status „Eingeladen“ zurückgesetzt, und es wird eine neue E-Mail versendet."
+  invitations.event: "Event" → "Veranstaltung"
+  invitations.chooseEvent: "— choose an event —" → "— Wähle eine Veranstaltung aus —"
+  invitations.noUpcomingEvents: "No upcoming events" → "Keine bevorstehenden Veranstaltungen"
+  invitations.players: "Players" → "Spieler"
+  invitations.participants: "Participants" → "Teilnehmer"
+  invitations.selected: "{count} selected" → "{count} ausgewählt"
+  invitations.selectAll: "Select all" → "Alles auswählen"
+  invitations.firstName: "First name" → "Vorname"
+  invitations.lastName: "Last name" → "Nachname"
+  invitations.noEmail: "no email" → "keine E-Mail-Adresse"
+  invitations.noParticipants: "No participants for this event" → "Es gibt keine Teilnehmer für diese Veranstaltung"
+  invitations.sendEmail: "Send invitation email" → "Einladungs-E-Mail senden"
+  invitations.sendEmailDesc: "Players will receive an email with a link to respond" → "Die Spieler erhalten eine E-Mail mit einem Link, über den sie antworten können"
+  invitations.noEmailDesc: "Players are registered without notification — 9H/18H toggle available per player" → "Die Spieler werden ohne Benachrichtigung registriert – pro Spieler kann zwischen 9H und 18H gewechselt werden"
+  invitations.preview: "👁 Preview" → "👁 Vorschau"
+  invitations.send: "Send" → "Senden"
+  invitations.sendCount: "Send ({count})" → "Senden ({count})"
+  invitations.saveNoEmail: "Register without email" → "Ohne E-Mail-Adresse registrieren"
+  invitations.saveNoEmailCount: "Register without email ({count})" → "Ohne E-Mail-Adresse registrieren ({count})"
+  invitations.resendCount: "Resend ({count})" → "Erneut senden ({count})"
+  invitations.sending: "Sending..." → "Wird gesendet..."
+  invitations.alreadyInvited: "Already invited — skipped: {names}" → "Bereits eingeladen – übersprungen: {names}"
+  invitations.allAlreadyInvited: "All selected players are already invited" → "Alle ausgewählten Spieler sind bereits eingeladen"
+  invitations.added: "{count} player(s) added" → "{count} Spieler hinzugefügt"
+  invitations.added9T: "{count} player(s) added including {nb} in 9H" → "{count} Spieler hinzugefügt, darunter „{nb}“ in der 9. Halbzeit"
+  invitations.invitationsSent: "{count} invitation(s) sent by email" → "{count} per E-Mail versandte Einladung(en)"
+  invitations.resendSuccess: "{count} invitation(s) resent" → "{count} Einladung(en) erneut gesendet"
+  invitations.cancelConfirm: "Cancel {count} invitation(s)?" → "{count}-Einladung(en) stornieren?"
+  invitations.cancelSuccess: "{count} invitation(s) cancelled" → "{count} Einladung(en) abgesagt"
+  invitations.cancelOne: "Cancel" → "Abbrechen"
+  invitations.cancelOneConfirm: "Cancel this invitation?" → "Diese Einladung stornieren?"
+  invitations.cancelled: "Cancelling..." → "Abbrechen..."
+  invitations.cancelSelected: "Cancel ({count})" → "Abbrechen ({count})"
+  invitations.allEvents: "All events" → "Alle Veranstaltungen"
+  invitations.viewParticipants: "View participants →" → "Teilnehmer anzeigen →"
+  invitations.noInvitations: "No invitations for this event" → "Für diese Veranstaltung liegen keine Einladungen vor"
+  invitations.search: "Search a member..." → "Ein Mitglied suchen..."
+  invitations.noParticipationsFound: "No invitations found for this member" → "Für dieses Mitglied wurden keine Einladungen gefunden"
+  invitations.noParticipations: "No participations" → "Keine Beteiligungen"
+  invitations.eventsCount: "{count} event(s)" → "{count} Veranstaltung(en)"
+  invitations.typeToSearch: "Type a member name to see their participations" → "Geben Sie den Namen eines Mitglieds ein, um dessen Beiträge anzuzeigen"
+  invitations.invited: "Invited on {date}" → "Zu Gast bei „{date}“"
+  invitations.adminOnly: "You must be Admin to use this feature" → "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
+  members.title: "Members" → "Mitglieder"
+  members.subtitle: "{count} member(s)" → "{count} Mitglied(er)"
+  members.constraints: "Constraints" → "Einschränkungen"
+  members.copy: "Copy" → "Kopieren"
+  members.copied: "Copied!" → "Kopiert!"
+  members.print: "Print" → "Drucken"
+  members.addMember: "+ Add member" → "+ Mitglied hinzufügen"
+  members.noMembers: "No members in this group" → "Diese Gruppe hat keine Mitglieder"
+  members.member: "Member" → "Mitglied"
+  members.whs: "WHS" → "WHS"
+  members.status: "Status" → "Status"
+  members.actions: "Actions" → "Aktionen"
+  members.firstName: "First name" → "Vorname"
+  members.lastName: "Last name" → "Nachname"
+  members.admin: "Admin" → "Admin"
+  members.visitor: "Visitor" → "Besucher"
+  members.removeConfirm: "Remove this player from the group? Their participations in future events will also be deleted." → "Diesen Spieler aus der Gruppe entfernen? Seine Teilnahmen an zukünftigen Veranstaltungen werden ebenfalls gelöscht."
+  members.adminOnly: "You must be Admin to use this feature" → "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
+  addMember.title: "Add a member" → "Ein Mitglied hinzufügen"
+  addMember.back: "← Members" → "← Mitglieder"
+  addMember.subtitle: "Search for an existing player or create a new one" → "Suche nach einem bestehenden Spieler oder erstelle einen neuen"
+  addMember.fromList: "From a list" → "Aus einer Liste"
+  addMember.importXlsx: "Import xlsx" → "XLSX importieren"
+  addMember.templateXlsx: "Template xlsx" → "Vorlage (XLSX)"
+  addMember.added: "✓ {count} member(s) added to the group" → "✓ {count}-Mitglieder wurden der Gruppe hinzugefügt"
+  addMember.searchLabel: "Search by name or federal number" → "Suche nach Namen oder Sozialversicherungsnummer"
+  addMember.searchPlaceholder: "E.g.: Dupont or 123456" → "Beispiel: Dupont oder 123456"
+  addMember.noResults: "No player found for "{query}"" → "Es wurde kein Spieler für „{query}“ gefunden."
+  addMember.member: "Member" → "Mitglied"
+  addMember.visitor: "Visitor" → "Besucher"
+  addMember.newPlayer: "New player" → "Neuer Spieler"
+  addMember.newVisitor: "New visitor" → "Neuer Besucher"
+  addMember.createPlayer: "+ Create a new player" → "+ Neuen Spieler erstellen"
+  addMember.createVisitor: "Add a visitor" → "Besucher hinzufügen"
+  addMember.cancel: "Cancel" → "Abbrechen"
+  addMember.firstName: "First name *" → "Vorname *"
+  addMember.lastName: "Last name *" → "Nachname *"
+  addMember.federalNo: "Federal no." → "Bundes-Nr."
+  addMember.federalNoRequired: "Federal no. *" → "Bundesnummer *"
+  addMember.federalNoOptional: "optional" → "optional"
+  addMember.whs: "WHS" → "WHS"
+  addMember.email: "Email" → "E-Mail"
+  addMember.phone: "Phone" → "Telefon"
+  addMember.genderTee: "Gender and default tee" → "Geschlecht und Standard-T-Shirt"
+  addMember.male: "Male" → "männlich"
+  addMember.female: "Female" → "weiblich"
+  addMember.teeNote: "Male → Yellow · Female → Red · editable per event" → "Männlich → Gelb · Weiblich → Rot · pro Veranstaltung anpassbar"
+  addMember.nameRequired: "Last name and first name required" → "Nachname und Vorname sind Pflichtangaben"
+  addMember.federalRequired: "Federal number required" → "Bundesnummer erforderlich"
+  addMember.errorPlayer: "Error creating player" → "Fehler beim Erstellen des Players"
+  addMember.saving: "Creating..." → "Wird erstellt..."
+  addMember.saveGuest: "Add as visitor" → "Als Besucher hinzufügen"
+  addMember.saveMember: "Create and add to group" → "Erstellen und zur Gruppe hinzufügen"
+  addMember.backToMembers: "← Back to members" → "← Zurück zu den Mitgliedern"
+  addMember.continueToEvents: "Continue to events →" → "Weiter zu den Veranstaltungen →"
+  addMember.alreadyMember: "This player is already in this group as {role}" → "Dieser Spieler ist bereits in dieser Gruppe unter dem Namen „{role}“ registriert."
+  addMember.importTitle: "Import players" → "Spieler importieren"
+✅ de.json mis à jour !
+
+✅ nl.json — déjà à jour
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (2 sections manquantes)...
+  addGroup.title: "New group" → "Nouveau groupe"
+  addGroup.subtitle: "Create a group to organise your events" → "Créez un groupe pour organiser vos événements"
+  addGroup.nameLabel: "Group name *" → "Nom du groupe *"
+  addGroup.namePlaceholder: "E.g.: Thursday Golf Group" → "Par exemple : le groupe de golf du jeudi"
+  addGroup.description: "Description" → "Description"
+  addGroup.descriptionPlaceholder: "E.g.: Thursday evening golf group" → "Par exemple : le groupe de golf du jeudi soir"
+  addGroup.color: "Group color" → "Couleur du groupe"
+  addGroup.nameRequired: "Name is required" → "Le nom est obligatoire"
+  addGroup.notConnected: "Not connected" → "Non connecté"
+  addGroup.errorCreate: "Error creating group" → "Erreur lors de la création du groupe"
+  addGroup.saving: "Creating..." → "Création en cours..."
+  addGroup.save: "Create group" → "Créer un groupe"
+  addGroup.cancel: "Cancel" → "Annuler"
+  groups.title: "My groups" → "Mes groupes"
+  groups.subtitle: "{count} group(s)" → "{count} groupe(s)"
+  groups.newGroup: "+ New group" → "+ Nouveau groupe"
+  groups.welcome: "Welcome to GolfGo" → "Bienvenue sur GolfGo"
+  groups.welcomeDesc: "Create your first group to start organising your events." → "Créez votre premier groupe pour commencer à organiser vos événements."
+  groups.createFirst: "+ Create my first group" → "+ Créer mon premier groupe"
+  groups.members: "Members" → "Membres"
+  groups.constraints: "Constraints" → "Contraintes"
+  groups.events: "event(s)" → "événement(s)"
+  groups.next: "next" → "suivant"
+  groups.deleteConfirm: "Delete this group?" → "Supprimer ce groupe ?"
+  groups.adminOnly: "You must be Admin to use this feature" → "Vous devez être administrateur pour utiliser cette fonctionnalité"
+✅ fr.json mis à jour !
+
+🌍 Traduction vers ES (2 sections manquantes)...
+  addGroup.title: "New group" → "Nuevo grupo"
+  addGroup.subtitle: "Create a group to organise your events" → "Crea un grupo para organizar tus eventos"
+  addGroup.nameLabel: "Group name *" → "Nombre del grupo *"
+  addGroup.namePlaceholder: "E.g.: Thursday Golf Group" → "Por ejemplo: Grupo de golf de los jueves"
+  addGroup.description: "Description" → "Descripción"
+  addGroup.descriptionPlaceholder: "E.g.: Thursday evening golf group" → "Por ejemplo: el grupo de golf de los jueves por la tarde"
+  addGroup.color: "Group color" → "Color del grupo"
+  addGroup.nameRequired: "Name is required" → "Es obligatorio introducir el nombre"
+  addGroup.notConnected: "Not connected" → "No conectado"
+  addGroup.errorCreate: "Error creating group" → "Error al crear el grupo"
+  addGroup.saving: "Creating..." → "Generando..."
+  addGroup.save: "Create group" → "Crear grupo"
+  addGroup.cancel: "Cancel" → "Cancelar"
+  groups.title: "My groups" → "Mis grupos"
+  groups.subtitle: "{count} group(s)" → "{count} grupo(s)"
+  groups.newGroup: "+ New group" → "+ Nuevo grupo"
+  groups.welcome: "Welcome to GolfGo" → "Bienvenido a GolfGo"
+  groups.welcomeDesc: "Create your first group to start organising your events." → "Crea tu primer grupo para empezar a organizar tus eventos."
+  groups.createFirst: "+ Create my first group" → "+ Crear mi primer grupo"
+  groups.members: "Members" → "Miembros"
+  groups.constraints: "Constraints" → "Restricciones"
+  groups.events: "event(s)" → "evento(s)"
+  groups.next: "next" → "siguiente"
+  groups.deleteConfirm: "Delete this group?" → "¿Desea eliminar este grupo?"
+  groups.adminOnly: "You must be Admin to use this feature" → "Debes ser administrador para utilizar esta función"
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (9 sections manquantes)...
+  payments.readOnly: "Read-only view" → "Schreibgeschützte Ansicht"
+  payments.summary: "Financial summary" → "Finanzübersicht"
+  payments.feePerPerson: "Fee / person" → "Preis pro Person"
+  payments.collected: "Collected" → "Gesammelt"
+  payments.pending: "Pending" → "In Bearbeitung"
+  payments.paid: "paid" → "bezahlt"
+  payments.awaitingPayment: "awaiting" → "in Erwartung"
+  payments.exempt: "exempt" → "ausgenommen"
+  payments.total: "total" → "insgesamt"
+  payments.player: "Player" → "Spieler"
+  payments.status: "Status" → "Status"
+  payments.actions: "Actions" → "Aktionen"
+  payments.noParticipants: "No confirmed participants (GOING)" → "Keine bestätigten Teilnehmer (TEILNEHMEN)"
+  results.title: "Results" → "Ergebnisse"
+  results.subtitle: "{count} players · {format}" → "{count} Spieler · {format}"
+  results.noScores: "No scores for this event" → "Für diese Veranstaltung liegen keine Ergebnisse vor"
+  results.noScoresHint: "Scores will appear here once entered" → "Die Ergebnisse werden hier angezeigt, sobald sie eingegeben wurden"
+  results.noParticipants: "No participants for this event" → "Es gibt keine Teilnehmer für diese Veranstaltung"
+  results.updatedAt: "Updated at {time}" → "Aktualisiert am {time}"
+  results.pollInterval: "30s" → "30er Jahre"
+  results.saveScorecard: "Save scorecard" → "Scorecard speichern"
+  results.saving: "Saving..." → "Wird gespeichert..."
+  results.changeEvent: "Change event" → "Ereignis ändern"
+  results.past: "past" → "vergangen"
+  scorecards.club: "Club" → "Verein"
+  scorecards.chooseClub: "Choose a club..." → "Wähle einen Verein aus..."
+  scorecards.cancel: "Cancel" → "Abbrechen"
+  scorecards.create: "Create" → "Erstellen"
+  scorecards.creating: "..." → "..."
+  scorecards.course: "Course" → "Kurs"
+  scorecards.chooseCourse: "Choose a course..." → "Wähle einen Kurs aus..."
+  scorecards.clubName: "Club name" → "Vereinsname"
+  scorecards.courseName: "Course name" → "Kursname"
+  scorecards.events: "Events" → "Veranstaltungen"
+  scorecards.upcoming: "Upcoming" → "Demnächst"
+  scorecards.recent: "Recent" → "Aktuell"
+  scorecards.last2months: "Last 2 months" → "die letzten zwei Monate"
+  scorecards.validated: "Scorecard closed" → "Ergebnisliste geschlossen"
+  scorecards.validatedOn: "Closed on {date}" → "Am {date} geschlossen"
+  scorecards.readOnly: "Read-only view" → "Schreibgeschützte Ansicht"
+  scorecards.pushScores: "Scores received from My Scorecard" → "Ergebnisse aus „Meine Ergebnisliste“"
+  scorecards.save: "Save" → "Speichern"
+  scorecards.saving: "Saving..." → "Wird gespeichert..."
+  scorecards.validating: "Closing..." → "Schließen..."
+  scorecards.saved: "Saved" → "Gespeichert"
+  scorecards.error: "Error" → "Fehler"
+  scorecards.noParticipants: "No confirmed players for this event" → "Für diese Veranstaltung sind noch keine Spieler bestätigt"
+  scorecards.noCourse: "Select a club and course to access scorecards" → "Wählen Sie einen Club und einen Platz aus, um die Scorekarten aufzurufen"
+  scorecards.noCourseReadOnly: "No course configured for this event" → "Für diese Veranstaltung wurde kein Kurs eingerichtet"
+  eventOverview.notFound: "Event not found" → "Veranstaltung nicht gefunden"
+  eventOverview.myParticipation: "My participation" → "Meine Teilnahme"
+  eventOverview.going18: "I am joining — 18 holes" → "Ich mache mit – 18 Löcher"
+  eventOverview.going18active: "✓ I am joining — 18 holes" → "✓ Ich mache mit – 18 Löcher"
+  eventOverview.going9: "I am joining — 9 holes" → "Ich mache mit – 9 Löcher"
+  eventOverview.going9active: "✓ I am joining — 9 holes" → "✓ Ich mache mit – 9 Löcher"
+  eventOverview.notGoing: "I am not joining" → "Ich mache nicht mit"
+  eventOverview.notGoingActive: "✗ I am not joining" → "✗ Ich mache nicht mit"
+  eventOverview.full: "Full" → "Vollständig"
+  eventOverview.participants: "{count} confirmed participant(s)" → "{count} bestätigte(r) Teilnehmer"
+  eventOverview.participantsMax: "{count} / {max} spot(s) — {remaining} remaining" → "{count} / {max} Plätze — {remaining} noch frei"
+  eventOverview.participantsMaxFull: "{count} / {max} — Full" → "{count} / {max} — Vollständiger Artikel"
+  eventOverview.errorUpdate: "Error updating" → "Fehler beim Aktualisieren"
+  eventOverview.toastDeclined: "Participation declined" → "Die Beteiligung ging zurück"
+  eventOverview.toast18: "Confirmed — 18 holes ⛳" → "Bestätigt – 18 Löcher ⛳"
+  eventOverview.toast9: "Confirmed — 9 holes ⛳" → "Bestätigt – 9 Löcher ⛳"
+  invitations.title: "Invitations" → "Einladungen"
+  invitations.subtitle: "{invited} invited · {going} going" → "{invited} eingeladen · {going} geht"
+  invitations.newInvitations: "New invitations" → "Neue Einladungen"
+  invitations.resend: "Resend" → "Erneut senden"
+  invitations.resendWarning: "Selected players will be reset to invited status and a new email will be sent." → "Die ausgewählten Spieler werden wieder auf den Status „Eingeladen“ zurückgesetzt, und es wird eine neue E-Mail versendet."
+  invitations.event: "Event" → "Veranstaltung"
+  invitations.chooseEvent: "— choose an event —" → "— Wähle eine Veranstaltung aus —"
+  invitations.noUpcomingEvents: "No upcoming events" → "Keine bevorstehenden Veranstaltungen"
+  invitations.players: "Players" → "Spieler"
+  invitations.participants: "Participants" → "Teilnehmer"
+  invitations.selected: "{count} selected" → "{count} ausgewählt"
+  invitations.selectAll: "Select all" → "Alles auswählen"
+  invitations.firstName: "First name" → "Vorname"
+  invitations.lastName: "Last name" → "Nachname"
+  invitations.noEmail: "no email" → "keine E-Mail-Adresse"
+  invitations.noParticipants: "No participants for this event" → "Es gibt keine Teilnehmer für diese Veranstaltung"
+  invitations.sendEmail: "Send invitation email" → "Einladungs-E-Mail senden"
+  invitations.sendEmailDesc: "Players will receive an email with a link to respond" → "Die Spieler erhalten eine E-Mail mit einem Link, über den sie antworten können"
+  invitations.noEmailDesc: "Players are registered without notification — 9H/18H toggle available per player" → "Die Spieler werden ohne Benachrichtigung registriert – pro Spieler kann zwischen 9H und 18H gewechselt werden"
+  invitations.preview: "👁 Preview" → "👁 Vorschau"
+  invitations.send: "Send" → "Senden"
+  invitations.sendCount: "Send ({count})" → "Senden ({count})"
+  invitations.saveNoEmail: "Register without email" → "Ohne E-Mail-Adresse registrieren"
+  invitations.saveNoEmailCount: "Register without email ({count})" → "Ohne E-Mail-Adresse registrieren ({count})"
+  invitations.resendCount: "Resend ({count})" → "Erneut senden ({count})"
+  invitations.sending: "Sending..." → "Wird gesendet..."
+  invitations.alreadyInvited: "Already invited — skipped: {names}" → "Bereits eingeladen – übersprungen: {names}"
+  invitations.allAlreadyInvited: "All selected players are already invited" → "Alle ausgewählten Spieler sind bereits eingeladen"
+  invitations.added: "{count} player(s) added" → "{count} Spieler hinzugefügt"
+  invitations.added9T: "{count} player(s) added including {nb} in 9H" → "{count} Spieler hinzugefügt, darunter „{nb}“ in der 9. Halbzeit"
+  invitations.invitationsSent: "{count} invitation(s) sent by email" → "{count} per E-Mail versandte Einladung(en)"
+  invitations.resendSuccess: "{count} invitation(s) resent" → "{count} Einladung(en) erneut gesendet"
+  invitations.cancelConfirm: "Cancel {count} invitation(s)?" → "{count}-Einladung(en) stornieren?"
+  invitations.cancelSuccess: "{count} invitation(s) cancelled" → "{count} Einladung(en) abgesagt"
+  invitations.cancelOne: "Cancel" → "Abbrechen"
+  invitations.cancelOneConfirm: "Cancel this invitation?" → "Diese Einladung stornieren?"
+  invitations.cancelled: "Cancelling..." → "Abbrechen..."
+  invitations.cancelSelected: "Cancel ({count})" → "Abbrechen ({count})"
+  invitations.allEvents: "All events" → "Alle Veranstaltungen"
+  invitations.viewParticipants: "View participants →" → "Teilnehmer anzeigen →"
+  invitations.noInvitations: "No invitations for this event" → "Für diese Veranstaltung liegen keine Einladungen vor"
+  invitations.search: "Search a member..." → "Ein Mitglied suchen..."
+  invitations.noParticipationsFound: "No invitations found for this member" → "Für dieses Mitglied wurden keine Einladungen gefunden"
+  invitations.noParticipations: "No participations" → "Keine Beteiligungen"
+  invitations.eventsCount: "{count} event(s)" → "{count} Veranstaltung(en)"
+  invitations.typeToSearch: "Type a member name to see their participations" → "Geben Sie den Namen eines Mitglieds ein, um dessen Beiträge anzuzeigen"
+  invitations.invited: "Invited on {date}" → "Zu Gast bei „{date}“"
+  invitations.adminOnly: "You must be Admin to use this feature" → "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
+  members.title: "Members" → "Mitglieder"
+  members.subtitle: "{count} member(s)" → "{count} Mitglied(er)"
+  members.constraints: "Constraints" → "Einschränkungen"
+  members.copy: "Copy" → "Kopieren"
+  members.copied: "Copied!" → "Kopiert!"
+  members.print: "Print" → "Drucken"
+  members.addMember: "+ Add member" → "+ Mitglied hinzufügen"
+  members.noMembers: "No members in this group" → "Diese Gruppe hat keine Mitglieder"
+  members.member: "Member" → "Mitglied"
+  members.whs: "WHS" → "WHS"
+  members.status: "Status" → "Status"
+  members.actions: "Actions" → "Aktionen"
+  members.firstName: "First name" → "Vorname"
+  members.lastName: "Last name" → "Nachname"
+  members.admin: "Admin" → "Admin"
+  members.visitor: "Visitor" → "Besucher"
+  members.removeConfirm: "Remove this player from the group? Their participations in future events will also be deleted." → "Diesen Spieler aus der Gruppe entfernen? Seine Teilnahmen an zukünftigen Veranstaltungen werden ebenfalls gelöscht."
+  members.adminOnly: "You must be Admin to use this feature" → "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
+  addMember.title: "Add a member" → "Ein Mitglied hinzufügen"
+  addMember.back: "← Members" → "← Mitglieder"
+  addMember.subtitle: "Search for an existing player or create a new one" → "Suche nach einem bestehenden Spieler oder erstelle einen neuen"
+  addMember.fromList: "From a list" → "Aus einer Liste"
+  addMember.importXlsx: "Import xlsx" → "XLSX importieren"
+  addMember.templateXlsx: "Template xlsx" → "Vorlage (XLSX)"
+  addMember.added: "✓ {count} member(s) added to the group" → "✓ {count}-Mitglieder wurden der Gruppe hinzugefügt"
+  addMember.searchLabel: "Search by name or federal number" → "Suche nach Namen oder Sozialversicherungsnummer"
+  addMember.searchPlaceholder: "E.g.: Dupont or 123456" → "Beispiel: Dupont oder 123456"
+  addMember.noResults: "No player found for "{query}"" → "Es wurde kein Spieler für „{query}“ gefunden."
+  addMember.member: "Member" → "Mitglied"
+  addMember.visitor: "Visitor" → "Besucher"
+  addMember.newPlayer: "New player" → "Neuer Spieler"
+  addMember.newVisitor: "New visitor" → "Neuer Besucher"
+  addMember.createPlayer: "+ Create a new player" → "+ Neuen Spieler erstellen"
+  addMember.createVisitor: "Add a visitor" → "Besucher hinzufügen"
+  addMember.cancel: "Cancel" → "Abbrechen"
+  addMember.firstName: "First name *" → "Vorname *"
+  addMember.lastName: "Last name *" → "Nachname *"
+  addMember.federalNo: "Federal no." → "Bundes-Nr."
+  addMember.federalNoRequired: "Federal no. *" → "Bundesnummer *"
+  addMember.federalNoOptional: "optional" → "optional"
+  addMember.whs: "WHS" → "WHS"
+  addMember.email: "Email" → "E-Mail"
+  addMember.phone: "Phone" → "Telefon"
+  addMember.genderTee: "Gender and default tee" → "Geschlecht und Standard-T-Shirt"
+  addMember.male: "Male" → "männlich"
+  addMember.female: "Female" → "weiblich"
+  addMember.teeNote: "Male → Yellow · Female → Red · editable per event" → "Männlich → Gelb · Weiblich → Rot · pro Veranstaltung anpassbar"
+  addMember.nameRequired: "Last name and first name required" → "Nachname und Vorname sind Pflichtangaben"
+  addMember.federalRequired: "Federal number required" → "Bundesnummer erforderlich"
+  addMember.errorPlayer: "Error creating player" → "Fehler beim Erstellen des Players"
+  addMember.saving: "Creating..." → "Wird erstellt..."
+  addMember.saveGuest: "Add as visitor" → "Als Gast hinzufügen"
+  addMember.saveMember: "Create and add to group" → "Erstellen und zur Gruppe hinzufügen"
+  addMember.backToMembers: "← Back to members" → "← Zurück zu den Mitgliedern"
+  addMember.continueToEvents: "Continue to events →" → "Weiter zu den Veranstaltungen →"
+  addMember.alreadyMember: "This player is already in this group as {role}" → "Dieser Spieler ist bereits in dieser Gruppe unter dem Namen „{role}“ registriert."
+  addMember.importTitle: "Import players" → "Spieler importieren"
+  addGroup.title: "New group" → "Neue Gruppe"
+  addGroup.subtitle: "Create a group to organise your events" → "Erstelle eine Gruppe, um deine Veranstaltungen zu organisieren"
+  addGroup.nameLabel: "Group name *" → "Gruppenname *"
+  addGroup.namePlaceholder: "E.g.: Thursday Golf Group" → "Beispiel: Golfgruppe am Donnerstag"
+  addGroup.description: "Description" → "Beschreibung"
+  addGroup.descriptionPlaceholder: "E.g.: Thursday evening golf group" → "Beispiel: Golfgruppe am Donnerstagabend"
+  addGroup.color: "Group color" → "Gruppenfarbe"
+  addGroup.nameRequired: "Name is required" → "Der Name ist erforderlich"
+  addGroup.notConnected: "Not connected" → "Keine Verbindung"
+  addGroup.errorCreate: "Error creating group" → "Fehler beim Erstellen der Gruppe"
+  addGroup.saving: "Creating..." → "Wird erstellt..."
+  addGroup.save: "Create group" → "Gruppe erstellen"
+  addGroup.cancel: "Cancel" → "Abbrechen"
+  groups.title: "My groups" → "Meine Gruppen"
+  groups.subtitle: "{count} group(s)" → "{count} Gruppe(n)"
+  groups.newGroup: "+ New group" → "+ Neue Gruppe"
+  groups.welcome: "Welcome to GolfGo" → "Willkommen bei GolfGo"
+  groups.welcomeDesc: "Create your first group to start organising your events." → "Erstelle deine erste Gruppe, um mit der Organisation deiner Veranstaltungen zu beginnen."
+  groups.createFirst: "+ Create my first group" → "+ Meine erste Gruppe erstellen"
+  groups.members: "Members" → "Mitglieder"
+  groups.constraints: "Constraints" → "Einschränkungen"
+  groups.events: "event(s)" → "Veranstaltung(en)"
+  groups.next: "next" → "weiter"
+  groups.deleteConfirm: "Delete this group?" → "Diese Gruppe löschen?"
+  groups.adminOnly: "You must be Admin to use this feature" → "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
+✅ de.json mis à jour !
+
+🌍 Traduction vers NL (2 sections manquantes)...
+  addGroup.title: "New group" → "Nieuwe groep"
+  addGroup.subtitle: "Create a group to organise your events" → "Maak een groep aan om je evenementen te organiseren"
+  addGroup.nameLabel: "Group name *" → "Groepsnaam *"
+  addGroup.namePlaceholder: "E.g.: Thursday Golf Group" → "Bijvoorbeeld: de donderdagse golfgroep"
+  addGroup.description: "Description" → "Beschrijving"
+  addGroup.descriptionPlaceholder: "E.g.: Thursday evening golf group" → "Bijvoorbeeld: de golfgroep op donderdagavond"
+  addGroup.color: "Group color" → "Groepskleur"
+  addGroup.nameRequired: "Name is required" → "Naam is verplicht"
+  addGroup.notConnected: "Not connected" → "Geen verbinding"
+  addGroup.errorCreate: "Error creating group" → "Fout bij het aanmaken van de groep"
+  addGroup.saving: "Creating..." → "Bezig met laden..."
+  addGroup.save: "Create group" → "Groep aanmaken"
+  addGroup.cancel: "Cancel" → "Annuleren"
+  groups.title: "My groups" → "Mijn groepen"
+  groups.subtitle: "{count} group(s)" → "{count} groep(en)"
+  groups.newGroup: "+ New group" → "+ Nieuwe groep"
+  groups.welcome: "Welcome to GolfGo" → "Welkom bij GolfGo"
+  groups.welcomeDesc: "Create your first group to start organising your events." → "Maak je eerste groep aan om te beginnen met het organiseren van je evenementen."
+  groups.createFirst: "+ Create my first group" → "+ Mijn eerste groep aanmaken"
+  groups.members: "Members" → "Leden"
+  groups.constraints: "Constraints" → "Beperkingen"
+  groups.events: "event(s)" → "evenement(en)"
+  groups.next: "next" → "volgende"
+  groups.deleteConfirm: "Delete this group?" → "Deze groep verwijderen?"
+  groups.adminOnly: "You must be Admin to use this feature" → "Je moet beheerder zijn om deze functie te kunnen gebruiken"
+✅ nl.json mis à jour !
+bash-3.2$ node script/translate.cjs
+node:internal/modules/cjs/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/didierlozet/Golfgo/script/translate.cjs'
+[90m    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)[39m
+[90m    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)[39m
+[90m    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1227:37)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)[39m
+[90m    at node:internal/main/run_main_module:33:47[39m {
+  code: [32m'MODULE_NOT_FOUND'[39m,
+  requireStack: []
+}
+
+Node.js v24.13.0
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Modifier le profil du joueur"
+  editPlayer.notFound: "Player not found" → "Joueur introuvable"
+  editPlayer.firstName: "First name *" → "Prénom *"
+  editPlayer.lastName: "Last name *" → "Nom de famille *"
+  editPlayer.federalNo: "Federal no." → "N° fédéral"
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "Courriel"
+  editPlayer.phone: "Phone" → "Téléphone"
+❌ Erreur pour FR: DeepL error: 400 {"tag_handling_version":"v2","message":"Tag handling parsing failed, please check input.\n\n'not well-formed (invalid token): line 1, column 15' (at Line: 1, Column: 8)"}
+
+🌍 Traduction vers ES (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Editar jugador"
+  editPlayer.notFound: "Player not found" → "No se ha encontrado el jugador"
+  editPlayer.firstName: "First name *" → "Nombre *"
+  editPlayer.lastName: "Last name *" → "Apellido *"
+  editPlayer.federalNo: "Federal no." → "N.º federal"
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "Correo electrónico"
+  editPlayer.phone: "Phone" → "Teléfono"
+❌ Erreur pour ES: DeepL error: 400 {"tag_handling_version":"v2","message":"Tag handling parsing failed, please check input.\n\n'not well-formed (invalid token): line 1, column 15' (at Line: 1, Column: 8)"}
+
+🌍 Traduction vers DE (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Spieler bearbeiten"
+  editPlayer.notFound: "Player not found" → "Spieler nicht gefunden"
+  editPlayer.firstName: "First name *" → "Vorname *"
+  editPlayer.lastName: "Last name *" → "Nachname *"
+  editPlayer.federalNo: "Federal no." → "Bundes-Nr."
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "E-Mail"
+  editPlayer.phone: "Phone" → "Telefon"
+❌ Erreur pour DE: DeepL error: 400 {"tag_handling_version":"v2","message":"Tag handling parsing failed, please check input.\n\n'not well-formed (invalid token): line 1, column 15' (at Line: 1, Column: 8)"}
+
+🌍 Traduction vers NL (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Speler bewerken"
+  editPlayer.notFound: "Player not found" → "Speler niet gevonden"
+  editPlayer.firstName: "First name *" → "Voornaam *"
+  editPlayer.lastName: "Last name *" → "Achternaam *"
+  editPlayer.federalNo: "Federal no." → "Federaal nr."
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "E-mail"
+  editPlayer.phone: "Phone" → "Telefoon"
+❌ Erreur pour NL: DeepL error: 400 {"tag_handling_version":"v2","message":"Tag handling parsing failed, please check input.\n\n'not well-formed (invalid token): line 1, column 15' (at Line: 1, Column: 8)"}
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Modifier le profil du joueur"
+  editPlayer.notFound: "Player not found" → "Joueur introuvable"
+  editPlayer.firstName: "First name *" → "Prénom *"
+  editPlayer.lastName: "Last name *" → "Nom de famille *"
+  editPlayer.federalNo: "Federal no." → "N° fédéral"
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "Courriel"
+  editPlayer.phone: "Phone" → "Téléphone"
+  editPlayer.genderTee: "Gender and default tee" → "Genre et t-shirt basique"
+  editPlayer.male: "Male" → "Homme"
+  editPlayer.female: "Female" → "Femme"
+  editPlayer.groupRole: "Role in the group" → "Rôle au sein du groupe"
+  editPlayer.member: "Member" → "Membre"
+  editPlayer.visitor: "Visitor" → "Visiteur"
+  editPlayer.nameRequired: "Last name and first name required" → "Nom et prénom obligatoires"
+  editPlayer.saving: "Saving..." → "Enregistrement en cours..."
+  editPlayer.save: "Save" → "Enregistrer"
+  editPlayer.backToMembers: "← Back to members" → "← Retour à la liste des membres"
+  notOwner.title: "Feature reserved for organisers" → "Fonctionnalité réservée aux organisateurs"
+  notOwner.desc: "Create a group to organise your events and invite players." → "Créez un groupe pour organiser vos événements et inviter des joueurs."
+  notOwner.createGroup: "+ Create a group →" → "+ Créer un groupe →"
+✅ fr.json mis à jour !
+
+🌍 Traduction vers ES (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Editar jugador"
+  editPlayer.notFound: "Player not found" → "No se ha encontrado el jugador"
+  editPlayer.firstName: "First name *" → "Nombre *"
+  editPlayer.lastName: "Last name *" → "Apellido *"
+  editPlayer.federalNo: "Federal no." → "N.º federal"
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "Correo electrónico"
+  editPlayer.phone: "Phone" → "Teléfono"
+  editPlayer.genderTee: "Gender and default tee" → "Género y camiseta básica"
+  editPlayer.male: "Male" → "Hombre"
+  editPlayer.female: "Female" → "Mujer"
+  editPlayer.groupRole: "Role in the group" → "Función en el grupo"
+  editPlayer.member: "Member" → "Miembro"
+  editPlayer.visitor: "Visitor" → "Visitante"
+  editPlayer.nameRequired: "Last name and first name required" → "Es obligatorio indicar el apellido y el nombre"
+  editPlayer.saving: "Saving..." → "Guardando..."
+  editPlayer.save: "Save" → "Guardar"
+  editPlayer.backToMembers: "← Back to members" → "← Volver a los miembros"
+  notOwner.title: "Feature reserved for organisers" → "Función reservada a los organizadores"
+  notOwner.desc: "Create a group to organise your events and invite players." → "Crea un grupo para organizar tus eventos e invitar a los jugadores."
+  notOwner.createGroup: "+ Create a group →" → "+ Crear un grupo →"
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Spieler bearbeiten"
+  editPlayer.notFound: "Player not found" → "Spieler nicht gefunden"
+  editPlayer.firstName: "First name *" → "Vorname *"
+  editPlayer.lastName: "Last name *" → "Nachname *"
+  editPlayer.federalNo: "Federal no." → "Bundes-Nr."
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "E-Mail"
+  editPlayer.phone: "Phone" → "Telefon"
+  editPlayer.genderTee: "Gender and default tee" → "Geschlecht und Standard-T-Shirt"
+  editPlayer.male: "Male" → "männlich"
+  editPlayer.female: "Female" → "weiblich"
+  editPlayer.groupRole: "Role in the group" → "Rolle in der Gruppe"
+  editPlayer.member: "Member" → "Mitglied"
+  editPlayer.visitor: "Visitor" → "Besucher"
+  editPlayer.nameRequired: "Last name and first name required" → "Nachname und Vorname sind Pflichtangaben"
+  editPlayer.saving: "Saving..." → "Wird gespeichert..."
+  editPlayer.save: "Save" → "Speichern"
+  editPlayer.backToMembers: "← Back to members" → "← Zurück zu den Mitgliedern"
+  notOwner.title: "Feature reserved for organisers" → "Funktion nur für Veranstalter"
+  notOwner.desc: "Create a group to organise your events and invite players." → "Erstelle eine Gruppe, um deine Events zu organisieren und Spieler einzuladen."
+  notOwner.createGroup: "+ Create a group →" → "+ Gruppe erstellen →"
+✅ de.json mis à jour !
+
+🌍 Traduction vers NL (2 sections manquantes)...
+  editPlayer.title: "Edit player" → "Speler bewerken"
+  editPlayer.notFound: "Player not found" → "Speler niet gevonden"
+  editPlayer.firstName: "First name *" → "Voornaam *"
+  editPlayer.lastName: "Last name *" → "Achternaam *"
+  editPlayer.federalNo: "Federal no." → "Federaal nr."
+  editPlayer.whs: "WHS" → "WHS"
+  editPlayer.email: "Email" → "E-mail"
+  editPlayer.phone: "Phone" → "Telefoon"
+  editPlayer.genderTee: "Gender and default tee" → "Geslacht en standaard-T-shirt"
+  editPlayer.male: "Male" → "Man"
+  editPlayer.female: "Female" → "Vrouw"
+  editPlayer.groupRole: "Role in the group" → "Rol in de groep"
+  editPlayer.member: "Member" → "Lid"
+  editPlayer.visitor: "Visitor" → "Bezoeker"
+  editPlayer.nameRequired: "Last name and first name required" → "Achternaam en voornaam zijn verplicht"
+  editPlayer.saving: "Saving..." → "Bezig met opslaan..."
+  editPlayer.save: "Save" → "Opslaan"
+  editPlayer.backToMembers: "← Back to members" → "← Terug naar leden"
+  notOwner.title: "Feature reserved for organisers" → "Functie voorbehouden aan organisatoren"
+  notOwner.desc: "Create a group to organise your events and invite players." → "Maak een groep aan om je evenementen te organiseren en spelers uit te nodigen."
+  notOwner.createGroup: "+ Create a group →" → "+ Een groep aanmaken →"
+✅ nl.json mis à jour !
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (3 sections manquantes)...
+  scorecard.title: "Scorecard" → "Tableau de bord"
+  scorecard.event: "Event" → "Événement"
+  scorecard.noEvents: "No events found" → "Aucun événement trouvé"
+  scorecard.noEventsHint: "Your scores will appear here once you are registered for an event" → "Vos résultats s'afficheront ici une fois que vous serez inscrit à une épreuve"
+  scorecard.noRecentEvents: "No events in the last 2 months" → "Aucun événement au cours des deux derniers mois"
+  scorecard.notConnected: "Not connected" → "Non connecté"
+  scorecard.noProfile: "Player profile not found" → "Profil du joueur introuvable"
+  scorecard.noCourse: "No course configured" → "Aucun cours n'a été configuré"
+  scorecard.noFlight: "No players in this flight" → "Il n'y a aucun joueur dans cette catégorie"
+  scorecard.closed: "Closed" → "Fermé"
+  scorecard.readOnly: "Read only" → "Lecture seule"
+  scorecard.send: "Send to Scorecards" → "Envoyer vers les tableaux de bord"
+  scorecard.sending: "Sending..." → "Envoi en cours..."
+  scorecard.sent: "✓ Sent to Scorecards" → "✓ Envoyé vers les tableaux de bord"
+  scorecard.sendError: "Error sending" → "Erreur lors de l'envoi"
+  scorecard.myFlight: "My flight" → "Mon vol"
+  scorecard.me: "Me" → "Moi"
+  scorecard.myScorecard: "My scorecard" → "Mon tableau de bord"
+  settings.title: "Settings" → "Paramètres"
+  settings.comingSoon: "Coming soon" → "À venir"
+  auth.forgotPassword.title: "Forgot password" → "Mot de passe oublié"
+  auth.forgotPassword.subtitle: "Receive a reset link by email" → "Recevez un lien de réinitialisation par e-mail"
+  auth.forgotPassword.back: "← Back to login" → "← Retour à la page de connexion"
+  auth.forgotPassword.sent: "Email sent! Check your inbox and click the link." → "L'e-mail a été envoyé ! Vérifiez votre boîte de réception et cliquez sur le lien."
+  auth.forgotPassword.resend: "Resend" → "Renvoyer"
+  auth.forgotPassword.noEmail: "Did not receive anything?" → "Vous n'avez rien reçu ?"
+  auth.forgotPassword.submit: "Send link" → "Envoyer le lien"
+  auth.forgotPassword.submitting: "Sending..." → "Envoi en cours..."
+  auth.resetPassword.title: "New password" → "Nouveau mot de passe"
+  auth.resetPassword.subtitle: "Choose a new password for your account" → "Choisissez un nouveau mot de passe pour votre compte"
+  auth.resetPassword.back: "← Back to login" → "← Retour à la page de connexion"
+  auth.resetPassword.email: "Email" → "Courriel"
+  auth.resetPassword.newPassword: "New password" → "Nouveau mot de passe"
+  auth.resetPassword.confirmPassword: "Confirm password" → "Confirmez le mot de passe"
+  auth.resetPassword.mismatch: "Passwords do not match." → "Les mots de passe ne correspondent pas."
+  auth.resetPassword.success: "Password reset successfully!" → "Le mot de passe a été réinitialisé avec succès !"
+  auth.resetPassword.submit: "Reset" → "Réinitialiser"
+  auth.resetPassword.submitting: "Resetting..." → "Réinitialisation en cours..."
+  auth.signup.title: "Create an account" → "Créer un compte"
+  auth.signup.subtitle: "Join GolfGo to organise your rounds" → "Rejoignez GolfGo pour organiser vos parties"
+  auth.signup.fullName: "First and last name" → "Prénom et nom"
+  auth.signup.email: "Email" → "Courriel"
+  auth.signup.password: "Password" → "Mot de passe"
+  auth.signup.alreadyUsed: "This email is already in use." → "Cette adresse e-mail est déjà utilisée."
+  auth.signup.alreadyAccount: "Already have an account?" → "Vous avez déjà un compte ?"
+  auth.signup.login: "Sign in" → "Se connecter"
+  auth.signup.submit: "Create my account" → "Créer mon compte"
+  auth.signup.submitting: "Creating..." → "Création en cours..."
+  auth.login.title: "Sign in" → "Se connecter"
+  auth.login.subtitle: "Welcome back to GolfGo" → "Bienvenue à nouveau sur GolfGo"
+  auth.login.email: "Email" → "Courriel"
+  auth.login.password: "Password" → "Mot de passe"
+  auth.login.forgotPassword: "Forgot password?" → "Mot de passe oublié ?"
+  auth.login.noAccount: "No account yet?" → "Vous n'avez pas encore de compte ?"
+  auth.login.signup: "Create one" → "En créer un"
+  auth.login.submit: "Sign in" → "Se connecter"
+  auth.login.submitting: "Signing in..." → "Connexion en cours..."
+✅ fr.json mis à jour !
+
+🌍 Traduction vers ES (3 sections manquantes)...
+  scorecard.title: "Scorecard" → "Cuadro de mando"
+  scorecard.event: "Event" → "Evento"
+  scorecard.noEvents: "No events found" → "No se han encontrado eventos"
+  scorecard.noEventsHint: "Your scores will appear here once you are registered for an event" → "Tus puntuaciones aparecerán aquí una vez que te hayas inscrito en una prueba"
+  scorecard.noRecentEvents: "No events in the last 2 months" → "No hay eventos en los últimos dos meses"
+  scorecard.notConnected: "Not connected" → "No conectado"
+  scorecard.noProfile: "Player profile not found" → "No se ha encontrado el perfil del jugador"
+  scorecard.noCourse: "No course configured" → "No hay ningún curso configurado"
+  scorecard.noFlight: "No players in this flight" → "No hay jugadores en este grupo"
+  scorecard.closed: "Closed" → "Cerrado"
+  scorecard.readOnly: "Read only" → "Solo lectura"
+  scorecard.send: "Send to Scorecards" → "Enviar a las fichas de puntuación"
+  scorecard.sending: "Sending..." → "Enviando..."
+  scorecard.sent: "✓ Sent to Scorecards" → "✓ Enviado a las fichas de puntuación"
+  scorecard.sendError: "Error sending" → "Error al enviar"
+  scorecard.myFlight: "My flight" → "Mi vuelo"
+  scorecard.me: "Me" → "Yo"
+  scorecard.myScorecard: "My scorecard" → "Mi tarjeta de puntuación"
+  settings.title: "Settings" → "Configuración"
+  settings.comingSoon: "Coming soon" → "Próximamente"
+  auth.forgotPassword.title: "Forgot password" → "Olvidé mi contraseña"
+  auth.forgotPassword.subtitle: "Receive a reset link by email" → "Recibe un enlace para restablecer la contraseña por correo electrónico"
+  auth.forgotPassword.back: "← Back to login" → "← Volver al inicio de sesión"
+  auth.forgotPassword.sent: "Email sent! Check your inbox and click the link." → "¡El correo electrónico se ha enviado! Revisa tu bandeja de entrada y haz clic en el enlace."
+  auth.forgotPassword.resend: "Resend" → "Reenviar"
+  auth.forgotPassword.noEmail: "Did not receive anything?" → "¿No has recibido nada?"
+  auth.forgotPassword.submit: "Send link" → "Enviar enlace"
+  auth.forgotPassword.submitting: "Sending..." → "Enviando..."
+  auth.resetPassword.title: "New password" → "Nueva contraseña"
+  auth.resetPassword.subtitle: "Choose a new password for your account" → "Elige una nueva contraseña para tu cuenta"
+  auth.resetPassword.back: "← Back to login" → "← Volver al inicio de sesión"
+  auth.resetPassword.email: "Email" → "Correo electrónico"
+  auth.resetPassword.newPassword: "New password" → "Nueva contraseña"
+  auth.resetPassword.confirmPassword: "Confirm password" → "Confirma la contraseña"
+  auth.resetPassword.mismatch: "Passwords do not match." → "Las contraseñas no coinciden."
+  auth.resetPassword.success: "Password reset successfully!" → "¡Contraseña restablecida correctamente!"
+  auth.resetPassword.submit: "Reset" → "Restablecer"
+  auth.resetPassword.submitting: "Resetting..." → "Restableciendo..."
+  auth.signup.title: "Create an account" → "Crear una cuenta"
+  auth.signup.subtitle: "Join GolfGo to organise your rounds" → "Únete a GolfGo para organizar tus partidas"
+  auth.signup.fullName: "First and last name" → "Nombre y apellidos"
+  auth.signup.email: "Email" → "Correo electrónico"
+  auth.signup.password: "Password" → "Contraseña"
+  auth.signup.alreadyUsed: "This email is already in use." → "Esa dirección de correo electrónico ya está en uso."
+  auth.signup.alreadyAccount: "Already have an account?" → "¿Ya tienes una cuenta?"
+  auth.signup.login: "Sign in" → "Iniciar sesión"
+  auth.signup.submit: "Create my account" → "Crear mi cuenta"
+  auth.signup.submitting: "Creating..." → "Generando..."
+  auth.login.title: "Sign in" → "Iniciar sesión"
+  auth.login.subtitle: "Welcome back to GolfGo" → "Bienvenido de nuevo a GolfGo"
+  auth.login.email: "Email" → "Correo electrónico"
+  auth.login.password: "Password" → "Contraseña"
+  auth.login.forgotPassword: "Forgot password?" → "¿Has olvidado la contraseña?"
+  auth.login.noAccount: "No account yet?" → "¿Aún no tienes cuenta?"
+  auth.login.signup: "Create one" → "Crear uno"
+  auth.login.submit: "Sign in" → "Iniciar sesión"
+  auth.login.submitting: "Signing in..." → "Iniciando sesión..."
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (3 sections manquantes)...
+  scorecard.title: "Scorecard" → "Ergebnisübersicht"
+  scorecard.event: "Event" → "Veranstaltung"
+  scorecard.noEvents: "No events found" → "Es wurden keine Veranstaltungen gefunden"
+  scorecard.noEventsHint: "Your scores will appear here once you are registered for an event" → "Ihre Ergebnisse werden hier angezeigt, sobald Sie sich für eine Veranstaltung angemeldet haben"
+  scorecard.noRecentEvents: "No events in the last 2 months" → "In den letzten zwei Monaten fanden keine Veranstaltungen statt"
+  scorecard.notConnected: "Not connected" → "Keine Verbindung"
+  scorecard.noProfile: "Player profile not found" → "Spielerprofil nicht gefunden"
+  scorecard.noCourse: "No course configured" → "Es wurde kein Kurs eingerichtet"
+  scorecard.noFlight: "No players in this flight" → "In dieser Gruppe sind keine Spieler"
+  scorecard.closed: "Closed" → "Geschlossen"
+  scorecard.readOnly: "Read only" → "Nur lesen"
+  scorecard.send: "Send to Scorecards" → "An Scorecards senden"
+  scorecard.sending: "Sending..." → "Wird gesendet..."
+  scorecard.sent: "✓ Sent to Scorecards" → "✓ An Scorecards gesendet"
+  scorecard.sendError: "Error sending" → "Fehler beim Senden"
+  scorecard.myFlight: "My flight" → "Mein Flug"
+  scorecard.me: "Me" → "Ich"
+  scorecard.myScorecard: "My scorecard" → "Meine Punkteliste"
+  settings.title: "Settings" → "Einstellungen"
+  settings.comingSoon: "Coming soon" → "In Kürze"
+  auth.forgotPassword.title: "Forgot password" → "Passwort vergessen"
+  auth.forgotPassword.subtitle: "Receive a reset link by email" → "Erhalten Sie einen Link zum Zurücksetzen per E-Mail"
+  auth.forgotPassword.back: "← Back to login" → "← Zurück zur Anmeldung"
+  auth.forgotPassword.sent: "Email sent! Check your inbox and click the link." → "Die E-Mail wurde gesendet! Schau bitte in deinen Posteingang und klicke auf den Link."
+  auth.forgotPassword.resend: "Resend" → "Erneut senden"
+  auth.forgotPassword.noEmail: "Did not receive anything?" → "Haben Sie nichts erhalten?"
+  auth.forgotPassword.submit: "Send link" → "Link senden"
+  auth.forgotPassword.submitting: "Sending..." → "Wird gesendet..."
+  auth.resetPassword.title: "New password" → "Neues Passwort"
+  auth.resetPassword.subtitle: "Choose a new password for your account" → "Wählen Sie ein neues Passwort für Ihr Konto"
+  auth.resetPassword.back: "← Back to login" → "← Zurück zur Anmeldung"
+  auth.resetPassword.email: "Email" → "E-Mail"
+  auth.resetPassword.newPassword: "New password" → "Neues Passwort"
+  auth.resetPassword.confirmPassword: "Confirm password" → "Passwort bestätigen"
+  auth.resetPassword.mismatch: "Passwords do not match." → "Die Passwörter stimmen nicht überein."
+  auth.resetPassword.success: "Password reset successfully!" → "Das Passwort wurde erfolgreich zurückgesetzt!"
+  auth.resetPassword.submit: "Reset" → "Zurücksetzen"
+  auth.resetPassword.submitting: "Resetting..." → "Zurücksetzen..."
+  auth.signup.title: "Create an account" → "Ein Konto erstellen"
+  auth.signup.subtitle: "Join GolfGo to organise your rounds" → "Melde dich bei GolfGo an, um deine Golfrunden zu organisieren"
+  auth.signup.fullName: "First and last name" → "Vor- und Nachname"
+  auth.signup.email: "Email" → "E-Mail"
+  auth.signup.password: "Password" → "Passwort"
+  auth.signup.alreadyUsed: "This email is already in use." → "Diese E-Mail-Adresse ist bereits vergeben."
+  auth.signup.alreadyAccount: "Already have an account?" → "Haben Sie bereits ein Konto?"
+  auth.signup.login: "Sign in" → "Anmelden"
+  auth.signup.submit: "Create my account" → "Mein Konto erstellen"
+  auth.signup.submitting: "Creating..." → "Wird erstellt..."
+  auth.login.title: "Sign in" → "Anmelden"
+  auth.login.subtitle: "Welcome back to GolfGo" → "Willkommen zurück bei GolfGo"
+  auth.login.email: "Email" → "E-Mail"
+  auth.login.password: "Password" → "Passwort"
+  auth.login.forgotPassword: "Forgot password?" → "Passwort vergessen?"
+  auth.login.noAccount: "No account yet?" → "Noch kein Konto?"
+  auth.login.signup: "Create one" → "Erstellen"
+  auth.login.submit: "Sign in" → "Anmelden"
+  auth.login.submitting: "Signing in..." → "Anmelden..."
+✅ de.json mis à jour !
+
+🌍 Traduction vers NL (3 sections manquantes)...
+  scorecard.title: "Scorecard" → "Scorecard"
+  scorecard.event: "Event" → "Evenement"
+  scorecard.noEvents: "No events found" → "Er zijn geen evenementen gevonden"
+  scorecard.noEventsHint: "Your scores will appear here once you are registered for an event" → "Je scores worden hier weergegeven zodra je je voor een evenement hebt ingeschreven"
+  scorecard.noRecentEvents: "No events in the last 2 months" → "Geen evenementen in de afgelopen 2 maanden"
+  scorecard.notConnected: "Not connected" → "Geen verbinding"
+  scorecard.noProfile: "Player profile not found" → "Spelersprofiel niet gevonden"
+  scorecard.noCourse: "No course configured" → "Er is geen cursus geconfigureerd"
+  scorecard.noFlight: "No players in this flight" → "Er zijn geen spelers in deze poule"
+  scorecard.closed: "Closed" → "Gesloten"
+  scorecard.readOnly: "Read only" → "Alleen-lezen"
+  scorecard.send: "Send to Scorecards" → "Naar scorekaarten verzenden"
+  scorecard.sending: "Sending..." → "Bezig met verzenden..."
+  scorecard.sent: "✓ Sent to Scorecards" → "✓ Verzonden naar scorekaarten"
+  scorecard.sendError: "Error sending" → "Fout bij verzenden"
+  scorecard.myFlight: "My flight" → "Mijn vlucht"
+  scorecard.me: "Me" → "Ik"
+  scorecard.myScorecard: "My scorecard" → "Mijn scorekaart"
+  settings.title: "Settings" → "Instellingen"
+  settings.comingSoon: "Coming soon" → "Binnenkort beschikbaar"
+  auth.forgotPassword.title: "Forgot password" → "Wachtwoord vergeten"
+  auth.forgotPassword.subtitle: "Receive a reset link by email" → "Ontvang een resetlink via e-mail"
+  auth.forgotPassword.back: "← Back to login" → "← Terug naar inloggen"
+  auth.forgotPassword.sent: "Email sent! Check your inbox and click the link." → "De e-mail is verzonden! Kijk even in je inbox en klik op de link."
+  auth.forgotPassword.resend: "Resend" → "Opnieuw verzenden"
+  auth.forgotPassword.noEmail: "Did not receive anything?" → "Heb je niets ontvangen?"
+  auth.forgotPassword.submit: "Send link" → "Link verzenden"
+  auth.forgotPassword.submitting: "Sending..." → "Bezig met verzenden..."
+  auth.resetPassword.title: "New password" → "Nieuw wachtwoord"
+  auth.resetPassword.subtitle: "Choose a new password for your account" → "Kies een nieuw wachtwoord voor je account"
+  auth.resetPassword.back: "← Back to login" → "← Terug naar inloggen"
+  auth.resetPassword.email: "Email" → "E-mail"
+  auth.resetPassword.newPassword: "New password" → "Nieuw wachtwoord"
+  auth.resetPassword.confirmPassword: "Confirm password" → "Bevestig wachtwoord"
+  auth.resetPassword.mismatch: "Passwords do not match." → "De wachtwoorden komen niet overeen."
+  auth.resetPassword.success: "Password reset successfully!" → "Wachtwoord succesvol opnieuw ingesteld!"
+  auth.resetPassword.submit: "Reset" → "Opnieuw instellen"
+  auth.resetPassword.submitting: "Resetting..." → "Opnieuw instellen..."
+  auth.signup.title: "Create an account" → "Maak een account aan"
+  auth.signup.subtitle: "Join GolfGo to organise your rounds" → "Word lid van GolfGo om je rondes te organiseren"
+  auth.signup.fullName: "First and last name" → "Voor- en achternaam"
+  auth.signup.email: "Email" → "E-mail"
+  auth.signup.password: "Password" → "Wachtwoord"
+  auth.signup.alreadyUsed: "This email is already in use." → "Dit e-mailadres is al in gebruik."
+  auth.signup.alreadyAccount: "Already have an account?" → "Heb je al een account?"
+  auth.signup.login: "Sign in" → "Inloggen"
+  auth.signup.submit: "Create my account" → "Mijn account aanmaken"
+  auth.signup.submitting: "Creating..." → "Bezig met laden..."
+  auth.login.title: "Sign in" → "Inloggen"
+  auth.login.subtitle: "Welcome back to GolfGo" → "Welkom terug bij GolfGo"
+  auth.login.email: "Email" → "E-mail"
+  auth.login.password: "Password" → "Wachtwoord"
+  auth.login.forgotPassword: "Forgot password?" → "Wachtwoord vergeten?"
+  auth.login.noAccount: "No account yet?" → "Heb je nog geen account?"
+  auth.login.signup: "Create one" → "Maak er een"
+  auth.login.submit: "Sign in" → "Inloggen"
+  auth.login.submitting: "Signing in..." → "Aan het inloggen..."
+✅ nl.json mis à jour !
+bash-3.2$ node scripts?translate.cjs
+node:internal/modules/cjs/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/didierlozet/Golfgo/scripts?translate.cjs'
+[90m    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)[39m
+[90m    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)[39m
+[90m    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1227:37)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)[39m
+[90m    at node:internal/main/run_main_module:33:47[39m {
+  code: [32m'MODULE_NOT_FOUND'[39m,
+  requireStack: []
+}
+
+Node.js v24.13.0
+bash-3.2$ node scripts?translate.cjs[K/[Ks[1Ptranslate.cjs/translate.cjs[C[C[C[C[C[C[C[C[C[C[C[C[C
+
+✅ fr.json — déjà à jour
+
+✅ es.json — déjà à jour
+
+✅ de.json — déjà à jour
+
+✅ nl.json — déjà à jour
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (2 sections manquantes)...
+  inviteYes.title: "You are joining!" → "Vous nous rejoignez !"
+  inviteYes.subtitle: "How many holes will you play?" → "Combien de trous allez-vous jouer ?"
+  inviteYes.holes: "holes" → "trous"
+  inviteYes.confirm: "Confirm my participation" → "Confirmer ma participation"
+  inviteYes.saving: "Confirming..." → "Confirmation..."
+  inviteYes.successTitle: "Participation confirmed!" → "Participation confirmée !"
+  inviteYes.successDesc: "You are playing {holes} holes. See you on the course ⛳" → "Vous jouez sur le parcours «{holes}» trous. Rendez-vous sur le parcours ⛳"
+  inviteYes.viewEvent: "View event" → "Voir l'événement"
+  inviteYes.errorTitle: "Invalid link" → "Lien invalide"
+  inviteYes.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
+  inviteNo.loading: "Processing..." → "Traitement en cours..."
+  inviteNo.successTitle: "Participation declined" → "La participation a diminué"
+  inviteNo.successDesc: "Your response has been recorded. Hope to see you next time!" → "Votre réponse a été enregistrée. À la prochaine !"
+  inviteNo.errorTitle: "Invalid link" → "Lien invalide"
+  inviteNo.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
+✅ fr.json mis à jour !
+
+🌍 Traduction vers ES (2 sections manquantes)...
+  inviteYes.title: "You are joining!" → "¡Te has apuntado!"
+  inviteYes.subtitle: "How many holes will you play?" → "¿Cuántos hoyos vas a jugar?"
+  inviteYes.holes: "holes" → "agujeros"
+  inviteYes.confirm: "Confirm my participation" → "Confirmar mi participación"
+  inviteYes.saving: "Confirming..." → "Confirmando..."
+  inviteYes.successTitle: "Participation confirmed!" → "¡Participación confirmada!"
+  inviteYes.successDesc: "You are playing {holes} holes. See you on the course ⛳" → "Estás jugando un recorrido de {holes} hoyos. Nos vemos en el campo ⛳"
+  inviteYes.viewEvent: "View event" → "Ver evento"
+  inviteYes.errorTitle: "Invalid link" → "Enlace no válido"
+  inviteYes.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Este enlace ha caducado o no es válido. Ponte en contacto con el organizador."
+  inviteNo.loading: "Processing..." → "Procesando..."
+  inviteNo.successTitle: "Participation declined" → "La participación disminuyó"
+  inviteNo.successDesc: "Your response has been recorded. Hope to see you next time!" → "Ya hemos registrado tu respuesta. ¡Esperamos verte la próxima vez!"
+  inviteNo.errorTitle: "Invalid link" → "Enlace no válido"
+  inviteNo.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Este enlace ha caducado o no es válido. Ponte en contacto con el organizador."
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (2 sections manquantes)...
+  inviteYes.title: "You are joining!" → "Du bist dabei!"
+  inviteYes.subtitle: "How many holes will you play?" → "Wie viele Löcher wirst du spielen?"
+  inviteYes.holes: "holes" → "Löcher"
+  inviteYes.confirm: "Confirm my participation" → "Meine Teilnahme bestätigen"
+  inviteYes.saving: "Confirming..." → "Wird überprüft..."
+  inviteYes.successTitle: "Participation confirmed!" → "Teilnahme bestätigt!"
+  inviteYes.successDesc: "You are playing {holes} holes. See you on the course ⛳" → "Du spielst „{holes}“ Löcher. Wir sehen uns auf dem Platz ⛳"
+  inviteYes.viewEvent: "View event" → "Veranstaltung anzeigen"
+  inviteYes.errorTitle: "Invalid link" → "Ungültiger Link"
+  inviteYes.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Dieser Link ist abgelaufen oder ungültig. Bitte wenden Sie sich an den Veranstalter."
+  inviteNo.loading: "Processing..." → "Wird verarbeitet..."
+  inviteNo.successTitle: "Participation declined" → "Die Beteiligung ging zurück"
+  inviteNo.successDesc: "Your response has been recorded. Hope to see you next time!" → "Ihre Antwort wurde gespeichert. Wir freuen uns auf ein Wiedersehen!"
+  inviteNo.errorTitle: "Invalid link" → "Ungültiger Link"
+  inviteNo.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Dieser Link ist abgelaufen oder ungültig. Bitte wenden Sie sich an den Veranstalter."
+✅ de.json mis à jour !
+
+🌍 Traduction vers NL (2 sections manquantes)...
+  inviteYes.title: "You are joining!" → "Je doet mee!"
+  inviteYes.subtitle: "How many holes will you play?" → "Hoeveel holes ga je spelen?"
+  inviteYes.holes: "holes" → "gaten"
+  inviteYes.confirm: "Confirm my participation" → "Bevestig mijn deelname"
+  inviteYes.saving: "Confirming..." → "Bevestigen..."
+  inviteYes.successTitle: "Participation confirmed!" → "Deelname bevestigd!"
+  inviteYes.successDesc: "You are playing {holes} holes. See you on the course ⛳" → "Je speelt op de baan '{holes}' holes. Tot ziens op de baan ⛳"
+  inviteYes.viewEvent: "View event" → "Bekijk evenement"
+  inviteYes.errorTitle: "Invalid link" → "Ongeldige link"
+  inviteYes.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Deze link is verlopen of ongeldig. Neem contact op met de organisator."
+  inviteNo.loading: "Processing..." → "Bezig met verwerken..."
+  inviteNo.successTitle: "Participation declined" → "De deelname is gedaald"
+  inviteNo.successDesc: "Your response has been recorded. Hope to see you next time!" → "Je reactie is opgeslagen. Tot de volgende keer!"
+  inviteNo.errorTitle: "Invalid link" → "Ongeldige link"
+  inviteNo.errorDesc: "This link has expired or is invalid. Please contact the organiser." → "Deze link is verlopen of ongeldig. Neem contact op met de organisator."
+✅ nl.json mis à jour !
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (1 sections manquantes)...
+  auth.login.checkEmail: "Check your email to confirm your account." → "Vérifiez votre boîte mail pour valider votre compte."
+✅ fr.json mis à jour !
+
+🌍 Traduction vers ES (1 sections manquantes)...
+  auth.login.checkEmail: "Check your email to confirm your account." → "Comprueba tu correo electrónico para confirmar tu cuenta."
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (1 sections manquantes)...
+  auth.login.checkEmail: "Check your email to confirm your account." → "Überprüfen Sie Ihre E-Mails, um Ihr Konto zu bestätigen."
+✅ de.json mis à jour !
+
+🌍 Traduction vers NL (1 sections manquantes)...
+  auth.login.checkEmail: "Check your email to confirm your account." → "Controleer je e-mail om je account te bevestigen."
+✅ nl.json mis à jour !
+bash-3.2$ grep -r "Aucun\|Créer\|Envoyer\|Confirmer\|Retour\|Sauvegarder" src/app/\[locale\] --include="*.ts x" -l
+src/app/[locale]/(app)/groups/[id]/events/add/page.tsx
+src/app/[locale]/(app)/groups/[id]/events/[eventId]/leaderboard/page.tsx
+src/app/[locale]/(app)/groups/[id]/events/page.tsx
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (2 sections manquantes)...
+  addEvent.title: "New event" → "Nouvel événement"
+  addEvent.subtitle: "Add an event to the group" → "Ajouter un événement au groupe"
+  addEvent.titleLabel: "Title *" → "Titre *"
+  addEvent.titlePlaceholder: "E.g.: April 2nd round" → "Par exemple : 2e tour d'avril"
+  addEvent.location: "Location" → "Lieu"
+  addEvent.locationPlaceholder: "E.g.: GC Louvain-La-Neuve" → "Par exemple : GC Louvain-La-Neuve"
+  addEvent.start: "Start *" → "Début *"
+  addEvent.end: "End" → "Fin"
+  addEvent.eventType: "Event type" → "Type d'événement"
+  addEvent.golf: "⛳ Golf round" → "⛳ Partie de golf"
+  addEvent.other: "🎉 Other event" → "🎉 Autre événement"
+  addEvent.golfHint: "Flights, scorecards and leaderboard will be available" → "Les résultats, les cartes de score et le classement seront disponibles"
+  addEvent.otherHint: "Participants and payments only" → "Uniquement les participants et les paiements"
+  addEvent.club: "Club" → "Club"
+  addEvent.chooseClub: "Choose a club..." → "Choisissez un club..."
+  addEvent.course: "Course" → "Cours"
+  addEvent.chooseCourse: "Choose a course..." → "Choisissez un cours..."
+  addEvent.noCourse: "No courses — add them in Clubs" → "Aucun cours — ajoutez-les dans la rubrique « Clubs »"
+  addEvent.format: "Competition format" → "Format de la compétition"
+  addEvent.chooseFormat: "Choose a format..." → "Choisissez un format..."
+  addEvent.fee: "Fee per person (€)" → "Tarif par personne (€)"
+  addEvent.feeOptional: "optional" → "facultatif"
+  addEvent.feeHint: "A Payments tab will be available" → "Un onglet « Paiements » sera disponible"
+  addEvent.maxParticipants: "Max spots" → "Nombre maximal de places"
+  addEvent.maxOptional: "optional" → "facultatif"
+  addEvent.maxHint: "Remaining spots will be shown" → "Les places restantes seront affichées"
+  addEvent.emailMessage: "Invitation message" → "Message d'invitation"
+  addEvent.emailOptional: "optional" → "facultatif"
+  addEvent.emailPlaceholder: "E.g.: Meet at tee 1 at 9am..." → "Par exemple : Rendez-vous au départ n° 1 à 9 h..."
+  addEvent.emailHint: "Included in the invitation email" → "Contenu de l'e-mail d'invitation"
+  addEvent.save: "Create event" → "Créer un événement"
+  addEvent.saving: "Saving..." → "Enregistrement en cours..."
+  addEvent.cancel: "Cancel" → "Annuler"
+  addEvent.errorUnexpected: "Unexpected error" → "Erreur inattendue"
+  addEvent.adminOnly: "You must be Admin to use this feature" → "Vous devez être administrateur pour utiliser cette fonctionnalité"
+  events.title: "Events" → "Événements"
+  events.subtitle: "{upcoming} upcoming · {past} past" → "{upcoming} à venir · {past} passé"
+  events.upcoming: "Upcoming" → "À venir"
+  events.past: "Past" → "Passé"
+  events.noEvents: "No events for this group" → "Aucun événement pour ce groupe"
+  events.noEventsHint: "Create the first event to get started" → "Créez votre premier événement pour commencer"
+  events.newEvent: "+ New event" → "+ Nouvel événement"
+  events.going: "{count} going" → "{count} en route"
+  events.goingMax: "{count}/{max} going" → "{count} / {max} en ligne"
+  events.deleteConfirm: "Delete this event?" → "Supprimer cet événement ?"
+  events.adminOnly: "You must be Admin to use this feature" → "Vous devez être administrateur pour utiliser cette fonctionnalité"
+✅ fr.json mis à jour !
+
+🌍 Traduction vers ES (2 sections manquantes)...
+  addEvent.title: "New event" → "Nuevo evento"
+  addEvent.subtitle: "Add an event to the group" → "Añadir un evento al grupo"
+  addEvent.titleLabel: "Title *" → "Título *"
+  addEvent.titlePlaceholder: "E.g.: April 2nd round" → "Por ejemplo: segunda ronda del 2 de abril"
+  addEvent.location: "Location" → "Ubicación"
+  addEvent.locationPlaceholder: "E.g.: GC Louvain-La-Neuve" → "Por ejemplo: GC Louvain-La-Neuve"
+  addEvent.start: "Start *" → "Inicio *"
+  addEvent.end: "End" → "Fin"
+  addEvent.eventType: "Event type" → "Tipo de evento"
+  addEvent.golf: "⛳ Golf round" → "⛳ Partida de golf"
+  addEvent.other: "🎉 Other event" → "🎉 Otro evento"
+  addEvent.golfHint: "Flights, scorecards and leaderboard will be available" → "Estarán disponibles las rondas, las tarjetas de puntuación y la clasificación"
+  addEvent.otherHint: "Participants and payments only" → "Solo participantes y pagos"
+  addEvent.club: "Club" → "Club"
+  addEvent.chooseClub: "Choose a club..." → "Elige un club..."
+  addEvent.course: "Course" → "Curso"
+  addEvent.chooseCourse: "Choose a course..." → "Elige un curso..."
+  addEvent.noCourse: "No courses — add them in Clubs" → "No hay cursos — añádelos en «Clubes»"
+  addEvent.format: "Competition format" → "Formato de la competición"
+  addEvent.chooseFormat: "Choose a format..." → "Elige un formato..."
+  addEvent.fee: "Fee per person (€)" → "Precio por persona (€)"
+  addEvent.feeOptional: "optional" → "opcional"
+  addEvent.feeHint: "A Payments tab will be available" → "Habrá una pestaña de «Pagos» disponible"
+  addEvent.maxParticipants: "Max spots" → "Número máximo de plazas"
+  addEvent.maxOptional: "optional" → "opcional"
+  addEvent.maxHint: "Remaining spots will be shown" → "Se mostrarán las plazas restantes"
+  addEvent.emailMessage: "Invitation message" → "Mensaje de invitación"
+  addEvent.emailOptional: "optional" → "opcional"
+  addEvent.emailPlaceholder: "E.g.: Meet at tee 1 at 9am..." → "Por ejemplo: Quedamos en el tee 1 a las 9 de la mañana..."
+  addEvent.emailHint: "Included in the invitation email" → "Incluido en el correo electrónico de invitación"
+  addEvent.save: "Create event" → "Crear evento"
+  addEvent.saving: "Saving..." → "Guardando..."
+  addEvent.cancel: "Cancel" → "Cancelar"
+  addEvent.errorUnexpected: "Unexpected error" → "Error inesperado"
+  addEvent.adminOnly: "You must be Admin to use this feature" → "Debes ser administrador para utilizar esta función"
+  events.title: "Events" → "Eventos"
+  events.subtitle: "{upcoming} upcoming · {past} past" → "{upcoming} Próximamente · {past} Anteriores"
+  events.upcoming: "Upcoming" → "Próximamente"
+  events.past: "Past" → "Pasado"
+  events.noEvents: "No events for this group" → "No hay eventos para este grupo"
+  events.noEventsHint: "Create the first event to get started" → "Crea el primer evento para empezar"
+  events.newEvent: "+ New event" → "+ Nuevo evento"
+  events.going: "{count} going" → "{count} de camino"
+  events.goingMax: "{count}/{max} going" → "{count} / {max} en marcha"
+  events.deleteConfirm: "Delete this event?" → "¿Quieres eliminar este evento?"
+  events.adminOnly: "You must be Admin to use this feature" → "Debes ser administrador para utilizar esta función"
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (2 sections manquantes)...
+  addEvent.title: "New event" → "Neue Veranstaltung"
+  addEvent.subtitle: "Add an event to the group" → "Ein Ereignis zur Gruppe hinzufügen"
+  addEvent.titleLabel: "Title *" → "Titel *"
+  addEvent.titlePlaceholder: "E.g.: April 2nd round" → "Beispiel: 2. Runde im April"
+  addEvent.location: "Location" → "Standort"
+  addEvent.locationPlaceholder: "E.g.: GC Louvain-La-Neuve" → "Beispiel: GC Louvain-La-Neuve"
+  addEvent.start: "Start *" → "Start *"
+  addEvent.end: "End" → "Ende"
+  addEvent.eventType: "Event type" → "Veranstaltungstyp"
+  addEvent.golf: "⛳ Golf round" → "⛳ Golfrunde"
+  addEvent.other: "🎉 Other event" → "🎉 Sonstige Veranstaltung"
+  addEvent.golfHint: "Flights, scorecards and leaderboard will be available" → "Flugpläne, Scorekarten und Ranglisten werden verfügbar sein"
+  addEvent.otherHint: "Participants and payments only" → "Nur Teilnehmer und Zahlungen"
+  addEvent.club: "Club" → "Verein"
+  addEvent.chooseClub: "Choose a club..." → "Wähle einen Verein aus..."
+  addEvent.course: "Course" → "Kurs"
+  addEvent.chooseCourse: "Choose a course..." → "Wähle einen Kurs aus..."
+  addEvent.noCourse: "No courses — add them in Clubs" → "Keine Kurse – füge sie unter „Clubs“ hinzu"
+  addEvent.format: "Competition format" → "Wettbewerbsformat"
+  addEvent.chooseFormat: "Choose a format..." → "Wählen Sie ein Format aus..."
+  addEvent.fee: "Fee per person (€)" → "Preis pro Person (€)"
+  addEvent.feeOptional: "optional" → "optional"
+  addEvent.feeHint: "A Payments tab will be available" → "Es wird eine Registerkarte „Zahlungen“ geben"
+  addEvent.maxParticipants: "Max spots" → "Maximale Anzahl"
+  addEvent.maxOptional: "optional" → "optional"
+  addEvent.maxHint: "Remaining spots will be shown" → "Die verbleibenden Plätze werden angezeigt"
+  addEvent.emailMessage: "Invitation message" → "Einladungstext"
+  addEvent.emailOptional: "optional" → "optional"
+  addEvent.emailPlaceholder: "E.g.: Meet at tee 1 at 9am..." → "Beispiel: Treffpunkt um 9 Uhr am Abschlag 1..."
+  addEvent.emailHint: "Included in the invitation email" → "In der Einladungs-E-Mail enthalten"
+  addEvent.save: "Create event" → "Veranstaltung erstellen"
+  addEvent.saving: "Saving..." → "Wird gespeichert..."
+  addEvent.cancel: "Cancel" → "Abbrechen"
+  addEvent.errorUnexpected: "Unexpected error" → "Unerwarteter Fehler"
+  addEvent.adminOnly: "You must be Admin to use this feature" → "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
+  events.title: "Events" → "Veranstaltungen"
+  events.subtitle: "{upcoming} upcoming · {past} past" → "{upcoming} Demnächst · {past} Vergangene Veranstaltungen"
+  events.upcoming: "Upcoming" → "Demnächst"
+  events.past: "Past" → "Vergangenheit"
+  events.noEvents: "No events for this group" → "Keine Veranstaltungen für diese Gruppe"
+  events.noEventsHint: "Create the first event to get started" → "Erstellen Sie das erste Ereignis, um loszulegen"
+  events.newEvent: "+ New event" → "+ Neue Veranstaltung"
+  events.going: "{count} going" → "{count} auf dem Weg"
+  events.goingMax: "{count}/{max} going" → "{count} / {max} geht"
+  events.deleteConfirm: "Delete this event?" → "Dieses Ereignis löschen?"
+  events.adminOnly: "You must be Admin to use this feature" → "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
+✅ de.json mis à jour !
+
+🌍 Traduction vers NL (2 sections manquantes)...
+  addEvent.title: "New event" → "Nieuw evenement"
+  addEvent.subtitle: "Add an event to the group" → "Een evenement aan de groep toevoegen"
+  addEvent.titleLabel: "Title *" → "Titel *"
+  addEvent.titlePlaceholder: "E.g.: April 2nd round" → "Bijvoorbeeld: de tweede ronde van april"
+  addEvent.location: "Location" → "Locatie"
+  addEvent.locationPlaceholder: "E.g.: GC Louvain-La-Neuve" → "Bijvoorbeeld: GC Louvain-La-Neuve"
+  addEvent.start: "Start *" → "Start *"
+  addEvent.end: "End" → "Einde"
+  addEvent.eventType: "Event type" → "Soort evenement"
+  addEvent.golf: "⛳ Golf round" → "⛳ Golfronde"
+  addEvent.other: "🎉 Other event" → "🎉 Ander evenement"
+  addEvent.golfHint: "Flights, scorecards and leaderboard will be available" → "Vluchten, scorekaarten en het klassement zullen beschikbaar zijn"
+  addEvent.otherHint: "Participants and payments only" → "Alleen deelnemers en betalingen"
+  addEvent.club: "Club" → "Club"
+  addEvent.chooseClub: "Choose a club..." → "Kies een club..."
+  addEvent.course: "Course" → "Cursus"
+  addEvent.chooseCourse: "Choose a course..." → "Kies een cursus..."
+  addEvent.noCourse: "No courses — add them in Clubs" → "Geen cursussen — voeg ze toe in Clubs"
+  addEvent.format: "Competition format" → "Wedstrijdopzet"
+  addEvent.chooseFormat: "Choose a format..." → "Kies een indeling..."
+  addEvent.fee: "Fee per person (€)" → "Prijs per persoon (€)"
+  addEvent.feeOptional: "optional" → "optioneel"
+  addEvent.feeHint: "A Payments tab will be available" → "Er komt een tabblad 'Betalingen' beschikbaar"
+  addEvent.maxParticipants: "Max spots" → "Max. aantal plaatsen"
+  addEvent.maxOptional: "optional" → "optioneel"
+  addEvent.maxHint: "Remaining spots will be shown" → "De resterende plaatsen worden weergegeven"
+  addEvent.emailMessage: "Invitation message" → "Uitnodigingsbericht"
+  addEvent.emailOptional: "optional" → "optioneel"
+  addEvent.emailPlaceholder: "E.g.: Meet at tee 1 at 9am..." → "Bijvoorbeeld: We spreken af bij tee 1 om 9 uur..."
+  addEvent.emailHint: "Included in the invitation email" → "Vermeld in de uitnodigingsmail"
+  addEvent.save: "Create event" → "Evenement aanmaken"
+  addEvent.saving: "Saving..." → "Bezig met opslaan..."
+  addEvent.cancel: "Cancel" → "Annuleren"
+  addEvent.errorUnexpected: "Unexpected error" → "Onverwachte fout"
+  addEvent.adminOnly: "You must be Admin to use this feature" → "Je moet beheerder zijn om deze functie te kunnen gebruiken"
+  events.title: "Events" → "Evenementen"
+  events.subtitle: "{upcoming} upcoming · {past} past" → "{upcoming} komende · {past} eerdere"
+  events.upcoming: "Upcoming" → "Binnenkort"
+  events.past: "Past" → "Verleden"
+  events.noEvents: "No events for this group" → "Er zijn geen evenementen voor deze groep"
+  events.noEventsHint: "Create the first event to get started" → "Maak het eerste evenement aan om aan de slag te gaan"
+  events.newEvent: "+ New event" → "+ Nieuw evenement"
+  events.going: "{count} going" → "{count} op weg"
+  events.goingMax: "{count}/{max} going" → "{count} / {max} is in de lucht"
+  events.deleteConfirm: "Delete this event?" → "Dit evenement verwijderen?"
+  events.adminOnly: "You must be Admin to use this feature" → "Je moet beheerder zijn om deze functie te kunnen gebruiken"
+✅ nl.json mis à jour !
+bash-3.2$ grep -r "Aucun\|Créer\|Envoyer\|Confirmer\|Retour\|Sauvegarder" src/app/\[locale\] --include="*.ts x" -l
+src/app/[locale]/(app)/groups/[id]/events/[eventId]/leaderboard/page.tsx
+bash-3.2$ npm run dev
+⠙[1G[0K⠹[1G[0K
+> golfgo@0.1.0 dev
+> next dev
+
+⠹[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.1.6[39m[22m (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.16:3000
+- Environments: .env.local
+
+[32m[1m✓[22m[39m Starting...
+[37m[1m○[22m[39m Compiling proxy ...
+[32m[1m✓[22m[39m Ready in 23.2s
+[37m[1m○[22m[39m Compiling /[locale]/my-events ...
+🌍 LocaleLayout locale: de
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /de/my-events [32m200[39m in 29.0s[2m (compile: 27.1s, proxy.ts: 399ms, render: 1550ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr [34m307[39m in 4.4s[2m (compile: 4.2s, proxy.ts: 8ms, render: 159ms)[22m
+[37m[1m○[22m[39m Compiling /[locale]/login ...
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/login [32m200[39m in 6.1s[2m (compile: 5.8s, proxy.ts: 8ms, render: 251ms)[22m
+🌍 LocaleLayout locale: en
+📦 messages keys: [
+  [32m'nav'[39m,            [32m'myEvents'[39m,      [32m'status'[39m,
+  [32m'teesheet'[39m,       [32m'calendar'[39m,      [32m'common'[39m,
+  [32m'communications'[39m, [32m'constraints'[39m,   [32m'clubs'[39m,
+  [32m'editEvent'[39m,      [32m'editGroup'[39m,     [32m'flightHistory'[39m,
+  [32m'flights'[39m,        [32m'leaderboard'[39m,   [32m'addParticipants'[39m,
+  [32m'participants'[39m,   [32m'payments'[39m,      [32m'results'[39m,
+  [32m'scorecards'[39m,     [32m'eventOverview'[39m, [32m'invitations'[39m,
+  [32m'members'[39m,        [32m'addMember'[39m,     [32m'addGroup'[39m,
+  [32m'groups'[39m,         [32m'editPlayer'[39m,    [32m'notOwner'[39m,
+  [32m'scorecard'[39m,      [32m'settings'[39m,      [32m'auth'[39m,
+  [32m'inviteYes'[39m,      [32m'inviteNo'[39m,      [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /en/login [32m200[39m in 124ms[2m (compile: 15ms, proxy.ts: 11ms, render: 98ms)[22m
+🌍 LocaleLayout locale: es
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /es/login [32m200[39m in 379ms[2m (compile: 27ms, proxy.ts: 42ms, render: 310ms)[22m
+🌍 LocaleLayout locale: en
+📦 messages keys: [
+  [32m'nav'[39m,            [32m'myEvents'[39m,      [32m'status'[39m,
+  [32m'teesheet'[39m,       [32m'calendar'[39m,      [32m'common'[39m,
+  [32m'communications'[39m, [32m'constraints'[39m,   [32m'clubs'[39m,
+  [32m'editEvent'[39m,      [32m'editGroup'[39m,     [32m'flightHistory'[39m,
+  [32m'flights'[39m,        [32m'leaderboard'[39m,   [32m'addParticipants'[39m,
+  [32m'participants'[39m,   [32m'payments'[39m,      [32m'results'[39m,
+  [32m'scorecards'[39m,     [32m'eventOverview'[39m, [32m'invitations'[39m,
+  [32m'members'[39m,        [32m'addMember'[39m,     [32m'addGroup'[39m,
+  [32m'groups'[39m,         [32m'editPlayer'[39m,    [32m'notOwner'[39m,
+  [32m'scorecard'[39m,      [32m'settings'[39m,      [32m'auth'[39m,
+  [32m'inviteYes'[39m,      [32m'inviteNo'[39m,      [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /en/login [32m200[39m in 125ms[2m (compile: 10ms, proxy.ts: 8ms, render: 108ms)[22m
+ GET /en/clubs [33m404[39m in 862ms[2m (compile: 478ms, proxy.ts: 6ms, render: 379ms)[22m
+ GET /en/courses [33m404[39m in 107ms[2m (compile: 8ms, proxy.ts: 7ms, render: 92ms)[22m
+ GET /en/courses [33m404[39m in 53ms[2m (compile: 7ms, proxy.ts: 6ms, render: 40ms)[22m
+ GET /fr/courses [33m404[39m in 62ms[2m (compile: 9ms, proxy.ts: 7ms, render: 47ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr [34m307[39m in 226ms[2m (compile: 22ms, proxy.ts: 5ms, render: 199ms)[22m
+ GET /fr/login [32m200[39m in 255ms[2m (compile: 10ms, proxy.ts: 6ms, render: 239ms)[22m
+ GET /fr/my-events [32m200[39m in 284ms[2m (compile: 22ms, proxy.ts: 150ms, render: 112ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/my-events [32m200[39m in 198ms[2m (compile: 9ms, proxy.ts: 117ms, render: 72ms)[22m
+[37m[1m○[22m[39m Compiling /[locale]/groups/[id]/events/[eventId]/participants ...
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 6.1s[2m (compile: 5.9s, proxy.ts: 117ms, render: 39ms)[22m
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events [32m200[39m in 2.4s[2m (compile: 2.3s, proxy.ts: 66ms, render: 38ms)[22m
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 127ms[2m (compile: 28ms, proxy.ts: 66ms, render: 32ms)[22m
+[32m[1m✓[22m[39m Compiled in 1774ms
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 1242ms[2m (compile: 572ms, proxy.ts: 436ms, render: 234ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 365ms[2m (compile: 7ms, proxy.ts: 281ms, render: 77ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 143ms[2m (compile: 8ms, proxy.ts: 63ms, render: 72ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 131ms[2m (compile: 8ms, proxy.ts: 62ms, render: 61ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 230ms[2m (compile: 5ms, proxy.ts: 179ms, render: 47ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 1317ms[2m (compile: 47ms, proxy.ts: 110ms, render: 1160ms)[22m
+ GET /fr/my-events [32m200[39m in 478ms[2m (compile: 309ms, proxy.ts: 50ms, render: 118ms)[22m
+[32m[1m✓[22m[39m Compiled in 221ms
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/my-events [32m200[39m in 1097ms[2m (compile: 351ms, proxy.ts: 138ms, render: 607ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/my-events [32m200[39m in 249ms[2m (compile: 6ms, proxy.ts: 163ms, render: 80ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/my-events [32m200[39m in 540ms[2m (compile: 150ms, proxy.ts: 249ms, render: 141ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/my-events [32m200[39m in 241ms[2m (compile: 5ms, proxy.ts: 183ms, render: 52ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/my-events [32m200[39m in 191ms[2m (compile: 5ms, proxy.ts: 142ms, render: 45ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/my-events [32m200[39m in 415ms[2m (compile: 9ms, proxy.ts: 58ms, render: 348ms)[22m
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 279ms[2m (compile: 104ms, proxy.ts: 62ms, render: 113ms)[22m
+ GET /fr/my-events [32m200[39m in 81ms[2m (compile: 7ms, proxy.ts: 56ms, render: 18ms)[22m
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 109ms[2m (compile: 9ms, proxy.ts: 51ms, render: 49ms)[22m
+[32m[1m✓[22m[39m Compiled in 239ms
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 838ms[2m (compile: 128ms, proxy.ts: 554ms, render: 156ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 209ms[2m (compile: 5ms, proxy.ts: 82ms, render: 122ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 157ms[2m (compile: 6ms, proxy.ts: 56ms, render: 95ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 286ms[2m (compile: 5ms, proxy.ts: 229ms, render: 52ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 137ms[2m (compile: 5ms, proxy.ts: 52ms, render: 80ms)[22m
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/teesheet [32m200[39m in 1795ms[2m (compile: 1635ms, proxy.ts: 127ms, render: 34ms)[22m
+[32m[1m✓[22m[39m Compiled in 211ms
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/teesheet [32m200[39m in 653ms[2m (compile: 206ms, proxy.ts: 170ms, render: 278ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/teesheet [32m200[39m in 141ms[2m (compile: 6ms, proxy.ts: 57ms, render: 78ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/teesheet [32m200[39m in 144ms[2m (compile: 6ms, proxy.ts: 60ms, render: 78ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/teesheet [32m200[39m in 220ms[2m (compile: 6ms, proxy.ts: 146ms, render: 68ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/teesheet [32m200[39m in 124ms[2m (compile: 14ms, proxy.ts: 53ms, render: 58ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/teesheet [32m200[39m in 125ms[2m (compile: 10ms, proxy.ts: 55ms, render: 60ms)[22m
+ GET /fr/scorecard [32m200[39m in 1570ms[2m (compile: 1491ms, proxy.ts: 54ms, render: 25ms)[22m
+[32m[1m✓[22m[39m Compiled in 262ms
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/scorecard [32m200[39m in 1489ms[2m (compile: 473ms, proxy.ts: 322ms, render: 694ms)[22m
+ GET /fr/scorecard [32m200[39m in 359ms[2m (compile: 13ms, proxy.ts: 232ms, render: 114ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/scorecard [32m200[39m in 200ms[2m (compile: 4ms, proxy.ts: 136ms, render: 60ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/scorecard [32m200[39m in 154ms[2m (compile: 9ms, proxy.ts: 97ms, render: 48ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/scorecard [32m200[39m in 116ms[2m (compile: 5ms, proxy.ts: 54ms, render: 57ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/scorecard [32m200[39m in 101ms[2m (compile: 4ms, proxy.ts: 52ms, render: 45ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/scorecard [32m200[39m in 147ms[2m (compile: 4ms, proxy.ts: 108ms, render: 35ms)[22m
+ GET /fr/groups [32m200[39m in 1039ms[2m (compile: 922ms, proxy.ts: 86ms, render: 31ms)[22m
+[32m[1m✓[22m[39m Compiled in 553ms
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 1226ms[2m (compile: 204ms, proxy.ts: 784ms, render: 238ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 254ms[2m (compile: 6ms, proxy.ts: 182ms, render: 66ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 162ms[2m (compile: 6ms, proxy.ts: 92ms, render: 64ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 294ms[2m (compile: 6ms, proxy.ts: 238ms, render: 50ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 114ms[2m (compile: 8ms, proxy.ts: 63ms, render: 43ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 115ms[2m (compile: 6ms, proxy.ts: 61ms, render: 48ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 241ms[2m (compile: 4ms, proxy.ts: 192ms, render: 45ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 112ms[2m (compile: 5ms, proxy.ts: 65ms, render: 42ms)[22m
+^C[?25h
+⠙[1G[0Kbash-3.2$ npm r[K[K[K[K[Knode scripts/translate.csj
+node:internal/modules/cjs/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/didierlozet/Golfgo/scripts/translate.csj'
+[90m    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)[39m
+[90m    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)[39m
+[90m    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1227:37)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)[39m
+[90m    at node:internal/main/run_main_module:33:47[39m {
+  code: [32m'MODULE_NOT_FOUND'[39m,
+  requireStack: []
+}
+
+Node.js v24.13.0
+bash-3.2$ node scripts/translate.cjs
+
+🌍 Traduction vers FR (1 sections manquantes)...
+  nav.constraints: "Constraints" → "Contraintes"
+✅ fr.json mis à jour !
+
+🌍 Traduction vers ES (1 sections manquantes)...
+  nav.constraints: "Constraints" → "Restricciones"
+✅ es.json mis à jour !
+
+🌍 Traduction vers DE (1 sections manquantes)...
+  nav.constraints: "Constraints" → "Einschränkungen"
+✅ de.json mis à jour !
+
+🌍 Traduction vers NL (1 sections manquantes)...
+  nav.constraints: "Constraints" → "Beperkingen"
+✅ nl.json mis à jour !
+bash-3.2$ npm run dev
+⠙[1G[0K
+> golfgo@0.1.0 dev
+> next dev
+
+⠙[1G[0K[1m[38;2;173;127;168m▲ Next.js 16.1.6[39m[22m (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.16:3000
+- Environments: .env.local
+
+[32m[1m✓[22m[39m Starting...
+[32m[1m✓[22m[39m Ready in 6.7s
+[37m[1m○[22m[39m Compiling /[locale]/groups ...
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 7.0s[2m (compile: 6.1s, proxy.ts: 443ms, render: 505ms)[22m
+ GET /fr/groups [32m200[39m in 88ms[2m (compile: 10ms, proxy.ts: 53ms, render: 25ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/members [32m200[39m in 2.8s[2m (compile: 2.6s, proxy.ts: 63ms, render: 113ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups [32m200[39m in 250ms[2m (compile: 11ms, proxy.ts: 108ms, render: 130ms)[22m
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/constraints [32m200[39m in 1044ms[2m (compile: 874ms, proxy.ts: 66ms, render: 105ms)[22m
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 944ms[2m (compile: 834ms, proxy.ts: 50ms, render: 60ms)[22m
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 128ms[2m (compile: 12ms, proxy.ts: 50ms, render: 66ms)[22m
+^C[?25h
+⠙[1G[0Kbash-3.2$ npm run dev
+
+> golfgo@0.1.0 dev
+> next dev
+
+[1m[38;2;173;127;168m▲ Next.js 16.1.6[39m[22m (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.16:3000
+- Environments: .env.local
+
+[32m[1m✓[22m[39m Starting...
+[32m[1m✓[22m[39m Ready in 13.7s
+[37m[1m○[22m[39m Compiling /[locale]/groups/[id]/events/[eventId]/participants ...
+🌍 LocaleLayout locale: fr
+📦 messages keys: [
+  [32m'nav'[39m,          [32m'myEvents'[39m,       [32m'status'[39m,
+  [32m'teesheet'[39m,     [32m'calendar'[39m,       [32m'common'[39m,
+  [32m'clubs'[39m,        [32m'communications'[39m, [32m'constraints'[39m,
+  [32m'editEvent'[39m,    [32m'editGroup'[39m,      [32m'flightHistory'[39m,
+  [32m'flights'[39m,      [32m'leaderboard'[39m,    [32m'addParticipants'[39m,
+  [32m'participants'[39m, [32m'payments'[39m,       [32m'results'[39m,
+  [32m'scorecards'[39m,   [32m'eventOverview'[39m,  [32m'invitations'[39m,
+  [32m'members'[39m,      [32m'addMember'[39m,      [32m'addGroup'[39m,
+  [32m'groups'[39m,       [32m'editPlayer'[39m,     [32m'notOwner'[39m,
+  [32m'scorecard'[39m,    [32m'settings'[39m,       [32m'auth'[39m,
+  [32m'inviteYes'[39m,    [32m'inviteNo'[39m,       [32m'addEvent'[39m,
+  [32m'events'[39m
+]
+ GET /fr/groups/e03cf990-a8a0-474b-900d-91f1c55b5faa/events/13d7d353-9d11-4af5-ae9b-4b97a62158a1/participants [32m200[39m in 10.0s[2m (compile: 8.5s, proxy.ts: 1001ms, render: 415ms)[22m
+[32m[1m✓[22m[39m Compiled in 21s
