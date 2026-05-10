@@ -381,7 +381,10 @@ export default function InvitationsPage() {
       )}
 
       <div className="flex items-center justify-between mb-6">
-       
+        <div>
+          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('invitations.title')}</h1>
+          
+        </div>
       </div>
 
       <div className={`rounded-xl border border-white/60 shadow-sm p-5 mb-6 ${!isOwner ? 'opacity-60' : ''}`}
