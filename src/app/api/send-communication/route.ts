@@ -227,6 +227,7 @@ export async function POST(req: Request) {
           .select('*', { count: 'exact', head: true })
           .eq('event_id', eventId).eq('status', 'GOING')
         placesRestantes = String(Math.max(0, event.max_participants - (count ?? 0)))
+        console.log('[PLACES] max:', event.max_participants, 'count:', count, 'result:', placesRestantes)
       }
 
       const templateVars: Record<string, string> = {
