@@ -163,6 +163,7 @@ function buildEmailHtml({
 }
 
 export async function POST(req: Request) {
+  console.log('[COMM] POST called')
   try {
     const { groupId, playerIds, subject: commSubject, body: commBody, eventId } = await req.json()
     console.log('[COMM] received:', { groupId, eventId, playerIds: playerIds?.length })
