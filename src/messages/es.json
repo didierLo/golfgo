@@ -32,7 +32,7 @@
       "past": "Pasado"
     },
     "stats": {
-      "next": "Siguiente",
+      "next": "próximo",
       "confirmed": "Confirmado",
       "invitations": "Invitaciones",
       "upcomingEvents": "próximos eventos",
@@ -623,7 +623,7 @@
     "members": "Miembros",
     "constraints": "Restricciones",
     "events": "evento(s)",
-    "next": "siguiente",
+    "next": "próximo",
     "deleteConfirm": "¿Desea eliminar este grupo?",
     "adminOnly": "Debes ser administrador para utilizar esta función"
   },

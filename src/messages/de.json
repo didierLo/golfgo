@@ -382,10 +382,10 @@
     "remove": "Entfernen",
     "removeConfirm": "Diesen Teilnehmer aus der Veranstaltung entfernen?",
     "member": "Mitglied",
-    "going": "auf dem Weg",
-    "going18": "18 Stunden",
+    "going": "angemeldet",
+    "going18": "18 angemeldet",
     "going9": "9H",
-    "invited": "eingeladen",
+    "invited": "eingeladet",
     "declined": "abgelehnt",
     "total": "insgesamt",
     "notInvited": "nicht eingeladen"
@@ -480,16 +480,16 @@
     "toastDeclined": "Die Beteiligung ging zurück",
     "toast18": "Bestätigt – 18 Löcher ⛳",
     "toast9": "Bestätigt – 9 Löcher ⛳",
-    "going9out": "Ich schließe mich an – 9H Front",
-    "going9outActive": "✓ Ich mache mit – 9H Front",
-    "going9in": "Ich mache mit – 9H Zurück",
-    "going9inActive": "✓ Ich mache mit — 9H Zurück",
-    "toast9out": "Bestätigt – 9H Front ⛳",
-    "toast9in": "Bestätigt – 9H zurück ⛳"
+    "going9out": "Ich schließe mich an – 9L Front",
+    "going9outActive": "✓ Ich mache mit – 9L Front",
+    "going9in": "Ich mache mit – 9L Back",
+    "going9inActive": "✓ Ich mache mit — 9L Back",
+    "toast9out": "Bestätigt – 9L Front ⛳",
+    "toast9in": "Bestätigt – 9L Back ⛳"
   },
   "invitations": {
     "title": "Einladungen",
-    "subtitle": "{invited} eingeladen · {going} geht",
+    "subtitle": "{invited} eingeladet · {going} angemeldet",
     "newInvitations": "Neue Einladungen",
     "resend": "Erneut senden",
     "resendWarning": "Die ausgewählten Spieler werden wieder auf den Status „Eingeladen“ zurückgesetzt, und es wird eine neue E-Mail versendet.",
@@ -534,7 +534,7 @@
     "noParticipations": "Keine Beteiligungen",
     "eventsCount": "{count} Veranstaltung(en)",
     "typeToSearch": "Geben Sie den Namen eines Mitglieds ein, um dessen Beiträge anzuzeigen",
-    "invited": "Zu Gast bei „{date}“",
+    "invited": "eingeladet„{date}“",
     "adminOnly": "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
   },
   "members": {
@@ -789,16 +789,16 @@
     "noEventsHint": "Erstellen Sie das erste Ereignis, um loszulegen",
     "newEvent": "+ Neue Veranstaltung",
     "going": "{count} Angemeldet",
-    "goingMax": "{count} / {max} geht",
+    "goingMax": "{count} / {max} angemeldet",
     "deleteConfirm": "Dieses Ereignis löschen?",
     "adminOnly": "Sie müssen Administrator sein, um diese Funktion nutzen zu können"
   },
   "holes": {
-    "18": "18 Stunden",
-    "9out": "9H-front",
-    "9in": "9H-back",
-    "out": "Raus",
-    "in": "In"
+    "18": "18L ",
+    "9out": "9L-front",
+    "9in": "9L-back",
+    "out": "Front",
+    "in": "Back"
   },
   "importClubs": {
     "templateDesc": "Laden Sie die GolfGo-Vorlage herunter.",
