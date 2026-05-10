@@ -42,7 +42,7 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
   <tr><td>
     <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:#FEF9C3;border:2px solid #CA8A04;border-radius:12px;padding:16px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:22px;width:36px;">🌅</td>
+        <td style="font-size:22px;width:36px;">🏌️</td>
         <td style="padding-left:12px;">
           <div style="font-size:15px;font-weight:700;color:#92400E;">Je participe</div>
           <div style="font-size:12px;color:#B45309;margin-top:2px;">9 trous Front · Trous 1–9</div>
@@ -56,7 +56,7 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
   <tr><td>
     <a href="${yes9backLink}" style="display:block;text-decoration:none;background:#FFEDD5;border:2px solid #EA580C;border-radius:12px;padding:16px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:22px;width:36px;">🌇</td>
+        <td style="font-size:22px;width:36px;">🏌️‍♀️</td>
         <td style="padding-left:12px;">
           <div style="font-size:15px;font-weight:700;color:#9A3412;">Je participe</div>
           <div style="font-size:12px;color:#C2410C;margin-top:2px;">9 trous Back · Trous 10–18</div>
@@ -186,8 +186,7 @@ export async function POST(req: Request) {
     // Charger l'event si fourni
     let event: any = null
     if (eventId) {
-      const { data } = await supabase.from('events').select('id, title, location, starts_at, group_id').eq('id', eventId).single()
-      event = data
+    const { data } = await supabase.from('events').select('id, title, location, starts_at, group_id, max_participants').eq('id', eventId).single()
     }
 
     const eventDate = event ? formatDate(event.starts_at) : ''
@@ -222,9 +221,13 @@ export async function POST(req: Request) {
       const yes9backLink  = token ? `${appUrl}/invite/yes?token=${token}&holes=9&section=in` : eventLink
       const noLink       = token ? `${appUrl}/invite/no?token=${token}` : eventLink
 
-      const placesRestantes = event?.max_participants
-        ? String(Math.max(0, event.max_participants - (event.going_count ?? 0)))
-        : '—'
+      let placesRestantes = '—'
+      if (event?.max_participants) {
+        const { count } = await supabase.from('event_participants')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', eventId).eq('status', 'GOING')
+        placesRestantes = String(Math.max(0, event.max_participants - (count ?? 0)))
+      }
 
       const templateVars: Record<string, string> = {
         first_name:        player.first_name,
