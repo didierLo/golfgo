@@ -165,7 +165,7 @@ function buildEmailHtml({
 export async function POST(req: Request) {
   try {
     const { groupId, playerIds, subject: commSubject, body: commBody, eventId } = await req.json()
-   
+    console.log('[COMM] received:', { groupId, eventId, playerIds: playerIds?.length })
     console.log('[COMM] groupId:', groupId, 'eventId:', eventId, 'playerIds:', playerIds?.length)
     if (!groupId || !playerIds?.length || !commSubject || !commBody) {
       return Response.json({ success: false, error: 'Paramètres manquants' }, { status: 400 })
