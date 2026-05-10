@@ -114,6 +114,7 @@ function buildEmailHtml({
 
             <p style="margin:0 0 28px;font-size:16px;font-weight:600;color:#185FA5;">${eventTitle}</p>
 
+            ${eventDate ? `
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
               <tr><td style="padding:16px 20px;">
                 <table cellpadding="0" cellspacing="0">
@@ -128,7 +129,7 @@ function buildEmailHtml({
                   </tr>` : ''}
                 </table>
               </td></tr>
-            </table>
+            </table>` : ''}
 
             ${eventMessage ? `
             <div style="margin-bottom:28px;">
@@ -167,7 +168,7 @@ export async function POST(req: Request) {
   try {
     const { groupId, playerIds, subject: commSubject, body: commBody, eventId } = await req.json()
     console.log('[COMM] received:', { groupId, eventId, playerIds: playerIds?.length })
-    console.log('[COMM] groupId:', groupId, 'eventId:', eventId, 'playerIds:', playerIds?.length)
+
     if (!groupId || !playerIds?.length || !commSubject || !commBody) {
       return Response.json({ success: false, error: 'Paramètres manquants' }, { status: 400 })
     }
@@ -183,32 +184,56 @@ export async function POST(req: Request) {
       .single()
     const ownerPlayer = (groupData?.owner as any)?.[0]?.players
     const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
-    const groupName   = groupData?.name ?? ''
+    const groupName   = (groupData as any)?.name ?? ''
 
     // Charger l'event si fourni
+    let event: any = undefined
     if (eventId) {
-      const { data } = await supabase.from('events').select('id, title, location, starts_at, group_id, max_participants').eq('id', eventId).single()
-      event = data
+      const { data } = await supabase
+        .from('events')
+        .select('id, title, location, starts_at, group_id, max_participants')
+        .eq('id', eventId)
+        .single()
+      event = data ?? undefined
+      console.log('[EVENT]', event)
     }
 
     const eventDate = event ? formatDate(event.starts_at) : ''
     const eventTime = event ? formatTime(event.starts_at) : ''
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-    const eventLink = event ? `${appUrl}/groups/${event.group_id}/events/${event.id}` : `${appUrl}/groups`
+    const eventLink = event
+      ? `${appUrl}/groups/${event.group_id}/events/${event.id}`
+      : `${appUrl}/groups`
 
-    // Charger les membres avec tokens si event fourni
-    let participantTokens: Record<string, string> = {}
+    // Compter les places restantes
+    let placesRestantes = '—'
+    if (event?.max_participants && eventId) {
+      const { count } = await supabase
+        .from('event_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+        .eq('status', 'GOING')
+      placesRestantes = String(Math.max(0, event.max_participants - (count ?? 0)))
+      console.log('[PLACES] max:', event.max_participants, 'count:', count, 'result:', placesRestantes)
+    }
+
+    // Charger les tokens si event fourni
+    const participantTokens: Record<string, string> = {}
     if (eventId) {
-      const { data: parts } = await supabase.from('event_participants')
-        .select('player_id, invite_token').eq('event_id', eventId).in('player_id', playerIds)
+      const { data: parts } = await supabase
+        .from('event_participants')
+        .select('player_id, invite_token')
+        .eq('event_id', eventId)
+        .in('player_id', playerIds)
       parts?.forEach((p: any) => { if (p.invite_token) participantTokens[p.player_id] = p.invite_token })
     }
 
     // Charger les membres
     const { data: playersData } = await supabase
-      .from('players').select('id, first_name, surname, email').in('id', playerIds)
+      .from('players')
+      .select('id, first_name, surname, email')
+      .in('id', playerIds)
 
-    // La variable {{yes_button}} dans le body déclenche l'affichage des boutons
     const hasYesButton = commBody.includes('{{yes_button}}')
 
     let sent = 0, skipped = 0
@@ -217,50 +242,41 @@ export async function POST(req: Request) {
     for (const player of playersData || []) {
       if (!player.email) { skipped++; continue }
 
-      const token        = participantTokens[player.id]
-      const yes18Link    = token ? `${appUrl}/invite/yes?token=${token}&holes=18` : eventLink
+      const token         = participantTokens[player.id]
+      const yes18Link     = token ? `${appUrl}/invite/yes?token=${token}&holes=18` : eventLink
       const yes9frontLink = token ? `${appUrl}/invite/yes?token=${token}&holes=9&section=out` : eventLink
       const yes9backLink  = token ? `${appUrl}/invite/yes?token=${token}&holes=9&section=in` : eventLink
-      const noLink       = token ? `${appUrl}/invite/no?token=${token}` : eventLink
-
-      let placesRestantes = '—'
-      if (event?.max_participants) {
-        const { count } = await supabase.from('event_participants')
-          .select('*', { count: 'exact', head: true })
-          .eq('event_id', eventId).eq('status', 'GOING')
-        placesRestantes = String(Math.max(0, event.max_participants - (count ?? 0)))
-        console.log('[PLACES] max:', event.max_participants, 'count:', count, 'result:', placesRestantes)
-      }
+      const noLink        = token ? `${appUrl}/invite/no?token=${token}` : eventLink
 
       const templateVars: Record<string, string> = {
-        first_name:        player.first_name,
-        surname:           player.surname,
-        player_name:       `${player.first_name} ${player.surname}`,
-        group_name:        groupName,
-        owner_name:        ownerName,
-        event_title:       event?.title ?? '',
-        event_date:        eventDate,
-        event_time:        eventTime,
-        start_time:        eventTime,
-        places_restantes:  placesRestantes,
-        yes_button:        '', // sera remplacé visuellement dans le HTML
+        first_name:       player.first_name,
+        surname:          player.surname,
+        player_name:      `${player.first_name} ${player.surname}`,
+        group_name:       groupName,
+        owner_name:       ownerName,
+        event_title:      event?.title ?? '',
+        event_date:       eventDate,
+        event_time:       eventTime,
+        start_time:       eventTime,
+        places_restantes: placesRestantes,
+        yes_button:       '',
       }
 
       const resolvedSubject = applyTemplateVariables(commSubject, templateVars)
-      // On retire {{yes_button}} du body car on l'insère via HTML
-      const resolvedBody = applyTemplateVariables(
+      const resolvedBody    = applyTemplateVariables(
         commBody.replace('{{yes_button}}', ''),
         templateVars
       ).trim()
 
       if (!EMAIL_ENABLED) {
-        console.log(`[PREVIEW] To: ${player.email} | Subject: ${resolvedSubject}`)
+        console.log(`[PREVIEW] To: ${player.email} | Subject: ${resolvedSubject} | Date: ${eventDate} | Places: ${placesRestantes}`)
         sent++; continue
       }
 
       const html = buildEmailHtml({
         eventTitle:    event?.title ?? groupName,
-        eventDate, eventTime,
+        eventDate,
+        eventTime,
         eventLocation: event?.location ?? null,
         eventMessage:  resolvedBody || null,
         eventLink,
@@ -269,8 +285,10 @@ export async function POST(req: Request) {
       })
 
       const { error: emailErr } = await resend.emails.send({
-        from: 'GolfGo <info@golfgo.be>', to: player.email,
-        subject: resolvedSubject, html,
+        from:    'GolfGo <info@golfgo.be>',
+        to:      player.email,
+        subject: resolvedSubject,
+        html,
       })
 
       if (emailErr) { errors.push(`${player.first_name} ${player.surname}: ${emailErr.message}`) }
