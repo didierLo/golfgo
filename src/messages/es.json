@@ -382,8 +382,8 @@
     "remove": "Eliminar",
     "removeConfirm": "¿Quieres eliminar a este jugador del evento?",
     "member": "Miembro",
-    "going": "de camino",
-    "going18": "18 horas",
+    "going": "inscito",
+    "going18": "18 hoyos",
     "going9": "9H",
     "invited": "invitado",
     "declined": "rechazado",
@@ -485,11 +485,11 @@
     "going9in": "Me uno a — 9H Back",
     "going9inActive": "✓ Me apunto — 9H Back",
     "toast9out": "Confirmado — 9H Front ⛳",
-    "toast9in": "Confirmado — Vuelta de 9 hoyos ⛳"
+    "toast9in": "Confirmado — 9 hoyos ⛳"
   },
   "invitations": {
     "title": "Invitaciones",
-    "subtitle": "{invited} Invitado · {going} Asistiré",
+    "subtitle": "{invited} Invitado · {going} inscito",
     "newInvitations": "Nuevas invitaciones",
     "resend": "Reenviar",
     "resendWarning": "Los jugadores seleccionados volverán a tener el estatus de «invitado» y se les enviará un nuevo correo electrónico.",
@@ -788,7 +788,7 @@
     "noEvents": "No hay eventos para este grupo",
     "noEventsHint": "Crea el primer evento para empezar",
     "newEvent": "+ Nuevo evento",
-    "going": "{count} de camino",
+    "going": "{count} inscrito",
     "goingMax": "{count} / {max} en marcha",
     "deleteConfirm": "¿Quieres eliminar este evento?",
     "adminOnly": "Debes ser administrador para utilizar esta función"
@@ -797,8 +797,8 @@
     "18": "18 h",
     "9out": "9H-front",
     "9in": "9H-back",
-    "out": "Fuera",
-    "in": "En"
+    "out": "Front",
+    "in": "Back"
   },
   "importClubs": {
     "templateDesc": "Descarga la plantilla de GolfGo.",

@@ -64,7 +64,7 @@
     "GOING": "Going",
     "INVITED": "Invited",
     "DECLINED": "Declined",
-    "WAITLIST": "Waitlist"
+    "WAITLIST": "Waiting list"
   },
   "teesheet": {
     "title": "Tee Sheet",
@@ -144,7 +144,7 @@
     "GOING": "Confirmed",
     "INVITED": "Invited",
     "DECLINED": "Declined",
-    "WAITLIST": "Waitlist"
+    "WAITLIST": "Waiting list"
   },
   "templates": {
     "applyTo": "Apply to",
