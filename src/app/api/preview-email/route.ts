@@ -16,11 +16,60 @@ function applyVars(text: string, vars: Record<string, string>): string {
   )
 }
 
-// ── Invitation HTML (avec 9T) ─────────────────────────────────────────────────
-function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, eventMessage, yes18Link, yes9Link, noLink, eventLink }: {
+function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string) {
+  return `
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
+  <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-size:22px;width:36px;">⛳</td>
+      <td style="padding-left:12px;">
+        <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
+        <div style="font-size:12px;color:#16A34A;margin-top:2px;">18 trous · Parcours complet</div>
+      </td>
+      <td align="right" style="font-size:20px;">→</td>
+    </tr></table>
+  </a>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
+  <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:#FEF9C3;border:2px solid #CA8A04;border-radius:12px;padding:16px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-size:22px;width:36px;">🏌️</td>
+      <td style="padding-left:12px;">
+        <div style="font-size:15px;font-weight:700;color:#92400E;">Je participe</div>
+        <div style="font-size:12px;color:#B45309;margin-top:2px;">9 trous Front · Trous 1–9</div>
+      </td>
+      <td align="right" style="font-size:20px;">→</td>
+    </tr></table>
+  </a>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
+  <a href="${yes9backLink}" style="display:block;text-decoration:none;background:#FFEDD5;border:2px solid #EA580C;border-radius:12px;padding:16px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-size:22px;width:36px;">🏌️‍♀️</td>
+      <td style="padding-left:12px;">
+        <div style="font-size:15px;font-weight:700;color:#9A3412;">Je participe</div>
+        <div style="font-size:12px;color:#C2410C;margin-top:2px;">9 trous Back · Trous 10–18</div>
+      </td>
+      <td align="right" style="font-size:20px;">→</td>
+    </tr></table>
+  </a>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td>
+  <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-size:22px;width:36px;">😔</td>
+      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+      <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
+    </tr></table>
+  </a>
+</td></tr></table>`
+}
+
+function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, eventMessage, yes18Link, yes9frontLink, yes9backLink, noLink, eventLink }: {
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null
-  yes18Link: string; yes9Link: string; noLink: string; eventLink: string
+  yes18Link: string; yes9frontLink: string; yes9backLink: string
+  noLink: string; eventLink: string
 }) {
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Invitation — ${eventTitle}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -47,30 +96,7 @@ function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, 
   ${eventMessage ? `<div style="margin-bottom:28px;"><p style="margin:0;font-size:14px;color:#334155;line-height:1.9;">${eventMessage.replace(/\n/g, '<br/>')}</p></div>` : ''}
   <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
   <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
-    <a href="${yes18Link}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #16A34A;border-radius:10px;padding:14px 20px;">
-      <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:15px;font-weight:600;color:#15803D;">Je participe — 18 trous</td>
-        <td align="right" style="font-size:18px;">⛳</td>
-      </tr></table>
-    </a>
-  </td></tr></table>
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
-    <a href="${yes9Link}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #D97706;border-radius:10px;padding:14px 20px;">
-      <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:15px;font-weight:600;color:#B45309;">Je participe — 9 trous</td>
-        <td align="right" style="font-size:18px;">🏌️</td>
-      </tr></table>
-    </a>
-  </td></tr></table>
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td>
-    <a href="${noLink}" style="display:block;text-decoration:none;background:#ffffff;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px 20px;">
-      <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:15px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
-        <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
-      </tr></table>
-    </a>
-  </td></tr></table>
+  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink)}
   <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
     Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
   </p>
@@ -82,7 +108,6 @@ function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, 
 </body></html>`
 }
 
-// ── Teesheet HTML ─────────────────────────────────────────────────────────────
 function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights }: {
   playerName: string; playerFlightNumber: number; eventTitle: string
   eventDate: string; eventLocation: string | null
@@ -94,19 +119,18 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
     const headerText  = isMyFlight ? '#ffffff'  : '#374151'
     const borderColor = isMyFlight ? '#185FA5'  : '#E5E7EB'
     const playersHtml = flight.players.map((p, i) => {
-      const isMe = `${p.first_name} ${p.surname}` === playerName
+      const isMe    = `${p.first_name} ${p.surname}` === playerName
       const badge9T = (p as any).holes_played === 9
         ? `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#FEF3C7;color:#B45309;margin-left:6px;">9T</span>`
         : ''
-      return `
-        <tr style="border-bottom:1px solid #F3F4F6;">
-          <td style="padding:10px 16px;font-size:13px;color:${isMe ? '#185FA5' : '#374151'};font-weight:${isMe ? '600' : '400'};">
-            ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}${badge9T}
-          </td>
-          <td style="padding:10px 16px;font-size:12px;color:#9CA3AF;text-align:right;">${p.whs !== null ? `WHS ${p.whs}` : ''}</td>
-        </tr>`
-       }).join('')
-     return `<div style="margin-bottom:16px;border:1.5px solid ${borderColor};border-radius:10px;overflow:hidden;">
+      return `<tr style="border-bottom:1px solid #F3F4F6;">
+        <td style="padding:10px 16px;font-size:13px;color:${isMe ? '#185FA5' : '#374151'};font-weight:${isMe ? '600' : '400'};">
+          ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}${badge9T}
+        </td>
+        <td style="padding:10px 16px;font-size:12px;color:#9CA3AF;text-align:right;">${p.whs !== null ? `WHS ${p.whs}` : ''}</td>
+      </tr>`
+    }).join('')
+    return `<div style="margin-bottom:16px;border:1.5px solid ${borderColor};border-radius:10px;overflow:hidden;">
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr style="background:${headerBg};">
           <td style="padding:10px 16px;font-size:13px;font-weight:600;color:${headerText};">
@@ -151,8 +175,10 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
 </body></html>`
 }
 
-// ── Communication HTML ────────────────────────────────────────────────────────
-function buildCommHtml({ subject, body, eventTitle }: { subject: string; body: string; eventTitle?: string }) {
+function buildCommHtml({ subject, body, eventTitle, hasButtons, yes18Link, yes9frontLink, yes9backLink, noLink }: {
+  subject: string; body: string; eventTitle?: string
+  hasButtons: boolean; yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string
+}) {
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>${subject}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
@@ -164,7 +190,11 @@ function buildCommHtml({ subject, body, eventTitle }: { subject: string; body: s
 </td></tr>
 <tr><td style="background:#ffffff;padding:36px 32px;">
   ${eventTitle ? `<p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#185FA5;">${eventTitle}</p>` : ''}
-  <div style="font-size:14px;color:#334155;line-height:1.9;">${body.replace(/\n/g, '<br/>')}</div>
+  <div style="font-size:14px;color:#334155;line-height:1.9;margin-bottom:${hasButtons ? '28px' : '0'};">${body.replace(/\n/g, '<br/>')}</div>
+  ${hasButtons ? `
+  <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
+  <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
+  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink)}` : ''}
 </td></tr>
 <tr><td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
   <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Envoyé via GolfGo · golfgo.be</p>
@@ -173,7 +203,6 @@ function buildCommHtml({ subject, body, eventTitle }: { subject: string; body: s
 </body></html>`
 }
 
-// ── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -193,26 +222,25 @@ export async function POST(req: Request) {
         .eq('id', event.group_id).eq('groups_players.role', 'owner').single()
 
       const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-      const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : 'L\'organisateur'
-
-      const eventDate = formatDate(event.starts_at)
-      const eventTime = formatTime(event.starts_at)
+      const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : "L'organisateur"
+      const eventDate   = formatDate(event.starts_at)
+      const eventTime   = formatTime(event.starts_at)
       const bodyTemplate = groupData?.template_invitation_body ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\n\nAu plaisir de te revoir,\n{{owner_name}}"
 
       const vars: Record<string, string> = {
         first_name: 'Prénom', player_name: 'Prénom Nom', player_surname: 'Nom',
-        event_title: event.title, event_date: eventDate, event_time: eventTime,
-        owner_name: ownerName,
+        event_title: event.title, event_date: eventDate, event_time: eventTime, owner_name: ownerName,
       }
 
       const resolvedBody = applyVars(event.email_message ?? bodyTemplate, vars)
       const html = buildInvitationHtml({
         eventTitle: event.title, eventDate, eventTime,
         eventLocation: event.location, eventMessage: resolvedBody,
-        yes18Link: `${appUrl}/invite/yes?token=PREVIEW&holes=18`,
-        yes9Link:  `${appUrl}/invite/yes?token=PREVIEW&holes=9`,
-        noLink:    `${appUrl}/invite/no?token=PREVIEW`,
-        eventLink: `${appUrl}/groups/${event.group_id}/events/${eventId}`,
+        yes18Link:    `${appUrl}/invite/yes?token=PREVIEW&holes=18`,
+        yes9frontLink: `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=out`,
+        yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,
+        noLink:        `${appUrl}/invite/no?token=PREVIEW`,
+        eventLink:     `${appUrl}/groups/${event.group_id}/events/${eventId}`,
       })
       return Response.json({ html, subject: applyVars(groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}', vars) })
     }
@@ -227,11 +255,9 @@ export async function POST(req: Request) {
       const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
       })
-
-      // Aperçu pour le premier flight
-      const firstFlight = flights?.[0]
+      const firstFlight   = flights?.[0]
       const previewPlayer = firstFlight?.players?.[0]
-      const playerName = previewPlayer ? `${previewPlayer.first_name} ${previewPlayer.surname}` : 'Joueur'
+      const playerName    = previewPlayer ? `${previewPlayer.first_name} ${previewPlayer.surname}` : 'Joueur'
 
       const html = buildTeesheetHtml({
         playerName, playerFlightNumber: firstFlight?.flight_number ?? 1,
@@ -246,22 +272,37 @@ export async function POST(req: Request) {
       const { data: group } = await supabase.from('groups').select('name').eq('id', groupId).single()
 
       let eventTitle: string | undefined
+      let eventDate = ''
+      let eventTime = ''
       if (eventId) {
-        const { data: event } = await supabase.from('events').select('title').eq('id', eventId).single()
+        const { data: event } = await supabase.from('events')
+          .select('title, starts_at').eq('id', eventId).single()
         eventTitle = event?.title
+        eventDate  = event ? formatDate(event.starts_at) : ''
+        eventTime  = event ? formatTime(event.starts_at) : ''
       }
+
+      const hasButtons = commBody.includes('{{yes_button}}')
 
       const vars: Record<string, string> = {
         first_name: 'Prénom', surname: 'Nom', player_name: 'Prénom Nom',
-        group_name: group?.name ?? 'Mon groupe', owner_name: 'L\'organisateur',
-        places_restantes: '5',
+        group_name: group?.name ?? 'Mon groupe', owner_name: "L'organisateur",
+        places_restantes: '5', event_title: eventTitle ?? '',
+        event_date: eventDate, event_time: eventTime, start_time: eventTime,
+        yes_button: '',
       }
 
       const resolvedSubject = applyVars(subject, vars)
-      const resolvedBody    = applyVars(commBody, vars)
-        .replace(/{{yes_button}}/g, '<a href="#" style="display:inline-block;background:#16A34A;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;margin-right:8px;">✓ Oui</a><a href="#" style="display:inline-block;background:#fff;color:#DC2626;text-decoration:none;font-size:14px;font-weight:600;padding:10px 24px;border-radius:8px;border:1.5px solid #DC2626;">✗ Non</a>')
+      const resolvedBody    = applyVars(commBody.replace('{{yes_button}}', ''), vars).trim()
 
-      const html = buildCommHtml({ subject: resolvedSubject, body: resolvedBody, eventTitle })
+      const html = buildCommHtml({
+        subject: resolvedSubject, body: resolvedBody, eventTitle,
+        hasButtons,
+        yes18Link:     `${appUrl}/invite/yes?token=PREVIEW&holes=18`,
+        yes9frontLink: `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=out`,
+        yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,
+        noLink:        `${appUrl}/invite/no?token=PREVIEW`,
+      })
       return Response.json({ html, subject: resolvedSubject })
     }
 
