@@ -186,9 +186,9 @@ export async function POST(req: Request) {
     const groupName   = groupData?.name ?? ''
 
     // Charger l'event si fourni
-    let event: any = null
     if (eventId) {
-    const { data } = await supabase.from('events').select('id, title, location, starts_at, group_id, max_participants').eq('id', eventId).single()
+      const { data } = await supabase.from('events').select('id, title, location, starts_at, group_id, max_participants').eq('id', eventId).single()
+      event = data
     }
 
     const eventDate = event ? formatDate(event.starts_at) : ''
