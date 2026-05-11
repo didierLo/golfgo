@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
+import { randomUUID } from 'crypto'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -214,18 +215,59 @@ export async function POST(req: Request) {
         .eq('event_id', eventId)
         .eq('status', 'GOING')
       placesRestantes = String(Math.max(0, event.max_participants - (count ?? 0)))
-      console.log('[PLACES] max:', event.max_participants, 'count:', count, 'result:', placesRestantes)
     }
 
-    // Charger les tokens si event fourni
+    const hasYesButton = commBody.includes('{{yes_button}}')
+
+    // ── Upsert event_participants + tokens ───────────────────────────────────
+    // Seulement si un event est lié et que les boutons oui/non sont présents
     const participantTokens: Record<string, string> = {}
+
     if (eventId) {
-      const { data: parts } = await supabase
+      // Récupérer les lignes existantes pour ces joueurs
+      const { data: existing } = await supabase
         .from('event_participants')
-        .select('player_id, invite_token')
+        .select('player_id, invite_token, status')
         .eq('event_id', eventId)
         .in('player_id', playerIds)
-      parts?.forEach((p: any) => { if (p.invite_token) participantTokens[p.player_id] = p.invite_token })
+
+      const existingMap: Record<string, { token: string; status: string }> = {}
+      for (const row of existing ?? []) {
+        existingMap[row.player_id] = { token: row.invite_token, status: row.status }
+      }
+
+      // Pour chaque joueur : créer s'il n'existe pas, ou récupérer/générer son token
+      for (const playerId of playerIds) {
+        if (existingMap[playerId]) {
+          // Déjà dans event_participants — réutiliser ou générer le token
+          let token = existingMap[playerId].token
+          if (!token) {
+            token = randomUUID()
+            await supabase
+              .from('event_participants')
+              .update({ invite_token: token })
+              .eq('event_id', eventId)
+              .eq('player_id', playerId)
+          }
+          participantTokens[playerId] = token
+        } else {
+          // Pas encore invité → créer avec statut INVITED
+          const token = randomUUID()
+          const { error: insertErr } = await supabase
+            .from('event_participants')
+            .insert({
+              event_id:     eventId,
+              player_id:    playerId,
+              status:       'INVITED',
+              invite_token: token,
+            })
+          if (!insertErr) {
+            participantTokens[playerId] = token
+          } else {
+            console.error('[INSERT PARTICIPANT]', insertErr.message)
+          }
+        }
+      }
     }
 
     // Charger les membres
@@ -233,8 +275,6 @@ export async function POST(req: Request) {
       .from('players')
       .select('id, first_name, surname, email')
       .in('id', playerIds)
-
-    const hasYesButton = commBody.includes('{{yes_button}}')
 
     let sent = 0, skipped = 0
     const errors: string[] = []
@@ -269,7 +309,7 @@ export async function POST(req: Request) {
       ).trim()
 
       if (!EMAIL_ENABLED) {
-        console.log(`[PREVIEW] To: ${player.email} | Subject: ${resolvedSubject} | Date: ${eventDate} | Places: ${placesRestantes}`)
+        console.log(`[PREVIEW] To: ${player.email} | Subject: ${resolvedSubject} | Token: ${token ?? 'none'}`)
         sent++; continue
       }
 
