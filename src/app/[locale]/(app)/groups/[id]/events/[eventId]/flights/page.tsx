@@ -10,13 +10,18 @@ import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
-type HolesMode = 'mixed' | 'separated'
+type HolesSection = 'out' | 'in' | null
 type DragState = { playerId: string; playerName: string; fromFlightNo: number }
 
-function holesBadge(p: any) {
+// ── Badge 9F / 9B / 9T correct ───────────────────────────────────────────────
+function holesBadge(p: { holes_played?: number | null; holes_section?: HolesSection }) {
   if (!p.holes_played || p.holes_played === 18) return null
-  const label = p.holes_section === 'out' ? '9F' : p.holes_section === 'in' ? '9B' : '9H'
-  const color  = p.holes_section === 'in' ? 'bg-orange-100 text-orange-700' : 'bg-amber-100 text-amber-700'
+  const label = p.holes_section === 'out' ? '9F'
+              : p.holes_section === 'in'  ? '9B'
+              : '9T'
+  const color = p.holes_section === 'in'  ? 'bg-orange-100 text-orange-700'
+              : p.holes_section === 'out' ? 'bg-amber-100 text-amber-700'
+              : 'bg-slate-100 text-slate-500'
   return <span className={`text-[10px] font-bold px-1 py-0.5 rounded ${color}`}>{label}</span>
 }
 
@@ -31,21 +36,21 @@ export default function FlightsPage() {
 
   const { players, flights, setFlights, loading, loadData, generate, save, remove } = useFlights(eventId)
 
-  const [flightSize,    setFlightSize]    = useState(4)
-  const [balanceWHS,    setBalanceWHS]    = useState(true)
-  const [iterations,    setIterations]    = useState(800)
-  const [historyWindow, setHistoryWindow] = useState(180)
-  const [holesMode,     setHolesMode]     = useState<HolesMode>('mixed')
-  const [pastFlights,   setPastFlights]   = useState<any[]>([])
-  const [forbiddenPairs,setForbiddenPairs]= useState<Set<string>>(new Set())
-  const [preferredPairs,setPreferredPairs]= useState<Set<string>>(new Set())
-  const [generating,    setGenerating]    = useState(false)
-  const [saving,        setSaving]        = useState(false)
-  const [dragState,     setDragState]     = useState<DragState | null>(null)
-  const [dragOverFlight,setDragOverFlight]= useState<number | null>(null)
-  const [dragOverPlayer,setDragOverPlayer]= useState<string | null>(null)
-  const [manualEdits,   setManualEdits]   = useState(false)
-  const [adminToast,    setAdminToast]    = useState<string | null>(null)
+  const [flightSize,     setFlightSize]     = useState(4)
+  const [balanceWHS,     setBalanceWHS]     = useState(true)
+  const [iterations,     setIterations]     = useState(800)
+  const [historyWindow,  setHistoryWindow]  = useState(180)
+  const [holesMode,      setHolesMode]      = useState<'mixed' | 'separated'>('mixed')
+  const [pastFlights,    setPastFlights]    = useState<any[]>([])
+  const [forbiddenPairs, setForbiddenPairs] = useState<Set<string>>(new Set())
+  const [preferredPairs, setPreferredPairs] = useState<Set<string>>(new Set())
+  const [generating,     setGenerating]     = useState(false)
+  const [saving,         setSaving]         = useState(false)
+  const [dragState,      setDragState]      = useState<DragState | null>(null)
+  const [dragOverFlight, setDragOverFlight] = useState<number | null>(null)
+  const [dragOverPlayer, setDragOverPlayer] = useState<string | null>(null)
+  const [manualEdits,    setManualEdits]    = useState(false)
+  const [adminToast,     setAdminToast]     = useState<string | null>(null)
 
   function showAdminToast() {
     setAdminToast(t('flights.adminOnly'))
@@ -73,12 +78,11 @@ export default function FlightsPage() {
       .from('flights')
       .select(`id, created_at, flight_players(player_id, players(id, first_name, surname, whs))`)
     setPastFlights((data ?? []).map((f: any) => ({
-      date: f.created_at,
+      date:    f.created_at,
       players: f.flight_players.map((fp: any) => fp.players),
     })))
   }
 
-  // Joueurs 9H (front ou back) et 18H
   const players9front = players.filter((p: any) => p.holes_played === 9 && p.holes_section === 'out')
   const players9back  = players.filter((p: any) => p.holes_played === 9 && p.holes_section === 'in')
   const players9      = players.filter((p: any) => p.holes_played === 9)
@@ -93,9 +97,7 @@ export default function FlightsPage() {
       if (holesMode === 'mixed' || !has9holers) {
         await generate(baseOpts)
       } else {
-        // 18H en premier
         await generate({ ...baseOpts, overridePlayers: players18, flightNoOffset: 0, groupLabel: '18T' })
-        // 9H-Front
         if (players9front.length > 0) {
           await generate({
             ...baseOpts,
@@ -105,7 +107,6 @@ export default function FlightsPage() {
             groupLabel: '9F',
           })
         }
-        // 9H-Back
         if (players9back.length > 0) {
           await generate({
             ...baseOpts,
@@ -158,7 +159,7 @@ export default function FlightsPage() {
   const sortedFlights = [...flights].sort((a: any, b: any) => a.flight_no - b.flight_no)
   const flightGroups = holesMode === 'separated' && has9holers
     ? [
-        { label: t('holes.18'), color: '#185FA5', bg: '#EBF3FC', flights: sortedFlights.filter((f: any) => f.groupLabel === '18T' || !f.groupLabel) },
+        { label: t('holes.18'),   color: '#185FA5', bg: '#EBF3FC', flights: sortedFlights.filter((f: any) => f.groupLabel === '18T' || !f.groupLabel) },
         { label: t('holes.9out'), color: '#92400E', bg: '#FEF3C7', flights: sortedFlights.filter((f: any) => f.groupLabel === '9F') },
         { label: t('holes.9in'),  color: '#9a3412', bg: '#FFF7ED', flights: sortedFlights.filter((f: any) => f.groupLabel === '9B') },
       ].filter(g => g.flights.length > 0)
@@ -254,7 +255,7 @@ export default function FlightsPage() {
               <div>
                 <p className="text-[12px] font-bold text-amber-800">
                   {t('flights.holes9Warning', { count: players9.length })}
-                  {players9front.length > 0 && <span className="ml-1 font-normal text-amber-700">({players9front.length} Front{players9back.length > 0 ? ` · ${players9back.length} Back` : ''})</span>}
+                  {players9front.length > 0 && <span className="ml-1 font-normal text-amber-700">({players9front.length} 9F{players9back.length > 0 ? ` · ${players9back.length} 9B` : ''})</span>}
                 </p>
                 <p className="text-[11px] text-amber-600 mt-0.5">{t('flights.holes9Question')}</p>
               </div>
@@ -299,8 +300,8 @@ export default function FlightsPage() {
       <div className="mb-6">
         <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">
           {t('flights.confirmedPlayers', { count: players.length })}
-          {players9front.length > 0 && <span className="ml-2 text-amber-700 normal-case font-semibold text-[10px]">· {players9front.length} 9H Front</span>}
-          {players9back.length > 0 && <span className="ml-1 text-orange-700 normal-case font-semibold text-[10px]">· {players9back.length} 9H Back</span>}
+          {players9front.length > 0 && <span className="ml-2 text-amber-700 normal-case font-semibold text-[10px]">· {players9front.length} 9F</span>}
+          {players9back.length > 0  && <span className="ml-1 text-orange-700 normal-case font-semibold text-[10px]">· {players9back.length} 9B</span>}
         </p>
         <div className="flex flex-wrap gap-2">
           {players.length === 0 && <p className="text-[13px] text-slate-500">{t('flights.noConfirmed')}</p>}
