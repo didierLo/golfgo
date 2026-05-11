@@ -16,6 +16,7 @@ type Participant = {
   responded_at: string | null
   holes_played: number | null
   holes_section: HolesSection
+  response_message: string | null          // ← NOUVEAU
   players: { first_name: string; surname: string; whs: number | null }
 }
 type Event     = { id: string; title: string; starts_at: string }
@@ -63,6 +64,133 @@ function holesLabel(holes: number | null, section: HolesSection): string {
   return '9T'
 }
 
+// ─── Modal message ──────────────────────────────────────────────────────────
+function MessageModal({
+  participant,
+  isOwner,
+  eventId,
+  onClose,
+  onSaved,
+}: {
+  participant: Participant
+  isOwner: boolean
+  eventId: string
+  onClose: () => void
+  onSaved: (playerId: string, msg: string) => void
+}) {
+  const [text, setText]     = useState(participant.response_message ?? '')
+  const [saving, setSaving] = useState(false)
+  const [saved,  setSaved]  = useState(false)
+
+  const canEdit = !isOwner // le joueur peut éditer le sien; l'owner lit seulement
+
+  async function handleSave() {
+    if (!text.trim()) return
+    setSaving(true)
+    await supabase
+      .from('event_participants')
+      .update({ response_message: text.slice(0, 300) })
+      .eq('event_id', eventId)
+      .eq('player_id', participant.player_id)
+    setSaved(true)
+    setSaving(false)
+    onSaved(participant.player_id, text.slice(0, 300))
+  }
+
+  async function handleDelete() {
+    setSaving(true)
+    await supabase
+      .from('event_participants')
+      .update({ response_message: null })
+      .eq('event_id', eventId)
+      .eq('player_id', participant.player_id)
+    onSaved(participant.player_id, '')
+    onClose()
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(15,23,42,0.45)', backdropFilter: 'blur(4px)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+        <button onClick={onClose}
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-[18px] leading-none">
+          ✕
+        </button>
+
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+            style={{ background: '#EBF3FC', color: '#0C447C' }}>
+            {participant.players.first_name[0]}{participant.players.surname[0]}
+          </div>
+          <div>
+            <p className="text-[14px] font-bold text-slate-800">
+              {participant.players.first_name} {participant.players.surname}
+            </p>
+            <p className="text-[11px] text-slate-400">Message de réponse</p>
+          </div>
+        </div>
+
+        {isOwner ? (
+          // Owner : lecture seule
+          <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[80px]">
+            {participant.response_message || <span className="text-slate-400 italic">Aucun message</span>}
+          </div>
+        ) : (
+          // Joueur : éditable
+          <>
+            <textarea
+              value={text}
+              onChange={e => {
+                const lines = e.target.value.split('\n')
+                if (lines.length <= 3) setText(e.target.value)
+              }}
+              maxLength={300}
+              rows={3}
+              placeholder="Votre message pour l'organisateur…"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 resize-none"
+            />
+            <div className="flex items-center justify-between mt-1 mb-4">
+              <span className="text-[11px] text-slate-400">{text.length}/300 · max 3 lignes</span>
+              {participant.response_message && (
+                <button onClick={handleDelete}
+                  className="text-[11px] text-red-400 hover:text-red-600 font-semibold">
+                  Supprimer le message
+                </button>
+              )}
+            </div>
+            {saved ? (
+              <p className="text-center text-[13px] text-[#3B6D11] font-semibold">✓ Message enregistré</p>
+            ) : (
+              <button onClick={handleSave} disabled={!text.trim() || saving}
+                className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
+                {saving ? 'Enregistrement…' : 'Enregistrer le message'}
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Badge "M" ───────────────────────────────────────────────────────────────
+function MBadge({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title="Voir le message"
+      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-colors hover:scale-110"
+      style={{ background: '#185FA5', color: '#fff' }}
+    >
+      M
+    </button>
+  )
+}
+
+// ─── Page principale ─────────────────────────────────────────────────────────
 export default function ParticipantsPage() {
   const params  = useParams()
   const groupId = params.id      as string
@@ -84,6 +212,18 @@ export default function ParticipantsPage() {
   const [upcomingEvents,  setUpcomingEvents]  = useState<Event[]>([])
   const [statusMatrix,    setStatusMatrix]    = useState<Record<string, Record<string, string>>>({})
   const [overviewLoading, setOverviewLoading] = useState(false)
+  const [msgModal,        setMsgModal]        = useState<Participant | null>(null)  // ← NOUVEAU
+
+  // Identifiant du joueur connecté (pour autoriser l'édition de son propre message)
+  const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        supabase.from('players').select('id').eq('user_id', data.user.id).single()
+          .then(({ data: p }) => { if (p) setMyPlayerId(p.id) })
+      }
+    })
+  }, [])
 
   function formatDate(d: string) {
     return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
@@ -113,7 +253,7 @@ export default function ParticipantsPage() {
     setLoading(true)
     const { data, error } = await supabase
       .from('event_participants')
-      .select(`player_id, status, responded_at, holes_played, holes_section, players(first_name, surname, whs)`)
+      .select(`player_id, status, responded_at, holes_played, holes_section, response_message, players(first_name, surname, whs)`)
       .eq('event_id', evId)
     if (error) { console.error(error); setLoading(false); return }
     setParticipants((data || []) as any)
@@ -152,14 +292,12 @@ export default function ParticipantsPage() {
     loadParticipants(selectedEventId)
   }
 
-  // Cycle: 18 → 9-Front → 9-Back → 18
   async function toggleHoles(playerId: string, current: number | null, currentSection: HolesSection) {
     let nextHoles: 9 | 18 = 18
     let nextSection: HolesSection = null
     if (!current || current === 18) { nextHoles = 9; nextSection = 'out' }
     else if (current === 9 && currentSection === 'out') { nextHoles = 9; nextSection = 'in' }
     else { nextHoles = 18; nextSection = null }
-
     await supabase.from('event_participants')
       .update({ holes_played: nextHoles, holes_section: nextSection })
       .eq('event_id', selectedEventId).eq('player_id', playerId)
@@ -180,6 +318,13 @@ export default function ParticipantsPage() {
     else { setSortField(field); setSortDir('asc') }
   }
 
+  // Mise à jour locale après sauvegarde du message
+  function handleMessageSaved(playerId: string, msg: string) {
+    setParticipants(prev => prev.map(p =>
+      p.player_id === playerId ? { ...p, response_message: msg || null } : p
+    ))
+  }
+
   const statusOrder = { GOING: 0, INVITED: 1, WAITLIST: 2, DECLINED: 3 }
   const displayed = [...participants].sort((a, b) => {
     const dir = sortDir === 'asc' ? 1 : -1
@@ -194,14 +339,14 @@ export default function ParticipantsPage() {
     return 0
   })
 
-  const going      = participants.filter(p => p.status === 'GOING')
-  const going18    = going.filter(p => !p.holes_played || p.holes_played === 18)
+  const going       = participants.filter(p => p.status === 'GOING')
+  const going18     = going.filter(p => !p.holes_played || p.holes_played === 18)
   const going9front = going.filter(p => p.holes_played === 9 && p.holes_section === 'out')
   const going9back  = going.filter(p => p.holes_played === 9 && p.holes_section === 'in')
-  const going9     = going.filter(p => p.holes_played === 9)
-  const invited    = participants.filter(p => p.status === 'INVITED').length
-  const declined   = participants.filter(p => p.status === 'DECLINED').length
-  const has9holers = going9.length > 0
+  const going9      = going.filter(p => p.holes_played === 9)
+  const invited     = participants.filter(p => p.status === 'INVITED').length
+  const declined    = participants.filter(p => p.status === 'DECLINED').length
+  const has9holers  = going9.length > 0
 
   function SortBtn({ field, label }: { field: SortField; label: string }) {
     const active = sortField === field
@@ -221,8 +366,28 @@ export default function ParticipantsPage() {
     </div>
   )
 
+  // Détermine si le joueur connecté peut éditer le message d'un participant
+  function canEditMessage(p: Participant): boolean {
+    if (isOwner) return false            // owner lit seulement
+    return p.player_id === myPlayerId   // le joueur édite uniquement le sien
+  }
+  function canSeeMessage(p: Participant): boolean {
+    return isOwner || p.player_id === myPlayerId
+  }
+
   return (
     <div className="p-5 sm:p-6 max-w-5xl">
+      {/* Modal message */}
+      {msgModal && (
+        <MessageModal
+          participant={msgModal}
+          isOwner={isOwner}
+          eventId={selectedEventId}
+          onClose={() => setMsgModal(null)}
+          onSaved={(pid, msg) => { handleMessageSaved(pid, msg); setMsgModal(null) }}
+        />
+      )}
+
       <div className="flex items-center gap-4 mb-5">
         <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
           <button type="button" onClick={() => setViewMode('list')}
@@ -303,12 +468,14 @@ export default function ParticipantsPage() {
           ) : (
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-              <div className={`grid gap-4 px-4 py-3 bg-white/30 border-b border-white/40 ${
+              {/* Header */}
+              <div className={`grid gap-3 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[minmax(140px,1fr)_70px_55px_55px] sm:grid-cols-[minmax(160px,1fr)_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                  : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_150px_130px]'
+                  ? 'grid-cols-[minmax(140px,1fr)_20px_70px_55px_55px] sm:grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
+                  : 'grid-cols-[1fr_20px_70px_55px_70px] sm:grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
               }`}>
                 <SortBtn field="name"   label={t('participants.player')} />
+                <span />  {/* colonne badge M */}
                 <SortBtn field="holes"  label={t('participants.holes')} />
                 <SortBtn field="whs"    label={t('participants.whs')} />
                 <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">{t('participants.respondedOn')}</span>
@@ -327,16 +494,38 @@ export default function ParticipantsPage() {
               ) : (
                 displayed.map((p, i) => (
                   <div key={p.player_id}
-                    className={`grid gap-4 px-4 py-3 items-center ${
+                    className={`grid gap-3 px-4 py-3 items-center ${
                       isOwner
-                        ? 'grid-cols-[minmax(140px,1fr)_70px_55px_55px] sm:grid-cols-[minmax(160px,1fr)_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                        : 'grid-cols-[1fr_70px_55px_70px] sm:grid-cols-[1fr_70px_60px_80px_150px_130px]'
+                        ? 'grid-cols-[minmax(140px,1fr)_20px_70px_55px_55px] sm:grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
+                        : 'grid-cols-[1fr_20px_70px_55px_70px] sm:grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
+
+                    {/* Nom */}
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-[13px] font-semibold text-slate-800 truncate">
                         {p.players.first_name} {p.players.surname}
                       </span>
                     </div>
+
+                    {/* Badge M */}
+                    <div className="flex items-center justify-center">
+                      {canSeeMessage(p) && p.response_message ? (
+                        <MBadge onClick={() => setMsgModal(p)} />
+                      ) : canEditMessage(p) ? (
+                        /* bouton discret pour ajouter un message */
+                        <button
+                          onClick={() => setMsgModal(p)}
+                          title="Ajouter un message"
+                          className="w-5 h-5 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-300 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors"
+                        >
+                          +
+                        </button>
+                      ) : (
+                        <span />
+                      )}
+                    </div>
+
+                    {/* Holes */}
                     <div className="flex justify-start">
                       {isOwner && p.status === 'GOING' ? (
                         <button type="button"
@@ -354,9 +543,17 @@ export default function ParticipantsPage() {
                         <HolesBadge holes={p.holes_played} section={p.holes_section} />
                       )}
                     </div>
+
+                    {/* WHS */}
                     <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
+
+                    {/* Responded at */}
                     <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
+
+                    {/* Status */}
                     <div><Badge status={p.status} /></div>
+
+                    {/* Actions owner */}
                     {isOwner && (
                       <div className="hidden sm:flex justify-center items-center gap-1">
                         {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
