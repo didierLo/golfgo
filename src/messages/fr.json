@@ -743,7 +743,8 @@
     "errorTitle": "Lien invalide",
     "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
   },
-  "addEvent": {.
+
+    "addEvent": {
     "title": "Nouvel événement",
     "subtitle": "Ajouter un événement au groupe",
     "titleLabel": "Titre *",
@@ -780,6 +781,7 @@
     "errorUnexpected": "Erreur inattendue",
     "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
   },
+
   "events": {
     "title": "Événements",
     "subtitle": "{upcoming} à venir · {past} passé",
