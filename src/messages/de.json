@@ -122,7 +122,7 @@
   "clubs": {
     "title": "Clubs & Plätze",
     "subtitle": "Verfügbare Clubs und Plätze verwalten",
-    "import": "Import aus Verbandsdatei (XLS)",
+    "import": "Import aus einer Excel-Datei",
     "manual": "Manuelle Verwaltung"
   },
   "communications": {
@@ -187,20 +187,20 @@
       "headerColor": "Farbe der Kopfzeile",
       "defaultColor": "GolfGo-Standard",
       "bgImage": "Hintergrundbild",
-      "bgImageDesc": "Nur mobile Veranstaltungskarten",
+      "bgImageDesc": "Nur mobile Spielstandskarten",
       "addBgImage": "+ Hintergrundbild hinzufügen",
       "logoDesc": "PNG, JPG – ersetzt das GolfGo-Logo",
-      "bgImageDesc2": "JPG, PNG – Hintergrund für mobile Veranstaltungskarten",
+      "bgImageDesc2": "JPG, PNG – Hintergrund für mobile Spielstandskarten",
       "uploading": "Wird hochgeladen...",
       "tabs": {
         "invitation": "Einladungs-E-Mail",
-        "teesheet": "E-Mail mit dem Spielplan",
+        "teesheet": "E-Mail mit der Abfahrtsliste",
         "print": "Dokumente"
       },
       "subject": "Betreff",
       "body": "Nachrichtentext",
       "teesheetBodyDesc": "Dieser Text erscheint in der E-Mail vor der Flugübersicht",
-      "yesButtonDesc": "Verwende {var}, um die Schaltflächen „Ich bin dabei / Ich kann nicht“ an beliebiger Stelle in deiner Nachricht einzufügen.",
+      "yesButtonDesc": "Verwende {yes_button}, um die Schaltflächen „Ich bin dabei 18, 9F, 9B, Ich kann nicht“ an beliebiger Stelle in deiner Nachricht einzufügen.",
       "saveGroup": "Für die gesamte Gruppe speichern",
       "saveEvent": "Für: {name}",
       "save": "Speichern",
@@ -240,7 +240,7 @@
     },
     "forbidden": {
       "title": "Verboten",
-      "desc": "Diese Spieler werden niemals in derselben Gruppe spielen",
+      "desc": "Diese Spieler werden selten in derselben Gruppe spielen",
       "empty": "Keine verbotenen Einschränkungen"
     },
     "preferred": {
@@ -261,9 +261,9 @@
     "other": "🎉 Sonstige Veranstaltung",
     "club": "Verein",
     "chooseClub": "Wähle einen Verein aus...",
-    "course": "Kurs",
-    "chooseCourse": "Wähle einen Kurs aus...",
-    "noCourse": "Keine Kurse – füge sie unter „Clubs“ hinzu",
+    "course": "Plätz",
+    "chooseCourse": "Wähle einen Plätz aus...",
+    "noCourse": "Keine Plätz– füge sie unter „Clubs“ hinzu",
     "format": "Wettbewerbsformat",
     "chooseFormat": "Wählen Sie ein Format aus...",
     "fee": "Preis pro Person (€)",
@@ -339,7 +339,7 @@
     "generating": "Wird generiert...",
     "confirmedPlayers": "Bestätigte Spieler ({count})",
     "plays9": "{count} 9H spielen",
-    "noConfirmed": "Keine bestätigten Spieler (TEILNEHMEND)",
+    "noConfirmed": "Keine bestätigten Spieler",
     "flightsTitle": "Flights",
     "noFlights": "Es wurden keine Flüge generiert",
     "generateHint": "Parameter konfigurieren und auf \"Generieren\" klicken",
@@ -375,7 +375,7 @@
     "whs": "WHS",
     "respondedOn": "Geantwortet am",
     "status": "Status",
-    "actions": "Aktionen",
+    "actions": "Bearbeiten",
     "yes": "Ja",
     "no": "Nein",
     "reset": "Zurücksetzen",
@@ -405,14 +405,14 @@
     "actions": "Aktionen",
     "noParticipants": "Keine bestätigten Teilnehmer (TEILNEHMEN)",
     "statuses": {
-      "PAID": "Paid",
-      "PENDING": "Pending",
-      "EXEMPT": "Exempt"
+      "PAID": "Bezahlt",
+      "PENDING": "In Bearbeitung",
+      "EXEMPT": "Befreit"
     },
     "buttons": {
-      "PAID": "Paid",
-      "PENDING": "Pending",
-      "EXEMPT": "Exempt"
+      "PAID": "Bezahlt",
+      "PENDING": "In Bearbeitung",
+      "EXEMPT": "Befreit"
     }
   },
   "results": {
@@ -439,11 +439,11 @@
     "cancel": "Abbrechen",
     "create": "Erstellen",
     "creating": "...",
-    "course": "Kurs",
-    "chooseCourse": "Wähle einen Kurs aus...",
+    "course": "Plätz",
+    "chooseCourse": "Wähle einen Plätz aus...",
     "newCourse": "+ New",
     "clubName": "Vereinsname",
-    "courseName": "Kursname",
+    "courseName": "Plätz name",
     "events": "Veranstaltungen",
     "upcoming": "Demnächst",
     "recent": "Aktuell",
@@ -759,9 +759,9 @@
     "otherHint": "Nur Teilnehmer und Zahlungen",
     "club": "Verein",
     "chooseClub": "Wähle einen Verein aus...",
-    "course": "Kurs",
-    "chooseCourse": "Wähle einen Kurs aus...",
-    "noCourse": "Keine Kurse – füge sie unter „Clubs“ hinzu",
+    "course": "Plätz",
+    "chooseCourse": "Wähle einen Plätz aus...",
+    "noCourse": "Keine Plätz – füge sie unter „Clubs“ hinzu",
     "format": "Wettbewerbsformat",
     "chooseFormat": "Wählen Sie ein Format aus...",
     "fee": "Preis pro Person (€)",
@@ -811,7 +811,7 @@
     "importing": "Wird geladen...",
     "resultTitle": "Import abgeschlossen",
     "clubsCreated": "gegründete Vereine",
-    "coursesCreated": "erstellte Kurse",
+    "coursesCreated": "erstellte Plätz",
     "teesCreated": "entworfene T-Shirts",
     "skipped": "{count} bereits vorhandene Einträge wurden übersprungen",
     "importAnother": "Eine weitere Datei importieren",

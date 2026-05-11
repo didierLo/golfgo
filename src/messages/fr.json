@@ -127,7 +127,7 @@
   },
   "communications": {
     "title": "Communications",
-    "subtitle": "Emails et modèles de groupe",
+    "subtitle": "Modèles",
     "tabs": {
       "send": "✉️ Nouveau message",
       "templates": "🎨 Modèles"
@@ -173,7 +173,7 @@
       "WAITLIST": "Liste d'attente"
     },
     "templates": {
-      "applyTo": "S'inscrire'",
+      "applyTo": "S'inscrire",
       "groupTemplate": "Modèle de groupe (par défaut)",
       "groupTemplateDesc": "Tous les événements utiliseront ce modèle, sauf s'ils sont personnalisés",
       "eventTemplate": "Propre à un événement",
@@ -187,20 +187,20 @@
       "headerColor": "Couleur de l'en-tête",
       "defaultColor": "GolfGo par défaut",
       "bgImage": "Image d'arrière-plan",
-      "bgImageDesc": "Uniquement les cartes événementielles mobiles",
+      "bgImageDesc": "Uniquement les cartes de score mobiles",
       "addBgImage": "+ Ajouter une image d'arrière-plan",
       "logoDesc": "PNG, JPG — remplace le logo GolfGo",
-      "bgImageDesc2": "JPG, PNG — arrière-plan des cartes d'événements pour mobile",
+      "bgImageDesc2": "JPG, PNG — arrière-plan des cartes de score pour mobile",
       "uploading": "Chargement en cours...",
       "tabs": {
-        "invitation": "E-mail d'invitation",
-        "teesheet": "E-mail de confirmation de réservation",
-        "print": "Documents"
+        "invitation": "Email d'invitation",
+        "teesheet": "Email aved la liste des départs",
+        "print": "Imprimer"
       },
       "subject": "Objet",
       "body": "Corps du message",
-      "teesheetBodyDesc": "Ce texte apparaît avant le tableau des flight dans l'e-mail",
-      "yesButtonDesc": "Utilisez {var} pour insérer les boutons 'Je suis partant / Je ne peux pas' n'importe où dans votre message.",
+      "teesheetBodyDesc": "Ce texte apparaît avant le tableau des flight dans l'email",
+      "yesButtonDesc": "Utilisez {yes_button} pour insérer les boutons 'Je suis partant 18T, 9T Front, 9T Back, je ne peux pas.",
       "saveGroup": "Enregistrer pour tout le groupe",
       "saveEvent": "Pour : {name}",
       "save": "Enregistrer",
@@ -208,7 +208,7 @@
       "reset": "↺ Réinitialiser",
       "print": {
         "title": "Personnalisation des documents",
-        "desc": "En-tête, pied de page et logo sur les feuilles de départ imprimées — à venir"
+        "desc": "En-tête, pied de page et logo sur les feuilles de départ imprimées"
       }
     },
     "toasts": {
@@ -241,12 +241,12 @@
     "forbidden": {
       "title": "Eviter",
       "desc": "Ces joueurs seront rarement dans le même groupe",
-      "empty": "Aucune contrainte interdite"
+      "empty": "Aucune contrainte"
     },
     "preferred": {
       "title": "Préférer",
       "desc": "Ces joueurs seront placés ensemble si possible",
-      "empty": "Aucune contrainte préférentielle"
+      "empty": "Aucune contrainte"
     },
     "remove": "Supprimer"
   },
@@ -268,14 +268,14 @@
     "chooseFormat": "Choisissez un format...",
     "fee": "Tarif par personne (€)",
     "feeOptional": "facultatif",
-    "feeHint": "Un onglet « Paiements » sera disponible",
+    "feeHint": "Paiements",
     "maxParticipants": "Nombre maximal de participants",
     "maxOptional": "facultatif",
-    "maxHint": "Les places restantes seront affichées",
+    "maxHint": "Les places restantes",
     "emailMessage": "Message d'invitation",
     "emailOptional": "facultatif",
     "emailPlaceholder": "Par exemple : Rendez-vous au départ n° 1 à 9 h...",
-    "emailHint": "Contenu de l'e-mail d'invitation",
+    "emailHint": "Contenu de l'email d'invitation",
     "save": "Enregistrer",
     "saving": "Enregistrement en cours...",
     "cancel": "Annuler",
@@ -339,7 +339,7 @@
     "generating": "Génération en cours...",
     "confirmedPlayers": "Joueurs confirmés ({count})",
     "plays9": "{count} jouer 9T",
-    "noConfirmed": "Aucun joueur confirmé (PRÉSENT)",
+    "noConfirmed": "Aucun joueur confirmé",
     "flightsTitle": "Flights",
     "noFlights": "Aucun flight généré",
     "generateHint": "Configurez les paramètres, puis cliquez sur Générer ",
@@ -375,7 +375,7 @@
     "whs": "WHS",
     "respondedOn": "Réponse donnée le",
     "status": "Statut",
-    "actions": "Modifier",
+    "actions": "éditer",
     "yes": "Oui",
     "no": "Non",
     "reset": "Reset",
@@ -396,23 +396,23 @@
     "feePerPerson": "Prix par personne",
     "collected": "Recueil",
     "pending": "En attente",
-    "paid": "rémunéré",
+    "paid": "payé",
     "awaitingPayment": "en attente",
     "exempt": "exempté",
     "total": "total",
     "player": "Joueur",
     "status": "Statut",
-    "actions": "Modifier",
-    "noParticipants": "Aucun participant confirmé (PRÉSENT)",
+    "éditers": "Modifier",
+    "noParticipants": "Aucun participant confirmé",
     "statuses": {
-      "PAID": "Paid",
-      "PENDING": "Pending",
-      "EXEMPT": "Exempt"
+      "PAID": "Payé",
+      "PENDING": "En attente",
+      "EXEMPT": "Exempté"
     },
     "buttons": {
-      "PAID": "Paid",
-      "PENDING": "Pending",
-      "EXEMPT": "Exempt"
+      "PAID": "Payé",
+      "PENDING": "En attente",
+      "EXEMPT": "Exempté"
     }
   },
   "results": {
@@ -432,7 +432,7 @@
     "past": "passé"
   },
   "scorecards": {
-    "clubCourse": "Club & Course",
+    "clubCourse": "Club et parcours",
     "club": "Club",
     "chooseClub": "Choisissez un club...",
     "newClub": "+ Nouveau",
@@ -492,7 +492,7 @@
     "subtitle": "{invited} invité · {going} inscrits",
     "newInvitations": "Nouvelles invitations",
     "resend": "Renvoyer",
-    "resendWarning": "Les joueurs sélectionnés retrouveront leur statut d'invité et recevront un nouvel e-mail.",
+    "resendWarning": "Les joueurs sélectionnés retrouveront leur statut d'invité et recevront un nouvel email.",
     "event": "Événement",
     "chooseEvent": "Choisissez un événement",
     "noUpcomingEvents": "Aucun événement à venir",
@@ -510,15 +510,15 @@
     "preview": "👁 Aperçu",
     "send": "Envoyer",
     "sendCount": "Envoyer ({count})",
-    "saveNoEmail": "S'inscrire sans adresse e-mail",
-    "saveNoEmailCount": "S'inscrire sans adresse e-mail ({count})",
+    "saveNoEmail": "S'inscrire sans adresse email",
+    "saveNoEmailCount": "S'inscrire sans adresse email ({count})",
     "resendCount": "Renvoyer ({count})",
     "sending": "Envoi en cours...",
     "alreadyInvited": "Déjà invité — ignoré : {names}",
     "allAlreadyInvited": "Tous les joueurs sélectionnés ont déjà été invités",
     "added": "{count} joueur(s) ajouté(s)",
     "added9T": "{count} joueurs ajoutés, dont{nb}, 9T",
-    "invitationsSent": "{count} invitation(s) envoyée(s) par e-mail",
+    "invitationsSent": "{count} invitation(s) envoyée(s) par email",
     "resendSuccess": "{count} invitations renvoyées",
     "cancelConfirm": "Annuler la ou les invitations à «{count}» ?",
     "cancelSuccess": "{count} invitation(s) annulée(s)",
@@ -549,7 +549,7 @@
     "member": "Membre",
     "whs": "WHS",
     "status": "Statut",
-    "actions": "actions",
+    "actions": "Actions",
     "firstName": "Prénom",
     "lastName": "Nom de famille",
     "admin": "Admin",
@@ -562,8 +562,8 @@
     "back": "← Membres",
     "subtitle": "Rechercher un joueur existant ou en créer un nouveau",
     "fromList": "À partir d'une liste",
-    "importXlsx": "Importer un fichier xlsx",
-    "templateXlsx": "Modèle xlsx",
+    "importXlsx": "Importer un fichier Excel",
+    "templateXlsx": "Modèle Excel",
     "added": "✓ Un ou plusieurs membres d'{count} ont été ajoutés au groupe",
     "searchLabel": "Recherche par nom ou par numéro fédéral",
     "searchPlaceholder": "Par exemple : Dupont ou 123456",
@@ -679,9 +679,9 @@
   "auth": {
     "forgotPassword": {
       "title": "Mot de passe oublié",
-      "subtitle": "Recevez un lien de réinitialisation par e-mail",
+      "subtitle": "Recevez un lien de réinitialisation par email",
       "back": "← Retour à la page de connexion",
-      "sent": "L'e-mail a été envoyé ! Vérifiez votre boîte de réception et cliquez sur le lien.",
+      "sent": "L'email a été envoyé ! Vérifiez votre boîte de réception et cliquez sur le lien.",
       "resend": "Renvoyer",
       "noEmail": "Vous n'avez rien reçu ?",
       "submit": "Envoyer le lien",
@@ -705,7 +705,7 @@
       "fullName": "Prénom et nom",
       "email": "Courriel",
       "password": "Mot de passe",
-      "alreadyUsed": "Cette adresse e-mail est déjà utilisée.",
+      "alreadyUsed": "Cette adresse email est déjà utilisée.",
       "alreadyAccount": "Vous avez déjà un compte ?",
       "login": "Se connecter",
       "submit": "Créer mon compte",
@@ -743,7 +743,7 @@
     "errorTitle": "Lien invalide",
     "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
   },
-  "addEvent": {
+  "addEvent": {.
     "title": "Nouvel événement",
     "subtitle": "Ajouter un événement au groupe",
     "titleLabel": "Titre *",
@@ -773,7 +773,7 @@
     "emailMessage": "Message d'invitation",
     "emailOptional": "facultatif",
     "emailPlaceholder": "Par exemple : Rendez-vous au départ n° 1 à 9 h...",
-    "emailHint": "Contenu de l'e-mail d'invitation",
+    "emailHint": "Contenu de l'email d'invitation",
     "save": "Créer un événement",
     "saving": "Enregistrement en cours...",
     "cancel": "Annuler",
@@ -801,9 +801,9 @@
     "in": "9 derniers"
   },
   "importClubs": {
-    "templateDesc": "Téléchargez le modèle GolfGo.",
+    "templateDesc": "Téléchargez le modèle de fichier",
     "templateBtn": "Modèle Excel",
-    "fileLabel": "Fichier Excel",
+    "fileLabel": "",
     "parsing": "Lecture du fichier...",
     "preview": "{clubs} clubs · {courses} parcours · {tees} tees détectés",
     "clear": "Effacer",
