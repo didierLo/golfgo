@@ -594,9 +594,7 @@ export default function CommunicationsPage() {
                       className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>
                   ))}
                 </div>
-                <p className="text-[11px] text-slate-500 mt-2">
-                  {t('communications.templates.yesButtonDesc', { var: '{{yes_button}}' })}
-                </p>
+               
               </div>
             </div>
           )}

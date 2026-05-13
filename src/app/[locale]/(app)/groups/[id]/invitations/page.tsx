@@ -405,7 +405,7 @@ export default function InvitationsPage() {
 
         {resendMode && (
           <div className="mb-4 px-3.5 py-3 rounded-xl bg-amber-50 border border-amber-200">
-            <p className="text-[12px] text-amber-700 leading-relaxed">{t('invitations.resendWarning')}</p>
+            
           </div>
         )}
 

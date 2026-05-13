@@ -143,7 +143,7 @@ function buildEmailHtml({
             ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink)}` : ''}
 
             <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
-              Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
+               Ou <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
             </p>
 
           </td>
