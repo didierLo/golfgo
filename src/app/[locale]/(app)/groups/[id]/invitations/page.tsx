@@ -298,11 +298,13 @@ export default function InvitationsPage() {
     if (!selectedEvent || selectedPlayers.length === 0) return
     setResending(true)
     try {
-      const { error: upsertErr } = await supabase.from('event_participants').upsert(
-        selectedPlayers.map(playerId => ({ event_id: selectedEvent, player_id: playerId, invited_at: new Date().toISOString(), registration_source: 'email' })),
-        { onConflict: 'event_id,player_id' }
-      )
-      if (upsertErr) throw new Error(upsertErr.message)
+    const now = new Date().toISOString()
+        const { error: updateErr } = await supabase
+          .from('event_participants')
+          .update({ invited_at: now, registration_source: 'email' })
+          .eq('event_id', selectedEvent)
+          .in('player_id', selectedPlayers)
+        if (updateErr) throw new Error(updateErr.message)
       const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: selectedPlayers }) })
       if (!res.ok) throw new Error(t('common.error'))
       toast.success(t('invitations.resendSuccess', { count: selectedPlayers.length }))
