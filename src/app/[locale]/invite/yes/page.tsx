@@ -199,15 +199,25 @@ function InviteYesContent() {
               )}
             </div>
 
-            {appLink && (
-              <a href={appLink}
-                className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-400 hover:text-[#185FA5] transition-colors">
-                {t('inviteYes.viewEvent')}
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </a>
-            )}
+         <div className="border-t border-slate-100 pt-4 flex flex-col items-center gap-3">
+              <p className="text-[12px] text-slate-400 text-center">
+                Tu peux fermer cette page ou te connecter pour voir l'événement.
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => window.close()}
+                  className="text-[13px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+                  Fermer
+                </button>
+                <a href="/login"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#185FA5] hover:text-[#0C447C] transition-colors">
+                  {t('inviteYes.viewEvent')}
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
           </>
         )}
 
