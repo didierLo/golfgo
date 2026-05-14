@@ -403,12 +403,6 @@ export default function InvitationsPage() {
           </button>
         </div>
 
-        {resendMode && (
-          <div className="mb-4 px-3.5 py-3 rounded-xl bg-amber-50 border border-amber-200">
-            <p className="text-[12px] text-amber-700 leading-relaxed">{t('invitations.resendWarning')}</p>
-          </div>
-        )}
-
         <div className="mb-4">
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('invitations.event')}</label>
           {resendMode ? (

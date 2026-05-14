@@ -492,7 +492,7 @@
     "subtitle": "{invited} eingeladet · {going} angemeldet",
     "newInvitations": "Neue Einladungen",
     "resend": "Erneut senden",
-    "resendWarning": "Die ausgewählten Spieler werden wieder auf den Status „Eingeladen“ zurückgesetzt, und es wird eine neue E-Mail versendet.",
+    "resendWarning": "Die ausgewählten Spieler wird eine neue E-Mail versendet.",
     "event": "Veranstaltung",
     "chooseEvent": "— Wähle eine Veranstaltung aus —",
     "noUpcomingEvents": "Keine bevorstehenden Veranstaltungen",

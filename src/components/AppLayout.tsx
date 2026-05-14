@@ -194,7 +194,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         style={{ background: 'rgba(24, 95, 165, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
         <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           <div className="flex items-center flex-shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
-            <Link href="/groups" className="flex items-center gap-2.5 select-none px-3">
+            <Link href="/my-events" className="flex items-center gap-2.5 select-none px-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo/GG_Favicon.png" alt="" className="h-[30px] w-[30px] object-contain rounded-lg flex-shrink-0" />
               <span className="hidden lg:flex items-baseline leading-none">

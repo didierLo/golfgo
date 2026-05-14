@@ -492,7 +492,7 @@
     "subtitle": "{invited} uitgenodigd · {going} ga ik",
     "newInvitations": "Nieuwe uitnodigingen",
     "resend": "Opnieuw verzenden",
-    "resendWarning": "De geselecteerde spelers krijgen weer de status 'uitgenodigd' en er wordt een nieuwe e-mail verstuurd.",
+    "resendWarning": "Er wordt een nieuwe e-mail verstuurd.",
     "event": "Evenement",
     "chooseEvent": "— kies een evenement —",
     "noUpcomingEvents": "Er zijn geen evenementen gepland",

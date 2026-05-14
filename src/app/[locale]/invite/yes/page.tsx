@@ -205,7 +205,7 @@ function InviteYesContent() {
               </p>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => window.close()}
+                  onClick={() => window.location.href = '/login'}
                   className="text-[13px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
                   Fermer
                 </button>

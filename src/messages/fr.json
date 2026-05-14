@@ -492,7 +492,7 @@
     "subtitle": "{invited} invité · {going} inscrits",
     "newInvitations": "Nouvelles invitations",
     "resend": "Renvoyer",
-    "resendWarning": "Les joueurs sélectionnés retrouveront leur statut d'invité et recevront un nouvel email.",
+    "resendWarning": "Les joueurs sélectionnés recevront un nouvel email.",
     "event": "Événement",
     "chooseEvent": "Choisissez un événement",
     "noUpcomingEvents": "Aucun événement à venir",
