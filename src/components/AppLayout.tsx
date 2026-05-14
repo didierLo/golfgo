@@ -92,7 +92,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const [groups,            setGroups]            = useState<Group[]>([])
   const [activeGroup,       setActiveGroup]       = useState<Group | null>(null)
-  const [currentUser,       setCurrentUser]       = useState<CurrentUser | null>(null)
+  const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null)
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
   const [loading,           setLoading]           = useState(true)
   const [drawerOpen,        setDrawerOpen]        = useState(false)
@@ -122,6 +122,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         if (playerError || !playerData) { setLoading(false); return }
         const initials = ((playerData.first_name?.[0] ?? '') + (playerData.surname?.[0] ?? '')).toUpperCase()
         setCurrentUser({ initials, name: `${playerData.first_name} ${playerData.surname}` })
+        setCurrentPlayerId(playerData.id)
         const { data, error } = await supabase.from('groups_players').select(`role, groups(id, name, color)`).eq('player_id', playerData.id)
         if (error) { setLoading(false); return }
         const fetchedGroups: Group[] = (data ?? []).filter((row: any) => row.groups).map((row: any, index: number) => ({
@@ -274,10 +275,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="px-4 py-2.5 border-b border-slate-100">
                       <p className="text-[12px] font-bold text-slate-800 truncate">{currentUser.name}</p>
                     </div>
-                    <Link href="/settings" onClick={() => setAvatarMenuOpen(false)}
+                       <Link href={currentPlayerId ? `/players/${currentPlayerId}/edit` : '/settings'}
+                      onClick={() => setAvatarMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
-                      <span className="text-slate-400">{Icons.settings}</span>
-                      <span className="text-[13px] text-slate-700 font-medium">{t('nav.settings')}</span>
+                      <span className="text-slate-400">{Icons.user}</span>
+                      <span className="text-[13px] text-slate-700 font-medium">{t('nav.myProfile')}</span>
                     </Link>
                     <div className="px-4 py-2.5">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Language</p>

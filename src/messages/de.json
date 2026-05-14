@@ -22,7 +22,8 @@
     "organiser": "Veranstalter",
     "play": "Spielen",
     "signOut": "Abmelden",
-    "constraints": "Einschränkungen"
+    "constraints": "Einschränkungen",
+    "myProfile": "Mein Profil"
   },
   "myEvents": {
     "title": "Meine Veranstaltungen",

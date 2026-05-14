@@ -22,7 +22,8 @@
     "organiser": "Organiser",
     "play": "Jouer",
     "constraints": "Contraintes",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "myProfile": "Mon profil"
   },
   "myEvents": {
     "title": "Mes événements",
