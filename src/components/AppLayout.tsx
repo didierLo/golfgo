@@ -92,6 +92,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const [groups,            setGroups]            = useState<Group[]>([])
   const [activeGroup,       setActiveGroup]       = useState<Group | null>(null)
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
   const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null)
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
   const [loading,           setLoading]           = useState(true)
