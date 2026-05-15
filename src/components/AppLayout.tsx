@@ -94,19 +94,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [activeGroup,       setActiveGroup]       = useState<Group | null>(null)
   const [currentUser,       setCurrentUser]       = useState<CurrentUser | null>(null)
   const [currentPlayerId,   setCurrentPlayerId]   = useState<string | null>(null)
-  const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
   const [loading,           setLoading]           = useState(true)
   const [drawerOpen,        setDrawerOpen]        = useState(false)
   const [avatarMenuOpen,    setAvatarMenuOpen]    = useState(false)
   const [nearestEventId,    setNearestEventId]    = useState<string | null>(null)
   const avatarRef   = useRef<HTMLDivElement>(null)
-  const switcherRef = useRef<HTMLDivElement>(null)
 
   const showBack = ORGANISER_SEGMENTS.some(s => pathname.includes(s))
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) setGroupSwitcherOpen(false)
       if (avatarRef.current   && !avatarRef.current.contains(e.target as Node))   setAvatarMenuOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -219,42 +216,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {loading ? (
               <div className="h-8 w-48 rounded-full bg-white/15 animate-pulse" />
             ) : activeGroup ? (
-              <div className="relative" ref={switcherRef}>
-                <button onClick={() => setGroupSwitcherOpen(v => !v)}
-                  className="flex items-center gap-2.5 bg-white/15 hover:bg-white/22 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 transition-all duration-150 cursor-pointer">
-                  <GroupDot color={activeGroup.color} size={9} />
-                  <span className="text-[13px] font-semibold text-white leading-none max-w-[140px] sm:max-w-[200px] truncate">{activeGroup.name}</span>
-                  <span className={`text-white/60 transition-transform duration-200 ${groupSwitcherOpen ? 'rotate-180' : ''}`}>{Icons.chevronDown}</span>
-                </button>
-                {groupSwitcherOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
-                    <div className="px-4 pt-2 pb-3 border-b border-slate-100">
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('nav.myGroups')}</span>
-                    </div>
-                    <div className="py-1 max-h-64 overflow-y-auto">
-                      {groups.map(group => (
-                        <button key={group.id} onClick={() => { setActiveGroup(group); setGroupSwitcherOpen(false) }}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left ${activeGroup.id === group.id ? 'bg-blue-50/60' : ''}`}>
-                          <GroupDot color={group.color} size={10} />
-                          <span className="text-[13.5px] text-slate-800 font-medium flex-1 truncate">{group.name}</span>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${group.role === 'owner' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
-                            {group.role === 'owner' ? t('nav.admin') : t('nav.member')}
-                          </span>
-                          {activeGroup.id === group.id && <span className="text-[#185FA5] flex-shrink-0">{Icons.check}</span>}
-                        </button>
-                      ))}
-                    </div>
-                    {isAnyOwner && (
-                      <div className="border-t border-slate-100 mt-1 pt-2 px-4 pb-1">
-                        <Link href="/groups/add" onClick={() => setGroupSwitcherOpen(false)}
-                          className="flex items-center gap-2 text-[13px] text-[#185FA5] font-semibold hover:text-[#0C447C] transition-colors py-1">
-                          <span className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[#185FA5]">{Icons.plus}</span>
-                          {t('nav.newGroup')}
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                )}
+              <div className="flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5">
+                <GroupDot color={activeGroup.color} size={9} />
+                <span className="text-[13px] font-semibold text-white leading-none max-w-[140px] sm:max-w-[200px] truncate">{activeGroup.name}</span>
               </div>
             ) : (
               <Link href="/groups/add" className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 border-dashed rounded-full px-3 py-1.5 transition-colors">
