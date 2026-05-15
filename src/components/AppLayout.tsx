@@ -166,11 +166,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const communicationsHref = gid ? `/groups/${gid}/communications` : '/groups'
   const groupsHref         = '/groups'
   const clubsHref          = '/admin/clubs'
-  const participantsHref = gid && eid ? `/groups/${gid}/events/${eid}/participants` : null
-  const teesheetHref     = gid && eid ? `/groups/${gid}/events/${eid}/teesheet`     : null
+  const participantsHref = gid && eid ? `/groups/${gid}/events/${eid}/participants` : (gid ? `/groups/${gid}/no-event` : null)
+  const teesheetHref     = gid && eid ? `/groups/${gid}/events/${eid}/teesheet`     : (gid ? `/groups/${gid}/no-event` : null)
   const invitationsHref  = gid        ? `/groups/${gid}/invitations`                : null
-  const flightsHref      = gid && eid ? `/groups/${gid}/events/${eid}/flights`      : null
-  const resultsHref      = gid && eid ? `/groups/${gid}/events/${eid}/results`      : null
+  const flightsHref      = gid && eid ? `/groups/${gid}/events/${eid}/flights`      : (gid ? `/groups/${gid}/no-event` : null)
+  const resultsHref      = gid && eid ? `/groups/${gid}/events/${eid}/results`      : (gid ? `/groups/${gid}/no-event` : null)
 
   const eventsListActive = !isAnyOwner ? false : !!gid && (pathname === `/groups/${gid}/events` || pathname === `/groups/${gid}/events/add`)
 
