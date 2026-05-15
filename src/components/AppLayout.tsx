@@ -104,6 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const showBack = ORGANISER_SEGMENTS.some(s => pathname.includes(s))
 
+  // Fermeture au clic extérieur
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) setGroupSwitcherOpen(false)
@@ -164,6 +165,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const gid            = activeGroup?.id
   const eid            = nearestEventId
   const isAnyOwner     = groups.some(g => g.role === 'owner')
+  // Switcher actif seulement si l'utilisateur a plus d'un groupe
+  const canSwitchGroup = groups.length > 1
 
   const eventsHref         = gid ? `/groups/${gid}/events`         : '/groups'
   const communicationsHref = gid ? `/groups/${gid}/communications` : '/groups'
@@ -220,13 +223,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="h-8 w-48 rounded-full bg-white/15 animate-pulse" />
             ) : activeGroup ? (
               <div className="relative" ref={switcherRef}>
-                <button onClick={() => setGroupSwitcherOpen(v => !v)}
-                  className="flex items-center gap-2.5 bg-white/15 hover:bg-white/22 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 transition-all duration-150 cursor-pointer">
+                {/* Pill : cliquable seulement si canSwitchGroup */}
+                <button
+                  onClick={() => canSwitchGroup && setGroupSwitcherOpen(v => !v)}
+                  className={`flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 transition-all duration-150 ${canSwitchGroup ? 'hover:bg-white/22 cursor-pointer' : 'cursor-default'}`}
+                >
                   <GroupDot color={activeGroup.color} size={9} />
                   <span className="text-[13px] font-semibold text-white leading-none max-w-[140px] sm:max-w-[200px] truncate">{activeGroup.name}</span>
-                  <span className={`text-white/60 transition-transform duration-200 ${groupSwitcherOpen ? 'rotate-180' : ''}`}>{Icons.chevronDown}</span>
+                  {/* Flèche visible seulement si plusieurs groupes */}
+                  {canSwitchGroup && (
+                    <span className={`text-white/60 transition-transform duration-200 ${groupSwitcherOpen ? 'rotate-180' : ''}`}>{Icons.chevronDown}</span>
+                  )}
                 </button>
-                {groupSwitcherOpen && (
+
+                {/* Dropdown — visible seulement si canSwitchGroup et ouvert */}
+                {canSwitchGroup && groupSwitcherOpen && (
                   <div className="absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
                     <div className="px-4 pt-2 pb-3 border-b border-slate-100">
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('nav.myGroups')}</span>
