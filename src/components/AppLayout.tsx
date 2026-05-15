@@ -168,6 +168,57 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Switcher actif seulement si l'utilisateur a plus d'un groupe
   const canSwitchGroup = groups.length > 1
 
+  // Changer de groupe en restant sur la même section
+  // Les URLs avec un eventId (/events/[eid]/participants etc.) naviguent vers
+  // l'event le plus proche du nouveau groupe ; les URLs simples remplacent juste le groupId.
+  async function switchGroup(group: Group) {
+    setActiveGroup(group)
+    setGroupSwitcherOpen(false)
+
+    const newGid = group.id
+
+    // Récupérer l'event le plus proche du nouveau groupe (pour les sections event-dépendantes)
+    let newEid: string | null = null
+    const now = new Date().toISOString()
+    const { data: future } = await supabase.from('events').select('id').eq('group_id', newGid).gte('starts_at', now).order('starts_at', { ascending: true }).limit(1)
+    if (future?.[0]) {
+      newEid = future[0].id
+    } else {
+      const { data: past } = await supabase.from('events').select('id').eq('group_id', newGid).lt('starts_at', now).order('starts_at', { ascending: false }).limit(1)
+      newEid = past?.[0]?.id ?? null
+    }
+
+    // Remplacer le groupId (et éventuellement l'eventId) dans l'URL courante
+    // Patterns possibles :
+    //   /groups/[gid]/events/[eid]/participants  → /groups/[newGid]/events/[newEid]/participants
+    //   /groups/[gid]/events/[eid]/flights       → idem
+    //   /groups/[gid]/events                     → /groups/[newGid]/events
+    //   /groups/[gid]/invitations                → /groups/[newGid]/invitations
+    //   Pages sans groupId (my-events, scorecard) → on ne navigue pas
+
+    const withEvent = pathname.match(/\/groups\/[^/]+\/events\/[^/]+(\/.+)?$/)
+    if (withEvent) {
+      // URL contient un eventId → remplacer gid + eid
+      const section = withEvent[1] ?? '' // ex: "/participants"
+      if (newEid) {
+        router.push(`/groups/${newGid}/events/${newEid}${section}`)
+      } else {
+        router.push(`/groups/${newGid}/events`)
+      }
+      return
+    }
+
+    const withGroup = pathname.match(/\/groups\/[^/]+(\/.+)?$/)
+    if (withGroup) {
+      // URL contient un groupId simple → remplacer juste le gid
+      const section = withGroup[1] ?? ''
+      router.push(`/groups/${newGid}${section}`)
+      return
+    }
+
+    // Page sans groupe (my-events, scorecard…) → pas de navigation
+  }
+
   const eventsHref         = gid ? `/groups/${gid}/events`         : '/groups'
   const communicationsHref = gid ? `/groups/${gid}/communications` : '/groups'
   const groupsHref         = '/groups'
@@ -244,7 +295,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </div>
                     <div className="py-1 max-h-64 overflow-y-auto">
                       {groups.map(group => (
-                        <button key={group.id} onClick={() => { setActiveGroup(group); setGroupSwitcherOpen(false) }}
+                        <button key={group.id} onClick={() => switchGroup(group)}
                           className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left ${activeGroup.id === group.id ? 'bg-blue-50/60' : ''}`}>
                           <GroupDot color={group.color} size={10} />
                           <span className="text-[13.5px] text-slate-800 font-medium flex-1 truncate">{group.name}</span>
