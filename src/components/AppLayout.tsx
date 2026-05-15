@@ -92,8 +92,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const [groups,            setGroups]            = useState<Group[]>([])
   const [activeGroup,       setActiveGroup]       = useState<Group | null>(null)
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
-  const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null)
+  const [currentUser,       setCurrentUser]       = useState<CurrentUser | null>(null)
+  const [currentPlayerId,   setCurrentPlayerId]   = useState<string | null>(null)
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false)
   const [loading,           setLoading]           = useState(true)
   const [drawerOpen,        setDrawerOpen]        = useState(false)
@@ -104,7 +104,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const showBack = ORGANISER_SEGMENTS.some(s => pathname.includes(s))
 
-  // Fermeture au clic extérieur
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) setGroupSwitcherOpen(false)
@@ -165,59 +164,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const gid            = activeGroup?.id
   const eid            = nearestEventId
   const isAnyOwner     = groups.some(g => g.role === 'owner')
-  // Switcher actif seulement si l'utilisateur a plus d'un groupe
-  const canSwitchGroup = groups.length > 1
-
-  // Changer de groupe en restant sur la même section
-  // Les URLs avec un eventId (/events/[eid]/participants etc.) naviguent vers
-  // l'event le plus proche du nouveau groupe ; les URLs simples remplacent juste le groupId.
-  async function switchGroup(group: Group) {
-    setActiveGroup(group)
-    setGroupSwitcherOpen(false)
-
-    const newGid = group.id
-
-    // Récupérer l'event le plus proche du nouveau groupe (pour les sections event-dépendantes)
-    let newEid: string | null = null
-    const now = new Date().toISOString()
-    const { data: future } = await supabase.from('events').select('id').eq('group_id', newGid).gte('starts_at', now).order('starts_at', { ascending: true }).limit(1)
-    if (future?.[0]) {
-      newEid = future[0].id
-    } else {
-      const { data: past } = await supabase.from('events').select('id').eq('group_id', newGid).lt('starts_at', now).order('starts_at', { ascending: false }).limit(1)
-      newEid = past?.[0]?.id ?? null
-    }
-
-    // Remplacer le groupId (et éventuellement l'eventId) dans l'URL courante
-    // Patterns possibles :
-    //   /groups/[gid]/events/[eid]/participants  → /groups/[newGid]/events/[newEid]/participants
-    //   /groups/[gid]/events/[eid]/flights       → idem
-    //   /groups/[gid]/events                     → /groups/[newGid]/events
-    //   /groups/[gid]/invitations                → /groups/[newGid]/invitations
-    //   Pages sans groupId (my-events, scorecard) → on ne navigue pas
-
-    const withEvent = pathname.match(/\/groups\/[^/]+\/events\/[^/]+(\/.+)?$/)
-    if (withEvent) {
-      // URL contient un eventId → remplacer gid + eid
-      const section = withEvent[1] ?? '' // ex: "/participants"
-      if (newEid) {
-        router.push(`/groups/${newGid}/events/${newEid}${section}`)
-      } else {
-        router.push(`/groups/${newGid}/events`)
-      }
-      return
-    }
-
-    const withGroup = pathname.match(/\/groups\/[^/]+(\/.+)?$/)
-    if (withGroup) {
-      // URL contient un groupId simple → remplacer juste le gid
-      const section = withGroup[1] ?? ''
-      router.push(`/groups/${newGid}${section}`)
-      return
-    }
-
-    // Page sans groupe (my-events, scorecard…) → pas de navigation
-  }
 
   const eventsHref         = gid ? `/groups/${gid}/events`         : '/groups'
   const communicationsHref = gid ? `/groups/${gid}/communications` : '/groups'
@@ -274,28 +220,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="h-8 w-48 rounded-full bg-white/15 animate-pulse" />
             ) : activeGroup ? (
               <div className="relative" ref={switcherRef}>
-                {/* Pill : cliquable seulement si canSwitchGroup */}
-                <button
-                  onClick={() => canSwitchGroup && setGroupSwitcherOpen(v => !v)}
-                  className={`flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 transition-all duration-150 ${canSwitchGroup ? 'hover:bg-white/22 cursor-pointer' : 'cursor-default'}`}
-                >
+                <button onClick={() => setGroupSwitcherOpen(v => !v)}
+                  className="flex items-center gap-2.5 bg-white/15 hover:bg-white/22 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 transition-all duration-150 cursor-pointer">
                   <GroupDot color={activeGroup.color} size={9} />
                   <span className="text-[13px] font-semibold text-white leading-none max-w-[140px] sm:max-w-[200px] truncate">{activeGroup.name}</span>
-                  {/* Flèche visible seulement si plusieurs groupes */}
-                  {canSwitchGroup && (
-                    <span className={`text-white/60 transition-transform duration-200 ${groupSwitcherOpen ? 'rotate-180' : ''}`}>{Icons.chevronDown}</span>
-                  )}
+                  <span className={`text-white/60 transition-transform duration-200 ${groupSwitcherOpen ? 'rotate-180' : ''}`}>{Icons.chevronDown}</span>
                 </button>
-
-                {/* Dropdown — visible seulement si canSwitchGroup et ouvert */}
-                {canSwitchGroup && groupSwitcherOpen && (
+                {groupSwitcherOpen && (
                   <div className="absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
                     <div className="px-4 pt-2 pb-3 border-b border-slate-100">
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('nav.myGroups')}</span>
                     </div>
                     <div className="py-1 max-h-64 overflow-y-auto">
                       {groups.map(group => (
-                        <button key={group.id} onClick={() => switchGroup(group)}
+                        <button key={group.id} onClick={() => { setActiveGroup(group); setGroupSwitcherOpen(false) }}
                           className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors text-left ${activeGroup.id === group.id ? 'bg-blue-50/60' : ''}`}>
                           <GroupDot color={group.color} size={10} />
                           <span className="text-[13.5px] text-slate-800 font-medium flex-1 truncate">{group.name}</span>
@@ -338,39 +276,39 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="px-4 py-2.5 border-b border-slate-100">
                       <p className="text-[12px] font-bold text-slate-800 truncate">{currentUser.name}</p>
                     </div>
-                       <Link href={currentPlayerId ? `/players/${currentPlayerId}/edit` : '/settings'}
+                    <Link href={currentPlayerId ? `/players/${currentPlayerId}/edit` : '/settings'}
                       onClick={() => setAvatarMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
                       <span className="text-slate-400">{Icons.user}</span>
                       <span className="text-[13px] text-slate-700 font-medium">{t('nav.myProfile')}</span>
                     </Link>
                     <div className="px-4 py-2.5">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Language</p>
-                    <div className="flex gap-1">
-                      {[
-                        { code: 'fr', label: '🇫🇷 FR' },
-                        { code: 'en', label: '🇬🇧 EN' },
-                        { code: 'nl', label: '🇳🇱 NL' },
-                        { code: 'de', label: '🇩🇪 DE' },
-                        { code: 'es', label: '🇪🇸 ES' },
-                      ].map(lang => (
-                        <button key={lang.code}
-                          onClick={() => {
-                            const segments = pathname.split('/')
-                            segments[1] = lang.code
-                            window.location.href = segments.join('/')
-                            setAvatarMenuOpen(false)
-                          }}
-                          className={`text-[11px] font-semibold px-2 py-1 rounded-lg transition-colors ${
-                            locale === lang.code
-                              ? 'bg-[#185FA5] text-white'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}>
-                          {lang.label}
-                        </button>
-                      ))}
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Language</p>
+                      <div className="flex gap-1">
+                        {[
+                          { code: 'fr', label: '🇫🇷 FR' },
+                          { code: 'en', label: '🇬🇧 EN' },
+                          { code: 'nl', label: '🇳🇱 NL' },
+                          { code: 'de', label: '🇩🇪 DE' },
+                          { code: 'es', label: '🇪🇸 ES' },
+                        ].map(lang => (
+                          <button key={lang.code}
+                            onClick={() => {
+                              const segments = pathname.split('/')
+                              segments[1] = lang.code
+                              window.location.href = segments.join('/')
+                              setAvatarMenuOpen(false)
+                            }}
+                            className={`text-[11px] font-semibold px-2 py-1 rounded-lg transition-colors ${
+                              locale === lang.code
+                                ? 'bg-[#185FA5] text-white'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}>
+                            {lang.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-</div>
                     <div className="mx-3 my-1 h-px bg-slate-100" />
                     <button onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors">
@@ -412,7 +350,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
             <NavItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </SidebarSection>
-     
         </aside>
 
         {/* Sidebar tablette */}
@@ -434,7 +371,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
             <NavIconItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </div>
-          
         </aside>
 
         <main className="flex-1 overflow-y-auto pb-20 sm:pb-0 min-h-0 relative" style={{ background: 'transparent' }}>
@@ -474,10 +410,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/40 flex items-stretch"
         style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
-          { href: '/my-events',                  icon: Icons.myEvents,    label: t('nav.myEvents'),    color: '#185FA5' },
-          { href: participantsHref ?? '/groups', icon: Icons.participants, label: t('nav.participants'), color: '#7F77DD' },
-          { href: teesheetHref ?? '/groups',     icon: Icons.teesheet,     label: t('nav.teesheet'),     color: '#1D9E75' },
-          { href: '/scorecard',                  icon: Icons.scorecard,   label: t('nav.scorecard'),   color: '#D85A30' },
+          { href: '/my-events',                  icon: Icons.myEvents,     label: t('nav.myEvents'),     color: '#185FA5' },
+          { href: participantsHref ?? '/groups', icon: Icons.participants,  label: t('nav.participants'),  color: '#7F77DD' },
+          { href: teesheetHref ?? '/groups',     icon: Icons.teesheet,      label: t('nav.teesheet'),      color: '#1D9E75' },
+          { href: '/scorecard',                  icon: Icons.scorecard,    label: t('nav.scorecard'),    color: '#D85A30' },
         ].map(item => {
           const active = isActive(item.href)
           return (
