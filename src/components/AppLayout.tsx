@@ -98,13 +98,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [drawerOpen,        setDrawerOpen]        = useState(false)
   const [avatarMenuOpen,    setAvatarMenuOpen]    = useState(false)
   const [nearestEventId,    setNearestEventId]    = useState<string | null>(null)
-  const avatarRef   = useRef<HTMLDivElement>(null)
+  const [pillMenuOpen,      setPillMenuOpen]      = useState(false)
+
+  const pillRef = useRef<HTMLDivElement>(null)
+  const avatarRef                                 = useRef<HTMLDivElement>(null)
 
   const showBack = ORGANISER_SEGMENTS.some(s => pathname.includes(s))
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (avatarRef.current   && !avatarRef.current.contains(e.target as Node))   setAvatarMenuOpen(false)
+      if (pillRef.current  && !pillRef.current.contains(e.target as Node))  setPillMenuOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -130,7 +134,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         }))
         setGroups(fetchedGroups)
         const urlGroupId = pathname.match(/\/groups\/([^/]+)/)?.[1]
-        setActiveGroup(fetchedGroups.find(g => g.id === urlGroupId) ?? fetchedGroups[0] ?? null)
+        const lastGroupId = localStorage.getItem('golfgo-last-group')
+        const determined  = fetchedGroups.find(g => g.id === urlGroupId)
+                        ?? fetchedGroups.find(g => g.id === lastGroupId)
+                        ?? fetchedGroups[0]
+                        ?? null
+        setActiveGroup(determined)
       } catch (e) { console.error('AppLayout error:', e) }
       finally { setLoading(false) }
     }
@@ -140,7 +149,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (groups.length === 0) return
     const urlGroupId = pathname.match(/\/groups\/([^/]+)/)?.[1]
-    if (urlGroupId) { const match = groups.find(g => g.id === urlGroupId); if (match) setActiveGroup(match) }
+    if (urlGroupId) { const match = groups.find(g => g.id === urlGroupId); if (match) {
+     setActiveGroup(match)
+     localStorage.setItem('golfgo-last-group', match.id)
+    } }
   }, [pathname, groups])
 
   useEffect(() => {
@@ -215,12 +227,52 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
             {loading ? (
               <div className="h-8 w-48 rounded-full bg-white/15 animate-pulse" />
-            ) : activeGroup ? (
-              <div className="flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5">
-                <GroupDot color={activeGroup.color} size={9} />
-                <span className="text-[13px] font-semibold text-white leading-none max-w-[140px] sm:max-w-[200px] truncate">{activeGroup.name}</span>
-              </div>
-            ) : (
+                      ) : activeGroup ? (
+                <div className="relative flex-shrink-0" ref={pillRef}>
+                  <button
+                    onClick={() => setPillMenuOpen(v => !v)}
+                    className="flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 hover:bg-white/25 transition-colors">
+                    <GroupDot color={activeGroup.color} size={9} />
+                    <span className="text-[13px] font-semibold text-white leading-none max-w-[140px] sm:max-w-[200px] truncate">
+                      {activeGroup.name}
+                    </span>
+                    <span className="text-white/60 ml-0.5">{Icons.chevronDown}</span>
+                  </button>
+
+                  {pillMenuOpen && (
+                    <div className="absolute top-[calc(100%+8px)] left-0 w-56 bg-white border border-slate-200/80 rounded-2xl shadow-xl shadow-slate-900/10 py-2 z-[9999] overflow-hidden">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 py-2">
+                        {t('nav.myGroups')}
+                      </p>
+                      {groups.map(g => (
+                        <button
+                          key={g.id}
+                          onClick={() => {
+                            setActiveGroup(g)
+                            localStorage.setItem('golfgo-last-group', g.id)
+                            setPillMenuOpen(false)
+                            const newPath = pathname.replace(/\/groups\/[^/]+/, `/groups/${g.id}`)
+                            router.push(newPath)
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                          <GroupDot color={g.color} size={8} />
+                          <span className="flex-1 text-left text-[13px] font-medium text-slate-700 truncate">{g.name}</span>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            style={{
+                              background: g.role === 'owner' ? '#EAF3DE' : '#EBF3FC',
+                              color:      g.role === 'owner' ? '#3B6D11' : '#0C447C',
+                            }}>
+                            {g.role === 'owner' ? t('nav.admin') : t('nav.member')}
+                          </span>
+                          {activeGroup.id === g.id && (
+                            <span className="text-[#185FA5]">{Icons.check}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
               <Link href="/groups/add" className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 border-dashed rounded-full px-3 py-1.5 transition-colors">
                 <span className="text-white/50">{Icons.plus}</span>
                 <span className="text-[13px] text-white/60 font-medium leading-none">{t('nav.createGroup')}</span>
