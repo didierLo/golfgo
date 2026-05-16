@@ -110,8 +110,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       if (avatarRef.current   && !avatarRef.current.contains(e.target as Node))   setAvatarMenuOpen(false)
       if (pillRef.current  && !pillRef.current.contains(e.target as Node))  setPillMenuOpen(false)
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
   useEffect(() => {
