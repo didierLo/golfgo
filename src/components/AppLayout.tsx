@@ -230,7 +230,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       ) : activeGroup ? (
                 <div className="relative flex-shrink-0" ref={pillRef}>
                   <button
-                    onClick={() => setPillMenuOpen(v => !v)}
+                    onClick={() => {
+                    console.log('pill clicked', pillMenuOpen)
+                    setPillMenuOpen(v => !v)
+                  }}
                     className="flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 hover:bg-white/25 transition-colors">
                     <GroupDot color={activeGroup.color} size={9} />
                     <span className="text-[13px] font-semibold text-white leading-none max-w-[140px] sm:max-w-[200px] truncate">
