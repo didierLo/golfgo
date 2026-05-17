@@ -131,9 +131,13 @@ export default function MyScorecardPage() {
     if (!participations?.length) { setError(t('scorecard.noEvents')); setLoading(false); return }
 
     const eventIds = participations.map(x => x.event_id)
+    const activeGroupId = localStorage.getItem('golfgo-last-group')
+
     const { data: eventsData } = await supabase.from('events')
       .select('id, title, starts_at').in('id', eventIds)
-      .gte('starts_at', twoMonthsAgo()).order('starts_at', { ascending: true })
+      .gte('starts_at', twoMonthsAgo())
+      .eq('group_id', activeGroupId ?? '')
+      .order('starts_at', { ascending: true })
 
     if (!eventsData?.length) { setError(t('scorecard.noRecentEvents')); setLoading(false); return }
 
@@ -156,7 +160,7 @@ export default function MyScorecardPage() {
   async function loadEvent(evId: string, pId: string) {
     setScorecardLoading(true); setError(null); setSaveStatus('idle')
     setFlightPlayers([]); setActivePlayerId(null); setHoles([]); setScores({})
-    const now = new Date()
+    const now = new Date() 
     try {
       const { data: participations } = await supabase.from('event_participants')
         .select('event_id, tee_id').eq('player_id', pId).eq('status', 'GOING')

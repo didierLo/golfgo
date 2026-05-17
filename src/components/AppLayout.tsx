@@ -149,6 +149,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (groups.length === 0) return
     const urlGroupId = pathname.match(/\/groups\/([^/]+)/)?.[1]
+    console.log('pathname effect', urlGroupId, pathname)
     if (urlGroupId) { const match = groups.find(g => g.id === urlGroupId); if (match) {
      setActiveGroup(match)
      localStorage.setItem('golfgo-last-group', match.id)
@@ -203,7 +204,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* TOPBAR */}
       <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20 overflow-visible"
         style={{ background: 'rgba(24, 95, 165, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-        <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-visible" style={{ scrollbarWidth: 'none' }}>
           <div className="flex items-center flex-shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
             <Link href="/my-events" className="flex items-center gap-2.5 select-none px-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -231,7 +232,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <div className="relative flex-shrink-0" ref={pillRef}>
                   <button
                     onClick={() => {
-                    console.log('pill clicked', pillMenuOpen)
                     setPillMenuOpen(v => !v)
                   }}
                     className="flex items-center gap-2.5 bg-white/15 border border-white/20 rounded-full pl-2.5 pr-3 py-1.5 hover:bg-white/25 transition-colors">
@@ -250,14 +250,44 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       {groups.map(g => (
                         <button
                           key={g.id}
-                          onClick={() => {
-                            setActiveGroup(g)
-                            localStorage.setItem('golfgo-last-group', g.id)
-                            setPillMenuOpen(false)
-                            const newPath = pathname.replace(/\/groups\/[^/]+/, `/groups/${g.id}`)
-                            router.push(newPath)
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                            onClick={async () => {
+                              localStorage.setItem('golfgo-last-group', g.id)
+                              setPillMenuOpen(false)
+
+                              const lastSegment = pathname.split('/').pop()
+                              const pagesWithEvent = ['participants', 'flights', 'results', 'teesheet', 'scorecards']
+                             
+                              let targetEventId = nearestEventId
+                              
+                              if (pagesWithEvent.includes(lastSegment ?? '')) {
+                                const now = new Date().toISOString()
+                                const { data } = await supabase.from('events').select('id')
+                                  .eq('group_id', g.id).gte('starts_at', now)
+                                  .order('starts_at', { ascending: true }).limit(1)
+                                targetEventId = data?.[0]?.id ?? nearestEventId
+                              }
+ console.log('lastSegment:', lastSegment, 'targetEventId:', targetEventId, 'pagesWithEvent:', pagesWithEvent.includes(lastSegment ?? ''))
+                            if (pathname.includes('/my-events')) {
+                              router.push(`/groups/${g.id}/events`)
+                            } else if (!pathname.includes('/groups/')) {
+                              setActiveGroup(g)
+                              window.location.href = pathname  // recharge complète → init() relu
+                              return                           // ← le return évite le router.refresh() final
+                            } else if (pathname.match(/\/groups\/?$/) || pathname.includes('/groups/add')) {
+                              router.refresh()
+                              return
+                            } else if (pagesWithEvent.includes(lastSegment ?? '') && targetEventId) {
+                              router.push(`/groups/${g.id}/events/${targetEventId}/${lastSegment}`)
+                            } else {
+                              const afterGroupId = pathname.match(/\/groups\/[^/]+\/(.+)/)?.[1]
+                              const newPath = afterGroupId
+                                ? `/groups/${g.id}/${afterGroupId.replace(/[0-9a-f-]{36}/g, '').replace(/\/\//g, '/')}`
+                                : `/groups/${g.id}/events`
+                              router.push(newPath)
+                            }
+                            router.refresh()
+                            }}
+                                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
                           <GroupDot color={g.color} size={8} />
                           <span className="flex-1 text-left text-[13px] font-medium text-slate-700 truncate">{g.name}</span>
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
