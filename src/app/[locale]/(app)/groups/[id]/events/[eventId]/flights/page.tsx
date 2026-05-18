@@ -6,12 +6,19 @@ import { useFlights } from '@/lib/hooks/useFlights'
 import { createClient } from '@/lib/supabase/client'
 import { pairKey } from '@/lib/utils/pairs'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 const supabase = createClient()
 
 type HolesSection = 'out' | 'in' | null
 type DragState = { playerId: string; playerName: string; fromFlightNo: number }
+type EventRow = { id: string; title: string; starts_at: string }
+
+function formatEventDate(dateStr: string, locale: string) {
+  return new Date(dateStr).toLocaleDateString(locale, {
+    day: 'numeric', month: 'short', timeZone: 'UTC',
+  })
+}
 
 // ── Badge 9F / 9B / 9T correct ───────────────────────────────────────────────
 function holesBadge(p: { holes_played?: number | null; holes_section?: HolesSection }) {
@@ -28,13 +35,43 @@ function holesBadge(p: { holes_played?: number | null; holes_section?: HolesSect
 export default function FlightsPage() {
   const params  = useParams()
   const groupId = params.id      as string
-  const eventId = params.eventId as string
-  const t = useTranslations()
+  const t      = useTranslations()
+  const locale = useLocale()
 
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
 
-  const { players, flights, setFlights, loading, loadData, generate, save, remove } = useFlights(eventId)
+  // ── Event selector ──────────────────────────────────────────────────────────
+  const [events,          setEvents]          = useState<EventRow[]>([])
+  const [activeEventId,   setActiveEventId]   = useState<string>(params.eventId as string)
+  const [eventsLoading,   setEventsLoading]   = useState(true)
+
+  useEffect(() => { loadEvents() }, [groupId])
+
+  async function loadEvents() {
+    setEventsLoading(true)
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, starts_at')
+      .eq('group_id', groupId)
+      .order('starts_at', { ascending: true })
+    const evts = data ?? []
+    setEvents(evts)
+
+    // Par défaut : event le plus proche (futur ou dernier passé)
+    if (!activeEventId && evts.length) {
+      const now = new Date()
+      const upcoming = evts.find(e => new Date(e.starts_at) >= now)
+      setActiveEventId(upcoming?.id ?? evts[evts.length - 1].id)
+    }
+    setEventsLoading(false)
+  }
+
+  // ── Flights (rechargé quand activeEventId change) ───────────────────────────
+  const { players, flights, setFlights, loading, loadData, generate, save, remove } = useFlights(activeEventId)
+
+  useEffect(() => { if (activeEventId) loadData() }, [activeEventId])
+  useEffect(() => { if (!groupId) return; loadConstraints(); loadPastFlights() }, [groupId])
 
   const [flightSize,     setFlightSize]     = useState(4)
   const [balanceWHS,     setBalanceWHS]     = useState(true)
@@ -56,9 +93,6 @@ export default function FlightsPage() {
     setAdminToast(t('flights.adminOnly'))
     setTimeout(() => setAdminToast(null), 3000)
   }
-
-  useEffect(() => { loadData() }, [])
-  useEffect(() => { if (!groupId) return; loadConstraints(); loadPastFlights() }, [groupId])
 
   async function loadConstraints() {
     const { data } = await supabase.from('player_pair_constraints').select('*').eq('group_id', groupId)
@@ -165,7 +199,9 @@ export default function FlightsPage() {
       ].filter(g => g.flights.length > 0)
     : [{ label: null, color: null, bg: null, flights: sortedFlights }]
 
-  if (loading || roleLoading) return (
+  const now = new Date()
+
+  if (loading || roleLoading || eventsLoading) return (
     <div className="p-6 space-y-3">
       {[1,2,3].map(i => <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />)}
     </div>
@@ -184,14 +220,55 @@ export default function FlightsPage() {
         </div>
       )}
 
-      {/* Paramètres */}
+      {/* ── Sélecteur d'événement ─────────────────────────────────────────── */}
+      {events.length > 0 && (
+        <div className="rounded-2xl border border-white/60 shadow-sm mb-4 overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+          <div className="px-5 pt-4 pb-3 border-b border-slate-100">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">
+              {t('flights.event')}
+            </span>
+          </div>
+          <div className="px-4 py-3 flex gap-2 flex-wrap">
+            {events.map(evt => {
+              const isActive  = evt.id === activeEventId
+              const isPast    = new Date(evt.starts_at) < now
+              return (
+                <button
+                  key={evt.id}
+                  onClick={() => { setActiveEventId(evt.id); setManualEdits(false) }}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-semibold border transition-all ${
+                    isActive
+                      ? 'bg-[#185FA5] border-[#185FA5] text-white shadow-sm'
+                      : isPast
+                        ? 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
+                        : 'border-slate-200 text-slate-600 hover:border-[#185FA5]/40 hover:text-[#185FA5]'
+                  }`}>
+                  <span>{evt.title}</span>
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-lg ${
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : isPast
+                        ? 'bg-slate-100 text-slate-400'
+                        : 'bg-[#EBF3FC] text-[#185FA5]'
+                  }`}>
+                    {formatEventDate(evt.starts_at, locale)}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Paramètres ───────────────────────────────────────────────────── */}
       <div className={`rounded-2xl border border-white/60 shadow-sm mb-6 overflow-hidden ${!isOwner ? 'opacity-80' : ''}`}
         style={{ background: 'rgba(255, 255, 255, 0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
         <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">{t('flights.parameters')}</span>
           <div className="flex items-center gap-2">
-            <a href={`/groups/${groupId}/events/${eventId}/flights/history`}
+            <a href={`/groups/${groupId}/events/${activeEventId}/flights/history`}
               className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors flex items-center gap-1">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 5h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
               {t('flights.matrix')}
@@ -296,7 +373,7 @@ export default function FlightsPage() {
         </div>
       </div>
 
-      {/* Joueurs confirmés */}
+      {/* ── Joueurs confirmés ─────────────────────────────────────────────── */}
       <div className="mb-6">
         <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">
           {t('flights.confirmedPlayers', { count: players.length })}
@@ -317,7 +394,7 @@ export default function FlightsPage() {
         </div>
       </div>
 
-      {/* Flights */}
+      {/* ── Flights ───────────────────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
