@@ -199,8 +199,6 @@ export default function FlightsPage() {
       ].filter(g => g.flights.length > 0)
     : [{ label: null, color: null, bg: null, flights: sortedFlights }]
 
-  const now = new Date()
-
   if (loading || roleLoading || eventsLoading) return (
     <div className="p-6 space-y-3">
       {[1,2,3].map(i => <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />)}
@@ -222,41 +220,24 @@ export default function FlightsPage() {
 
       {/* ── Sélecteur d'événement ─────────────────────────────────────────── */}
       {events.length > 0 && (
-        <div className="rounded-2xl border border-white/60 shadow-sm mb-4 overflow-hidden"
-          style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
-          <div className="px-5 pt-4 pb-3 border-b border-slate-100">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">
-              {t('flights.event')}
-            </span>
-          </div>
-          <div className="px-4 py-3 flex gap-2 flex-wrap">
-            {events.map(evt => {
-              const isActive  = evt.id === activeEventId
-              const isPast    = new Date(evt.starts_at) < now
-              return (
-                <button
-                  key={evt.id}
-                  onClick={() => { setActiveEventId(evt.id); setManualEdits(false) }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-semibold border transition-all ${
-                    isActive
-                      ? 'bg-[#185FA5] border-[#185FA5] text-white shadow-sm'
-                      : isPast
-                        ? 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'
-                        : 'border-slate-200 text-slate-600 hover:border-[#185FA5]/40 hover:text-[#185FA5]'
-                  }`}>
-                  <span>{evt.title}</span>
-                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-lg ${
-                    isActive
-                      ? 'bg-white/20 text-white'
-                      : isPast
-                        ? 'bg-slate-100 text-slate-400'
-                        : 'bg-[#EBF3FC] text-[#185FA5]'
-                  }`}>
-                    {formatEventDate(evt.starts_at, locale)}
-                  </span>
-                </button>
-              )
-            })}
+        <div className="mb-4">
+          <div className="relative">
+            <select
+              value={activeEventId}
+              onChange={e => { setActiveEventId(e.target.value); setManualEdits(false) }}
+              className="w-full appearance-none bg-white/80 backdrop-blur border border-white/60 rounded-2xl px-5 py-3.5 pr-10 text-[14px] font-semibold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 cursor-pointer"
+              style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+              {events.map(evt => (
+                <option key={evt.id} value={evt.id}>
+                  {evt.title} — {formatEventDate(evt.starts_at, locale)}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
           </div>
         </div>
       )}
