@@ -157,17 +157,34 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [pathname, groups])
 
   useEffect(() => {
-    const groupId = activeGroup?.id
-    if (!groupId) return
-    async function loadNearest() {
-      const now = new Date().toISOString()
-      const { data: future } = await supabase.from('events').select('id').eq('group_id', groupId).gte('starts_at', now).order('starts_at', { ascending: true }).limit(1)
-      if (future?.[0]) { setNearestEventId(future[0].id); return }
-      const { data: past } = await supabase.from('events').select('id').eq('group_id', groupId).lt('starts_at', now).order('starts_at', { ascending: false }).limit(1)
-      setNearestEventId(past?.[0]?.id ?? null)
-    }
-    loadNearest()
-  }, [activeGroup?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  const groupId = activeGroup?.id
+  if (!groupId) return
+  async function loadNearest() {
+    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+    if (retained) { setNearestEventId(retained); return }
+
+    const now = new Date().toISOString()
+          const { data: future } = await supabase.from('events').select('id').eq('group_id', groupId).gte('starts_at', now).order('starts_at', { ascending: true }).limit(1)
+          if (future?.[0]) {
+            setNearestEventId(future[0].id)
+            localStorage.setItem(`golfgo-active-event-${groupId}`, future[0].id)
+            return
+          }
+          const { data: past } = await supabase.from('events').select('id').eq('group_id', groupId).lt('starts_at', now).order('starts_at', { ascending: false }).limit(1)
+          const id = past?.[0]?.id ?? null
+          setNearestEventId(id)
+          if (id) localStorage.setItem(`golfgo-active-event-${groupId}`, id)
+        }
+        loadNearest()
+}, [activeGroup?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+
+useEffect(() => {
+  const groupId = activeGroup?.id
+  if (!groupId) return
+  const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+  if (retained) setNearestEventId(retained)
+}, [pathname, activeGroup?.id])
 
   const isActive       = (href: string) => pathname === href || pathname.startsWith(href + '/')
   const isGroupsActive = pathname === '/groups' || pathname === '/groups/add'
@@ -266,7 +283,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                   .order('starts_at', { ascending: true }).limit(1)
                                 targetEventId = data?.[0]?.id ?? nearestEventId
                               }
- console.log('lastSegment:', lastSegment, 'targetEventId:', targetEventId, 'pagesWithEvent:', pagesWithEvent.includes(lastSegment ?? ''))
+                              
                             if (pathname.includes('/my-events')) {
                               router.push(`/groups/${g.id}/events`)
                             } else if (!pathname.includes('/groups/')) {

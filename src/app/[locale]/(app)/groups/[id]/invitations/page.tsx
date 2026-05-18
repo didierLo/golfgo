@@ -227,7 +227,13 @@ export default function InvitationsPage() {
     const map: Record<string, Event> = {}
     allEvents.forEach(e => { map[e.id] = e })
     setEventsMap(map)
-    if (upcomingEvents.length > 0) setSelectedEvent(upcomingEvents[0].id)
+    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+    const retainedUpcoming = upcomingEvents.find(e => e.id === retained)
+    if (retainedUpcoming) {
+      setSelectedEvent(retainedUpcoming.id)
+    } else if (upcomingEvents.length > 0) {
+      setSelectedEvent(upcomingEvents[0].id)
+    }
 
     if (allEvents.length > 0) {
       const { data: inv } = await supabase.from('event_participants')
@@ -406,7 +412,11 @@ export default function InvitationsPage() {
         <div className="mb-4">
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('invitations.event')}</label>
           {resendMode ? (
-            <select value={selectedEvent} onChange={e => isOwner ? setSelectedEvent(e.target.value) : showAdminToast()}
+            <select value={selectedEvent} onChange={e => {
+            if (!isOwner) { showAdminToast(); return }
+            setSelectedEvent(e.target.value)
+            localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
+          }}
               disabled={!isOwner}
               className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 disabled:cursor-not-allowed">
               <option value="">{t('invitations.chooseEvent')}</option>
@@ -417,7 +427,11 @@ export default function InvitationsPage() {
             events.length === 0 ? (
               <p className="text-[12px] text-slate-500">{t('invitations.noUpcomingEvents')}</p>
             ) : (
-              <select value={selectedEvent} onChange={e => isOwner ? setSelectedEvent(e.target.value) : showAdminToast()}
+             <select value={selectedEvent} onChange={e => {
+            if (!isOwner) { showAdminToast(); return }
+            setSelectedEvent(e.target.value)
+            localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
+          }}
                 disabled={!isOwner}
                 className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 disabled:cursor-not-allowed">
                 {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>)}

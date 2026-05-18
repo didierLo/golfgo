@@ -34,7 +34,10 @@ function EventCard({ event, groupId, goingCount, onDelete, isOwner, onNotOwner, 
       <div className="px-4 py-3">
         <div className="flex items-start gap-3">
           <div className="w-[3px] h-12 rounded-full flex-shrink-0 bg-[#185FA5] mt-0.5" />
-          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { window.location.href = base }}>
+          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => {
+            localStorage.setItem(`golfgo-active-event-${groupId}`, event.id)
+            window.location.href = base
+          }}>
             <div className="text-[14px] font-semibold text-slate-900 truncate">{event.title}</div>
             <div className="text-[12px] text-slate-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
               <span>{formatDate(event.starts_at)}</span>

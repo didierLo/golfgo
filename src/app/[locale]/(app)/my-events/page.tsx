@@ -320,8 +320,11 @@ export default function MyEventsPage() {
   const invitedCount = upcoming.filter(e => e.status === 'INVITED').length
 
   function goToEvent(e: MyEvent) {
+    // Retenir cet event comme actif pour ce groupe
+    localStorage.setItem(`golfgo-active-event-${e.events.group_id}`, e.event_id)
     router.push(`/groups/${e.events.group_id}/events/${e.event_id}/view`)
   }
+ 
 
   if (loading) return (
     <div className="p-6 space-y-4 max-w-2xl">

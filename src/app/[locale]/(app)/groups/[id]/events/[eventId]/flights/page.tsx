@@ -48,6 +48,7 @@ export default function FlightsPage() {
 
   useEffect(() => { loadEvents() }, [groupId])
 
+  
   async function loadEvents() {
     setEventsLoading(true)
     const { data } = await supabase
@@ -57,12 +58,19 @@ export default function FlightsPage() {
       .order('starts_at', { ascending: true })
     const evts = data ?? []
     setEvents(evts)
-
-    // Par défaut : event le plus proche (futur ou dernier passé)
-    if (!activeEventId && evts.length) {
-      const now = new Date()
-      const upcoming = evts.find(e => new Date(e.starts_at) >= now)
-      setActiveEventId(upcoming?.id ?? evts[evts.length - 1].id)
+ 
+    if (evts.length) {
+      // 1. Priorité : event retenu par l'utilisateur pour ce groupe
+      const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+      const retainedExists = evts.find(e => e.id === retained)
+      if (retainedExists) {
+        setActiveEventId(retainedExists.id)
+      } else {
+        // 2. Fallback : event futur le plus proche
+        const now = new Date()
+        const upcoming = evts.find(e => new Date(e.starts_at) >= now)
+        setActiveEventId(upcoming?.id ?? evts[evts.length - 1].id)
+      }
     }
     setEventsLoading(false)
   }
@@ -224,8 +232,12 @@ export default function FlightsPage() {
           <div className="relative">
             <select
               value={activeEventId}
-              onChange={e => { setActiveEventId(e.target.value); setManualEdits(false) }}
-              className="w-full appearance-none bg-white/80 backdrop-blur border border-white/60 rounded-2xl px-5 py-3.5 pr-10 text-[14px] font-semibold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 cursor-pointer"
+              onChange={e => {
+                setActiveEventId(e.target.value)
+                localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
+                setManualEdits(false)
+              }}
+             className="w-full appearance-none bg-white/80 backdrop-blur border border-white/60 rounded-2xl px-5 py-3.5 pr-10 text-[14px] font-semibold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 cursor-pointer"
               style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
               {events.map(evt => (
                 <option key={evt.id} value={evt.id}>

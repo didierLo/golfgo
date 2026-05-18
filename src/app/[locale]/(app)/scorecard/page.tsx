@@ -147,10 +147,11 @@ export default function MyScorecardPage() {
       isPast: new Date(e.starts_at) < now,
     }))
     setAllEvents(items)
-    const nearest = items.find(e => !e.isPast) ?? items[items.length - 1]
-    setSelectedEventId(nearest.id)
+   const retained = localStorage.getItem(`golfgo-active-event-${activeGroupId}`)
+   const retainedExists = items.find(e => e.id === retained)
+    setSelectedEventId(retainedExists?.id ?? (items.find(e => !e.isPast) ?? items[items.length - 1]).id)
     setLoading(false)
-  }
+      }
 
   useEffect(() => {
     if (!selectedEventId || !playerId) return
@@ -274,7 +275,11 @@ export default function MyScorecardPage() {
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
             {t('scorecard.event')}
           </label>
-          <select value={selectedEventId ?? ''} onChange={e => setSelectedEventId(e.target.value)} className={selectClass}>
+          <select value={selectedEventId ?? ''} onChange={e => {
+            setSelectedEventId(e.target.value)
+            const gid = localStorage.getItem('golfgo-last-group')
+            if (gid) localStorage.setItem(`golfgo-active-event-${gid}`, e.target.value)
+          }}className={selectClass}>
             {allEvents.map(e => (
               <option key={e.id} value={e.id}>
                 {e.title} · {formatShortDate(e.starts_at)}{e.isPast ? ' ✓' : ''}

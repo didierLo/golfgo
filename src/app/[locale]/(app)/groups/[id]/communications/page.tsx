@@ -133,7 +133,13 @@ export default function CommunicationsPage() {
     const { data: evts } = await supabase.from('events').select('id, title, starts_at')
       .eq('group_id', groupId).order('starts_at', { ascending: false })
     setEvents(evts || [])
-    if (evts?.length) { setSelectedEventId(evts[0].id); setFilterEventId(evts[0].id) }
+    if (evts?.length) {
+      const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+      const retainedExists = evts.find(e => e.id === retained)
+      const defaultId = retainedExists?.id ?? evts[0].id
+      setSelectedEventId(defaultId)
+      setFilterEventId(defaultId)
+    }
 
     const { data: membersData } = await supabase
       .from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
@@ -336,7 +342,10 @@ export default function CommunicationsPage() {
                 ))}
               </div>
               {filterMode === 'event' && (<>
-                <select value={filterEventId} onChange={e => setFilterEventId(e.target.value)} className={selectClass}>
+                <select value={filterEventId} onChange={e => {
+                  setFilterEventId(e.target.value)
+                  localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
+                }} className={selectClass}>
                   <option value="">{t('communications.recipients.chooseEvent')}</option>
                   {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
                 </select>
