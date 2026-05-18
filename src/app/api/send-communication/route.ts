@@ -217,7 +217,21 @@ export async function POST(req: Request) {
       placesRestantes = String(Math.max(0, event.max_participants - (count ?? 0)))
     }
 
-    const hasYesButton = commBody.includes('{{yes_button}}')
+    // ── NOUVEAU : liste des joueurs déjà inscrits (GOING) ───────────────────
+    let listeInscrits = '—'
+    if (eventId) {
+      const { data: goingData } = await supabase
+        .from('event_participants')
+        .select('player:players(first_name, surname)')
+        .eq('event_id', eventId)
+        .eq('status', 'GOING')
+      listeInscrits = goingData?.length
+        ? goingData.map((r: any) => `${r.player.first_name} ${r.player.surname}`).join(', ')
+        : '—'
+    }
+
+    // ── FIX : yes_button seulement si un event est lié ──────────────────────
+    const hasYesButton = commBody.includes('{{yes_button}}') && !!eventId
 
     // ── Upsert event_participants + tokens ───────────────────────────────────
     // Seulement si un event est lié et que les boutons oui/non sont présents
@@ -299,7 +313,8 @@ export async function POST(req: Request) {
         event_time:       eventTime,
         start_time:       eventTime,
         places_restantes: placesRestantes,
-        yes_button:       '',
+        liste_inscrits:   listeInscrits,  // ← NOUVEAU
+        yes_button:       '',             // retiré du body, géré via hasButtons
       }
 
       const resolvedSubject = applyTemplateVariables(commSubject, templateVars)
@@ -321,7 +336,7 @@ export async function POST(req: Request) {
         eventMessage:  resolvedBody || null,
         eventLink,
         yes18Link, yes9frontLink, yes9backLink, noLink,
-        hasButtons:    hasYesButton,
+        hasButtons:    hasYesButton && !!token,  // ← FIX : conditionné au token aussi
       })
 
       const { error: emailErr } = await resend.emails.send({
