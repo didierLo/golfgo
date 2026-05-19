@@ -20,7 +20,6 @@ function formatEventDate(dateStr: string, locale: string) {
   })
 }
 
-// ── Badge 9F / 9B / 9T correct ───────────────────────────────────────────────
 function holesBadge(p: { holes_played?: number | null; holes_section?: HolesSection }) {
   if (!p.holes_played || p.holes_played === 18) return null
   const label = p.holes_section === 'out' ? '9F'
@@ -41,14 +40,12 @@ export default function FlightsPage() {
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
 
-  // ── Event selector ──────────────────────────────────────────────────────────
   const [events,          setEvents]          = useState<EventRow[]>([])
   const [activeEventId,   setActiveEventId]   = useState<string>(params.eventId as string)
   const [eventsLoading,   setEventsLoading]   = useState(true)
 
   useEffect(() => { loadEvents() }, [groupId])
 
-  
   async function loadEvents() {
     setEventsLoading(true)
     const { data } = await supabase
@@ -58,15 +55,13 @@ export default function FlightsPage() {
       .order('starts_at', { ascending: true })
     const evts = data ?? []
     setEvents(evts)
- 
+
     if (evts.length) {
-      // 1. Priorité : event retenu par l'utilisateur pour ce groupe
       const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
       const retainedExists = evts.find(e => e.id === retained)
       if (retainedExists) {
         setActiveEventId(retainedExists.id)
       } else {
-        // 2. Fallback : event futur le plus proche
         const now = new Date()
         const upcoming = evts.find(e => new Date(e.starts_at) >= now)
         setActiveEventId(upcoming?.id ?? evts[evts.length - 1].id)
@@ -75,11 +70,16 @@ export default function FlightsPage() {
     setEventsLoading(false)
   }
 
-  // ── Flights (rechargé quand activeEventId change) ───────────────────────────
   const { players, flights, setFlights, loading, loadData, generate, save, remove } = useFlights(activeEventId)
 
   useEffect(() => { if (activeEventId) loadData() }, [activeEventId])
-  useEffect(() => { if (!groupId) return; loadConstraints(); loadPastFlights() }, [groupId])
+
+  // Recharger les contraintes ET l'historique quand le groupe ou la fenêtre change
+  useEffect(() => {
+    if (!groupId) return
+    loadConstraints()
+    loadPastFlights(historyWindow)
+  }, [groupId, activeEventId])
 
   const [flightSize,     setFlightSize]     = useState(4)
   const [balanceWHS,     setBalanceWHS]     = useState(true)
@@ -115,15 +115,44 @@ export default function FlightsPage() {
     setPreferredPairs(preferred)
   }
 
-  async function loadPastFlights() {
+  // ── loadPastFlights corrigé ──────────────────────────────────────────────
+  // 1. Filtre sur le groupe (group_id)
+  // 2. Filtre sur la fenêtre temporelle (historyWindowDays)
+  // 3. Exclut l'event en cours
+  async function loadPastFlights(historyWindowDays: number = 180) {
+    // Si fenêtre = 0, pas d'historique
+    if (historyWindowDays === 0) { setPastFlights([]); return }
+
+    // Calculer la date limite
+    const since = new Date()
+    since.setDate(since.getDate() - historyWindowDays)
+
+    // Récupérer les events du groupe dans la fenêtre temporelle, sauf l'event en cours
+    const { data: groupEvents } = await supabase
+      .from('events')
+      .select('id')
+      .eq('group_id', groupId)
+      .neq('id', activeEventId)
+      .gte('starts_at', since.toISOString())
+
+    const eventIds = (groupEvents ?? []).map((e: any) => e.id)
+    if (!eventIds.length) { setPastFlights([]); return }
+
     const { data } = await supabase
       .from('flights')
       .select(`id, created_at, flight_players(player_id, players(id, first_name, surname, whs))`)
+      .in('event_id', eventIds)
+
     setPastFlights((data ?? []).map((f: any) => ({
       date:    f.created_at,
       players: f.flight_players.map((fp: any) => fp.players),
     })))
   }
+
+  // Recharger l'historique quand historyWindow change
+  useEffect(() => {
+    if (groupId && activeEventId) loadPastFlights(historyWindow)
+  }, [historyWindow])
 
   const players9front = players.filter((p: any) => p.holes_played === 9 && p.holes_section === 'out')
   const players9back  = players.filter((p: any) => p.holes_played === 9 && p.holes_section === 'in')
@@ -135,7 +164,16 @@ export default function FlightsPage() {
     setGenerating(true)
     setManualEdits(false)
     try {
-      const baseOpts = { flightSize, balanceWHS, iterations, historyWindowDays: historyWindow, pastFlights, forbiddenPairs, preferredPairs, debug: true }
+      const baseOpts = {
+        flightSize,
+        balanceWHS,
+        iterations,
+        historyWindowDays: historyWindow,
+        pastFlights,
+        forbiddenPairs,
+        preferredPairs,
+        debug: true,
+      }
       if (holesMode === 'mixed' || !has9holers) {
         await generate(baseOpts)
       } else {
@@ -226,7 +264,7 @@ export default function FlightsPage() {
         </div>
       )}
 
-      {/* ── Sélecteur d'événement ─────────────────────────────────────────── */}
+      {/* ── Sélecteur d'événement ── */}
       {events.length > 0 && (
         <div className="mb-4">
           <div className="relative">
@@ -237,7 +275,7 @@ export default function FlightsPage() {
                 localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
                 setManualEdits(false)
               }}
-             className="w-full appearance-none bg-white/80 backdrop-blur border border-white/60 rounded-2xl px-5 py-3.5 pr-10 text-[14px] font-semibold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 cursor-pointer"
+              className="w-full appearance-none bg-white/80 backdrop-blur border border-white/60 rounded-2xl px-5 py-3.5 pr-10 text-[14px] font-semibold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20 cursor-pointer"
               style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
               {events.map(evt => (
                 <option key={evt.id} value={evt.id}>
@@ -254,7 +292,7 @@ export default function FlightsPage() {
         </div>
       )}
 
-      {/* ── Paramètres ───────────────────────────────────────────────────── */}
+      {/* ── Paramètres ── */}
       <div className={`rounded-2xl border border-white/60 shadow-sm mb-6 overflow-hidden ${!isOwner ? 'opacity-80' : ''}`}
         style={{ background: 'rgba(255, 255, 255, 0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
@@ -366,7 +404,7 @@ export default function FlightsPage() {
         </div>
       </div>
 
-      {/* ── Joueurs confirmés ─────────────────────────────────────────────── */}
+      {/* ── Joueurs confirmés ── */}
       <div className="mb-6">
         <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">
           {t('flights.confirmedPlayers', { count: players.length })}
@@ -387,7 +425,7 @@ export default function FlightsPage() {
         </div>
       </div>
 
-      {/* ── Flights ───────────────────────────────────────────────────────── */}
+      {/* ── Flights ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
