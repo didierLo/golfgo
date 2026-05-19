@@ -85,35 +85,15 @@
       "successToast": "Liste des départs envoyée à {sent} joueur(s){skipped}",
       "skippedSuffix": " · {count} sans email"
     },
+    "whatsapp": "WhatsApp",
     "printFooter": {
       "printedOn": "Imprimé le {date}",
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
     }
   },
   "calendar": {
-    "months": [
-      "Janvier",
-      "Février",
-      "Mars",
-      "Avril",
-      "Mai",
-      "Juin",
-      "Juillet",
-      "Août",
-      "Septembre",
-      "Octobre",
-      "Novembre",
-      "Décembre"
-    ],
-    "days": [
-      "Lu",
-      "Ma",
-      "Me",
-      "Je",
-      "Ve",
-      "Sa",
-      "Di"
-    ]
+    "months": ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
+    "days": ["Lu","Ma","Me","Je","Ve","Sa","Di"]
   },
   "common": {
     "loading": "Chargement…",
@@ -165,7 +145,8 @@
       "noRecipients": "Aucun destinataire",
       "recipientCount": "{count} destinataire(s)",
       "showPreview": "▼ Aperçu de «{name} »",
-      "hidePreview": "▲ Masquer"
+      "hidePreview": "▲ Masquer",
+      "whatsapp": "WhatsApp"
     },
     "status": {
       "GOING": "Confirmé",
@@ -288,6 +269,9 @@
     "nameRequired": "Le nom est obligatoire",
     "description": "Description",
     "color": "Couleur du groupe",
+    "whatsappLink": "Lien WhatsApp du groupe",
+    "whatsappLinkHint": "Dans WhatsApp : Infos du groupe → Lien d'invitation → Copier le lien",
+    "whatsappLinkTest": "Tester le lien",
     "save": "Enregistrer",
     "saving": "Enregistrement en cours...",
     "cancel": "Annuler"
@@ -350,7 +334,40 @@
     "emptyFlight": "Flight vide",
     "avgWHS": "moyenne",
     "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité",
-    "holes9Badge": "9T"
+    "holes9Badge": "9T",
+    "tabStandard": "Flights",
+    "tab4bbb": "Challenge 4BBB",
+    "whatsapp": "WhatsApp"
+  },
+  "challenge4bbb": {
+    "parameters": "Challenge 4BBB — Paramètres",
+    "period": "Période",
+    "iterations": "Itérations",
+    "refresh": "Actualiser les events",
+    "saving": "Enregistrement…",
+    "save": "Enregistrer",
+    "generating": "Génération…",
+    "generate": "Générer",
+    "modified": "Modifié",
+    "eventsCount": "{count} event(s) dans la période",
+    "playersCount": "{count} joueurs au total",
+    "viewByEvent": "Par event",
+    "viewGlobal": "Planning global",
+    "registered": "{count} inscrits",
+    "dragHint": "Glisser depuis les flights ou les non sélectionnés pour modifier les paires",
+    "flightEmpty": "Flight vide",
+    "dropHere": "Déposer ici",
+    "bench": "Non sélectionnés",
+    "benchDrop": "Déposer ici pour retirer du flight",
+    "avg": "Moy.",
+    "participations": "Participations",
+    "stat2plus": "≥ 2 participations",
+    "statLess2": "Moins de 2",
+    "stat1event": "1 seul event disponible",
+    "noEvents": "Aucun event dans la période sélectionnée",
+    "noEventsHint": "Modifiez la période et cliquez sur Actualiser",
+    "fromBench": "Bench →",
+    "fromFlight": "Flight {no} →"
   },
   "leaderboard": {
     "noScorecard": "Aucune feuille de score n'a été trouvée pour cet événement"
@@ -462,7 +479,8 @@
     "validateConfirm": "Validation confirmée",
     "noParticipants": "Aucun joueur n'est confirmé pour cet événement",
     "noCourse": "Sélectionnez un club et un parcours pour accéder aux cartes de score",
-    "noCourseReadOnly": "Aucun parcours n'a été configuré pour cet événement"
+    "noCourseReadOnly": "Aucun parcours n'a été configuré pour cet événement",
+    "whatsapp": "WhatsApp"
   },
   "eventOverview": {
     "notFound": "Événement introuvable",
@@ -488,7 +506,7 @@
     "toast9out": "Confirmé — 9T Front ⛳",
     "toast9in": "Confirmé — 9T Back ⛳"
   },
-  "invitations": { 
+  "invitations": {
     "title": "Invitations",
     "subtitle": "{invited} invité · {going} inscrits",
     "newInvitations": "Nouvelles invitations",
@@ -744,8 +762,7 @@
     "errorTitle": "Lien invalide",
     "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
   },
-
-    "addEvent": {
+  "addEvent": {
     "title": "Nouvel événement",
     "subtitle": "Ajouter un événement au groupe",
     "titleLabel": "Titre *",
@@ -782,7 +799,6 @@
     "errorUnexpected": "Erreur inattendue",
     "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
   },
-
   "events": {
     "title": "Événements",
     "subtitle": "{upcoming} à venir · {past} passé",
