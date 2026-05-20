@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { generateFlights } from "@/lib/golf/flights/generateFlights"
 import { pairKey } from "@/lib/utils/pairs"
@@ -15,14 +15,20 @@ export function useFlights(eventId: string) {
   const [forbiddenPairs, setForbiddenPairs] = useState<Set<string>>(new Set())
   const [preferredPairs, setPreferredPairs] = useState<Set<string>>(new Set())
 
-  async function loadData() {
-    setLoading(true)
+  const isSaving = useRef(false)
 
-    /* PLAYERS — inclure holes_played */
+  async function loadData() {
+    if (!eventId) return
+    setLoading(true)
+    setFlights([])
+    setPlayers([])
+
+    /* PLAYERS */
     const { data: participants } = await supabase
       .from("event_participants")
       .select(`
         holes_played,
+        holes_section,
         player:players(id, first_name, surname, whs)
       `)
       .eq("event_id", eventId)
@@ -30,7 +36,8 @@ export function useFlights(eventId: string) {
 
     const list = (participants ?? []).map((p: any) => ({
       ...p.player,
-      holes_played: p.holes_played ?? 18,
+      holes_played:  p.holes_played ?? 18,
+      holes_section: p.holes_section ?? null,
     }))
     setPlayers(list)
 
@@ -89,11 +96,7 @@ export function useFlights(eventId: string) {
     setLoading(false)
   }
 
-  /* ── GENERATE ────────────────────────────────────────────────────────────
-     options.overridePlayers : liste de joueurs à utiliser au lieu de players
-     options.flightNoOffset  : décalage des numéros de flight (pour le 2e groupe)
-     options.groupLabel      : '18T' | '9T' | null
-  */
+  /* ── GENERATE ── */
   async function generate(options: any) {
     const inputPlayers: any[] = options.overridePlayers ?? players
     const offset:       number = options.flightNoOffset ?? 0
@@ -111,14 +114,12 @@ export function useFlights(eventId: string) {
       ? result
       : (result as any)?.flights ?? []
 
-    // Appliquer offset et groupLabel
     const withMeta = raw.map((f: any) => ({
       ...f,
-      flight_no:  f.flight_no + offset,
+      flight_no: f.flight_no + offset,
       groupLabel,
     }))
 
-    // Si offset > 0 on append aux flights existants, sinon on remplace
     if (offset > 0) {
       setFlights(prev => [...prev, ...withMeta])
     } else {
@@ -126,30 +127,49 @@ export function useFlights(eventId: string) {
     }
   }
 
-  /* ── SAVE ────────────────────────────────────────────────────────────────
-     Sauvegarde group_label si la colonne existe (migration optionnelle)
-  */
+  /* ── SAVE ── */
   async function save() {
-    await supabase.from("flights").delete().eq("event_id", eventId)
-
-    for (const flight of flights) {
-      const { data: newFlight } = await supabase
+    if (isSaving.current) return
+    isSaving.current = true
+    try {
+      // 1. Récupérer les IDs existants
+      const { data: existingFlights } = await supabase
         .from("flights")
-        .insert({
-          event_id:      eventId,
-          flight_number: flight.flight_no,
-          group_label:   flight.groupLabel ?? null,
-        })
-        .select()
-        .single()
+        .select("id")
+        .eq("event_id", eventId)
 
-      const rows = flight.players.map((p: any, i: number) => ({
-        flight_id: newFlight.id,
-        player_id: p.id,
-        position:  i + 1,
-      }))
+      const existingIds = existingFlights?.map(f => f.id) ?? []
 
-      await supabase.from("flight_players").insert(rows)
+      // 2. Supprimer flight_players d'abord (FK), puis flights
+      if (existingIds.length > 0) {
+        await supabase.from("flight_players").delete().in("flight_id", existingIds)
+      }
+      await supabase.from("flights").delete().eq("event_id", eventId)
+
+      // 3. Insérer les nouveaux flights
+      for (const flight of flights) {
+        const { data: newFlight } = await supabase
+          .from("flights")
+          .insert({
+            event_id:      eventId,
+            flight_number: flight.flight_no,
+            group_label:   flight.groupLabel ?? null,
+          })
+          .select()
+          .single()
+
+        if (!newFlight) continue
+
+        const rows = flight.players.map((p: any, i: number) => ({
+          flight_id: newFlight.id,
+          player_id: p.id,
+          position:  i + 1,
+        }))
+
+        await supabase.from("flight_players").insert(rows)
+      }
+    } finally {
+      isSaving.current = false
     }
   }
 
