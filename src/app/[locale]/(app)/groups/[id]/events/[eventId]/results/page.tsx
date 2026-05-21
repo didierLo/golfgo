@@ -268,35 +268,30 @@ export default function ResultsPage() {
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
-      {/* ── Header ── */}
-    
-    <div className="mb-5">
-      <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <div>
-          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('results.title')}</h1>
-          <p className="text-[13px] text-slate-900 mt-0.5">{t('results.subtitle', { count: players.length, format: eventFormat })}</p>
-        </div>
-        <div className="flex items-center gap-1.5">
-          {/* 🖨 Imprimer */}
-          <IconBtn onClick={() => window.print()} title={t('results.print')}>🖨</IconBtn>
-          {/* 👁 Aperçu */}
-          <IconBtn onClick={() => {}} disabled={players.length === 0} title={t('results.print')}>👁</IconBtn>
-          {/* 📤 Email */}
-          <IconBtn onClick={() => {}} disabled={players.length === 0} title="Email">📤</IconBtn>
-          {/* 💬 WhatsApp */}
-          <IconBtn href={players.length > 0 ? buildWhatsAppLeaderboard() : undefined}
-            disabled={players.length === 0} title="WhatsApp">💬</IconBtn>
-          {/* 💾 Enregistrer leaderboard */}
-          {isOwner && tab === 'scorecards' && (
-            <IconBtn onClick={handleSaveScorecard} disabled={savingSc} title={t('results.saveScorecard')} color="blue">
-              {savingSc ? '⏳' : '💾'}
-            </IconBtn>
-          )}
-        </div>
-      </div>
+     {/* ── Header ── */}
+<div className="mb-5">
+  <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+    <div>
+      <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('results.title')}</h1>
+      <p className="text-[13px] text-slate-900 mt-0.5">{t('results.subtitle', { count: players.length, format: eventFormat })}</p>
+    </div>
+    <div className="flex items-center gap-1.5">
+      {isOwner && (
+        <IconBtn onClick={handleSaveScorecard} disabled={savingSc} title={t('results.saveScorecard')} color="blue">
+          {savingSc ? '⏳' : '💾'}
+        </IconBtn>
+      )}
+      <IconBtn onClick={() => window.print()} title={t('results.print')}>🖨</IconBtn>
+      <IconBtn onClick={() => {}} disabled={players.length === 0} title="Aperçu">👁</IconBtn>
+      <IconBtn onClick={() => {}} disabled={players.length === 0} title="Email">📤</IconBtn>
+      <IconBtn href={players.length > 0 ? buildWhatsAppLeaderboard() : undefined}
+        disabled={players.length === 0} title="WhatsApp">💬</IconBtn>
+    </div>
+  </div>
   <EventPill events={events} selectedId={selectedId}
     onSelect={id => { setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`) }} />
 </div>
+
 
       {saveMsgSc && (
         <p className="text-[12px] font-semibold text-[#3B6D11] mb-3">{saveMsgSc}</p>
@@ -407,5 +402,6 @@ export default function ResultsPage() {
         }
       `}</style>
     </div>
+    
   )
 }

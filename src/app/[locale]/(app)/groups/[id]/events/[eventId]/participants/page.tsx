@@ -405,8 +405,8 @@ export default function ParticipantsPage() {
         </div>
         {viewMode === 'list' && (
           <a href={`/groups/${groupId}/invitations`}
-            className="text-[12px] font-semibold text-[#185FA5] hover:underline whitespace-nowrap ml-auto">
-            {t('participants.invitations')}
+              className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] transition-colors whitespace-nowrap ml-auto">
+    ✉️         {t('participants.invitations')}
           </a>
         )}
       </div>
