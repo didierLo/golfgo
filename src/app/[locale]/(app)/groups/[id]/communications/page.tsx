@@ -4,11 +4,9 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
-import { useWhatsAppLink } from '@/lib/hooks/useWhatsAppLink'
 import toast from 'react-hot-toast'
 import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 import { useTranslations, useLocale } from 'next-intl'
-import Link from 'next/link'
 
 const supabase = createClient()
 
@@ -25,50 +23,50 @@ type Template = {
   template_teesheet_subject:   string | null
   template_teesheet_body:      string | null
 }
-
 type Member = { id: string; first_name: string; surname: string; email: string | null; role: string }
 type EventRow = { id: string; title: string; starts_at: string }
 type ParticipantStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
 
 const INVITATION_BODY_DEFAULT = "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
-
 const DEFAULTS: Template = {
-  template_logo_url:           null,
-  template_header_color:       '#185FA5',
-  template_bg_image_url:       null,
-  template_invitation_subject: 'Invitation : {{event_title}}',
-  template_invitation_body:    INVITATION_BODY_DEFAULT,
-  template_teesheet_subject:   'Tee Sheet — {{event_title}}',
-  template_teesheet_body:      "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
+  template_logo_url: null, template_header_color: '#185FA5', template_bg_image_url: null,
+  template_invitation_subject: 'Invitation : {{event_title}}', template_invitation_body: INVITATION_BODY_DEFAULT,
+  template_teesheet_subject: 'Tee Sheet — {{event_title}}',
+  template_teesheet_body: "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
 }
-
 const TEMPLATE_VARS = [
-  { label: 'Prénom',            value: '{{first_name}}' },
-  { label: 'Nom',               value: '{{player_surname}}' },
-  { label: 'Titre event',       value: '{{event_title}}' },
-  { label: 'Date event',        value: '{{event_date}}' },
-  { label: 'Heure event',       value: '{{event_time}}' },
-  { label: 'N° flight',         value: '{{flight_number}}' },
-  { label: 'Heure départ',      value: '{{start_time}}' },
-  { label: '✓ Boutons oui/non', value: '{{yes_button}}' },
-  { label: '✍️ Signature',      value: '{{owner_name}}' },
+  { label: 'Prénom', value: '{{first_name}}' }, { label: 'Nom', value: '{{player_surname}}' },
+  { label: 'Titre event', value: '{{event_title}}' }, { label: 'Date event', value: '{{event_date}}' },
+  { label: 'Heure event', value: '{{event_time}}' }, { label: 'N° flight', value: '{{flight_number}}' },
+  { label: 'Heure départ', value: '{{start_time}}' }, { label: '✓ Boutons oui/non', value: '{{yes_button}}' },
+  { label: '✍️ Signature', value: '{{owner_name}}' },
 ]
-
 const COMM_VARS = [
-  { key: '{{first_name}}',       label: 'Prénom' },
-  { key: '{{surname}}',          label: 'Nom' },
-  { key: '{{player_name}}',      label: 'Prénom + Nom' },
-  { key: '{{group_name}}',       label: 'Groupe' },
-  { key: '{{owner_name}}',       label: 'Signature' },
-  { key: '{{places_restantes}}', label: 'Places restantes' },
-  { key: '{{yes_button}}',       label: '✓/✗ Boutons réponse' },
+  { key: '{{first_name}}', label: 'Prénom' }, { key: '{{surname}}', label: 'Nom' },
+  { key: '{{player_name}}', label: 'Prénom + Nom' }, { key: '{{group_name}}', label: 'Groupe' },
+  { key: '{{owner_name}}', label: 'Signature' }, { key: '{{places_restantes}}', label: 'Places restantes' },
+  { key: '{{yes_button}}', label: '✓/✗ Boutons réponse' },
 ]
 
-const WhatsAppIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-  </svg>
-)
+// ── Bouton icône compact ──────────────────────────────────────────────────────
+function IconBtn({ onClick, href, title, disabled, color, children }: {
+  onClick?: () => void; href?: string; title: string
+  disabled?: boolean; color?: 'blue' | 'green'; children: React.ReactNode
+}) {
+  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0`
+  const cls = disabled
+    ? `${base} border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed`
+    : color === 'blue'
+      ? `${base} border-[#185FA5] bg-[#185FA5] text-white hover:bg-[#0C447C]`
+      : `${base} border-slate-200 text-slate-600 hover:bg-slate-50`
+  if (href) return (
+    <a href={disabled ? undefined : href} target="_blank" rel="noopener noreferrer"
+      title={title} className={cls} style={disabled ? { pointerEvents: 'none' } : {}}>
+      {children}
+    </a>
+  )
+  return <button type="button" onClick={onClick} disabled={disabled} title={title} className={cls}>{children}</button>
+}
 
 function formatDate(d: string, locale: string) {
   return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
@@ -82,10 +80,10 @@ export default function CommunicationsPage() {
   const t      = useTranslations()
   const locale = useLocale()
 
-  const [mainTab, setMainTab] = useState<'send' | 'templates'>('send')
-  const [members,  setMembers]  = useState<Member[]>([])
-  const [events,   setEvents]   = useState<EventRow[]>([])
-  const [loading,  setLoading]  = useState(true)
+  const [mainTab,          setMainTab]          = useState<'send' | 'templates'>('send')
+  const [members,          setMembers]          = useState<Member[]>([])
+  const [events,           setEvents]           = useState<EventRow[]>([])
+  const [loading,          setLoading]          = useState(true)
   const [groupTemplate,    setGroupTemplate]    = useState<Template>(DEFAULTS)
   const [useGroupTemplate, setUseGroupTemplate] = useState(true)
   const [eventTemplate,    setEventTemplate]    = useState<Template>(DEFAULTS)
@@ -112,10 +110,6 @@ export default function CommunicationsPage() {
   const [preview,       setPreview]       = useState(false)
   const [showPreview,   setShowPreview]   = useState(false)
 
-  // Résolution du lien WhatsApp : event actif → groupe
-  const activeEventIdForWa = filterEventId || selectedEventId || null
-  const { whatsappLink, loading: waLoading } = useWhatsAppLink(activeEventIdForWa, groupId)
-
   const COMM_TEMPLATES = [
     { id: 'reminder',   label: '⏰ Rappel',      subject: 'Rappel — {{group_name}}',      body: "Bonjour {{first_name}},\n\nIl reste {{places_restantes}} places pour notre prochaine rencontre le {{event_date}} à {{start_time}}.\n\nSi tu veux jouer, clique sur le bouton ci-dessous\n\nÀ bientôt sur le parcours !\n\n{{owner_name}}\n\n{{yes_button}}" },
     { id: 'invitation', label: '✉️ Invitation',  subject: 'Invitation : {{event_title}}', body: INVITATION_BODY_DEFAULT },
@@ -141,20 +135,15 @@ export default function CommunicationsPage() {
       template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
       template_teesheet_body:      group.template_teesheet_body ?? DEFAULTS.template_teesheet_body,
     })
-
-    const { data: evts } = await supabase.from('events').select('id, title, starts_at')
-      .eq('group_id', groupId).order('starts_at', { ascending: false })
+    const { data: evts } = await supabase.from('events').select('id, title, starts_at').eq('group_id', groupId).order('starts_at', { ascending: false })
     setEvents(evts || [])
     if (evts?.length) {
       const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
       const retainedExists = evts.find(e => e.id === retained)
       const defaultId = retainedExists?.id ?? evts[0].id
-      setSelectedEventId(defaultId)
-      setFilterEventId(defaultId)
+      setSelectedEventId(defaultId); setFilterEventId(defaultId)
     }
-
-    const { data: membersData } = await supabase
-      .from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
+    const { data: membersData } = await supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
     setMembers((membersData ?? []).map((r: any) => ({ ...r.player, role: r.role })))
     setLoading(false)
   }
@@ -211,18 +200,15 @@ export default function CommunicationsPage() {
         template_header_color:       '#185FA5',
       }).eq('id', groupId)
       if (error) { toast.error(error.message); return }
-      setGroupTemplate({ ...DEFAULTS })
-      toast.success(t('communications.toasts.groupReset'))
+      setGroupTemplate({ ...DEFAULTS }); toast.success(t('communications.toasts.groupReset'))
     } else {
       await supabase.from('events').update({ use_group_template: true, template_invitation_subject: null, template_invitation_body: null, template_teesheet_subject: null, template_teesheet_body: null, template_logo_url: null, template_header_color: null }).eq('id', selectedEventId)
-      setUseGroupTemplate(true); setEventTemplate({ ...groupTemplate })
-      toast.success(t('communications.toasts.eventReset'))
+      setUseGroupTemplate(true); setEventTemplate({ ...groupTemplate }); toast.success(t('communications.toasts.eventReset'))
     }
   }
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]; if (!file) return
-    setUploading(true)
+    const file = e.target.files?.[0]; if (!file) return; setUploading(true)
     const path = `${useGroupTemplate ? groupId : selectedEventId}/logo.${file.name.split('.').pop()}`
     const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
     if (error) { toast.error(error.message); setUploading(false); return }
@@ -232,8 +218,7 @@ export default function CommunicationsPage() {
   }
 
   async function handleBgUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]; if (!file) return
-    setUploading(true)
+    const file = e.target.files?.[0]; if (!file) return; setUploading(true)
     const path = `${groupId}/bg.${file.name.split('.').pop()}`
     const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
     if (error) { toast.error(error.message); setUploading(false); return }
@@ -246,13 +231,10 @@ export default function CommunicationsPage() {
   function setTpl(field: keyof Template, value: string) { setTemplate(t => ({ ...t, [field]: value })) }
   function insertTplVar(field: keyof Template, v: string) { setTemplate(t => ({ ...t, [field]: ((t[field] as string) ?? '') + v })) }
 
-  const membersWithEmail = useMemo(() =>
-    [...members].sort((a, b) => a.surname.localeCompare(b.surname, locale)), [members])
-  const selectedMembers = membersWithEmail.filter(m => selectedIds.has(m.id))
+  const membersWithEmail = useMemo(() => [...members].sort((a, b) => a.surname.localeCompare(b.surname, locale)), [members])
+  const selectedMembers  = membersWithEmail.filter(m => selectedIds.has(m.id))
 
-  function toggleMember(id: string) {
-    setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
-  }
+  function toggleMember(id: string) { setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n }) }
   function selectAll()  { setSelectedIds(new Set(membersWithEmail.filter(m => m.email).map(m => m.id))) }
   function selectNone() { setSelectedIds(new Set()) }
 
@@ -271,20 +253,14 @@ export default function CommunicationsPage() {
   }
 
   const previewVars = selectedMembers[0] ? {
-    first_name:  selectedMembers[0].first_name,
-    surname:     selectedMembers[0].surname,
-    player_name: `${selectedMembers[0].first_name} ${selectedMembers[0].surname}`,
-    group_name:  'Mon groupe',
+    first_name: selectedMembers[0].first_name, surname: selectedMembers[0].surname,
+    player_name: `${selectedMembers[0].first_name} ${selectedMembers[0].surname}`, group_name: 'Mon groupe',
   } : {}
-
   function applyPreviewVars(text: string) {
     return Object.entries(previewVars).reduce((r, [k, v]) => r.replace(new RegExp(`{{${k}}}`, 'g'), v), text)
   }
 
   function buildWhatsAppComm(): string {
-    // Si un lien WhatsApp est configuré, on ouvre directement le groupe
-    if (whatsappLink) return whatsappLink
-    // Sinon, message pré-rempli avec le sujet et le corps
     const text = `*${commSubject}*\n\n${commBody.replace(/\{\{[^}]+\}\}/g, '…')}`
     return `https://wa.me/?text=${encodeURIComponent(text)}`
   }
@@ -307,6 +283,9 @@ export default function CommunicationsPage() {
     finally { setSending(false) }
   }
 
+  const canSend = !sending && selectedIds.size > 0 && !!commSubject.trim() && !!commBody.trim() && isOwner
+  const hasMsg  = !!commSubject && !!commBody
+
   if (loading || roleLoading) return (
     <div className="p-6 space-y-3 max-w-3xl">
       {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
@@ -321,14 +300,9 @@ export default function CommunicationsPage() {
       </div>
 
       <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
-        {([
-          { key: 'send',      label: t('communications.tabs.send') },
-          { key: 'templates', label: t('communications.tabs.templates') },
-        ] as const).map(tab => (
+        {([{ key: 'send', label: t('communications.tabs.send') }, { key: 'templates', label: t('communications.tabs.templates') }] as const).map(tab => (
           <button key={tab.key} onClick={() => setMainTab(tab.key)}
-            className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${
-              mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-            }`}>
+            className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
             {tab.label}
           </button>
         ))}
@@ -336,25 +310,6 @@ export default function CommunicationsPage() {
 
       {mainTab === 'send' && (
         <div className="flex flex-col gap-6">
-
-          {/* ── Bandeau WhatsApp non configuré (admin uniquement) ── */}
-          {isOwner && !waLoading && !whatsappLink && (
-            <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50">
-              <div className="flex items-center gap-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-                <p className="text-[12px] text-amber-800 font-medium">
-                  {t('whatsapp.noGroupConfigured')}
-                </p>
-              </div>
-              <Link href={`/groups/${groupId}/edit`}
-                className="text-[11px] font-bold text-amber-700 hover:underline whitespace-nowrap">
-                {t('whatsapp.configureNow')}
-              </Link>
-            </div>
-          )}
-
           {/* ── Destinataires ── */}
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -371,23 +326,17 @@ export default function CommunicationsPage() {
                 <button onClick={selectNone} className="text-[11px] font-semibold text-slate-400 hover:underline px-2 py-1">{t('communications.recipients.none')}</button>
               </div>
             </div>
-
             <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-2 items-end">
               <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
                 {(['all', 'event', 'role'] as const).map(mode => (
                   <button key={mode} onClick={() => setFilterMode(mode)}
-                    className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                      filterMode === mode ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                    }`}>
+                    className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${filterMode === mode ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                     {mode === 'all' ? t('communications.recipients.filter.all') : mode === 'event' ? t('communications.recipients.filter.byEvent') : t('communications.recipients.filter.byRole')}
                   </button>
                 ))}
               </div>
               {filterMode === 'event' && (<>
-                <select value={filterEventId} onChange={e => {
-                  setFilterEventId(e.target.value)
-                  localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
-                }} className={selectClass}>
+                <select value={filterEventId} onChange={e => { setFilterEventId(e.target.value); localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value) }} className={selectClass}>
                   <option value="">{t('communications.recipients.chooseEvent')}</option>
                   {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
                 </select>
@@ -404,32 +353,25 @@ export default function CommunicationsPage() {
               </>)}
               {filterMode === 'role' && (
                 <div className="flex gap-2">
-                  <button onClick={() => setSelectedIds(new Set(membersWithEmail.filter(m => m.role === 'owner').map(m => m.id)))}
-                    className="text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-blue-100 transition-colors">{t('communications.recipients.roles.admins')}</button>
-                  <button onClick={() => setSelectedIds(new Set(membersWithEmail.filter(m => m.role !== 'owner' && m.role !== 'guest').map(m => m.id)))}
-                    className="text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">{t('communications.recipients.roles.members')}</button>
-                  <button onClick={() => setSelectedIds(new Set(membersWithEmail.filter(m => m.role === 'guest').map(m => m.id)))}
-                    className="text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors">{t('communications.recipients.roles.visitors')}</button>
+                  <button onClick={() => setSelectedIds(new Set(membersWithEmail.filter(m => m.role === 'owner').map(m => m.id)))} className="text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-blue-100 transition-colors">{t('communications.recipients.roles.admins')}</button>
+                  <button onClick={() => setSelectedIds(new Set(membersWithEmail.filter(m => m.role !== 'owner' && m.role !== 'guest').map(m => m.id)))} className="text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">{t('communications.recipients.roles.members')}</button>
+                  <button onClick={() => setSelectedIds(new Set(membersWithEmail.filter(m => m.role === 'guest').map(m => m.id)))} className="text-[11px] font-semibold px-3 py-1.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors">{t('communications.recipients.roles.visitors')}</button>
                 </div>
               )}
             </div>
-
             <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
               {membersWithEmail.map(member => {
                 const hasEmail = !!member.email; const isSelected = selectedIds.has(member.id)
                 return (
                   <label key={member.id} className={`flex items-center gap-3 px-5 py-2.5 cursor-pointer transition-colors ${!hasEmail ? 'opacity-40 cursor-not-allowed' : isSelected ? 'bg-[#EBF3FC]/50' : 'hover:bg-slate-50'}`}>
-                    <input type="checkbox" checked={isSelected} disabled={!hasEmail} onChange={() => hasEmail && toggleMember(member.id)}
-                      className="rounded border-slate-300 text-[#185FA5] focus:ring-[#185FA5]/30" />
+                    <input type="checkbox" checked={isSelected} disabled={!hasEmail} onChange={() => hasEmail && toggleMember(member.id)} className="rounded border-slate-300 text-[#185FA5] focus:ring-[#185FA5]/30" />
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
                       style={{ background: member.role === 'guest' ? '#FEF3C7' : '#EBF3FC', color: member.role === 'guest' ? '#92400E' : '#0C447C' }}>
                       {member.first_name[0]}{member.surname[0]}
                     </div>
                     <div className="flex-1 min-w-0">
                       <span className="text-[13px] font-semibold text-slate-800">{member.first_name} {member.surname}</span>
-                      {member.email
-                        ? <span className="text-[11px] text-slate-400 ml-2">{member.email}</span>
-                        : <span className="text-[11px] text-red-400 ml-2">{t('communications.recipients.noEmail')}</span>}
+                      {member.email ? <span className="text-[11px] text-slate-400 ml-2">{member.email}</span> : <span className="text-[11px] text-red-400 ml-2">{t('communications.recipients.noEmail')}</span>}
                     </div>
                     {member.role === 'owner' && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EBF3FC] text-[#185FA5]">{t('nav.admin')}</span>}
                     {member.role === 'guest' && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E]">{t('communications.recipients.roles.visitors')}</span>}
@@ -453,22 +395,18 @@ export default function CommunicationsPage() {
               </div>
               <div className="mb-3">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.subject')}</label>
-                <input type="text" value={commSubject} onChange={e => setCommSubject(e.target.value)}
-                  readOnly={!isOwner} placeholder={t('communications.message.subjectPlaceholder')} className={inputClass} />
+                <input type="text" value={commSubject} onChange={e => setCommSubject(e.target.value)} readOnly={!isOwner} placeholder={t('communications.message.subjectPlaceholder')} className={inputClass} />
               </div>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="text-[11px] font-semibold text-slate-400">{t('communications.message.insert')}</span>
                 {COMM_VARS.map(v => (
                   <button key={v.key} onClick={() => setCommBody(p => p + v.key)}
-                    className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
-                    {v.key}
-                  </button>
+                    className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">{v.key}</button>
                 ))}
               </div>
               <div className="mb-3">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.body')}</label>
-                <textarea value={commBody} onChange={e => setCommBody(e.target.value)} rows={10}
-                  readOnly={!isOwner} placeholder={t('communications.message.bodyPlaceholder')} className={`${textareaClass} font-mono leading-relaxed`} />
+                <textarea value={commBody} onChange={e => setCommBody(e.target.value)} rows={10} readOnly={!isOwner} placeholder={t('communications.message.bodyPlaceholder')} className={`${textareaClass} font-mono leading-relaxed`} />
               </div>
               {selectedMembers.length > 0 && (commSubject || commBody) && (
                 <div>
@@ -485,39 +423,20 @@ export default function CommunicationsPage() {
               )}
             </div>
 
-            {/* ── Barre d'actions ── */}
-            <div className="px-5 py-4 bg-slate-50/50 flex items-center justify-between gap-4">
+            {/* ── Barre d'actions compacte ── */}
+            <div className="px-5 py-3 bg-slate-50/50 flex items-center justify-between gap-3">
               <p className="text-[12px] text-slate-500">
                 {selectedIds.size === 0 ? t('communications.message.noRecipients') : t('communications.message.recipientCount', { count: selectedIds.size })}
               </p>
-              <div className="flex gap-2 items-center">
-                <button onClick={() => setShowPreview(true)}
-                  disabled={selectedIds.size === 0 || !commSubject.trim() || !commBody.trim() || !isOwner}
-                  className="text-[13px] font-semibold px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors">
-                  {t('communications.message.preview')}
-                </button>
-                <button onClick={handleSend} disabled={sending || selectedIds.size === 0 || !commSubject.trim() || !commBody.trim() || !isOwner}
-                  className={`flex items-center gap-2 text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-colors ${
-                    isOwner ? 'bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-40' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}>
-                  {sending
-                    ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>{t('communications.message.sending')}</>
-                    : <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>{t('communications.message.send')}</>
-                  }
-                </button>
-                <a
-                  href={buildWhatsAppComm()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={whatsappLink ? t('whatsapp.openGroup') : t('whatsapp.sendMessage')}
-                  className={`flex items-center gap-1.5 text-[12px] font-semibold px-4 py-2.5 rounded-xl border transition-colors ${
-                    commSubject && commBody
-                      ? 'border-[#25D366] text-[#25D366] hover:bg-green-50'
-                      : 'border-slate-200 text-slate-300 bg-slate-50 pointer-events-none'
-                  }`}>
-                  <WhatsAppIcon />
-                  WhatsApp
-                </a>
+              <div className="flex items-center gap-1.5">
+                {/* 👁 Aperçu */}
+                <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
+                {/* 📤 Envoyer email */}
+                <IconBtn onClick={handleSend} disabled={!canSend} title={sending ? t('communications.message.sending') : t('communications.message.send')} color="blue">
+                  {sending ? '⏳' : '📤'}
+                </IconBtn>
+                {/* 💬 WhatsApp */}
+                <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
               </div>
             </div>
 
@@ -545,16 +464,11 @@ export default function CommunicationsPage() {
               <button type="button" onClick={() => handleToggleGroupTemplate(!useGroupTemplate)}
                 style={{ backgroundColor: useGroupTemplate ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
                 className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
-                <div style={{ transform: useGroupTemplate ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
-                  className="w-4 h-4 rounded-full bg-white shadow-sm" />
+                <div style={{ transform: useGroupTemplate ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }} className="w-4 h-4 rounded-full bg-white shadow-sm" />
               </button>
               <div>
-                <p className="text-[13px] font-semibold text-slate-800">
-                  {useGroupTemplate ? t('communications.templates.groupTemplate') : t('communications.templates.eventTemplate')}
-                </p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  {useGroupTemplate ? t('communications.templates.groupTemplateDesc') : t('communications.templates.eventTemplateDesc')}
-                </p>
+                <p className="text-[13px] font-semibold text-slate-800">{useGroupTemplate ? t('communications.templates.groupTemplate') : t('communications.templates.eventTemplate')}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{useGroupTemplate ? t('communications.templates.groupTemplateDesc') : t('communications.templates.eventTemplateDesc')}</p>
               </div>
             </div>
             {!useGroupTemplate && (
@@ -594,8 +508,7 @@ export default function CommunicationsPage() {
               <div>
                 <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('communications.templates.headerColor')}</label>
                 <div className="flex items-center gap-3">
-                  <input type="color" value={template.template_header_color} onChange={e => setTpl('template_header_color', e.target.value)}
-                    className="w-10 h-10 rounded-xl border border-white/50 cursor-pointer p-0.5" />
+                  <input type="color" value={template.template_header_color} onChange={e => setTpl('template_header_color', e.target.value)} className="w-10 h-10 rounded-xl border border-white/50 cursor-pointer p-0.5" />
                   <div>
                     <p className="text-[13px] font-semibold text-slate-700">{template.template_header_color}</p>
                     <button onClick={() => setTpl('template_header_color', '#185FA5')} className="text-[11px] font-medium text-slate-400 hover:text-slate-600">{t('communications.templates.defaultColor')}</button>
@@ -604,8 +517,7 @@ export default function CommunicationsPage() {
                 <div className="mt-3 rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: template.template_header_color }}>
                   {template.template_logo_url
                     ? <img src={template.template_logo_url} alt="Logo" className="h-6 object-contain" />
-                    : <><span className="text-[15px] font-black text-white">Golf</span><span className="text-[15px] font-black" style={{ color: '#4CAF1A' }}>Go</span></>
-                  }
+                    : <><span className="text-[15px] font-black text-white">Golf</span><span className="text-[15px] font-black" style={{ color: '#4CAF1A' }}>Go</span></>}
                   <span className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Aperçu</span>
                 </div>
               </div>
@@ -620,8 +532,7 @@ export default function CommunicationsPage() {
                   <img src={template.template_bg_image_url} alt="Fond" className="h-16 w-32 object-cover rounded-xl border border-white/50" />
                   <div className="flex flex-col gap-1">
                     <button onClick={() => bgFileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
-                    <button onClick={async () => { setTemplate(t => ({ ...t, template_bg_image_url: null })); await supabase.from('groups').update({ template_bg_image_url: null }).eq('id', groupId); toast.success(t('communications.toasts.bgDeleted')) }}
-                      className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
+                    <button onClick={async () => { setTemplate(t => ({ ...t, template_bg_image_url: null })); await supabase.from('groups').update({ template_bg_image_url: null }).eq('id', groupId); toast.success(t('communications.toasts.bgDeleted')) }} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
                   </div>
                 </div>
               ) : (
@@ -636,11 +547,7 @@ export default function CommunicationsPage() {
           </div>
 
           <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-5">
-            {([
-              { key: 'invitation', label: t('communications.templates.tabs.invitation') },
-              { key: 'teesheet',   label: t('communications.templates.tabs.teesheet') },
-              { key: 'print',      label: t('communications.templates.tabs.print') },
-            ] as const).map(tab => (
+            {([{ key: 'invitation', label: t('communications.templates.tabs.invitation') }, { key: 'teesheet', label: t('communications.templates.tabs.teesheet') }, { key: 'print', label: t('communications.templates.tabs.print') }] as const).map(tab => (
               <button key={tab.key} onClick={() => setTemplateTab(tab.key)}
                 className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${templateTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
                 {tab.label}
@@ -658,10 +565,7 @@ export default function CommunicationsPage() {
                 <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('communications.templates.body')}</label>
                 <textarea value={template.template_invitation_body ?? ''} onChange={e => setTpl('template_invitation_body', e.target.value)} rows={6} className={textareaClass} />
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {TEMPLATE_VARS.map(v => (
-                    <button key={v.value} onClick={() => insertTplVar('template_invitation_body', v.value)}
-                      className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>
-                  ))}
+                  {TEMPLATE_VARS.map(v => <button key={v.value} onClick={() => insertTplVar('template_invitation_body', v.value)} className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>)}
                 </div>
               </div>
             </div>
@@ -677,10 +581,7 @@ export default function CommunicationsPage() {
                 <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('communications.templates.body')}</label>
                 <textarea value={template.template_teesheet_body ?? ''} onChange={e => setTpl('template_teesheet_body', e.target.value)} rows={6} className={textareaClass} />
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {TEMPLATE_VARS.map(v => (
-                    <button key={v.value} onClick={() => insertTplVar('template_teesheet_body', v.value)}
-                      className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>
-                  ))}
+                  {TEMPLATE_VARS.map(v => <button key={v.value} onClick={() => insertTplVar('template_teesheet_body', v.value)} className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>)}
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2">{t('communications.templates.teesheetBodyDesc')}</p>
               </div>
@@ -690,9 +591,7 @@ export default function CommunicationsPage() {
           {templateTab === 'print' && (
             <div className="rounded-xl border border-white/60 shadow-sm p-8 text-center" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M9 21h6v-6H9v6z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M9 21h6v-6H9v6z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </div>
               <p className="text-[14px] font-bold text-slate-700 mb-1">{t('communications.templates.print.title')}</p>
               <p className="text-[12px] text-slate-500">{t('communications.templates.print.desc')}</p>

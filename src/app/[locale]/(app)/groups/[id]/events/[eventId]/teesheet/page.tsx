@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
-import { useWhatsAppLink } from '@/lib/hooks/useWhatsAppLink'
 import EventPillSelector, { useNearestEvent } from '@/components/events/EventPillSelector'
 import toast from 'react-hot-toast'
 import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 import { useTranslations, useLocale } from 'next-intl'
-import Link from 'next/link'
 
 const supabase = createClient()
 
@@ -23,17 +21,34 @@ type Flight = { flight_number: number; players: FlightPlayer[] }
 function HolesBadge({ p }: { p: FlightPlayer }) {
   if (!p.holes_played || p.holes_played === 18) return null
   const label = p.holes_section === 'out' ? '9F' : p.holes_section === 'in' ? '9B' : '9H'
-  const cls   = p.holes_section === 'in'
-    ? 'bg-orange-100 text-orange-700'
-    : 'bg-amber-100 text-amber-700'
+  const cls   = p.holes_section === 'in' ? 'bg-orange-100 text-orange-700' : 'bg-amber-100 text-amber-700'
   return <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${cls}`}>{label}</span>
 }
 
-const WhatsAppIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-  </svg>
-)
+// ── Bouton icône compact ──────────────────────────────────────────────────────
+function IconBtn({ onClick, href, title, disabled, active, children }: {
+  onClick?: () => void; href?: string; title: string
+  disabled?: boolean; active?: boolean; children: React.ReactNode
+}) {
+  const cls = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0 ${
+    disabled
+      ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
+      : active
+        ? 'border-[#185FA5] bg-[#185FA5] text-white'
+        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+  }`
+  if (href) return (
+    <a href={disabled ? undefined : href} target="_blank" rel="noopener noreferrer"
+      title={title} className={cls} style={disabled ? { pointerEvents: 'none' } : {}}>
+      {children}
+    </a>
+  )
+  return (
+    <button type="button" onClick={onClick} disabled={disabled} title={title} className={cls}>
+      {children}
+    </button>
+  )
+}
 
 export default function TeeSheetPage() {
   const params           = useParams()
@@ -48,18 +63,16 @@ export default function TeeSheetPage() {
   const { nearestEventId, loading: nearestLoading } = useNearestEvent(groupId)
   const [selectedEventId, setSelectedEventId] = useState<string>(eventIdFromRoute)
 
-  const { whatsappLink, loading: waLoading } = useWhatsAppLink(selectedEventId || null, groupId)
-
-  const [flights,       setFlights]       = useState<Flight[]>([])
-  const [eventTitle,    setEventTitle]    = useState('')
-  const [eventDate,     setEventDate]     = useState('')
-  const [startsAt,      setStartsAt]      = useState<string | null>(null)
-  const [interval,      setInterval]      = useState(9)
-  const [loading,       setLoading]       = useState(true)
-  const [error,         setError]         = useState<string | null>(null)
-  const [sending,       setSending]       = useState(false)
-  const [emailEnabled,  setEmailEnabled]  = useState(false)
-  const [showPreview,   setShowPreview]   = useState(false)
+  const [flights,      setFlights]      = useState<Flight[]>([])
+  const [eventTitle,   setEventTitle]   = useState('')
+  const [eventDate,    setEventDate]    = useState('')
+  const [startsAt,     setStartsAt]     = useState<string | null>(null)
+  const [interval,     setInterval]     = useState(9)
+  const [loading,      setLoading]      = useState(true)
+  const [error,        setError]        = useState<string | null>(null)
+  const [sending,      setSending]      = useState(false)
+  const [emailEnabled, setEmailEnabled] = useState(false)
+  const [showPreview,  setShowPreview]  = useState(false)
 
   useEffect(() => {
     if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
@@ -77,7 +90,6 @@ export default function TeeSheetPage() {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
       }))
     }
-
     const { data: flightsData, error: fErr } = await supabase
       .from('flights')
       .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
@@ -85,9 +97,7 @@ export default function TeeSheetPage() {
     if (fErr) { setError(fErr.message); setLoading(false); return }
 
     const { data: participants } = await supabase
-      .from('event_participants')
-      .select('player_id, holes_played, holes_section')
-      .eq('event_id', evId)
+      .from('event_participants').select('player_id, holes_played, holes_section').eq('event_id', evId)
 
     const holesMap: Record<string, { holes_played: number | null; holes_section: HolesSection }> = {}
     participants?.forEach(p => { holesMap[p.player_id] = { holes_played: p.holes_played, holes_section: p.holes_section as HolesSection } })
@@ -112,9 +122,6 @@ export default function TeeSheetPage() {
   }
 
   function buildWhatsAppTeesheet(): string {
-    // Si un lien WhatsApp est configuré, on ouvre directement le groupe
-    if (whatsappLink) return whatsappLink
-    // Sinon, message pré-rempli
     const lines = [`📋 *${eventTitle}* — ${eventDate}`, '']
     flights.forEach((f, i) => {
       lines.push(`*Flight ${f.flight_number}* — ${getFlightTime(i)}`)
@@ -149,11 +156,10 @@ export default function TeeSheetPage() {
     </div>
   )
 
-  const canSend = emailEnabled && !sending
-
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
+      {/* Print header/footer */}
       <div className="print-header">
         <div className="print-logo">
           <span className="print-logo-golf">Golf</span>
@@ -169,18 +175,29 @@ export default function TeeSheetPage() {
         <span>{t('teesheet.printFooter.printedOn', { date: new Date().toLocaleDateString(locale) })}</span>
       </div>
 
-      <div className="flex items-start justify-between mb-4 flex-wrap gap-3 print:hidden">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-4 print:hidden">
         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('teesheet.title')}</h1>
-        <div className="flex items-center gap-2 flex-wrap">
-          <label className="text-[12px] font-semibold text-slate-900">{t('teesheet.interval')}</label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-[12px] font-semibold text-slate-500 mr-1">{t('teesheet.interval')}</label>
           <select value={interval} onChange={e => setInterval(Number(e.target.value))}
-            className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-            {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{t('teesheet.intervalUnit', { count: v })}</option>)}
+            className="border border-slate-200 rounded-xl px-2 py-1.5 text-[12px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
+            {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{v}'</option>)}
           </select>
-          <button onClick={() => window.print()}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-            {t('teesheet.print')}
-          </button>
+          {/* 🖨 Imprimer */}
+          <IconBtn onClick={() => window.print()} title={t('teesheet.print')}>🖨</IconBtn>
+          {isOwner && flights.length > 0 && (<>
+            {/* ✉ Email — toggle */}
+            <IconBtn onClick={() => setEmailEnabled(v => !v)} title={t('teesheet.email.label')} active={emailEnabled}>✉</IconBtn>
+            {/* 👁 Aperçu email */}
+            <IconBtn onClick={() => setShowPreview(true)} title={t('teesheet.email.preview')} disabled={!emailEnabled}>👁</IconBtn>
+            {/* ✉ Envoyer email */}
+            <IconBtn onClick={handleSendEmail} title={sending ? t('teesheet.email.sending') : t('teesheet.email.send')} disabled={!emailEnabled || sending}>
+              {sending ? '⏳' : '📤'}
+            </IconBtn>
+            {/* 💬 WhatsApp */}
+            <IconBtn href={buildWhatsAppTeesheet()} title="WhatsApp" disabled={flights.length === 0}>💬</IconBtn>
+          </>)}
         </div>
       </div>
 
@@ -191,63 +208,6 @@ export default function TeeSheetPage() {
           onChange={id => { setSelectedEventId(id); setEmailEnabled(false) }}
         />
       </div>
-
-      {/* ── Bandeau WhatsApp non configuré (admin uniquement) ── */}
-      {isOwner && !waLoading && !whatsappLink && selectedEventId && (
-        <div className="flex items-center justify-between gap-3 mb-4 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 print:hidden">
-          <div className="flex items-center gap-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            <p className="text-[12px] text-amber-800 font-medium">
-              {t('whatsapp.noGroupConfigured')}
-            </p>
-          </div>
-          <Link href={`/groups/${groupId}/edit`}
-            className="text-[11px] font-bold text-amber-700 hover:underline whitespace-nowrap">
-            {t('whatsapp.configureNow')}
-          </Link>
-        </div>
-      )}
-
-      {isOwner && flights.length > 0 && (
-        <div className="flex items-center justify-between gap-4 mb-5 p-4 bg-white border border-slate-200 rounded-xl print:hidden">
-          <div className="flex items-start gap-3">
-            <button type="button" role="switch" aria-checked={emailEnabled}
-              onClick={() => setEmailEnabled(v => !v)}
-              style={{ backgroundColor: emailEnabled ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
-              className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
-              <div style={{ transform: emailEnabled ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
-                className="w-4 h-4 rounded-full bg-white shadow-sm" />
-            </button>
-            <div>
-              <p className="text-[13px] font-semibold text-slate-800">{t('teesheet.email.label')}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">{t('teesheet.email.description')}</p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => setShowPreview(true)} disabled={!emailEnabled}
-              className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
-                emailEnabled ? 'border-slate-300 text-slate-600 hover:bg-slate-50 cursor-pointer' : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'}`}>
-              {t('teesheet.email.preview')}
-            </button>
-            <button type="button" onClick={canSend ? handleSendEmail : undefined} disabled={!canSend}
-              className={`flex-shrink-0 text-[12px] font-semibold px-4 py-2 rounded-xl border transition-colors ${
-                canSend ? 'border-[#185FA5] text-[#185FA5] hover:bg-blue-50 cursor-pointer' : 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'}`}>
-              {sending ? t('teesheet.email.sending') : t('teesheet.email.send')}
-            </button>
-            <a
-              href={buildWhatsAppTeesheet()}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={whatsappLink ? t('whatsapp.openGroup') : t('whatsapp.sendMessage')}
-              className="flex-shrink-0 flex items-center gap-1.5 text-[12px] font-semibold px-4 py-2 rounded-xl border border-[#25D366] text-[#25D366] hover:bg-green-50 transition-colors">
-              <WhatsAppIcon />
-              WhatsApp
-            </a>
-          </div>
-        </div>
-      )}
 
       {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium">{error}</div>}
 
