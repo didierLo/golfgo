@@ -61,6 +61,11 @@ export default function AddMemberPage() {
 
     let err: any = null
     if (existing) {
+      // ── PROTECTION : ne jamais écraser un owner ──────────────────────────
+      if (existing.role === 'owner') {
+        alert(t('addMember.alreadyMember', { role: t('members.admin') }))
+        setLoadingKey(null); return
+      }
       if (existing.role === role) {
         alert(t('addMember.alreadyMember', { role: role === 'guest' ? t('addMember.visitor') : t('addMember.member') }))
         setLoadingKey(null); return
