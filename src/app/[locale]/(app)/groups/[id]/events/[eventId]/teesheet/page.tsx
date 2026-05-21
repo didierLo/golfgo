@@ -71,7 +71,7 @@ export default function TeeSheetPage() {
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState<string | null>(null)
   const [sending,      setSending]      = useState(false)
-  const [emailEnabled, setEmailEnabled] = useState(false)
+
   const [showPreview,  setShowPreview]  = useState(false)
 
   useEffect(() => {
@@ -187,12 +187,10 @@ export default function TeeSheetPage() {
           {/* 🖨 Imprimer */}
           <IconBtn onClick={() => window.print()} title={t('teesheet.print')}>🖨</IconBtn>
           {isOwner && flights.length > 0 && (<>
-            {/* ✉ Email — toggle */}
-            <IconBtn onClick={() => setEmailEnabled(v => !v)} title={t('teesheet.email.label')} active={emailEnabled}>✉</IconBtn>
             {/* 👁 Aperçu email */}
-            <IconBtn onClick={() => setShowPreview(true)} title={t('teesheet.email.preview')} disabled={!emailEnabled}>👁</IconBtn>
-            {/* ✉ Envoyer email */}
-            <IconBtn onClick={handleSendEmail} title={sending ? t('teesheet.email.sending') : t('teesheet.email.send')} disabled={!emailEnabled || sending}>
+            <IconBtn onClick={() => setShowPreview(true)} title={t('teesheet.email.preview')}>👁</IconBtn>
+            {/* 📤 Envoyer email */}
+            <IconBtn onClick={handleSendEmail} title={sending ? t('teesheet.email.sending') : t('teesheet.email.send')} disabled={sending}>
               {sending ? '⏳' : '📤'}
             </IconBtn>
             {/* 💬 WhatsApp */}
@@ -205,7 +203,7 @@ export default function TeeSheetPage() {
         <EventPillSelector
           groupId={groupId}
           selectedEventId={selectedEventId}
-          onChange={id => { setSelectedEventId(id); setEmailEnabled(false) }}
+          onChange={id => setSelectedEventId(id)}
         />
       </div>
 
