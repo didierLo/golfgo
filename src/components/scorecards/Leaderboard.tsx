@@ -116,10 +116,7 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
               }`}>
               {savingLb ? 'Saving…' : 'Save leaderboard'}
             </button>
-            <button onClick={() => window.print()}
-              className="no-print text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-              🖨 Imprimer
-            </button>
+            
           </div>
         </div>
 

@@ -301,6 +301,8 @@ export default function CommunicationsPage() {
         </div>
         {mainTab === 'send' && (
           <div className="flex items-center gap-1.5">
+            {/* 🖨 Imprimer */}
+            <IconBtn onClick={() => window.print()} title="Imprimer">🖨</IconBtn>
             {/* 👁 Aperçu */}
             <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
             {/* 📤 Envoyer email */}

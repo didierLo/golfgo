@@ -413,14 +413,18 @@ export default function ParticipantsPage() {
 
       {viewMode === 'list' && (
         <>
-          <div className="mb-5">
-            <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-              className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 w-full max-w-sm">
-              {events.map(e => (
-                <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>
-              ))}
-            </select>
-          </div>
+          <div className="mb-5 rounded-xl border border-white/60 shadow-sm p-4"
+  style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+    {t('participants.byEvent')}
+  </label>
+  <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
+    className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 w-full max-w-sm">
+    {events.map(e => (
+      <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>
+    ))}
+  </select>
+</div>
 
           {!isOwner && (
             <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">

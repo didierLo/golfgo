@@ -63,25 +63,16 @@ function MemberSearchView({
     : []
 
   return (
-    <div>
-      <div className="relative mb-4">
+  <div>
+    <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-4"
+      style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+        {t('invitations.search')}
+      </label>
+      <div className="relative">
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/60 shadow-sm"
           style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-          <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-          </svg>
-          <input type="text" value={query}
-            onChange={e => { setQuery(e.target.value); setSelectedMember(null); setOpen(true) }}
-            onFocus={() => { if (query && !selectedMember) setOpen(true) }}
-            placeholder={t('invitations.search')}
-            className="flex-1 bg-transparent text-[13px] text-slate-900 placeholder-slate-400 outline-none" />
-          {query && (
-            <button onClick={clear} className="text-slate-400 hover:text-slate-600 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+          {/* ... tout le contenu existant de la div interne ... */}
         </div>
         {open && suggestions.length > 0 && (
           <div className="absolute z-20 top-full left-0 right-0 mt-1 rounded-xl border border-white/60 shadow-lg overflow-hidden"
@@ -100,6 +91,7 @@ function MemberSearchView({
             ))}
           </div>
         )}
+      </div>
       </div>
 
       {selectedMember && (

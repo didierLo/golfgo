@@ -136,25 +136,8 @@ export default function MembersPage() {
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('members.title')}</h1>
           <p className="text-[13px] text-slate-900 mt-0.5">{t('members.subtitle', { count: members.length })}</p>
         </div>
-        <div className="flex gap-2 flex-wrap justify-end">
-          <a href={`/groups/${groupId}/constraints`}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors">
-            {t('members.constraints')}
-          </a>
-          <button onClick={copyList} disabled={members.length === 0}
-            className={`flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-              copied ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'border-white/50 text-slate-600 hover:bg-white/30'}`}>
-            {copied ? (
-              <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>{t('members.copied')}</>
-            ) : (
-              <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>{t('members.copy')}</>
-            )}
-          </button>
-          <button onClick={printList} disabled={members.length === 0}
-            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-white/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            {t('members.print')}
-          </button>
+
+        <div className="mb-5">
           <button onClick={() => {
               if (userRole !== 'owner') { showToast(t('members.adminOnly')); return }
               router.push(`/groups/${groupId}/members/add`)
@@ -162,10 +145,27 @@ export default function MembersPage() {
             className={`flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl transition-colors ${
               userRole === 'owner' ? 'bg-[#185FA5] text-white hover:bg-[#0C447C]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             }`}>
-            {t('members.addMember')}
+            + {t('members.addMember')}
           </button>
         </div>
-      </div>
+              
+        <div className="flex items-center gap-1.5">
+          {/* 🖨 Imprimer */}
+          <button type="button" onClick={() => window.print()}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">🖨</button>
+          {/* 👁 Aperçu */}
+          <button type="button" onClick={printList}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">👁</button>
+          {/* 📤 Email — copie liste */}
+          <button type="button" onClick={copyList}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">📤</button>
+          {/* 💬 WhatsApp */}
+          <button type="button" onClick={() => {
+              const lines = sortedMembers.map(m => `• ${m.first_name} ${m.surname}${m.whs != null ? ` (${m.whs})` : ''}`)
+              window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
+            }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">💬</button>
+        </div>
 
       {members.length === 0 ? (
         <div className="text-center py-16 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
@@ -240,6 +240,7 @@ export default function MembersPage() {
           ))}
         </div>
       )}
+    </div>
     </div>
   )
 }

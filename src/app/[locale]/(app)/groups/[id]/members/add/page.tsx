@@ -189,7 +189,7 @@ export default function AddMemberPage() {
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('addMember.searchPlaceholder')} className={inputClass} autoFocus />
             {results.length > 0 && (
               <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden mt-3"
-                style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+                style={{ background: "#ffffff", border: '1px solid #E2E8F0' }}>
                 {results.map((p, i) => {
                   const addedRole = added[p.id]
                   return (

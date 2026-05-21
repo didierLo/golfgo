@@ -176,28 +176,33 @@ export default function TeeSheetPage() {
       </div>
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between mb-4 print:hidden">
-        <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('teesheet.title')}</h1>
-        <div className="flex items-center gap-1.5">
-          <label className="text-[12px] font-semibold text-slate-500 mr-1">{t('teesheet.interval')}</label>
-          <select value={interval} onChange={e => setInterval(Number(e.target.value))}
-            className="border border-slate-200 rounded-xl px-2 py-1.5 text-[12px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-            {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{v}'</option>)}
-          </select>
-          {/* 🖨 Imprimer */}
-          <IconBtn onClick={() => window.print()} title={t('teesheet.print')}>🖨</IconBtn>
-          {isOwner && flights.length > 0 && (<>
-            {/* 👁 Aperçu email */}
-            <IconBtn onClick={() => setShowPreview(true)} title={t('teesheet.email.preview')}>👁</IconBtn>
-            {/* 📤 Envoyer email */}
-            <IconBtn onClick={handleSendEmail} title={sending ? t('teesheet.email.sending') : t('teesheet.email.send')} disabled={sending}>
-              {sending ? '⏳' : '📤'}
-            </IconBtn>
-            {/* 💬 WhatsApp */}
-            <IconBtn href={buildWhatsAppTeesheet()} title="WhatsApp" disabled={flights.length === 0}>💬</IconBtn>
-          </>)}
+  
+      <div className="print:hidden mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('teesheet.title')}</h1>
+          <div className="flex items-center gap-1.5">
+            {/* 🖨 Imprimer */}
+            <IconBtn onClick={() => window.print()} title={t('teesheet.print')}>🖨</IconBtn>
+            {isOwner && flights.length > 0 && (<>
+              {/* 👁 Aperçu email */}
+              <IconBtn onClick={() => setShowPreview(true)} title={t('teesheet.email.preview')}>👁</IconBtn>
+              {/* 📤 Envoyer email */}
+              <IconBtn onClick={handleSendEmail} title={sending ? t('teesheet.email.sending') : t('teesheet.email.send')} disabled={sending}>
+                {sending ? '⏳' : '📤'}
+              </IconBtn>
+              {/* 💬 WhatsApp */}
+              <IconBtn href={buildWhatsAppTeesheet()} title="WhatsApp" disabled={flights.length === 0}>💬</IconBtn>
+            </>)}
+          </div>
         </div>
-      </div>
+        <div className="flex items-center gap-2">
+    <label className="text-[12px] font-semibold text-slate-600">{t('teesheet.interval')}</label>
+    <select value={interval} onChange={e => setInterval(Number(e.target.value))}
+      className="border border-slate-200 rounded-xl px-2 py-1.5 text-[12px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
+      {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{v}' — Intervalle {v} min</option>)}
+    </select>
+  </div>
+</div>
 
       <div className="mb-5 print:hidden">
         <EventPillSelector
