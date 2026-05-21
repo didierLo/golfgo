@@ -294,9 +294,23 @@ export default function CommunicationsPage() {
 
   return (
     <div className="p-5 sm:p-6 max-w-3xl">
-      <div className="mb-6">
-        <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('communications.title')}</h1>
-        <p className="text-[13px] text-slate-900 mt-0.5">{t('communications.subtitle')}</p>
+      <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+        <div>
+          <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('communications.title')}</h1>
+          <p className="text-[13px] text-slate-900 mt-0.5">{t('communications.subtitle')}</p>
+        </div>
+        {mainTab === 'send' && (
+          <div className="flex items-center gap-1.5">
+            {/* 👁 Aperçu */}
+            <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
+            {/* 📤 Envoyer email */}
+            <IconBtn onClick={handleSend} disabled={!canSend} title={sending ? t('communications.message.sending') : t('communications.message.send')} color="blue">
+              {sending ? '⏳' : '📤'}
+            </IconBtn>
+            {/* 💬 WhatsApp */}
+            <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
@@ -421,23 +435,6 @@ export default function CommunicationsPage() {
                   )}
                 </div>
               )}
-            </div>
-
-            {/* ── Barre d'actions compacte ── */}
-            <div className="px-5 py-3 bg-slate-50/50 flex items-center justify-between gap-3">
-              <p className="text-[12px] text-slate-500">
-                {selectedIds.size === 0 ? t('communications.message.noRecipients') : t('communications.message.recipientCount', { count: selectedIds.size })}
-              </p>
-              <div className="flex items-center gap-1.5">
-                {/* 👁 Aperçu */}
-                <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
-                {/* 📤 Envoyer email */}
-                <IconBtn onClick={handleSend} disabled={!canSend} title={sending ? t('communications.message.sending') : t('communications.message.send')} color="blue">
-                  {sending ? '⏳' : '📤'}
-                </IconBtn>
-                {/* 💬 WhatsApp */}
-                <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
-              </div>
             </div>
 
             {showPreview && (

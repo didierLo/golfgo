@@ -15,11 +15,31 @@ const supabase = createClient()
 type EventOption = { id: string; title: string; starts_at: string }
 type Tab = 'scorecards' | 'leaderboard'
 
+// ── Bouton icône compact ──────────────────────────────────────────────────────
+function IconBtn({ onClick, href, title, disabled, color, children }: {
+  onClick?: () => void; href?: string; title: string
+  disabled?: boolean; color?: 'blue'; children: React.ReactNode
+}) {
+  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0`
+  const cls = disabled
+    ? `${base} border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed`
+    : color === 'blue'
+      ? `${base} border-[#185FA5] bg-[#185FA5] text-white hover:bg-[#0C447C]`
+      : `${base} border-slate-200 text-slate-600 hover:bg-slate-50`
+  if (href) return (
+    <a href={disabled ? undefined : href} target="_blank" rel="noopener noreferrer"
+      title={title} className={cls} style={disabled ? { pointerEvents: 'none' } : {}}>
+      {children}
+    </a>
+  )
+  return <button type="button" onClick={onClick} disabled={disabled} title={title} className={cls}>{children}</button>
+}
+
 function EventPill({ events, selectedId, onSelect }: {
   events: EventOption[]; selectedId: string; onSelect: (id: string) => void
 }) {
-  const t        = useTranslations()
-  const locale   = useLocale()
+  const t      = useTranslations()
+  const locale = useLocale()
   const selected = events.find(e => e.id === selectedId)
   const [open, setOpen] = useState(false)
   if (events.length === 0) return null
@@ -116,11 +136,11 @@ export default function ResultsPage() {
   const [saveMsgSc,      setSaveMsgSc]      = useState('')
   const [lastRefresh,    setLastRefresh]    = useState<Date | null>(null)
 
-  const scIdRef      = useRef<string | null>(null)
-  const playersRef   = useRef<Player[]>([])
-  const selectedRef  = useRef(selectedId)
-  const scoresRef    = useRef<ScoreMap>({})
-  const pollTimer    = useRef<ReturnType<typeof setInterval> | null>(null)
+  const scIdRef     = useRef<string | null>(null)
+  const playersRef  = useRef<Player[]>([])
+  const selectedRef = useRef(selectedId)
+  const scoresRef   = useRef<ScoreMap>({})
+  const pollTimer   = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => { selectedRef.current = selectedId }, [selectedId])
 
@@ -150,9 +170,7 @@ export default function ResultsPage() {
     const map: ScoreMap = {}
     players.forEach(p => { map[p.id] = {} })
     scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-    setScores(map)
-    scoresRef.current = map
-    setLastRefresh(new Date())
+    setScores(map); scoresRef.current = map; setLastRefresh(new Date())
   }
 
   async function loadScorecard(evtId: string) {
@@ -169,16 +187,15 @@ export default function ResultsPage() {
         const { data: h } = await supabase.from('course_holes')
           .select('hole_number, par, stroke_index').eq('course_id', event.course_id).order('hole_number')
         if (h?.length) holesData = h
-        const { data: t } = await supabase.from('course_tees')
+        const { data: tData } = await supabase.from('course_tees')
           .select('id, tee_name, par_total, course_rating, slope').eq('course_id', event.course_id).order('tee_name')
-        teesData = t ?? []
+        teesData = tData ?? []
       }
       setHoles(holesData)
 
       const { data: existing } = await supabase.from('scorecards').select('id').eq('event_id', evtId).maybeSingle()
       const scId = existing?.id ?? null
-      setScorecardId(scId)
-      scIdRef.current = scId
+      setScorecardId(scId); scIdRef.current = scId
 
       const { data: participants } = await supabase.from('event_participants')
         .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
@@ -194,8 +211,7 @@ export default function ResultsPage() {
         }
         return { id: p.id, first_name: p.first_name, surname: p.surname, whs: p.whs ?? 0, tee_id: teeId, tee, phcp: computePhcp(p.whs ?? 0, tee) }
       })
-      setPlayers(built)
-      playersRef.current = built
+      setPlayers(built); playersRef.current = built
       if (built.length > 0) setActivePlayerId(built[0].id)
 
       if (scId && built.length > 0) {
@@ -204,12 +220,8 @@ export default function ResultsPage() {
         const map: ScoreMap = {}
         built.forEach(p => { map[p.id] = {} })
         scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-        setScores(map)
-        scoresRef.current = map
-      } else {
-        setScores({})
-        scoresRef.current = {}
-      }
+        setScores(map); scoresRef.current = map
+      } else { setScores({}); scoresRef.current = {} }
       setLastRefresh(new Date())
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
@@ -223,20 +235,25 @@ export default function ResultsPage() {
         Object.entries(scoresRef.current[player.id] ?? {})
           .filter(([, s]) => s != null)
           .map(([hole, strokes]) => ({
-            scorecard_id: scorecardId,
-            event_id:     selectedId,
-            player_id:    player.id,
-            hole:         Number(hole),
-            strokes:      strokes as number,
-            saved_at:     new Date().toISOString(),
+            scorecard_id: scorecardId, event_id: selectedId,
+            player_id: player.id, hole: Number(hole), strokes: strokes as number,
+            saved_at: new Date().toISOString(),
           }))
       )
-      if (rows.length > 0) {
-        await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
-      }
+      if (rows.length > 0) await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
       setSaveMsgSc(t('scorecards.saved'))
     } catch { setSaveMsgSc(t('scorecards.error')) }
     finally { setSavingSc(false); setTimeout(() => setSaveMsgSc(''), 3000) }
+  }
+
+  function buildWhatsAppLeaderboard(): string {
+    const ev = events.find(e => e.id === selectedId)
+    const lines = [`🏆 *${ev?.title ?? 'Leaderboard'}*`, '']
+    players.forEach((p, i) => {
+      const total = Object.values(scoresRef.current[p.id] ?? {}).reduce((s, v) => (s ?? 0) + (v ?? 0), 0) ?? 0
+      lines.push(`${i + 1}. ${p.first_name} ${p.surname} — ${total} (Phcp ${p.phcp})`)
+    })
+    return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`
   }
 
   const activePlayer  = players.find(p => p.id === activePlayerId) ?? null
@@ -250,15 +267,35 @@ export default function ResultsPage() {
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
-      <div className="flex items-start justify-between mb-5 gap-3 flex-wrap">
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('results.title')}</h1>
           <p className="text-[13px] text-slate-900 mt-0.5">{t('results.subtitle', { count: players.length, format: eventFormat })}</p>
         </div>
-        <EventPill events={events} selectedId={selectedId}
-          onSelect={id => { setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`) }} />
+        <div className="flex items-center gap-1.5">
+          <EventPill events={events} selectedId={selectedId}
+            onSelect={id => { setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`) }} />
+          {/* 🖨 Imprimer */}
+          <IconBtn onClick={() => window.print()} title={t('results.print')}>🖨</IconBtn>
+          {/* 💬 WhatsApp */}
+          <IconBtn href={players.length > 0 ? buildWhatsAppLeaderboard() : undefined}
+            disabled={players.length === 0} title="WhatsApp">💬</IconBtn>
+          {/* 💾 Enregistrer (owner scorecards tab) */}
+          {isOwner && tab === 'scorecards' && (
+            <IconBtn onClick={handleSaveScorecard} disabled={savingSc} title={t('results.saveScorecard')} color="blue">
+              {savingSc ? '⏳' : '💾'}
+            </IconBtn>
+          )}
+        </div>
       </div>
 
+      {saveMsgSc && (
+        <p className="text-[12px] font-semibold text-[#3B6D11] mb-3">{saveMsgSc}</p>
+      )}
+
+      {/* ── Onglets ── */}
       <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-6 w-fit">
         {([['leaderboard', t('results.leaderboard')], ['scorecards', t('results.scorecards')]] as [Tab, string][]).map(([tabKey, label]) => (
           <button key={tabKey} onClick={() => setTab(tabKey)}
@@ -305,27 +342,12 @@ export default function ResultsPage() {
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                  {lastRefresh && (
-                    <span className="text-[11px] text-slate-400">
-                      {t('results.updatedAt', { time: lastRefresh.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })}
-                      <span className="text-slate-300"> · {t('results.pollInterval')}</span>
-                    </span>
-                  )}
-                  <div className="flex items-center gap-2 ml-auto">
-                    {saveMsgSc && <span className="text-[12px] font-semibold text-[#3B6D11]">{saveMsgSc}</span>}
-                    {isOwner && (
-                      <button onClick={handleSaveScorecard} disabled={savingSc}
-                        className="text-[12px] font-semibold px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors">
-                        {savingSc ? t('results.saving') : t('results.saveScorecard')}
-                      </button>
-                    )}
-                    <button onClick={() => window.print()}
-                      className="text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-                      {t('results.print')}
-                    </button>
-                  </div>
-                </div>
+                {lastRefresh && (
+                  <p className="text-[11px] text-slate-400 mb-4">
+                    {t('results.updatedAt', { time: lastRefresh.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })}
+                    <span className="text-slate-300"> · {t('results.pollInterval')}</span>
+                  </p>
+                )}
 
                 <div className="flex gap-2 items-center mb-5 flex-wrap">
                   {players.map(p => {
@@ -334,7 +356,9 @@ export default function ResultsPage() {
                     return (
                       <button key={p.id} onClick={() => setActivePlayerId(p.id)}
                         title={`${p.first_name} ${p.surname}`}
-                        className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all flex-shrink-0 ${isActive ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'}`}>
+                        className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all flex-shrink-0 ${
+                          isActive ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
+                        }`}>
                         {initials}
                       </button>
                     )
@@ -357,12 +381,8 @@ export default function ResultsPage() {
                   <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
                     style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
                     <ScorecardTable
-                      holes={holes}
-                      player={activePlayer}
-                      scores={scores}
-                      setScores={() => {}}
-                      eventFormat={eventFormat}
-                      readOnly={true}
+                      holes={holes} player={activePlayer} scores={scores}
+                      setScores={() => {}} eventFormat={eventFormat} readOnly={true}
                     />
                   </div>
                 )}
