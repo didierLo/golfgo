@@ -172,7 +172,7 @@ export default function MembersPage() {
           {t('members.noMembers')}
         </div>
       ) : (
-        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden max-w-2xl"
+        <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden max-w-2xl ml-auto"
           style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
 
           <div className="grid grid-cols-[minmax(0,1fr)_60px_80px_100px] gap-3 px-4 py-3 bg-white/30 border-b border-white/40">
@@ -189,7 +189,7 @@ export default function MembersPage() {
               </div>
             </div>
             <span className="text-[12px] font-semibold text-slate-500 text-center">{t('members.whs')}</span>
-            <span className="text-[12px] font-semibold text-slate-500">{t('members.status')}</span>
+  
             <span className="text-[12px] font-semibold text-slate-500 text-right">Edit</span>
           </div>
 
@@ -198,7 +198,7 @@ export default function MembersPage() {
               className={`grid grid-cols-[minmax(0,1fr)_60px_80px_100px] gap-3 px-4 py-3 items-center hover:bg-white/30 transition-colors ${i < sortedMembers.length - 1 ? 'border-b border-white/30' : ''}`}>
               <div className="flex items-center gap-2.5 cursor-pointer min-w-0" onClick={() => router.push(`/players/${member.id}/edit?groupId=${groupId}`)}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
-                  style={{ background: member.role === 'guest' ? '#FEF3C7' : '#EBF3FC', color: member.role === 'guest' ? '#92400E' : '#0C447C' }}>
+                  style={{ background: member.role === 'owner' ? '#185FA5' : member.role === 'guest' ? '#FEF3C7' : '#EBF3FC', color:  member.role === 'owner' ? '#ffffff'  : member.role === 'guest' ? '#92400E' : '#0C447C' }}>
                   {member.first_name[0]}{member.surname[0]}
                 </div>
                 <span className="text-[13px] font-semibold text-slate-900 truncate">
