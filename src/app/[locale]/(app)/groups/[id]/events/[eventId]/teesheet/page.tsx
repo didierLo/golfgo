@@ -181,18 +181,18 @@ export default function TeeSheetPage() {
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('teesheet.title')}</h1>
           <div className="flex items-center gap-1.5">
-            {/* 🖨 Imprimer */}
+         
             <IconBtn onClick={() => window.print()} title={t('teesheet.print')}>🖨</IconBtn>
-            {isOwner && flights.length > 0 && (<>
-              {/* 👁 Aperçu email */}
-              <IconBtn onClick={() => setShowPreview(true)} title={t('teesheet.email.preview')}>👁</IconBtn>
-              {/* 📤 Envoyer email */}
-              <IconBtn onClick={handleSendEmail} title={sending ? t('teesheet.email.sending') : t('teesheet.email.send')} disabled={sending}>
+            {isOwner && flights.length > 0 && <>
+          
+              <IconBtn onClick={() => setShowPreview(true)} disabled={!isOwner || flights.length === 0} title={t('teesheet.email.preview')}>👁</IconBtn>
+            
+              <IconBtn onClick={handleSendEmail} disabled={!isOwner || sending || flights.length === 0} title={sending ? t('teesheet.email.sending') : t('teesheet.email.send')}>
                 {sending ? '⏳' : '📤'}
               </IconBtn>
               {/* 💬 WhatsApp */}
-              <IconBtn href={buildWhatsAppTeesheet()} title="WhatsApp" disabled={flights.length === 0}>💬</IconBtn>
-            </>)}
+              <IconBtn href={flights.length > 0 ? buildWhatsAppTeesheet() : undefined} disabled={flights.length === 0} title="WhatsApp">💬</IconBtn>
+            </>}
           </div>
         </div>
         <div className="flex items-center gap-2">

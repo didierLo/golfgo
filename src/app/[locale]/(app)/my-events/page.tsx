@@ -280,7 +280,6 @@ export default function MyEventsPage() {
 
   const locale = useLocale()
 
-
   useEffect(() => { loadData() }, [])
 
   async function loadData() {
@@ -320,11 +319,9 @@ export default function MyEventsPage() {
   const invitedCount = upcoming.filter(e => e.status === 'INVITED').length
 
   function goToEvent(e: MyEvent) {
-    // Retenir cet event comme actif pour ce groupe
     localStorage.setItem(`golfgo-active-event-${e.events.group_id}`, e.event_id)
     router.push(`/groups/${e.events.group_id}/events/${e.event_id}/view`)
   }
- 
 
   if (loading) return (
     <div className="p-6 space-y-4 max-w-2xl">
@@ -344,31 +341,50 @@ export default function MyEventsPage() {
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('myEvents.title')}</h1>
           <p className="text-[13px] text-slate-900 mt-0.5">{t('myEvents.subtitle', { upcoming: upcoming.length, past: past.length })}</p>
         </div>
-        <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
-          <button onClick={() => setView('list')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${view === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <rect x="1" y="2"  width="3" height="3" rx="0.5" fill="currentColor"/>
-              <rect x="6" y="2.5" width="7" height="2" rx="1" fill="currentColor"/>
-              <rect x="1" y="6"  width="3" height="3" rx="0.5" fill="currentColor"/>
-              <rect x="6" y="6.5" width="7" height="2" rx="1" fill="currentColor"/>
-              <rect x="1" y="10" width="3" height="3" rx="0.5" fill="currentColor"/>
-              <rect x="6" y="10.5" width="7" height="2" rx="1" fill="currentColor"/>
+
+        {/* ── Contrôles droite : toggle vue + bouton Mes partenaires ── */}
+        <div className="flex items-center gap-2">
+          {/* Toggle Liste / Calendrier */}
+          <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
+            <button onClick={() => setView('list')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${view === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="2"  width="3" height="3" rx="0.5" fill="currentColor"/>
+                <rect x="6" y="2.5" width="7" height="2" rx="1" fill="currentColor"/>
+                <rect x="1" y="6"  width="3" height="3" rx="0.5" fill="currentColor"/>
+                <rect x="6" y="6.5" width="7" height="2" rx="1" fill="currentColor"/>
+                <rect x="1" y="10" width="3" height="3" rx="0.5" fill="currentColor"/>
+                <rect x="6" y="10.5" width="7" height="2" rx="1" fill="currentColor"/>
+              </svg>
+              {t('myEvents.views.list')}
+            </button>
+            <button onClick={() => setView('calendar')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${view === 'calendar' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M1 5.5h12" stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M4.5 1v3M9.5 1v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                <circle cx="4.5" cy="8.5" r="1" fill="currentColor"/>
+                <circle cx="7"   cy="8.5" r="1" fill="currentColor"/>
+                <circle cx="9.5" cy="8.5" r="1" fill="currentColor"/>
+              </svg>
+              {t('myEvents.views.calendar')}
+            </button>
+          </div>
+
+          {/* Bouton Mes partenaires */}
+          <a
+            href="/my-events/partners"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-semibold transition-all border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-[#185FA5] hover:text-white hover:border-[#185FA5]"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <circle cx="8"  cy="4"  r="2"   stroke="currentColor" strokeWidth="1.4"/>
+              <circle cx="3"  cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
+              <circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
+              <path d="M8 6v2.5M8 8.5L3 10.2M8 8.5L13 10.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
             </svg>
-            {t('myEvents.views.list')}
-          </button>
-          <button onClick={() => setView('calendar')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${view === 'calendar' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M1 5.5h12" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M4.5 1v3M9.5 1v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-              <circle cx="4.5" cy="8.5" r="1" fill="currentColor"/>
-              <circle cx="7"   cy="8.5" r="1" fill="currentColor"/>
-              <circle cx="9.5" cy="8.5" r="1" fill="currentColor"/>
-            </svg>
-            {t('myEvents.views.calendar')}
-          </button>
+            Mes partenaires
+          </a>
         </div>
       </div>
 
