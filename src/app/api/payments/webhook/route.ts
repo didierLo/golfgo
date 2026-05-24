@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   } catch { return new Response('Invalid signature', { status: 400 }) }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.CheckoutSession
+    const session = event.data.object as Stripe.Checkout.Session
     const { eventId, playerId } = session.metadata!
     
     await supabase.from('event_participants')
