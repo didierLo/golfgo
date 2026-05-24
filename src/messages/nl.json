@@ -837,4 +837,14 @@
     "errorFormat": "Niet-herkend formaat — kolommen CLUB en SLOPE niet gevonden",
     "errorRead": "Kan bestand niet lezen"
   }
+  "partners": {
+    "title": "Mijn partners",
+    "subtitle": "Partnermatrix",
+    "noData": "Nog geen rondes geregistreerd.",
+    "legend": "Aantal rondes samen gespeeld",
+    "rounds": "Mijn rondes",
+    "round": "ronde",
+    "rounds_plural": "rondes",
+    "solo": "Solo"
+  }
 }

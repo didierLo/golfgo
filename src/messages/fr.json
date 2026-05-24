@@ -837,4 +837,14 @@
     "errorFormat": "Format non reconnu — Colonnes CLUB et SLOPE introuvables",
     "errorRead": "Impossible de lire le fichier"
   }
+    "partners": {
+    "title": "Mes partenaires",
+    "subtitle": "Matrice des partenaires",
+    "noData": "Aucune partie enregistrée.",
+    "legend": "Nombre de parties jouées ensemble",
+    "rounds": "Mes parties",
+    "round": "partie",
+    "rounds_plural": "parties",
+    "solo": "Solo"
+  }
 }

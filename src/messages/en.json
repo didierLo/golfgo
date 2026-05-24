@@ -837,4 +837,15 @@
     "errorFormat": "Unrecognised format — CLUB and SLOPE columns not found",
     "errorRead": "Unable to read file"
   }
+    "partners": {
+    "title": "My partners",
+    "subtitle": "Partner matrix",
+    "noData": "No rounds recorded yet.",
+    "legend": "Number of rounds played together",
+    "rounds": "My rounds",
+    "round": "round",
+    "rounds_plural": "rounds",
+    "solo": "Solo"
+  }
+
 }

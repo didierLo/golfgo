@@ -837,4 +837,15 @@
     "errorFormat": "Unbekanntes Format — Spalten CLUB und SLOPE nicht gefunden",
     "errorRead": "Datei kann nicht gelesen werden"
   }
+
+    "partners": {
+    "title": "Meine Partner",
+    "subtitle": "Partnermatrix",
+    "noData": "Noch keine Runden gespeichert.",
+    "legend": "Anzahl gemeinsam gespielte Runden",
+    "rounds": "Meine Runden",
+    "round": "Runde",
+    "rounds_plural": "Runden",
+    "solo": "Solo"
+  }
 }

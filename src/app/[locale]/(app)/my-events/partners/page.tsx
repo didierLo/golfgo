@@ -228,19 +228,7 @@ export default function MyPartnersPage() {
                 </tbody>
               </table>
             </div>
-            {/* Légende */}
-            <div className="flex items-center gap-3 px-4 py-3 border-t border-slate-100 flex-wrap">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Légende</span>
-              {[
-                { label: '1×', style: { background: '#EBF3FC', color: '#185FA5' } },
-                { label: '2×', style: { background: '#B5D4F4', color: '#0C447C' } },
-                { label: '3×', style: { background: '#5B9BD5', color: 'white'   } },
-                { label: '4×+', style: { background: '#185FA5', color: 'white'  } },
-              ].map(({ label, style }) => (
-                <div key={label} className="px-2 py-0.5 rounded-md text-[10px] font-bold" style={style}>{label}</div>
-              ))}
-              <span className="text-[10px] text-slate-400 ml-auto">Nombre de parties jouées ensemble</span>
-            </div>
+
           </div>
         )}
       </section>
@@ -259,23 +247,22 @@ export default function MyPartnersPage() {
           <div className="space-y-2">
             {pastRounds.map(round => (
               <div key={round.eventId}
-                className="rounded-2xl border border-white/60 shadow-sm px-4 py-3.5 flex items-start gap-4"
+                className="rounded-2xl border border-white/60 shadow-sm px-4 py-3.5 flex flex-col gap-2.5"
                 style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
 
-                {/* Date */}
-                <div className="flex-shrink-0 w-28">
-                  <p className="text-[11px] font-black text-slate-600 leading-tight">{formatDate(round.date)}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5 leading-tight line-clamp-2">{round.eventTitle}</p>
+                {/* Date + titre */}
+                <div className="flex items-center gap-2">
+                  <p className="text-[12px] font-black text-slate-700 leading-tight">{formatDate(round.date)}</p>
+                  <span className="text-slate-300">·</span>
+                  <p className="text-[11px] text-slate-400 leading-tight truncate">{round.eventTitle}</p>
                 </div>
 
-                <div className="w-px self-stretch bg-slate-100 flex-shrink-0" />
-
                 {/* Partenaires */}
-                <div className="flex flex-wrap gap-2 flex-1">
+                <div className="flex flex-wrap gap-2">
                   {round.partners.length === 0 ? (
                     <span className="text-[12px] text-slate-400 italic">Solo</span>
                   ) : round.partners.map(p => (
-                    <div key={p.id} className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1">
+                    <div key={p.id} className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
                       <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
                         <span className="text-[8px] font-bold text-slate-500">{p.first_name[0]}{p.surname[0]}</span>
                       </div>
