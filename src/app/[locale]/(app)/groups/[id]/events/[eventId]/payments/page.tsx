@@ -61,6 +61,23 @@ export default function PaymentsPage() {
     setUpdating(null)
   }
 
+  async function handlePay(playerId: string, amount: number) {
+    const res = await fetch('/api/payments/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventId,
+        groupId,
+        playerId,
+        amount,
+        description: `Inscription événement`,
+        locale: params.locale as string,
+      }),
+    })
+    const { url } = await res.json()
+    window.location.href = url
+  }
+
   const paidCount    = participants.filter(p => p.payment_status === 'PAID').length
   const pendingCount = participants.filter(p => p.payment_status === 'PENDING').length
   const exemptCount  = participants.filter(p => p.payment_status === 'EXEMPT').length
@@ -101,6 +118,7 @@ export default function PaymentsPage() {
           </div>
         </div>
       )}
+
 
       <div className="flex gap-3 mb-5">
         {[
@@ -149,6 +167,14 @@ export default function PaymentsPage() {
                     {t(`payments.statuses.${p.payment_status ?? 'PENDING'}` as any)}
                   </span>
                 </div>
+
+                {!isOwner && p.payment_status === 'PENDING' && (
+                  <button onClick={() => handlePay(p.player_id, fee!)}
+                    className="text-[11px] font-semibold px-3 py-1 rounded-lg bg-[#185FA5] text-white">
+                    Payer {fee} €
+                  </button>
+                )}
+
                 {isOwner && (
                   <div className="flex justify-end gap-1">
                     {(['PAID', 'PENDING', 'EXEMPT'] as PaymentStatus[]).map(status => (
