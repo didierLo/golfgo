@@ -836,7 +836,8 @@
     "importAnother": "Importer un autre fichier",
     "errorFormat": "Format non reconnu — Colonnes CLUB et SLOPE introuvables",
     "errorRead": "Impossible de lire le fichier"
-  }
+  },
+  
     "partners": {
     "title": "Mes partenaires",
     "subtitle": "Matrice des partenaires",

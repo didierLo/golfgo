@@ -836,7 +836,8 @@
     "importAnother": "Ander bestand importeren",
     "errorFormat": "Niet-herkend formaat — kolommen CLUB en SLOPE niet gevonden",
     "errorRead": "Kan bestand niet lezen"
-  }
+  },
+  
   "partners": {
     "title": "Mijn partners",
     "subtitle": "Partnermatrix",

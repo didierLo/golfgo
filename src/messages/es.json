@@ -836,7 +836,8 @@
     "importAnother": "Importar otro archivo",
     "errorFormat": "Formato no reconocido — columnas CLUB y SLOPE no encontradas",
     "errorRead": "No se puede leer el archivo"
-  }
+  },
+  
   "partners": {
     "title": "Mis compañeros",
     "subtitle": "Matriz de compañeros",

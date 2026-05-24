@@ -836,7 +836,8 @@
     "importAnother": "Import another file",
     "errorFormat": "Unrecognised format — CLUB and SLOPE columns not found",
     "errorRead": "Unable to read file"
-  }
+  },
+  
     "partners": {
     "title": "My partners",
     "subtitle": "Partner matrix",
