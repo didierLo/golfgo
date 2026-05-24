@@ -342,8 +342,9 @@ export default function MyEventsPage() {
           <p className="text-[13px] text-slate-900 mt-0.5">{t('myEvents.subtitle', { upcoming: upcoming.length, past: past.length })}</p>
         </div>
 
-        {/* ── Contrôles droite : toggle vue + bouton Mes partenaires ── */}
-        <div className="flex items-center gap-2">
+        {/* ── Contrôles droite ── */}
+        <div className="flex flex-col items-end gap-2">
+
           {/* Toggle Liste / Calendrier */}
           <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
             <button onClick={() => setView('list')}
@@ -372,19 +373,20 @@ export default function MyEventsPage() {
             </button>
           </div>
 
-          {/* Bouton Mes partenaires */}
-          <a
-            href="/my-events/partners"
+          {/* Bouton Mes partenaires — icône seule sur mobile, texte sur sm+ */}
+          <a href="/my-events/partners"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-semibold transition-all border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-[#185FA5] hover:text-white hover:border-[#185FA5]"
           >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
               <circle cx="8"  cy="4"  r="2"   stroke="currentColor" strokeWidth="1.4"/>
               <circle cx="3"  cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
               <circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
               <path d="M8 6v2.5M8 8.5L3 10.2M8 8.5L13 10.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
             </svg>
-            Mes partenaires
+            <span className="hidden sm:inline">Mes partenaires</span>
+            <span className="sm:hidden">Partenaires</span>
           </a>
+
         </div>
       </div>
 
