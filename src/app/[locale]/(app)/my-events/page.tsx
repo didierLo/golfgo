@@ -464,7 +464,9 @@ export default function MyEventsPage() {
               <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">{t('myEvents.sections.past')}</p>
               <div className="flex flex-col gap-2">
                 {past.slice().reverse().map(e => (
-                  <EventCard key={e.event_id} event={e} past locale={locale} onView={() => goToEvent(e)}
+                  <EventCard key={e.event_id} event={e} past locale={locale} 
+                    onView={() => goToEvent(e)}
+                    onPay={() => {}}
                     onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} />
                 ))}
               </div>

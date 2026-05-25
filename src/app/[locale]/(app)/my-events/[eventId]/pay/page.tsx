@@ -43,10 +43,20 @@ export default function PayPage() {
         locale,
       }),
     })
-    const { url } = await res.json()
-    window.location.href = url
-  }
+      // Debug temporaire
+      const text = await res.text()
+      console.log('API response:', res.status, text)
+      
+      if (!res.ok) {
+        console.error('Erreur API:', text)
+        setPaying(false)
+        return
+      }
 
+      const { url } = JSON.parse(text)
+      window.location.href = url
+    }
+    
   if (loading) return <div className="p-6 animate-pulse h-40 bg-slate-100 rounded-xl" />
 
   if (!event?.fee_per_person) {
