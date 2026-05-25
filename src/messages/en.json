@@ -23,7 +23,8 @@
     "play": "Play",
     "constraints": "Constraints",
     "signOut": "Sign out",
-    "myProfile": "My profile"
+    "myProfile": "My profile",
+    "payments": "Payments"
   },
   "myEvents": {
     "title": "My events",
@@ -422,6 +423,7 @@
     "status": "Status",
     "éditers": "Edit",
     "noParticipants": "No confirmed participants",
+    "actions": "Actions",
     "statuses": {
       "PAID": "Paid",
       "PENDING": "Pending",
@@ -430,8 +432,9 @@
     "buttons": {
       "PAID": "Paid",
       "PENDING": "Pending",
-      "EXEMPT": "Exempt"
+      "EXEMPT": "Exempt"   
     }
+   
   },
   "results": {
     "title": "Results",
@@ -837,7 +840,7 @@
     "errorFormat": "Unrecognised format — CLUB and SLOPE columns not found",
     "errorRead": "Unable to read file"
   },
-  
+
     "partners": {
     "title": "My partners",
     "subtitle": "Partner matrix",

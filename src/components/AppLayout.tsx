@@ -31,6 +31,7 @@ const Icons = {
   plus:          (<svg width="14" height="14" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>),
   user:          (<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="white" strokeWidth="1.4" /><path d="M2.5 14c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" /></svg>),
   back:          (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  payments:      (<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 7h14" stroke="currentColor" strokeWidth="1.4"/><circle cx="5" cy="10.5" r="1" fill="currentColor"/></svg>),
   hamburger: (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
       <rect x="3"  y="4.5"  width="3" height="3" rx="0.5" fill="currentColor" />
@@ -199,20 +200,23 @@ useEffect(() => {
   const participantsHref = gid && eid ? `/groups/${gid}/events/${eid}/participants` : (gid ? `/groups/${gid}/no-event` : null)
   const teesheetHref     = gid && eid ? `/groups/${gid}/events/${eid}/teesheet`     : (gid ? `/groups/${gid}/no-event` : null)
   const invitationsHref  = gid        ? `/groups/${gid}/invitations`                : null
+
+  const paymentsHref = gid && eid ? `/groups/${gid}/events/${eid}/payments` : (gid ? `/groups/${gid}/no-event` : null)
   const flightsHref      = gid && eid ? `/groups/${gid}/events/${eid}/flights`      : (gid ? `/groups/${gid}/no-event` : null)
   const resultsHref      = gid && eid ? `/groups/${gid}/events/${eid}/results`      : (gid ? `/groups/${gid}/no-event` : null)
 
   const eventsListActive = !isAnyOwner ? false : !!gid && (pathname === `/groups/${gid}/events` || pathname === `/groups/${gid}/events/add`)
 
   const organiserDrawerItems = [
-    { href: groupsHref,                   icon: Icons.groups,         label: t('nav.groups'),         color: '#7F77DD', active: isGroupsActive },
-    { href: eventsHref,                   icon: Icons.events,         label: t('nav.events'),         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: eventsListActive },
-    { href: invitationsHref ?? '/groups', icon: Icons.invitations,    label: t('nav.invitations'),    color: '#0C447C', active: !!invitationsHref && isActive(invitationsHref) },
-    { href: flightsHref ?? '/groups',     icon: Icons.flights,        label: t('nav.flights'),        color: '#EF9F27', active: !!flightsHref && isActive(flightsHref) },
-    { href: resultsHref ?? '/groups',     icon: Icons.results,        label: t('nav.results'),        color: '#3B6D11', active: !!resultsHref && isActive(resultsHref) },
-    { href: clubsHref,                    icon: Icons.clubs,          label: t('nav.clubs'),          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
-    { href: communicationsHref,           icon: Icons.communications, label: t('nav.communications'), color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
-  ]
+      { href: groupsHref,                   icon: Icons.groups,         label: t('nav.groups'),         color: '#7F77DD', active: isGroupsActive },
+      { href: eventsHref,                   icon: Icons.events,         label: t('nav.events'),         sublabel: activeGroup?.name ?? null, color: '#185FA5', active: eventsListActive },
+      { href: invitationsHref ?? '/groups', icon: Icons.invitations,    label: t('nav.invitations'),    color: '#0C447C', active: !!invitationsHref && isActive(invitationsHref) },
+      { href: paymentsHref ?? '/groups',    icon: Icons.payments,       label: t('nav.payments'),       color: '#3B6D11', active: !!paymentsHref && isActive(paymentsHref ?? '') },  // ← ici
+      { href: flightsHref ?? '/groups',     icon: Icons.flights,        label: t('nav.flights'),        color: '#EF9F27', active: !!flightsHref && isActive(flightsHref) },
+      { href: resultsHref ?? '/groups',     icon: Icons.results,        label: t('nav.results'),        color: '#3B6D11', active: !!resultsHref && isActive(resultsHref) },
+      { href: clubsHref,                    icon: Icons.clubs,          label: t('nav.clubs'),          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
+      { href: communicationsHref,           icon: Icons.communications, label: t('nav.communications'), color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
+    ]
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
@@ -411,6 +415,7 @@ useEffect(() => {
             <NavItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label={t('nav.groups')}         active={isGroupsActive} />
             <NavItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label={t('nav.events')}         active={eventsListActive} />
             <NavItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label={t('nav.invitations')}    active={!!invitationsHref && isActive(invitationsHref)} />
+            <NavItem href={paymentsHref ?? '/groups'} icon={Icons.payments} iconColor="#3B6D11" label={t('nav.payments')} active={!!paymentsHref && isActive(paymentsHref)} />
             <NavItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
             <NavItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
             <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />

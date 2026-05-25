@@ -12,6 +12,7 @@ const supabase = createClient()
 type MyEvent = {
   event_id: string
   status: 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
+  payment_status?: 'PENDING' | 'PAID' | 'EXEMPT' | null
   goingCount?: number
   events: {
     title: string
@@ -19,6 +20,7 @@ type MyEvent = {
     location: string | null
     group_id: string
     max_participants: number | null
+    fee_per_person: number | null   // ← ajout
     groups: {
       name: string
       color: string | null
@@ -116,8 +118,8 @@ function daysUntil(dateStr: string): number {
   return Math.round((utcTarget.getTime() - utcNow.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-function EventCard({ event: e, onView, onICS, past = false, locale }: {
-  event: MyEvent; onView: () => void; onICS: () => void; past?: boolean; locale: string
+function EventCard({ event: e, onView, onICS, onPay, past = false, locale }: {
+  event: MyEvent; onView: () => void; onICS: () => void; onPay: () => void; past?: boolean; locale: string
 }) {
   const t = useTranslations()
   const groupColor = e.events.groups?.color ?? '#378ADD'
@@ -154,6 +156,20 @@ function EventCard({ event: e, onView, onICS, past = false, locale }: {
 
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
         <Badge status={e.status} />
+
+        {e.events.fee_per_person && !past && (
+          e.payment_status === 'PAID' ? (
+            <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#EAF3DE] text-[#3B6D11]">
+              ✓ Payé
+            </span>
+          ) : e.status === 'GOING' && (
+            <button
+              onClick={ev => { ev.stopPropagation(); onPay() }}
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
+              Payer {e.events.fee_per_person} €
+            </button>
+          )
+        )}
         <button
           onClick={ev => { ev.stopPropagation(); onICS() }}
           title={t('myEvents.calendar.addToCalendar')}
@@ -292,7 +308,7 @@ export default function MyEventsPage() {
 
     const { data, error } = await supabase
       .from('event_participants')
-      .select(`event_id, status, events(title, starts_at, location, group_id, max_participants, groups!events_group_id_fkey(name, color))`)
+      .select(`event_id, status, events(title, starts_at, location, group_id, max_participants, fee_per_person, groups!events_group_id_fkey(name, color))`)
       .eq('player_id', player.id)
       .order('starts_at', { foreignTable: 'events', ascending: true })
 
@@ -434,7 +450,9 @@ export default function MyEventsPage() {
               <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">{t('myEvents.sections.upcoming')}</p>
               <div className="flex flex-col gap-2">
                 {upcoming.map(e => (
-                  <EventCard key={e.event_id} event={e} locale={locale} onView={() => goToEvent(e)}
+                  <EventCard key={e.event_id} event={e} locale={
+                    locale} onView={() => goToEvent(e)}
+                    onPay={() => router.push(`/${locale}/my-events/${e.event_id}/pay`)}
                     onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} />
                 ))}
               </div>

@@ -34,8 +34,16 @@ export default function PaymentsPage() {
   const [fee, setFee]                   = useState<number | null>(null)
   const [loading, setLoading]           = useState(true)
   const [updating, setUpdating]         = useState<string | null>(null)
+   
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+   useEffect(() => { loadData() }, [eventId])
 
-  useEffect(() => { loadData() }, [eventId])
+   useEffect(() => {
+      supabase.auth.getUser().then(({ data }) => {
+        setCurrentUserId(data.user?.id ?? null)
+      })
+    }, [])
+
 
   async function loadData() {
     setLoading(true)
@@ -168,7 +176,7 @@ export default function PaymentsPage() {
                   </span>
                 </div>
 
-                {!isOwner && p.payment_status === 'PENDING' && (
+                {p.player_id === currentUserId && p.payment_status === 'PENDING' && (
                   <button onClick={() => handlePay(p.player_id, fee!)}
                     className="text-[11px] font-semibold px-3 py-1 rounded-lg bg-[#185FA5] text-white">
                     Payer {fee} €

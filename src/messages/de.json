@@ -23,7 +23,8 @@
     "play": "Spielen",
     "constraints": "Einschränkungen",
     "signOut": "Abmelden",
-    "myProfile": "Mein Profil"
+    "myProfile": "Mein Profil",
+    "payments": "Zahlungen"
   },
   "myEvents": {
     "title": "Meine Veranstaltungen",
@@ -422,6 +423,7 @@
     "status": "Status",
     "éditers": "Bearbeiten",
     "noParticipants": "Keine bestätigten Teilnehmer",
+    "actions": "Aktionen",
     "statuses": {
       "PAID": "Bezahlt",
       "PENDING": "Ausstehend",
@@ -432,6 +434,8 @@
       "PENDING": "Ausstehend",
       "EXEMPT": "Befreit"
     }
+  
+
   },
   "results": {
     "title": "Ergebnisse",

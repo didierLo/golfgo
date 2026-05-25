@@ -23,7 +23,8 @@
     "play": "Spelen",
     "constraints": "Beperkingen",
     "signOut": "Uitloggen",
-    "myProfile": "Mijn profiel"
+    "myProfile": "Mijn profiel",
+    "payments": "Betalingen"
   },
   "myEvents": {
     "title": "Mijn evenementen",
@@ -422,6 +423,7 @@
     "status": "Status",
     "éditers": "Bewerken",
     "noParticipants": "Geen bevestigde deelnemers",
+     "actions": "Acties",
     "statuses": {
       "PAID": "Betaald",
       "PENDING": "Uitstaand",
@@ -432,6 +434,7 @@
       "PENDING": "Uitstaand",
       "EXEMPT": "Vrijgesteld"
     }
+   
   },
   "results": {
     "title": "Resultaten",
@@ -837,7 +840,7 @@
     "errorFormat": "Niet-herkend formaat — kolommen CLUB en SLOPE niet gevonden",
     "errorRead": "Kan bestand niet lezen"
   },
-  
+
   "partners": {
     "title": "Mijn partners",
     "subtitle": "Partnermatrix",

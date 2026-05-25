@@ -23,7 +23,8 @@
     "play": "Jouer",
     "constraints": "Contraintes",
     "signOut": "Se déconnecter",
-    "myProfile": "Mon profil"
+    "myProfile": "Mon profil",
+    "payments": "Paiements"
   },
   "myEvents": {
     "title": "Mes événements",
@@ -410,9 +411,9 @@
   },
   "payments": {
     "readOnly": "Vue en lecture seule",
-    "summary": "Résumé financier",
+    "summary": "Résumé",
     "feePerPerson": "Prix par personne",
-    "collected": "Recueil",
+    "collected": "Reçus",
     "pending": "En attente",
     "paid": "payé",
     "awaitingPayment": "en attente",
@@ -422,6 +423,7 @@
     "status": "Statut",
     "éditers": "Modifier",
     "noParticipants": "Aucun participant confirmé",
+     "actions": "Actions",
     "statuses": {
       "PAID": "Payé",
       "PENDING": "En attente",
@@ -432,6 +434,7 @@
       "PENDING": "En attente",
       "EXEMPT": "Exempté"
     }
+   
   },
   "results": {
     "title": "Résultats",
@@ -837,7 +840,7 @@
     "errorFormat": "Format non reconnu — Colonnes CLUB et SLOPE introuvables",
     "errorRead": "Impossible de lire le fichier"
   },
-  
+
     "partners": {
     "title": "Mes partenaires",
     "subtitle": "Matrice des partenaires",
