@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale } from 'next-intl'
 
+
 const supabase = createClient()
 
 export default function PayPage() {
@@ -56,7 +57,7 @@ export default function PayPage() {
       const { url } = JSON.parse(text)
       window.location.href = url
     }
-    
+
   if (loading) return <div className="p-6 animate-pulse h-40 bg-slate-100 rounded-xl" />
 
   if (!event?.fee_per_person) {

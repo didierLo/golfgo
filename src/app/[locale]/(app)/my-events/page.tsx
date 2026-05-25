@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
@@ -295,6 +295,13 @@ export default function MyEventsPage() {
   const [view,    setView]    = useState<View>('list')
 
   const locale = useLocale()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('payment') === 'success') {
+      toast.success('Paiement reçu ! Merci 🎉')
+    }
+  }, [])
 
   useEffect(() => { loadData() }, [])
 
