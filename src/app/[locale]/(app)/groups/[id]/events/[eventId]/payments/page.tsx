@@ -14,6 +14,7 @@ type Participant = {
   payment_status: PaymentStatus
   players: { first_name: string; surname: string }
 }
+type Event = { id: string; title: string; starts_at: string }
 
 const STATUS_STYLE: Record<PaymentStatus, { bg: string; text: string }> = {
   PAID:    { bg: '#EAF3DE', text: '#3B6D11' },
@@ -30,29 +31,42 @@ export default function PaymentsPage() {
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
 
-  const [participants, setParticipants] = useState<Participant[]>([])
-  const [fee, setFee]                   = useState<number | null>(null)
-  const [loading, setLoading]           = useState(true)
-  const [updating, setUpdating]         = useState<string | null>(null)
-   
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-   useEffect(() => { loadData() }, [eventId])
+  const [participants,    setParticipants]    = useState<Participant[]>([])
+  const [fee,             setFee]             = useState<number | null>(null)
+  const [loading,         setLoading]         = useState(true)
+  const [updating,        setUpdating]        = useState<string | null>(null)
+  const [currentUserId,   setCurrentUserId]   = useState<string | null>(null)
+  const [events,          setEvents]          = useState<Event[]>([])
+  const [selectedEventId, setSelectedEventId] = useState<string>(eventId)
 
-   useEffect(() => {
-      supabase.auth.getUser().then(({ data }) => {
-        setCurrentUserId(data.user?.id ?? null)
-      })
-    }, [])
+  useEffect(() => { loadData() }, [selectedEventId])
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id ?? null)
+    })
+  }, [])
 
   async function loadData() {
     setLoading(true)
-    const { data: event } = await supabase.from('events').select('fee_per_person').eq('id', eventId).single()
+
+    const { data: evts } = await supabase.from('events')
+      .select('id, title, starts_at')
+      .eq('group_id', groupId)
+      .order('starts_at', { ascending: false })
+    setEvents(evts || [])
+
+    const { data: event } = await supabase.from('events')
+      .select('fee_per_person')
+      .eq('id', selectedEventId)
+      .single()
     setFee(event?.fee_per_person ?? null)
+
     const { data } = await supabase
       .from('event_participants')
       .select(`player_id, payment_status, players(first_name, surname)`)
-      .eq('event_id', eventId).eq('status', 'GOING')
+      .eq('event_id', selectedEventId)
+      .eq('status', 'GOING')
       .order('surname', { foreignTable: 'players', ascending: true })
     setParticipants((data || []) as any)
     setLoading(false)
@@ -62,7 +76,7 @@ export default function PaymentsPage() {
     if (!isOwner) return
     setUpdating(playerId)
     await supabase.from('event_participants').update({ payment_status: status })
-      .eq('event_id', eventId).eq('player_id', playerId)
+      .eq('event_id', selectedEventId).eq('player_id', playerId)
     setParticipants(prev => prev.map(p =>
       p.player_id === playerId ? { ...p, payment_status: status } : p
     ))
@@ -74,7 +88,7 @@ export default function PaymentsPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        eventId,
+        eventId: selectedEventId,
         groupId,
         playerId,
         amount,
@@ -99,13 +113,27 @@ export default function PaymentsPage() {
   return (
     <div className="p-5 sm:p-6">
 
+      {/* Sélecteur d'événement */}
+      <div className="mb-5">
+        <select
+          value={selectedEventId}
+          onChange={e => setSelectedEventId(e.target.value)}
+          className="w-full border border-slate-200 rounded-xl px-4 py-3 text-[13px] font-semibold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
+          {events.map(e => (
+            <option key={e.id} value={e.id}>
+              {e.title} — {new Date(e.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {!isOwner && (
         <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
           {t('payments.readOnly')}
         </div>
       )}
 
-      {fee && (
+      {fee ? (
         <div className="bg-white border border-slate-200 rounded-xl p-5 mb-5">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">{t('payments.summary')}</p>
           <div className="grid grid-cols-3 gap-3">
@@ -125,8 +153,11 @@ export default function PaymentsPage() {
             </div>
           </div>
         </div>
+      ) : (
+        <div className="mb-5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[12px] text-slate-500">
+          Cet événement n'a pas de tarif défini.
+        </div>
       )}
-
 
       <div className="flex gap-3 mb-5">
         {[
