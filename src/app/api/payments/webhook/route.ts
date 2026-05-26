@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch { return new Response('Invalid signature', { status: 400 }) }
 
-if (event.type === 'checkout.session.completed') {
+  if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
     const { eventId, playerId } = session.metadata!
     
@@ -21,15 +21,15 @@ if (event.type === 'checkout.session.completed') {
       .update({ payment_status: 'PAID' })
       .eq('event_id', eventId).eq('player_id', playerId)
 
-    // Récupérer email du joueur
     const { data: player } = await supabase
       .from('players')
-      .select('first_name, surname, user_id, users(email)')
+      .select('first_name, surname')
       .eq('id', playerId)
       .single()
 
-    // Envoyer email via Resend
-    if (player) {
+    const email = session.customer_details?.email
+
+    if (player && email) {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -38,7 +38,7 @@ if (event.type === 'checkout.session.completed') {
         },
         body: JSON.stringify({
           from: 'GolfGo <info@golfgo.be>',
-          to: (player as any).users?.email,
+          to: email,
           subject: 'Confirmation de paiement GolfGo',
           html: `<p>Bonjour ${player.first_name},</p>
                  <p>Votre paiement a bien été reçu. Merci !</p>
@@ -47,8 +47,6 @@ if (event.type === 'checkout.session.completed') {
       })
     }
   }
-
-
 
   return new Response('OK')
 }
