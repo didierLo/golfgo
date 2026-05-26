@@ -315,7 +315,7 @@ export default function MyEventsPage() {
 
     const { data, error } = await supabase
       .from('event_participants')
-      .select(`event_id, status, events(title, starts_at, location, group_id, max_participants, fee_per_person, groups!events_group_id_fkey(name, color))`)
+      .select(`event_id, status, payment_status, events(title, starts_at, location, group_id, max_participants, fee_per_person, groups!events_group_id_fkey(name, color))`)
       .eq('player_id', player.id)
       .order('starts_at', { foreignTable: 'events', ascending: true })
 
