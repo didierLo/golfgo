@@ -290,13 +290,13 @@ export default function FlightsPage() {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">{t('flights.parameters')}</span>
               <div className="flex items-center gap-2">
                 <a href={`/groups/${groupId}/events/${activeEventId}/flights/history`}
-                  className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors flex items-center gap-1">
+                  className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors flex items-center gap-1">
                   <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 5h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
                   {t('flights.matrix')}
                 </a>
                 <span className="text-slate-200 text-[10px]">·</span>
                 <a href={`/groups/${groupId}/constraints`}
-                  className="text-[11px] font-medium text-slate-400 hover:text-[#185FA5] transition-colors">
+                  className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors">
                   {t('flights.constraints')}
                 </a>
               </div>

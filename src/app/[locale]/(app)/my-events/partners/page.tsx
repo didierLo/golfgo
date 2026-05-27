@@ -161,18 +161,18 @@ export default function MyPartnersPage() {
         </button>
         <div>
           <h1 className="text-[20px] font-black text-slate-900 tracking-tight leading-none">Mes partenaires</h1>
-          <p className="text-[12px] text-slate-400 mt-0.5">{me.first_name} {me.surname}</p>
+          <p className="text-[12px] text-slate-900 mt-0.5">{me.first_name} {me.surname}</p>
         </div>
       </div>
 
       {/* ══ PARTIE 1 : Matrice ══ */}
       <section className="mb-8">
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em] mb-3">
+        <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.14em] mb-3">
           Matrice des partenaires
         </p>
 
         {partners.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-[13px] text-slate-400">
+          <div className="rounded-xl border border-dashed border-slate-900 py-10 text-center text-[13px] text-slate-400">
             Aucune partie enregistrée.
           </div>
         ) : (
@@ -207,7 +207,7 @@ export default function MyPartnersPage() {
                         </div>
                         <div>
                           <p className="text-[12px] font-bold text-slate-900 leading-tight">{me.first_name} {me.surname}</p>
-                          {me.whs !== null && <p className="text-[10px] text-slate-400">WHS {me.whs}</p>}
+                          {me.whs !== null && <p className="text-[10px] text-slate-900">WHS {me.whs}</p>}
                         </div>
                       </div>
                     </td>
@@ -235,12 +235,12 @@ export default function MyPartnersPage() {
 
       {/* ══ PARTIE 2 : Mes parties ══ */}
       <section>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em] mb-3">
+        <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.14em] mb-3">
           Mes parties · {pastRounds.length} {pastRounds.length === 1 ? 'partie' : 'parties'}
         </p>
 
         {pastRounds.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-[13px] text-slate-400">
+          <div className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-[13px] text-slate-900">
             Aucune partie enregistrée.
           </div>
         ) : (

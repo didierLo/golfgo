@@ -81,9 +81,9 @@ export default function PayPage() {
       <div className="bg-[#EAF3DE] border border-[#C0DD97] rounded-xl p-4 mb-5">
         <p className="text-[12px] font-bold text-[#3B6D11] mb-2">🔒 Paiement 100% sécurisé</p>
         <p className="text-[12px] text-[#3B6D11] leading-relaxed">
-          Votre paiement est traité par <strong>Stripe</strong>, leader mondial du paiement en ligne.
+          Votre paiement est traité par <strong>Stripe</strong>, leader mondial du paiement en ligne sécurisé.
           GolfGo ne stocke jamais vos données bancaires. La transaction est chiffrée et conforme aux
-          normes PCI-DSS. Vous acceptez les cartes Visa, Mastercard, Bancontact et Apple/Google Pay.
+          normes PCI-DSS. Accepte les cartes Visa, Mastercard, Bancontact et Apple/Google Pay.
         </p>
       </div>
 
