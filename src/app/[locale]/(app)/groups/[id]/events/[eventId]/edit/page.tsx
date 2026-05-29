@@ -13,7 +13,7 @@ function PhotoUploader({ eventId }: { eventId: string }) {
   const [uploading, setUploading]   = useState(false)
   const [loadingPhotos, setLoadingPhotos] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  
+
   useEffect(() => { loadPhotos() }, [eventId])
 
   async function loadPhotos() {
@@ -74,8 +74,8 @@ async function handleDelete(photo: { id: string; path: string }) {
 
   return (
     <div className="space-y-3">
-      <label className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-5 cursor-pointer transition-colors
-        ${uploading ? 'border-slate-200 bg-slate-50 opacity-60 pointer-events-none' : 'border-slate-200 hover:border-[#185FA5] hover:bg-blue-50/40'}`}>
+      <label className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-5 cursor-pointer transition-colors bg-white
+  ${uploading ? 'border-slate-200 opacity-60 pointer-events-none' : 'border-slate-200 hover:border-[#185FA5] hover:bg-blue-50/40'}`}>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-slate-400">
           <rect x="3" y="5" width="18" height="15" rx="2" stroke="currentColor" strokeWidth="1.5"/>
           <circle cx="8.5" cy="10.5" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
