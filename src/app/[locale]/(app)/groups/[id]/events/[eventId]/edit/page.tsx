@@ -12,7 +12,8 @@ function PhotoUploader({ eventId }: { eventId: string }) {
   const [photos, setPhotos]         = useState<{ id: string; url: string; path: string }[]>([])
   const [uploading, setUploading]   = useState(false)
   const [loadingPhotos, setLoadingPhotos] = useState(true)
-
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  
   useEffect(() => { loadPhotos() }, [eventId])
 
   async function loadPhotos() {
@@ -61,22 +62,14 @@ function PhotoUploader({ eventId }: { eventId: string }) {
     e.target.value = ''
   }
 
+
+
 async function handleDelete(photo: { id: string; path: string }) {
-  const { error: storageError } = await supabase.storage
-    .from('event-photos')
-    .remove([photo.path])
-  
-  console.log('storage error:', storageError)
-  console.log('path used:', photo.path)
-
-  const { error: dbError } = await supabase.from('event_photos')
-    .delete()
-    .eq('id', photo.id)
-  
-  console.log('db error:', dbError)
-  console.log('id used:', photo.id)
-
+  setDeletingId(photo.id)
+  await supabase.storage.from('event-photos').remove([photo.path])
+  await supabase.from('event_photos').delete().eq('id', photo.id)
   setPhotos(prev => prev.filter(p => p.id !== photo.id))
+  setDeletingId(null)
 }
 
   return (
