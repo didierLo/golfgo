@@ -309,24 +309,19 @@ function PhotoModal({ eventId, onClose }: { eventId: string; onClose: () => void
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from('event_photos')
-        .select('storage_path')
-        .eq('event_id', eventId)
-        .order('created_at', { ascending: false })
+  async function load() {
+  const { data } = await supabase
+    .from('event_photos')
+    .select('storage_path')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false })
 
-      const signed = await Promise.all(
-        (data || []).map(async row => {
-          const { data: url } = await supabase.storage
-            .from('event-photos')
-            .createSignedUrl(row.storage_path, 3600)
-          return url?.signedUrl ?? ''
-        })
-      )
-      setUrls(signed.filter(Boolean))
-      setLoading(false)
-    }
+  const urls = (data || []).map(row =>
+    supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
+  )
+  setUrls(urls)
+  setLoading(false)
+}
     load()
   }, [eventId])
 

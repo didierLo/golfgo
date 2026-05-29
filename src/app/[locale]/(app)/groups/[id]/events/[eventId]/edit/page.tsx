@@ -16,24 +16,22 @@ function PhotoUploader({ eventId }: { eventId: string }) {
   useEffect(() => { loadPhotos() }, [eventId])
 
   async function loadPhotos() {
-    setLoadingPhotos(true)
-    const { data } = await supabase
-      .from('event_photos')
-      .select('id, storage_path')
-      .eq('event_id', eventId)
-      .order('created_at', { ascending: false })
+  setLoadingPhotos(true)
+  const { data } = await supabase
+    .from('event_photos')
+    .select('id, storage_path')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false })
 
-    const withUrls = await Promise.all(
-      (data || []).map(async row => {
-        const { data: signed } = await supabase.storage
-          .from('event-photos')
-          .createSignedUrl(row.storage_path, 3600)
-        return { id: row.id, path: row.storage_path, url: signed?.signedUrl ?? '' }
-      })
-    )
-    setPhotos(withUrls.filter(p => p.url))
-    setLoadingPhotos(false)
-  }
+  const withUrls = (data || []).map(row => ({
+    id: row.id,
+    path: row.storage_path,
+    url: supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
+  }))
+
+  setPhotos(withUrls)
+  setLoadingPhotos(false)
+}
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || [])
