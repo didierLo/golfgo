@@ -173,19 +173,19 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, loc
   )}
 
 
-  {(e.photoCount ?? 0) > 0 && (
-    <button
-      onClick={ev => { ev.stopPropagation(); onPhotos() }}
-      className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-[#185FA5] transition-colors"
-    >
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
-        <circle cx="8" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
-        <path d="M5 4l1.5-2h3L11 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-      {e.photoCount}
-    </button>
-  )}
+ {(e.photoCount ?? 0) > 0 && (
+  <button
+    onClick={ev => { ev.stopPropagation(); onPhotos() }}
+    className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-[#185FA5] transition-colors"
+  >
+    {e.photoCount}  {/* ← nombre en premier */}
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+      <rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+      <circle cx="8" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
+      <path d="M5 4l1.5-2h3L11 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  </button>
+)}
 
   <button
     onClick={ev => { ev.stopPropagation(); onICS() }}
