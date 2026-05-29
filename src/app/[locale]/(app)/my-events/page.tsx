@@ -328,7 +328,14 @@ function PhotoModal({ eventId, onClose }: { eventId: string; onClose: () => void
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4"
       onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-4"
+      <div className="rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-4"
+  style={{ 
+    background: 'rgba(255,255,255,0.75)', 
+    backdropFilter: 'blur(16px)', 
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255,255,255,0.6)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
+  }}
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-3">
           <span className="font-bold text-slate-900">Photos</span>
