@@ -10,6 +10,7 @@ const supabase = createClient()
 type EventRow = {
   id: string; title: string; location: string | null; starts_at: string
   competition_formats: { name: string } | null; max_participants: number | null
+  photoCount?: number  // ← ajouter
 }
 
 function isPast(dateStr: string) { return new Date(dateStr) < new Date() }
@@ -51,7 +52,21 @@ function EventCard({ event, groupId, goingCount, onDelete, isOwner, onNotOwner, 
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
+       <div className="flex items-center gap-1 flex-shrink-0">
+  {(event.photoCount ?? 0) > 0 && (
+    <a href={`${base}/edit`}
+      className="flex items-center gap-1 text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+      {event.photoCount}
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+        <circle cx="8" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
+        <path d="M5 4l1.5-2h3L11 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </a>
+  )}
+
+
+            
             <a href={isOwner ? `${base}/edit` : '#'}
               onClick={e => { if (!isOwner) { e.preventDefault(); onNotOwner() } }}
               className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
@@ -108,13 +123,27 @@ export default function EventsPage() {
     const evts = data ?? []
     setEvents(evts as any)
 
-    if (evts.length > 0) {
+      if (evts.length > 0) {
       const { data: counts } = await supabase.from('event_participants').select('event_id')
         .in('event_id', evts.map(e => e.id)).eq('status', 'GOING')
       const countMap: Record<string, number> = {}
       evts.forEach(e => { countMap[e.id] = 0 })
       counts?.forEach(c => { countMap[c.event_id] = (countMap[c.event_id] ?? 0) + 1 })
       setGoingCounts(countMap)
+
+      // ← ici
+      const { data: photoCounts } = await supabase
+        .from('event_photo_counts')
+        .select('event_id, photo_count')
+        .in('event_id', evts.map(e => e.id))
+
+      const photoCountMap: Record<string, number> = {}
+      photoCounts?.forEach(p => { photoCountMap[p.event_id] = p.photo_count })
+
+      setEvents(evts.map((e: any) => ({
+        ...e,
+        photoCount: photoCountMap[e.id] ?? 0
+      })) as any)
     }
     setLoading(false)
   }
