@@ -207,32 +207,7 @@ export default function EventOverviewPage() {
         </div>
       </div>
 
-      {/* ── Bouton Mes partenaires ── */}
-      <a
-        href={`/groups/${groupId}/events/${eventId}/partners`}
-        className="flex items-center justify-between w-full rounded-xl border border-white/60 shadow-sm px-4 py-3 mb-6 transition-all hover:shadow-md hover:scale-[1.01] active:scale-[0.99] group"
-        style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-      >
-        <div className="flex items-center gap-3">
-          {/* Icône réseau/partenaires */}
-          <div className="w-8 h-8 rounded-xl bg-[#EBF3FC] flex items-center justify-center flex-shrink-0">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#185FA5]">
-              <circle cx="8"  cy="4"  r="2"   stroke="currentColor" strokeWidth="1.3"/>
-              <circle cx="3"  cy="12" r="1.8" stroke="currentColor" strokeWidth="1.3"/>
-              <circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M8 6v2.5M8 8.5L3 10.2M8 8.5L13 10.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-            </svg>
-          </div>
-          <div>
-            <p className="text-[13px] font-bold text-slate-900 leading-tight">Mes partenaires</p>
-            <p className="text-[11px] text-slate-400 leading-tight">Matrice &amp; historique des parties</p>
-          </div>
-        </div>
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="text-slate-300 group-hover:text-slate-500 transition-colors flex-shrink-0">
-          <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </a>
-
+     
       {status !== null && (
         <div className="rounded-xl border border-white/60 shadow-sm p-4"
           style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
