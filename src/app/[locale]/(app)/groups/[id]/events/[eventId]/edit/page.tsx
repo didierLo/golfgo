@@ -63,11 +63,23 @@ function PhotoUploader({ eventId }: { eventId: string }) {
     e.target.value = ''
   }
 
-  async function handleDelete(photo: { id: string; path: string }) {
-    await supabase.storage.from('event-photos').remove([photo.path])
-    await supabase.from('event_photos').delete().eq('id', photo.id)
-    setPhotos(prev => prev.filter(p => p.id !== photo.id))
-  }
+async function handleDelete(photo: { id: string; path: string }) {
+  const { error: storageError } = await supabase.storage
+    .from('event-photos')
+    .remove([photo.path])
+  
+  console.log('storage error:', storageError)
+  console.log('path used:', photo.path)
+
+  const { error: dbError } = await supabase.from('event_photos')
+    .delete()
+    .eq('id', photo.id)
+  
+  console.log('db error:', dbError)
+  console.log('id used:', photo.id)
+
+  setPhotos(prev => prev.filter(p => p.id !== photo.id))
+}
 
   return (
     <div className="space-y-3">
