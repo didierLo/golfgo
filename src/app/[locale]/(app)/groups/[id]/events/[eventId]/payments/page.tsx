@@ -50,26 +50,20 @@ export default function PaymentsPage() {
   async function loadData() {
     setLoading(true)
 
-    const { data: evts } = await supabase.from('events')
-      .select('id, title, starts_at')
-      .eq('group_id', groupId)
-      .order('starts_at', { ascending: false })
-    setEvents(evts || [])
-
-    const { data: event } = await supabase.from('events')
-      .select('fee_per_person')
-      .eq('id', selectedEventId)
-      .single()
-    setFee(event?.fee_per_person ?? null)
-
-    const { data } = await supabase
-      .from('event_participants')
-      .select(`player_id, payment_status, players(first_name, surname)`)
-      .eq('event_id', selectedEventId)
-      .eq('status', 'GOING')
-      .order('surname', { foreignTable: 'players', ascending: true })
-    setParticipants((data || []) as any)
-    setLoading(false)
+   const [{ data: evts }, { data: event }, { data }] = await Promise.all([
+  supabase.from('events').select('id, title, starts_at')
+    .eq('group_id', groupId).order('starts_at', { ascending: false }),
+  supabase.from('events').select('fee_per_person')
+    .eq('id', selectedEventId).single(),
+  supabase.from('event_participants')
+    .select(`player_id, payment_status, players(first_name, surname)`)
+    .eq('event_id', selectedEventId).eq('status', 'GOING')
+    .order('surname', { foreignTable: 'players', ascending: true }),
+])
+setEvents(evts || [])
+setFee(event?.fee_per_person ?? null)
+setParticipants((data || []) as any)
+setLoading(false)
   }
 
   async function updatePayment(playerId: string, status: PaymentStatus) {

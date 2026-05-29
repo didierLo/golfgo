@@ -62,28 +62,17 @@ export function useNearestEvent(groupId: string): { nearestEventId: string | nul
   useEffect(() => {
     async function load() {
       const now = new Date().toISOString()
-      // Cherche l'event futur le plus proche
-      const { data: future } = await supabase
-        .from('events')
-        .select('id, starts_at')
-        .eq('group_id', groupId)
-        .gte('starts_at', now)
-        .order('starts_at', { ascending: true })
-        .limit(1)
 
-      if (future?.[0]) {
-        setNearestEventId(future[0].id)
-      } else {
-        // Fallback : event passé le plus récent
-        const { data: past } = await supabase
-          .from('events')
-          .select('id, starts_at')
-          .eq('group_id', groupId)
-          .lt('starts_at', now)
-          .order('starts_at', { ascending: false })
-          .limit(1)
-        setNearestEventId(past?.[0]?.id ?? null)
-      }
+      const [{ data: future }, { data: past }] = await Promise.all([
+        supabase.from('events').select('id, starts_at')
+          .eq('group_id', groupId).gte('starts_at', now)
+          .order('starts_at', { ascending: true }).limit(1),
+        supabase.from('events').select('id, starts_at')
+          .eq('group_id', groupId).lt('starts_at', now)
+          .order('starts_at', { ascending: false }).limit(1),
+      ])
+
+      setNearestEventId(future?.[0]?.id ?? past?.[0]?.id ?? null)
       setLoading(false)
     }
     load()

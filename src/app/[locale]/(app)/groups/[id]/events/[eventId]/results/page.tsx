@@ -183,14 +183,16 @@ export default function ResultsPage() {
       let holesData: Hole[] = fallbackHoles()
       let teesData: TeeInfo[] = []
 
-      if (event?.course_id) {
-        const { data: h } = await supabase.from('course_holes')
-          .select('hole_number, par, stroke_index').eq('course_id', event.course_id).order('hole_number')
-        if (h?.length) holesData = h
-        const { data: tData } = await supabase.from('course_tees')
-          .select('id, tee_name, par_total, course_rating, slope').eq('course_id', event.course_id).order('tee_name')
-        teesData = tData ?? []
-      }
+   if (event?.course_id) {
+  const [{ data: h }, { data: tData }] = await Promise.all([
+    supabase.from('course_holes')
+      .select('hole_number, par, stroke_index').eq('course_id', event.course_id).order('hole_number'),
+    supabase.from('course_tees')
+      .select('id, tee_name, par_total, course_rating, slope').eq('course_id', event.course_id).order('tee_name'),
+  ])
+  if (h?.length) holesData = h
+  teesData = tData ?? []
+}
       setHoles(holesData)
 
       const { data: existing } = await supabase.from('scorecards').select('id').eq('event_id', evtId).maybeSingle()

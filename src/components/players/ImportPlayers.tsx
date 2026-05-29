@@ -1,7 +1,7 @@
 'use client'
 
 import * as XLSX from 'xlsx'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
@@ -116,9 +116,11 @@ export default function ImportPlayers() {
     setPreview([]); setLoading(false)
   }
 
-  const newCount    = preview.filter(p => p.status === 'NEW').length
-  const updateCount = preview.filter(p => p.status === 'UPDATE').length
-  const existsCount = preview.filter(p => p.status === 'EXISTS').length
+const { newCount, updateCount, existsCount } = useMemo(() => ({
+  newCount:    preview.filter(p => p.status === 'NEW').length,
+  updateCount: preview.filter(p => p.status === 'UPDATE').length,
+  existsCount: preview.filter(p => p.status === 'EXISTS').length,
+}), [preview])
 
 
   return (

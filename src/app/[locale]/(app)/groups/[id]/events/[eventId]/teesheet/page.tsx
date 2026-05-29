@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
@@ -81,50 +81,58 @@ export default function TeeSheetPage() {
   useEffect(() => { if (selectedEventId) loadData(selectedEventId) }, [selectedEventId])
 
   async function loadData(evId: string) {
-    setLoading(true); setError(null)
-    const { data: event } = await supabase.from('events').select('title, starts_at').eq('id', evId).single()
-    if (event) {
-      setEventTitle(event.title)
-      setStartsAt(event.starts_at)
-      setEventDate(new Date(event.starts_at).toLocaleDateString(locale, {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
-      }))
-    }
-    const { data: flightsData, error: fErr } = await supabase
-      .from('flights')
-      .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
-      .eq('event_id', evId).order('flight_number')
-    if (fErr) { setError(fErr.message); setLoading(false); return }
-
-    const { data: participants } = await supabase
-      .from('event_participants').select('player_id, holes_played, holes_section').eq('event_id', evId)
-
-    const holesMap: Record<string, { holes_played: number | null; holes_section: HolesSection }> = {}
-    participants?.forEach(p => { holesMap[p.player_id] = { holes_played: p.holes_played, holes_section: p.holes_section as HolesSection } })
-
-    const built: Flight[] = (flightsData || []).map((f: any) => ({
-      flight_number: f.flight_number,
-      players: (f.flight_players || []).map((fp: any) => ({
-        ...fp.players,
-        holes_played:  holesMap[fp.player_id]?.holes_played  ?? null,
-        holes_section: holesMap[fp.player_id]?.holes_section ?? null,
-      })).filter(Boolean),
+  setLoading(true); setError(null)
+  
+  const { data: event } = await supabase.from('events')
+    .select('title, starts_at').eq('id', evId).single()
+  
+  if (event) {
+    setEventTitle(event.title)
+    setStartsAt(event.starts_at)
+    setEventDate(new Date(event.starts_at).toLocaleDateString(locale, {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     }))
-    built.sort((a, b) => a.players.length - b.players.length)
-    setFlights(built.map((f, i) => ({ ...f, flight_number: i + 1 })))
-    setLoading(false)
   }
 
-  function getFlightTime(flightIndex: number): string {
+  // Paralléliser flights et participants
+  const [{ data: flightsData, error: fErr }, { data: participants }] = await Promise.all([
+    supabase.from('flights')
+      .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
+      .eq('event_id', evId).order('flight_number'),
+    supabase.from('event_participants')
+      .select('player_id, holes_played, holes_section').eq('event_id', evId)
+  ])
+
+  if (fErr) { setError(fErr.message); setLoading(false); return }
+
+  const holesMap: Record<string, { holes_played: number | null; holes_section: HolesSection }> = {}
+  participants?.forEach(p => { holesMap[p.player_id] = { holes_played: p.holes_played, holes_section: p.holes_section as HolesSection } })
+
+  const built: Flight[] = (flightsData || []).map((f: any) => ({
+    flight_number: f.flight_number,
+    players: (f.flight_players || []).map((fp: any) => ({
+      ...fp.players,
+      holes_played:  holesMap[fp.player_id]?.holes_played  ?? null,
+      holes_section: holesMap[fp.player_id]?.holes_section ?? null,
+    })).filter(Boolean),
+  }))
+  built.sort((a, b) => a.players.length - b.players.length)
+  setFlights(built.map((f, i) => ({ ...f, flight_number: i + 1 })))
+  setLoading(false)
+}
+
+ const flightTimes = useMemo(() =>
+  flights.map((_, i) => {
     if (!startsAt) return t('common.noData')
-    const ms = new Date(startsAt).getTime() + flightIndex * interval * 60 * 1000
+    const ms = new Date(startsAt).getTime() + i * interval * 60 * 1000
     return new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
-  }
+  })
+, [flights, startsAt, interval, locale])
 
   function buildWhatsAppTeesheet(): string {
     const lines = [`📋 *${eventTitle}* — ${eventDate}`, '']
     flights.forEach((f, i) => {
-      lines.push(`*Flight ${f.flight_number}* — ${getFlightTime(i)}`)
+      lines.push(`*Flight ${f.flight_number}* — ${flightTimes[i]}`)
       f.players.forEach(p => lines.push(`  • ${p.first_name} ${p.surname}${p.whs !== null ? ` (${Number(p.whs).toFixed(1)})` : ''}`))
       lines.push('')
     })
@@ -135,7 +143,7 @@ export default function TeeSheetPage() {
     setSending(true)
     try {
       const teesheetFlights = flights.map((f, index) => ({
-        flight_number: f.flight_number, start_time: getFlightTime(index), players: f.players,
+        flight_number: f.flight_number, start_time: flightTimes[index], players: f.players,
       }))
       const res = await fetch('/api/send-teesheet', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -227,7 +235,7 @@ export default function TeeSheetPage() {
             <div key={flight.flight_number} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
                 <span className="text-[13px] font-black text-slate-800">{t('teesheet.flight', { number: flight.flight_number })}</span>
-                <span className="text-[15px] font-black text-[#185FA5]">{getFlightTime(index)}</span>
+                <span className="text-[15px] font-black text-[#185FA5]">{flightTimes[index]}</span>
               </div>
               <div className="divide-y divide-slate-100">
                 {flight.players.map((p, i) => (
@@ -260,7 +268,7 @@ export default function TeeSheetPage() {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               type: 'teesheet', eventId: selectedEventId,
-              flights: flights.map((f, i) => ({ ...f, start_time: getFlightTime(i) })),
+              flights: flights.map((f, i) => ({ ...f, start_time: flightTimes[i] })),
             }),
           }).then(r => r.json())}
         />

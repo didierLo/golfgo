@@ -32,23 +32,23 @@ export default function ConstraintsPage() {
 
   useEffect(() => { load() }, [])
 
-  async function load() {
-    const { data: members } = await supabase
-      .from('groups_players')
+async function load() {
+  const [{ data: members }, { data: constraints }] = await Promise.all([
+    supabase.from('groups_players')
       .select(`player:players(id, first_name, surname)`)
-      .eq('group_id', groupId)
-    setPlayers((members || []).map((m: any) => m.player))
-
-    const { data: constraints } = await supabase
-      .from('player_pair_constraints')
+      .eq('group_id', groupId),
+    supabase.from('player_pair_constraints')
       .select(`
         id, player_a, player_b, constraint_type,
         players_a:players!player_pair_constraints_player_a_fkey(first_name, surname),
         players_b:players!player_pair_constraints_player_b_fkey(first_name, surname)
       `)
       .eq('group_id', groupId)
-    setPairs((constraints || []) as any)
-  }
+  ])
+
+  setPlayers((members || []).map((m: any) => m.player))
+  setPairs((constraints || []) as any)
+}
 
   async function addConstraint() {
     if (!playerA || !playerB) return

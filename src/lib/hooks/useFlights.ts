@@ -3,10 +3,10 @@ import { createClient } from "@/lib/supabase/client"
 import { generateFlights } from "@/lib/golf/flights/generateFlights"
 import { pairKey } from "@/lib/utils/pairs"
 
+
+ const supabase = createClient()
+
 export function useFlights(eventId: string) {
-
-  const supabase = createClient()
-
   const [players, setPlayers] = useState<any[]>([])
   const [flights, setFlights] = useState<any[]>([])
   const [event,   setEvent]   = useState<any>(null)
@@ -23,38 +23,24 @@ export function useFlights(eventId: string) {
     setFlights([])
     setPlayers([])
 
-    /* PLAYERS */
-    const { data: participants } = await supabase
-      .from("event_participants")
-      .select(`
-        holes_played,
-        holes_section,
-        player:players(id, first_name, surname, whs)
-      `)
-      .eq("event_id", eventId)
-      .eq("status", "GOING")
+   const [{ data: participants }, { data: flightsData }, { data: eventData, error }] = await Promise.all([
+  supabase.from('event_participants')
+    .select(`holes_played, holes_section, player:players(id, first_name, surname, whs)`)
+    .eq('event_id', eventId).eq('status', 'GOING'),
+  supabase.from('flights')
+    .select(`id, flight_number, group_label, flight_players(position, players(id, first_name, surname, whs))`)
+    .eq('event_id', eventId).order('flight_number'),
+  supabase.from('events')
+    .select('id, group_id, title, starts_at')
+    .eq('id', eventId).single(),
+])
 
-    const list = (participants ?? []).map((p: any) => ({
-      ...p.player,
-      holes_played:  p.holes_played ?? 18,
-      holes_section: p.holes_section ?? null,
-    }))
-    setPlayers(list)
-
-    /* FLIGHTS */
-    const { data: flightsData } = await supabase
-      .from("flights")
-      .select(`
-        id,
-        flight_number,
-        group_label,
-        flight_players(
-          position,
-          players(id, first_name, surname, whs)
-        )
-      `)
-      .eq("event_id", eventId)
-      .order("flight_number")
+const list = (participants ?? []).map((p: any) => ({
+  ...p.player,
+  holes_played:  p.holes_played ?? 18,
+  holes_section: p.holes_section ?? null,
+}))
+setPlayers(list)
 
     const formatted = (flightsData ?? []).map((f: any) => ({
       flight_no:  f.flight_number,
@@ -65,15 +51,7 @@ export function useFlights(eventId: string) {
     }))
     setFlights(formatted)
 
-    /* EVENT */
-    const { data: eventData, error } = await supabase
-      .from("events")
-      .select("id, group_id, title, starts_at")
-      .eq("id", eventId)
-      .single()
-
-    if (error) { console.error("Event load error", error) }
-    else { setEvent(eventData) }
+ 
 
     /* CONSTRAINTS */
     if (eventData?.group_id) {
@@ -101,8 +79,6 @@ export function useFlights(eventId: string) {
     const inputPlayers: any[] = options.overridePlayers ?? players
     const offset:       number = options.flightNoOffset ?? 0
     const groupLabel:   string | null = options.groupLabel ?? null
-
-    console.log("GENERATE", { players: inputPlayers.length, offset, groupLabel })
 
     const result = await generateFlights(inputPlayers, {
       ...options,

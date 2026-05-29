@@ -55,17 +55,21 @@ export default function PlayerForm({ initialData, playerId, onSubmit, submitLabe
   const [selectedGroups, setSelectedGroups] = useState<string[]>([])
 
   useEffect(() => {
-    if (initialData) setForm({ ...empty, ...initialData })
+  if (initialData) setForm({ ...empty, ...initialData })
+  
+  if (playerId) {
+    Promise.all([loadGroups(), loadPlayerGroups()])
+  } else {
     loadGroups()
-    if (playerId) loadPlayerGroups()
-  }, [playerId])
-
-  async function loadGroups() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase.from('groups').select('id, name').eq('owner_id', user.id)
-    setGroups(data ?? [])
   }
+}, [playerId])
+
+ async function loadGroups() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) return
+  const { data } = await supabase.from('groups').select('id, name').eq('owner_id', session.user.id)
+  setGroups(data ?? [])
+}
 
   async function loadPlayerGroups() {
     const { data } = await supabase.from('groups_players').select('group_id').eq('player_id', playerId)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
@@ -199,55 +199,50 @@ export default function InvitationsPage() {
 
   useEffect(() => { setHolesMap({}) }, [selectedEvent, sendEmail, resendMode])
 
-  async function loadData() {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
-      if (player) {
-        const { data: gp } = await supabase.from('groups_players').select('role')
-          .eq('group_id', groupId).eq('player_id', player.id).single()
-        setIsOwner(gp?.role === 'owner')
-      }
-    }
+ async function loadData() {
+  setLoading(true)
+  const { data: { user } } = await supabase.auth.getUser()
 
-    const { data: evts } = await supabase.from('events').select('id, title, starts_at')
-      .eq('group_id', groupId).order('starts_at', { ascending: true })
-    const allEvents = evts || []
-    const upcomingEvents = allEvents.filter(e => new Date(e.starts_at) >= new Date())
-    setEvents(upcomingEvents)
-    const map: Record<string, Event> = {}
-    allEvents.forEach(e => { map[e.id] = e })
-    setEventsMap(map)
-    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
-    const retainedUpcoming = upcomingEvents.find(e => e.id === retained)
-    if (retainedUpcoming) {
-      setSelectedEvent(retainedUpcoming.id)
-    } else if (upcomingEvents.length > 0) {
-      setSelectedEvent(upcomingEvents[0].id)
-    }
+  // Paralléliser events, members et role
+  const [{ data: evts }, { data: mbrs }, playerResult] = await Promise.all([
+    supabase.from('events').select('id, title, starts_at')
+      .eq('group_id', groupId).order('starts_at', { ascending: true }),
+    supabase.from('groups_players')
+      .select(`player:players(id, first_name, surname, email)`).eq('group_id', groupId),
+    user
+      ? supabase.from('players').select('id').eq('user_id', user.id).single()
+      : Promise.resolve({ data: null }),
+  ])
 
-    if (allEvents.length > 0) {
-      const { data: inv } = await supabase.from('event_participants')
-        .select('id, player_id, status, invited_at, event_id, players(first_name, surname, email)')
-        .in('event_id', allEvents.map(e => e.id)).order('invited_at', { ascending: false })
-      setInvitations((inv || []) as any)
-    } else { setInvitations([]) }
-
-    const { data: mbrs } = await supabase.from('groups_players')
-      .select(`player:players(id, first_name, surname, email)`).eq('group_id', groupId)
-    setMembers((mbrs || []).map((m: any) => m.player))
-    setSelectedToCancel([])
-    setLoading(false)
+  // Role check
+  if (playerResult.data && user) {
+    const { data: gp } = await supabase.from('groups_players').select('role')
+      .eq('group_id', groupId).eq('player_id', playerResult.data.id).single()
+    setIsOwner(gp?.role === 'owner')
   }
 
-    function toggleHoles(playerId: string) {
-    setHolesMap(prev => {
-      const cur = prev[playerId]
-      if (!cur || cur.holes === 18) return { ...prev, [playerId]: { holes: 9, section: 'out' } }
-      if (cur.section === 'out') return { ...prev, [playerId]: { holes: 9, section: 'in' } }
-      return { ...prev, [playerId]: { holes: 18, section: null } }
-    })
+  const allEvents = evts || []
+  const upcomingEvents = allEvents.filter(e => new Date(e.starts_at) >= new Date())
+  setEvents(upcomingEvents)
+  const map: Record<string, Event> = {}
+  allEvents.forEach(e => { map[e.id] = e })
+  setEventsMap(map)
+
+  const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+  const retainedUpcoming = upcomingEvents.find(e => e.id === retained)
+  if (retainedUpcoming) setSelectedEvent(retainedUpcoming.id)
+  else if (upcomingEvents.length > 0) setSelectedEvent(upcomingEvents[0].id)
+
+  if (allEvents.length > 0) {
+    const { data: inv } = await supabase.from('event_participants')
+      .select('id, player_id, status, invited_at, event_id, players(first_name, surname, email)')
+      .in('event_id', allEvents.map(e => e.id)).order('invited_at', { ascending: false })
+    setInvitations((inv || []) as any)
+  } else { setInvitations([]) }
+
+  setMembers((mbrs || []).map((m: any) => m.player))
+  setSelectedToCancel([])
+  setLoading(false)
 }
 
   async function handleSend() {
@@ -331,6 +326,15 @@ export default function InvitationsPage() {
     setCancelling(false)
   }
 
+  function toggleHoles(playerId: string) {
+  setHolesMap(prev => {
+    const cur = prev[playerId]
+    if (!cur || cur.holes === 18) return { ...prev, [playerId]: { holes: 9, section: 'out' } }
+    if (cur.section === 'out') return { ...prev, [playerId]: { holes: 9, section: 'in' } }
+    return { ...prev, [playerId]: { holes: 18, section: null } }
+  })
+}
+
   function toggleCancel(id: string) { setSelectedToCancel(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]) }
   function toggleCancelAll() {
     const cancellable = filteredInvited.map(i => i.id)
@@ -345,21 +349,27 @@ export default function InvitationsPage() {
     setResendMode(mode === 'resend'); setSelectedPlayers([])
   }
 
+ const { filtered, filteredInvited, invitedCount, goingCount, declinedCount, displayedEvent, sortedMembers, sortedFiltered, sortedResendParticipants } = useMemo(() => {
   const filtered        = invitations.filter(i => eventFilter === 'ALL' || i.event_id === eventFilter)
   const filteredInvited = filtered.filter(i => i.status === 'INVITED')
-  const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length === filteredInvited.length
-  const invitedCount  = filtered.filter(i => i.status === 'INVITED').length
-  const goingCount    = filtered.filter(i => i.status === 'GOING').length
-  const declinedCount = filtered.filter(i => i.status === 'DECLINED').length
-  const displayedEvent = eventFilter !== 'ALL' ? eventsMap[eventFilter] : null
+  return {
+    filtered,
+    filteredInvited,
+    invitedCount:  filtered.filter(i => i.status === 'INVITED').length,
+    goingCount:    filtered.filter(i => i.status === 'GOING').length,
+    declinedCount: filtered.filter(i => i.status === 'DECLINED').length,
+    displayedEvent: eventFilter !== 'ALL' ? eventsMap[eventFilter] : null,
+    sortedMembers: sortByKey(members, sortKey),
+    sortedFiltered: [...filtered].sort((a, b) =>
+      (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', locale, { sensitivity: 'base' })
+    ),
+    sortedResendParticipants: [...resendParticipants].sort((a, b) =>
+      (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', locale, { sensitivity: 'base' })
+    ),
+  }
+}, [invitations, eventFilter, eventsMap, members, sortKey, resendParticipants, locale])
 
-  const sortedMembers = sortByKey(members, sortKey)
-  const sortedFiltered = [...filtered].sort((a, b) =>
-    (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', locale, { sensitivity: 'base' })
-  )
-  const sortedResendParticipants = [...resendParticipants].sort((a, b) =>
-    (a.players?.[sortKey] ?? '').localeCompare(b.players?.[sortKey] ?? '', locale, { sensitivity: 'base' })
-  )
+const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length === filteredInvited.length
 
   if (loading) return (
     <div className="p-6 space-y-3">

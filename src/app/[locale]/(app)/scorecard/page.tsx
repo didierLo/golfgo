@@ -163,13 +163,14 @@ export default function MyScorecardPage() {
     setFlightPlayers([]); setActivePlayerId(null); setHoles([]); setScores({})
     const now = new Date() 
     try {
-      const { data: participations } = await supabase.from('event_participants')
-        .select('event_id, tee_id').eq('player_id', pId).eq('status', 'GOING')
-
-      const { data: events } = await supabase.from('events')
-        .select('id, title, starts_at, course_id, competition_formats(scoring_type), courses(course_name, clubs(name))')
-        .eq('id', evId).limit(1)
-
+      const [{ data: participations }, { data: events }] = await Promise.all([
+  supabase.from('event_participants')
+    .select('event_id, tee_id')
+    .eq('player_id', pId).eq('status', 'GOING'),
+  supabase.from('events')
+    .select('id, title, starts_at, course_id, competition_formats(scoring_type), courses(course_name, clubs(name))')
+    .eq('id', evId).limit(1),
+])
       const event = events?.[0] as any
       if (!event) { setError(t('common.error')); return }
 
@@ -187,15 +188,17 @@ export default function MyScorecardPage() {
   }
 
   async function loadScorecardData(evId: string, courseId: string, pId: string, myTeeId: string | null) {
-    const { data: holesData } = await supabase.from('course_holes')
-      .select('hole_number, par, stroke_index').eq('course_id', courseId).order('hole_number')
-    setHoles(holesData?.length ? holesData : fallbackHoles())
-
-    const { data: teesData } = await supabase.from('course_tees')
-      .select('id, tee_name, par_total, course_rating, slope').eq('course_id', courseId)
-
-    const { data: myFlight } = await supabase.from('flight_players')
-      .select('flights(id, event_id)').eq('player_id', pId)
+    const [{ data: holesData }, { data: teesData }, { data: myFlight }] = await Promise.all([
+  supabase.from('course_holes')
+    .select('hole_number, par, stroke_index')
+    .eq('course_id', courseId).order('hole_number'),
+  supabase.from('course_tees')
+    .select('id, tee_name, par_total, course_rating, slope')
+    .eq('course_id', courseId),
+  supabase.from('flight_players')
+    .select('flights(id, event_id)')
+    .eq('player_id', pId),
+])
     const myFlightRow = (myFlight || []).find((f: any) => f.flights?.event_id === evId)
     const flightId = (myFlightRow as any)?.flights?.id ?? null
     let flightPlayerIds: string[] = [pId]
@@ -229,12 +232,16 @@ export default function MyScorecardPage() {
     setIsValidated(!!sc?.validated_at)
     if (!scId) return
 
-    const { data: savedData } = await supabase.from('saved_scorecards')
-      .select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', evId)
-      .in('player_id', flightPlayerIds)
-    const { data: liveData } = await supabase.from('scores')
-      .select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', evId)
-      .in('player_id', flightPlayerIds)
+    const [{ data: savedData }, { data: liveData }] = await Promise.all([
+  supabase.from('saved_scorecards')
+    .select('player_id, hole, strokes')
+    .eq('scorecard_id', scId).eq('event_id', evId)
+    .in('player_id', flightPlayerIds),
+  supabase.from('scores')
+    .select('player_id, hole, strokes')
+    .eq('scorecard_id', scId).eq('event_id', evId)
+    .in('player_id', flightPlayerIds),
+])
 
     const map: ScoreMap = {}
     sorted.forEach(p => { map[p.id] = {} })

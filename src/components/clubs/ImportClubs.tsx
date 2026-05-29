@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import * as XLSX from 'xlsx'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
@@ -174,8 +174,10 @@ export default function ImportClubs() {
     finally { setImporting(false) }
   }
 
-  const clubCount   = new Set(preview.map(r => r.club)).size
-  const courseCount = new Set(preview.map(r => `${r.club}__${r.course}`)).size
+  const { clubCount, courseCount } = useMemo(() => ({
+  clubCount:   new Set(preview.map(r => r.club)).size,
+  courseCount: new Set(preview.map(r => `${r.club}__${r.course}`)).size,
+}), [preview])
 
   return (
     <div className="flex flex-col gap-4">

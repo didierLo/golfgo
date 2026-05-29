@@ -17,8 +17,9 @@ type Props = {
   eventDate?: string
 }
 
+const supabase = createClient()
 export default function Leaderboard({ eventId, scorecardId, players, holes, eventFormat, isOwner = false, eventTitle = '', eventDate = '' }: Props) {
-  const supabase = createClient()
+ 
   const isStableford = eventFormat === 'stableford'
 
   const [entries,   setEntries]   = useState<LeaderboardEntry[]>([])

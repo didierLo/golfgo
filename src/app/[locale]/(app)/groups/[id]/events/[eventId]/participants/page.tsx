@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
@@ -240,8 +240,8 @@ export default function ParticipantsPage() {
   }
 
   useEffect(() => { if (groupId) loadEvents() }, [groupId])
-  useEffect(() => { if (selectedEventId) loadParticipants(selectedEventId) }, [selectedEventId])
-  useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOverview() }, [viewMode, isOwner, groupId])
+useEffect(() => { if (selectedEventId) loadParticipants(selectedEventId) }, [selectedEventId, groupId])
+useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOverview() }, [viewMode, isOwner, groupId])
 
   async function loadEvents() {
     const { data } = await supabase.from('events').select('id, title, starts_at')
@@ -260,30 +260,42 @@ export default function ParticipantsPage() {
     setLoading(false)
   }
 
-  async function loadOverview() {
-    if (!groupId) return
-    setOverviewLoading(true)
-    const { data: evts } = await supabase.from('events').select('id, title, starts_at')
-      .eq('group_id', groupId).gte('starts_at', new Date().toISOString()).order('starts_at', { ascending: true })
-    const upcoming = evts || []
-    setUpcomingEvents(upcoming)
-    const { data: mbrs } = await supabase.from('groups_players')
-      .select(`player:players(id, first_name, surname)`).eq('group_id', groupId)
-    const members = (mbrs || []).map((m: any) => m.player)
-      .sort((a: Member, b: Member) => a.surname.localeCompare(b.surname, locale))
-    setAllMembers(members)
-    if (upcoming.length > 0 && members.length > 0) {
-      const { data: participations } = await supabase.from('event_participants')
-        .select('player_id, event_id, status')
-        .in('event_id', upcoming.map(e => e.id))
-        .in('player_id', members.map((m: Member) => m.id))
-      const matrix: Record<string, Record<string, string>> = {}
-      members.forEach((m: Member) => { matrix[m.id] = {} })
-      participations?.forEach(p => { matrix[p.player_id][p.event_id] = p.status })
-      setStatusMatrix(matrix)
-    }
-    setOverviewLoading(false)
+ async function loadOverview() {
+  if (!groupId) return
+  setOverviewLoading(true)
+
+  // Requêtes parallèles
+  const [{ data: evts }, { data: mbrs }] = await Promise.all([
+    supabase.from('events').select('id, title, starts_at')
+      .eq('group_id', groupId)
+      .gte('starts_at', new Date().toISOString())
+      .order('starts_at', { ascending: true }),
+    supabase.from('groups_players')
+      .select(`player:players(id, first_name, surname)`)
+      .eq('group_id', groupId)
+  ])
+
+  const upcoming = evts || []
+  setUpcomingEvents(upcoming)
+
+  const members = (mbrs || []).map((m: any) => m.player)
+    .sort((a: Member, b: Member) => a.surname.localeCompare(b.surname, locale))
+  setAllMembers(members)
+
+  if (upcoming.length > 0 && members.length > 0) {
+    const { data: participations } = await supabase.from('event_participants')
+      .select('player_id, event_id, status')
+      .in('event_id', upcoming.map(e => e.id))
+      .in('player_id', members.map((m: Member) => m.id))
+
+    const matrix: Record<string, Record<string, string>> = {}
+    members.forEach((m: Member) => { matrix[m.id] = {} })
+    participations?.forEach(p => { matrix[p.player_id][p.event_id] = p.status })
+    setStatusMatrix(matrix)
   }
+
+  setOverviewLoading(false)
+}
 
   async function updateStatus(playerId: string, status: 'GOING' | 'DECLINED' | 'INVITED') {
     await supabase.from('event_participants')
@@ -326,27 +338,33 @@ export default function ParticipantsPage() {
   }
 
   const statusOrder = { GOING: 0, INVITED: 1, WAITLIST: 2, DECLINED: 3 }
-  const displayed = [...participants].sort((a, b) => {
-    const dir = sortDir === 'asc' ? 1 : -1
-    if (sortField === 'name') {
-      const na = `${a.players.surname} ${a.players.first_name}`.toLowerCase()
-      const nb = `${b.players.surname} ${b.players.first_name}`.toLowerCase()
-      return na.localeCompare(nb) * dir
-    }
-    if (sortField === 'whs')    return ((a.players.whs ?? 999) - (b.players.whs ?? 999)) * dir
-    if (sortField === 'status') return ((statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)) * dir
-    if (sortField === 'holes')  return ((a.holes_played ?? 18) - (b.holes_played ?? 18)) * dir
-    return 0
-  })
-
+  const { going, going18, going9front, going9back, going9, invited, declined, has9holers } = useMemo(() => {
   const going       = participants.filter(p => p.status === 'GOING')
-  const going18     = going.filter(p => !p.holes_played || p.holes_played === 18)
-  const going9front = going.filter(p => p.holes_played === 9 && p.holes_section === 'out')
-  const going9back  = going.filter(p => p.holes_played === 9 && p.holes_section === 'in')
   const going9      = going.filter(p => p.holes_played === 9)
-  const invited     = participants.filter(p => p.status === 'INVITED').length
-  const declined    = participants.filter(p => p.status === 'DECLINED').length
-  const has9holers  = going9.length > 0
+  return {
+    going,
+    going18:     going.filter(p => !p.holes_played || p.holes_played === 18),
+    going9front: going.filter(p => p.holes_played === 9 && p.holes_section === 'out'),
+    going9back:  going.filter(p => p.holes_played === 9 && p.holes_section === 'in'),
+    going9,
+    invited:     participants.filter(p => p.status === 'INVITED').length,
+    declined:    participants.filter(p => p.status === 'DECLINED').length,
+    has9holers:  going9.length > 0,
+  }
+}, [participants])
+
+const displayed = useMemo(() => [...participants].sort((a, b) => {
+  const dir = sortDir === 'asc' ? 1 : -1
+  if (sortField === 'name') {
+    const na = `${a.players.surname} ${a.players.first_name}`.toLowerCase()
+    const nb = `${b.players.surname} ${b.players.first_name}`.toLowerCase()
+    return na.localeCompare(nb) * dir
+  }
+  if (sortField === 'whs')    return ((a.players.whs ?? 999) - (b.players.whs ?? 999)) * dir
+  if (sortField === 'status') return ((statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)) * dir
+  if (sortField === 'holes')  return ((a.holes_played ?? 18) - (b.holes_played ?? 18)) * dir
+  return 0
+}), [participants, sortField, sortDir])
 
   function SortBtn({ field, label }: { field: SortField; label: string }) {
     const active = sortField === field

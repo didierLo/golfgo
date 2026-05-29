@@ -165,10 +165,10 @@ function buildEmailHtml({
 }
 
 export async function POST(req: Request) {
-  console.log('[COMM] POST called')
+ 
   try {
     const { groupId, playerIds, subject: commSubject, body: commBody, eventId } = await req.json()
-    console.log('[COMM] received:', { groupId, eventId, playerIds: playerIds?.length })
+  
 
     if (!groupId || !playerIds?.length || !commSubject || !commBody) {
       return Response.json({ success: false, error: 'Paramètres manquants' }, { status: 400 })
@@ -177,27 +177,23 @@ export async function POST(req: Request) {
     const supabase = await createServerClient()
 
     // Charger le groupe + owner
-    const { data: groupData } = await supabase
-      .from('groups')
-      .select('name, owner:groups_players(players(first_name, surname))')
-      .eq('id', groupId)
-      .eq('groups_players.role', 'owner')
-      .single()
-    const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-    const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
-    const groupName   = (groupData as any)?.name ?? ''
-
-    // Charger l'event si fourni
-    let event: any = undefined
-    if (eventId) {
-      const { data } = await supabase
-        .from('events')
+const [{ data: groupData }, eventResult] = await Promise.all([
+  supabase.from('groups')
+    .select('name, owner:groups_players(players(first_name, surname))')
+    .eq('id', groupId)
+    .eq('groups_players.role', 'owner')
+    .single(),
+  eventId
+    ? supabase.from('events')
         .select('id, title, location, starts_at, group_id, max_participants')
-        .eq('id', eventId)
-        .single()
-      event = data ?? undefined
-      console.log('[EVENT]', event)
-    }
+        .eq('id', eventId).single()
+    : Promise.resolve({ data: null }),
+])
+
+const event       = eventResult.data ?? undefined
+const ownerPlayer = (groupData?.owner as any)?.[0]?.players
+const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
+const groupName   = (groupData as any)?.name ?? ''
 
     const eventDate = event ? formatDate(event.starts_at) : ''
     const eventTime = event ? formatTime(event.starts_at) : ''
@@ -206,49 +202,45 @@ export async function POST(req: Request) {
       ? `${appUrl}/groups/${event.group_id}/events/${event.id}`
       : `${appUrl}/groups`
 
-    // Compter les places restantes
-    let placesRestantes = '—'
-    if (event?.max_participants && eventId) {
-      const { count } = await supabase
-        .from('event_participants')
+   // Compter les places restantes et liste inscrits en parallèle
+const [countResult, goingResult] = await Promise.all([
+  event?.max_participants && eventId
+    ? supabase.from('event_participants')
         .select('*', { count: 'exact', head: true })
-        .eq('event_id', eventId)
-        .eq('status', 'GOING')
-      placesRestantes = String(Math.max(0, event.max_participants - (count ?? 0)))
-    }
-
-    // ── NOUVEAU : liste des joueurs déjà inscrits (GOING) ───────────────────
-    let listeInscrits = '—'
-    if (eventId) {
-      const { data: goingData } = await supabase
-        .from('event_participants')
+        .eq('event_id', eventId).eq('status', 'GOING')
+    : Promise.resolve({ count: null }),
+  eventId
+    ? supabase.from('event_participants')
         .select('player:players(first_name, surname)')
-        .eq('event_id', eventId)
-        .eq('status', 'GOING')
-      listeInscrits = goingData?.length
-        ? goingData.map((r: any) => `${r.player.first_name} ${r.player.surname}`).join(', ')
-        : '—'
-    }
+        .eq('event_id', eventId).eq('status', 'GOING')
+    : Promise.resolve({ data: null }),
+])
 
-    // ── FIX : yes_button seulement si un event est lié ──────────────────────
-    const hasYesButton = commBody.includes('{{yes_button}}') && !!eventId
+const placesRestantes = event?.max_participants
+  ? String(Math.max(0, event.max_participants - ((countResult as any).count ?? 0)))
+  : '—'
 
-    // ── Upsert event_participants + tokens ───────────────────────────────────
-    // Seulement si un event est lié et que les boutons oui/non sont présents
-    const participantTokens: Record<string, string> = {}
+const listeInscrits = (goingResult as any).data?.length
+  ? (goingResult as any).data.map((r: any) => `${r.player.first_name} ${r.player.surname}`).join(', ')
+  : '—'
 
-    if (eventId) {
-      // Récupérer les lignes existantes pour ces joueurs
-      const { data: existing } = await supabase
-        .from('event_participants')
-        .select('player_id, invite_token, status')
-        .eq('event_id', eventId)
-        .in('player_id', playerIds)
+// ── FIX : yes_button seulement si un event est lié ──────────────────────
+const hasYesButton = commBody.includes('{{yes_button}}') && !!eventId
 
-      const existingMap: Record<string, { token: string; status: string }> = {}
-      for (const row of existing ?? []) {
-        existingMap[row.player_id] = { token: row.invite_token, status: row.status }
-      }
+// ── Upsert event_participants + tokens ───────────────────────────────────
+const participantTokens: Record<string, string> = {}
+
+if (eventId) {
+  const { data: existing } = await supabase
+    .from('event_participants')
+    .select('player_id, invite_token, status')
+    .eq('event_id', eventId)
+    .in('player_id', playerIds)
+
+  const existingMap: Record<string, { token: string; status: string }> = {}
+  for (const row of existing ?? []) {
+    existingMap[row.player_id] = { token: row.invite_token, status: row.status }
+  }
 
       // Pour chaque joueur : créer s'il n'existe pas, ou récupérer/générer son token
       for (const playerId of playerIds) {
@@ -324,7 +316,6 @@ export async function POST(req: Request) {
       ).trim()
 
       if (!EMAIL_ENABLED) {
-        console.log(`[PREVIEW] To: ${player.email} | Subject: ${resolvedSubject} | Token: ${token ?? 'none'}`)
         sent++; continue
       }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 
@@ -21,6 +21,10 @@ export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
   function updateRow(index: number, field: keyof PlayerRow, value: string) {
     setListRows(prev => { const u = [...prev]; u[index] = { ...u[index], [field]: value }; return u })
   }
+
+  const validCount = useMemo(() =>
+  listRows.filter(r => r.surname.trim() && r.first_name.trim()).length
+, [listRows])
 
   async function handleBulkInsert() {
     setLoading(true)
@@ -106,7 +110,7 @@ export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
             </button>
             <button onClick={handleBulkInsert} disabled={loading}
               className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
-              {loading ? 'Ajout…' : `Ajouter ${listRows.filter(r => r.surname.trim() && r.first_name.trim()).length} joueur(s)`}
+              {loading ? 'Ajout…' : `Ajouter ${validCount} joueur(s)`}
             </button>
           </div>
         </div>

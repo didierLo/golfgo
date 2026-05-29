@@ -33,100 +33,75 @@ export default function MyPartnersPage() {
 
   useEffect(() => { loadData() }, [])
 
-  async function loadData() {
-    setLoading(true)
+ async function loadData() {
+  setLoading(true)
 
-    // 1. Joueur courant
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
-    const { data: playerRow } = await supabase.from('players')
-      .select('id, first_name, surname, whs').eq('user_id', user.id).single()
-    if (!playerRow) { setLoading(false); return }
-    const me: Player = playerRow
-    setMe(me)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { setLoading(false); return }
 
-    // 2. Tous les flight_ids où je suis
-    const { data: myFP } = await supabase
-      .from('flight_players')
-      .select('flight_id')
-      .eq('player_id', me.id)
-    const myFlightIds = (myFP ?? []).map((r: any) => r.flight_id)
-    if (!myFlightIds.length) { setLoading(false); return }
+  const { data: playerRow } = await supabase.from('players')
+    .select('id, first_name, surname, whs').eq('user_id', user.id).single()
+  if (!playerRow) { setLoading(false); return }
+  const me: Player = playerRow
+  setMe(me)
 
-    // 3. Pour chaque flight, récupérer event_id depuis flights
-    const { data: flightRows } = await supabase
-      .from('flights')
-      .select('id, event_id')
-      .in('id', myFlightIds)
+  const { data: myFP } = await supabase.from('flight_players')
+    .select('flight_id').eq('player_id', me.id)
+  const myFlightIds = (myFP ?? []).map((r: any) => r.flight_id)
+  if (!myFlightIds.length) { setLoading(false); return }
 
-    // Map flight_id → event_id
-    const flightToEvent: Record<string, string> = {}
-    for (const f of flightRows ?? []) flightToEvent[f.id] = f.event_id
+  // Paralléliser flights et co-joueurs
+  const [{ data: flightRows }, { data: coFP }] = await Promise.all([
+    supabase.from('flights').select('id, event_id').in('id', myFlightIds),
+    supabase.from('flight_players').select('flight_id, player_id')
+      .in('flight_id', myFlightIds).neq('player_id', me.id)
+  ])
 
-    // 4. Tous les co-joueurs dans ces flights (sauf moi)
-    const { data: coFP } = await supabase
-      .from('flight_players')
-      .select('flight_id, player_id')
-      .in('flight_id', myFlightIds)
-      .neq('player_id', me.id)
+  const flightToEvent: Record<string, string> = {}
+  for (const f of flightRows ?? []) flightToEvent[f.id] = f.event_id
 
-    // 5. Détails des partenaires uniques
-    const partnerIds = [...new Set((coFP ?? []).map((r: any) => r.player_id))]
-    const { data: partnerRows } = await supabase
-      .from('players')
-      .select('id, first_name, surname, whs')
-      .in('id', partnerIds)
+  const partnerIds = [...new Set((coFP ?? []).map((r: any) => r.player_id))]
+  const eventIds   = [...new Set(Object.values(flightToEvent))]
 
-    const playerMap: Record<string, Player> = {}
-    for (const p of partnerRows ?? []) playerMap[p.id] = p
+  // Paralléliser partenaires et events
+  const [{ data: partnerRows }, { data: eventRows }] = await Promise.all([
+    supabase.from('players').select('id, first_name, surname, whs').in('id', partnerIds),
+    supabase.from('events').select('id, title, starts_at')
+      .in('id', eventIds).order('starts_at', { ascending: false })
+  ])
 
-    setPartners(
-      Object.values(playerMap).sort((a, b) =>
-        `${a.first_name} ${a.surname}`.localeCompare(`${b.first_name} ${b.surname}`)
-      )
+  const playerMap: Record<string, Player> = {}
+  for (const p of partnerRows ?? []) playerMap[p.id] = p
+
+  setPartners(
+    Object.values(playerMap).sort((a, b) =>
+      `${a.first_name} ${a.surname}`.localeCompare(`${b.first_name} ${b.surname}`)
     )
+  )
 
-    // 6. Matrice : nombre de parties jouées avec chaque partenaire
-    const counts: Record<string, number> = {}
-    for (const fp of coFP ?? []) {
-      counts[fp.player_id] = (counts[fp.player_id] ?? 0) + 1
-    }
-    setMatrix(counts)
+  const counts: Record<string, number> = {}
+  for (const fp of coFP ?? []) counts[fp.player_id] = (counts[fp.player_id] ?? 0) + 1
+  setMatrix(counts)
 
-    // 7. Historique : regrouper par event_id
-    // Pour chaque flight où je suis, trouver l'event et les partenaires
-    const eventIds = [...new Set(Object.values(flightToEvent))]
-    const { data: eventRows } = await supabase
-      .from('events')
-      .select('id, title, starts_at')
-      .in('id', eventIds)
-      .order('starts_at', { ascending: false })
-
-    // Par flight, quels partenaires ?
-    const coByFlight: Record<string, Player[]> = {}
-    for (const fp of coFP ?? []) {
-      if (!coByFlight[fp.flight_id]) coByFlight[fp.flight_id] = []
-      const p = playerMap[fp.player_id]
-      if (p) coByFlight[fp.flight_id].push(p)
-    }
-
-    // Par event, prendre le premier flight qui me contient
-    const rounds: PastRound[] = []
-    for (const evt of eventRows ?? []) {
-      // Trouver un flight de cet event où je joue
-      const flightId = myFlightIds.find(fid => flightToEvent[fid] === evt.id)
-      if (!flightId) continue
-      rounds.push({
-        eventId:    evt.id,
-        eventTitle: evt.title,
-        date:       evt.starts_at,
-        partners:   coByFlight[flightId] ?? [],
-      })
-    }
-    setPastRounds(rounds)
-    setLoading(false)
+  const coByFlight: Record<string, Player[]> = {}
+  for (const fp of coFP ?? []) {
+    if (!coByFlight[fp.flight_id]) coByFlight[fp.flight_id] = []
+    const p = playerMap[fp.player_id]
+    if (p) coByFlight[fp.flight_id].push(p)
   }
 
+  const rounds: PastRound[] = []
+  for (const evt of eventRows ?? []) {
+    const flightId = myFlightIds.find(fid => flightToEvent[fid] === evt.id)
+    if (!flightId) continue
+    rounds.push({
+      eventId: evt.id, eventTitle: evt.title, date: evt.starts_at,
+      partners: coByFlight[flightId] ?? [],
+    })
+  }
+  setPastRounds(rounds)
+  setLoading(false)
+}
   const maxCount = Math.max(1, ...Object.values(matrix))
 
   function cellBg(count: number) {

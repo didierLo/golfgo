@@ -170,19 +170,22 @@ export async function POST(req: Request) {
 
     const supabase = await createServerClient()
 
-    const { data: event } = await supabase
-      .from('events').select('title, starts_at, location, group_id').eq('id', eventId).single()
-    if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
+    const [{ data: event }, { data: participants }] = await Promise.all([
+  supabase.from('events')
+    .select('title, starts_at, location, group_id')
+    .eq('id', eventId).single(),
+  supabase.from('event_participants')
+    .select('player_id, players(id, first_name, surname, email)')
+    .eq('event_id', eventId).eq('status', 'GOING')
+])
 
-    const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
-    })
+if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
 
-    const { data: participants } = await supabase
-      .from('event_participants')
-      .select('player_id, players(id, first_name, surname, email)')
-      .eq('event_id', eventId)
-      .eq('status', 'GOING')
+const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+})
+
+    
 
     let sent = 0, skipped = 0
     const errors: string[] = []
@@ -196,11 +199,7 @@ export async function POST(req: Request) {
       if (!playerFlight) { skipped++; continue }
 
       if (!EMAIL_ENABLED) {
-        console.log('━━━ TEESHEET EMAIL PREVIEW ━━━━━━━━━━━━━━━━━━')
-        console.log(`To:     ${player.email}`)
-        console.log(`Player: ${playerName}`)
-        console.log(`Flight: ${playerFlight.flight_number} @ ${playerFlight.start_time}`)
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+       
         sent++
         continue
       }

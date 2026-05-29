@@ -204,8 +204,14 @@ export default function ScorecardsPage() {
           if (count === 0) await supabase.from('scorecard_players').insert(built.map((p, i) => ({ scorecard_id: scId, player_id: p.id, position: i + 1 })))
         }
         const playerIds = built.map(p => p.id)
-        const { data: savedData } = await supabase.from('saved_scorecards').select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds)
-        const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds)
+        const [{ data: savedData }, { data: scoresData }] = await Promise.all([
+  supabase.from('saved_scorecards')
+    .select('player_id, hole, strokes')
+    .eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds),
+  supabase.from('scores')
+    .select('player_id, hole, strokes')
+    .eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds),
+])
         const map: ScoreMap = {}; built.forEach(p => { map[p.id] = {} })
         scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
         savedData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })

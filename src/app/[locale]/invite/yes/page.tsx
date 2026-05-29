@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 
+const supabase     = createClient()
+
 function InviteYesContent() {
   const supabase     = createClient()
   const searchParams = useSearchParams()
@@ -42,21 +44,19 @@ function InviteYesContent() {
   async function confirmParticipation(tok: string, holes: 9 | 18, section: 'out' | 'in' | null) {
     setStep('saving')
 
-    const { data: participant } = await supabase
-      .from('event_participants')
-      .select('event_id, events(group_id)')
-      .eq('invite_token', tok)
-      .maybeSingle()
-
-    const { error } = await supabase
-      .from('event_participants')
-      .update({
-        status:        'GOING',
-        holes_played:  holes,
-        holes_section: section,
-        responded_at:  new Date().toISOString(),
-      })
-      .eq('invite_token', tok)
+   const [{ data: participant }, { error }] = await Promise.all([
+  supabase.from('event_participants')
+    .select('event_id, events(group_id)')
+    .eq('invite_token', tok).maybeSingle(),
+  supabase.from('event_participants')
+    .update({
+      status:        'GOING',
+      holes_played:  holes,
+      holes_section: section,
+      responded_at:  new Date().toISOString(),
+    })
+    .eq('invite_token', tok),
+])
 
     if (error) { setStep('error'); return }
 

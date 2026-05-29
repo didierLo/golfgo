@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 type Player = {
@@ -24,6 +24,8 @@ type Props = {
   onClose: () => void
 }
 
+  const supabase = createClient()
+
 export default function AddParticipantsModal({
   groupId,
   eventId,
@@ -31,79 +33,49 @@ export default function AddParticipantsModal({
   onClose
 }: Props){
 
-  const supabase = createClient()
+
 
   const [players,setPlayers] = useState<Player[]>([])
-  const [filteredPlayers,setFilteredPlayers] = useState<Player[]>([])
+  
   const [selectedPlayers,setSelectedPlayers] = useState<string[]>([])
   const [search,setSearch] = useState('')
   const [loading,setLoading] = useState(true)
 
   const [sendEmail,setSendEmail] = useState(true)
   
+  const filteredPlayers = useMemo(() => {
+  if (!search) return players
+  const s = search.toLowerCase()
+  return players.filter(p =>
+    `${p.first_name} ${p.surname}`.toLowerCase().includes(s)
+  )
+}, [search, players])
 
   useEffect(()=>{
     loadPlayers()
   },[])
 
-  useEffect(()=>{
-    filterPlayers()
-  },[search,players])
 
-  async function loadPlayers(){
 
-    setLoading(true)
+async function loadPlayers() {
+  setLoading(true)
 
-    const { data:groupPlayers } = await supabase
-      .from('groups_players')
-      .select(`
-        player_id,
-        players(
-          id,
-          first_name,
-          surname,
-          email,
-          whs
-        )
-      `)
-      .eq('group_id',groupId)
+  const [{ data: groupPlayers }, { data: participants }] = await Promise.all([
+    supabase.from('groups_players')
+      .select(`player_id, players(id, first_name, surname, email, whs)`)
+      .eq('group_id', groupId),
+    supabase.from('event_participants')
+      .select('player_id').eq('event_id', eventId)
+  ])
 
-    const { data:participants } = await supabase
-      .from('event_participants')
-      .select('player_id')
-      .eq('event_id',eventId)
+  const participantIds = participants?.map(p => p.player_id) ?? []
+  const availablePlayers = groupPlayers
+    ?.map((g: any) => g.players)
+    .filter((p: Player) => !participantIds.includes(p.id)) ?? []
 
-    const participantIds =
-      participants?.map(p=>p.player_id) ?? []
-
-    const availablePlayers =
-      groupPlayers
-        ?.map((g:any)=>g.players)
-        .filter((p:Player)=>!participantIds.includes(p.id))
-        ?? []
-
-    setPlayers(availablePlayers)
-    setFilteredPlayers(availablePlayers)
-    setLoading(false)
-  }
-
-  function filterPlayers(){
-
-    if(!search){
-      setFilteredPlayers(players)
-      return
-    }
-
-    const s = search.toLowerCase()
-
-    const filtered = players.filter(p =>
-      `${p.first_name} ${p.surname}`
-        .toLowerCase()
-        .includes(s)
-    )
-
-    setFilteredPlayers(filtered)
-  }
+  setPlayers(availablePlayers)
+  setLoading(false)
+}
 
   function togglePlayer(playerId:string){
 

@@ -41,26 +41,17 @@ export default function LeaderboardPage() {
       const courseId = event.course_id
       if (!courseId) throw new Error(t('scorecard.noCourse'))
 
-      const { data: course } = await supabase
-        .from('courses').select('course_name, clubs(name)').eq('id', courseId).single()
-      setCourseName(course?.course_name ?? '')
-      setClubName((course?.clubs as any)?.name ?? '')
-
-      const { data: holesData } = await supabase
-        .from('course_holes').select('hole_number, par, stroke_index').eq('course_id', courseId).order('hole_number')
-      setHoles(holesData || [])
-
-      const { data: teesData } = await supabase
-        .from('course_tees').select('id, tee_name, par_total, course_rating, slope').eq('course_id', courseId)
-
-      const { data: scorecard } = await supabase
-        .from('scorecards').select('id').eq('event_id', eventId).maybeSingle()
-      setScorecardId(scorecard?.id ?? null)
-
-      const { data: participants } = await supabase
-        .from('event_participants')
-        .select('player_id, tee_id, players(id, first_name, surname, whs)')
-        .eq('event_id', eventId).order('created_at')
+     const [{ data: course }, { data: holesData }, { data: teesData }, { data: scorecard }, { data: participants }] = await Promise.all([
+  supabase.from('courses').select('course_name, clubs(name)').eq('id', courseId).single(),
+  supabase.from('course_holes').select('hole_number, par, stroke_index').eq('course_id', courseId).order('hole_number'),
+  supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope').eq('course_id', courseId),
+  supabase.from('scorecards').select('id').eq('event_id', eventId).maybeSingle(),
+  supabase.from('event_participants').select('player_id, tee_id, players(id, first_name, surname, whs)').eq('event_id', eventId).order('created_at'),
+])
+setCourseName(course?.course_name ?? '')
+setClubName((course?.clubs as any)?.name ?? '')
+setHoles(holesData || [])
+setScorecardId(scorecard?.id ?? null)
 
       const built: Player[] = (participants || []).map((ep: any) => {
         const p = ep.players

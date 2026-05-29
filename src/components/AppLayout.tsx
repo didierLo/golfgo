@@ -4,9 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useTranslations } from 'next-intl'
-import { useLocale } from 'next-intl'
-import { usePathname as useNextPathname } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface Group       { id: string; name: string; color: string; role: 'owner' | 'member' }
 interface CurrentUser { initials: string; name: string }
@@ -84,10 +82,11 @@ function GroupDot({ color, size = 8 }: { color: string; size?: number }) {
 
 const ORGANISER_SEGMENTS = ['/events/', '/invitations', '/flights', '/results', '/participants', '/teesheet', '/scorecards', '/leaderboard', '/communications']
 
+const supabase = createClient()
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router   = useRouter()
-  const supabase = createClient()
+ 
   const t        = useTranslations()
   const locale   = useLocale()
 
@@ -150,7 +149,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (groups.length === 0) return
     const urlGroupId = pathname.match(/\/groups\/([^/]+)/)?.[1]
-    console.log('pathname effect', urlGroupId, pathname)
+   
     if (urlGroupId) { const match = groups.find(g => g.id === urlGroupId); if (match) {
      setActiveGroup(match)
      localStorage.setItem('golfgo-last-group', match.id)
@@ -160,32 +159,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
   const groupId = activeGroup?.id
   if (!groupId) return
-  async function loadNearest() {
-    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
-    if (retained) { setNearestEventId(retained); return }
 
-    const now = new Date().toISOString()
-          const { data: future } = await supabase.from('events').select('id').eq('group_id', groupId).gte('starts_at', now).order('starts_at', { ascending: true }).limit(1)
-          if (future?.[0]) {
-            setNearestEventId(future[0].id)
-            localStorage.setItem(`golfgo-active-event-${groupId}`, future[0].id)
-            return
-          }
-          const { data: past } = await supabase.from('events').select('id').eq('group_id', groupId).lt('starts_at', now).order('starts_at', { ascending: false }).limit(1)
-          const id = past?.[0]?.id ?? null
-          setNearestEventId(id)
-          if (id) localStorage.setItem(`golfgo-active-event-${groupId}`, id)
-        }
-        loadNearest()
-}, [activeGroup?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-
-
-useEffect(() => {
-  const groupId = activeGroup?.id
-  if (!groupId) return
+  // D'abord vérifier le localStorage (synchrone, immédiat)
   const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
-  if (retained) setNearestEventId(retained)
-}, [pathname, activeGroup?.id])
+  if (retained) { setNearestEventId(retained); return }
+
+  // Sinon chercher en base
+  async function loadNearest() {
+    const now = new Date().toISOString()
+    const { data: future } = await supabase.from('events').select('id')
+      .eq('group_id', groupId).gte('starts_at', now)
+      .order('starts_at', { ascending: true }).limit(1)
+    if (future?.[0]) {
+      setNearestEventId(future[0].id)
+      localStorage.setItem(`golfgo-active-event-${groupId}`, future[0].id)
+      return
+    }
+    const { data: past } = await supabase.from('events').select('id')
+      .eq('group_id', groupId).lt('starts_at', now)
+      .order('starts_at', { ascending: false }).limit(1)
+    const id = past?.[0]?.id ?? null
+    setNearestEventId(id)
+    if (id) localStorage.setItem(`golfgo-active-event-${groupId}`, id)
+  }
+  loadNearest()
+}, [activeGroup?.id, pathname])
 
   const isActive       = (href: string) => pathname === href || pathname.startsWith(href + '/')
   const isGroupsActive = pathname === '/groups' || pathname === '/groups/add'

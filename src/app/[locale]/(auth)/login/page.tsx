@@ -1,17 +1,19 @@
 'use client'
 
-import { useState, useMemo, Suspense } from 'react'
+import { useState,  Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { AuthCard, AuthInput, AuthButton, AuthError, AuthSuccess, EyeButton } from '@/components/auth/AuthCard'
 import { useTranslations } from 'next-intl'
 
+ const supabase = createClient()
+
 function LoginContent() {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const message      = searchParams.get('message')
-  const supabase     = useMemo(() => createClient(), [])
+ 
   const t            = useTranslations()
 
   const [email,        setEmail]        = useState('')

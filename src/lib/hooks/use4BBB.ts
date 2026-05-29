@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/client'
 import { generate4BBB, EventSlot, RoundResult } from '@/lib/golf/flights/generate4BBB'
 import { pairKey } from '@/lib/utils/pairs'
 
-export function use4BBB(groupId: string) {
   const supabase = createClient()
+export function use4BBB(groupId: string) {
 
   const [events,       setEvents]       = useState<EventSlot[]>([])
   const [rounds,       setRounds]       = useState<RoundResult[]>([])
@@ -30,21 +30,20 @@ export function use4BBB(groupId: string) {
     if (!eventsData?.length) { setEvents([]); setLoading(false); return }
 
     // Charger les GOING pour chaque event
-    const eventSlots: EventSlot[] = []
-    for (const ev of eventsData) {
-      const { data: participants } = await supabase
-        .from('event_participants')
-        .select('players(id, first_name, surname, whs)')
-        .eq('event_id', ev.id)
-        .eq('status', 'GOING')
-
-      eventSlots.push({
-        eventId:   ev.id,
-        title:     ev.title,
-        starts_at: ev.starts_at,
-        going:     (participants ?? []).map((p: any) => p.players).filter(Boolean),
-      })
+  const eventSlots: EventSlot[] = await Promise.all(
+  eventsData.map(async ev => {
+    const { data: participants } = await supabase
+      .from('event_participants')
+      .select('players(id, first_name, surname, whs)')
+      .eq('event_id', ev.id).eq('status', 'GOING')
+    return {
+      eventId:   ev.id,
+      title:     ev.title,
+      starts_at: ev.starts_at,
+      going:     (participants ?? []).map((p: any) => p.players).filter(Boolean),
     }
+  })
+)
 
     setEvents(eventSlots)
     setLoading(false)

@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 
+
+ const supabase     = createClient()
 function InviteNoContent() {
   const supabase     = createClient()
   const searchParams = useSearchParams()

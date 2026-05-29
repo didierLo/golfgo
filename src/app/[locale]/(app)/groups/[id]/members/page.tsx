@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations, useLocale } from 'next-intl'
@@ -27,21 +27,30 @@ export default function MembersPage() {
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
-  async function loadMembers() {
-    const { data: { user } } = await supabase.auth.getUser()
-    const { data: player } = await supabase.from('players').select('id').eq('user_id', user!.id).single()
-    const { data, error } = await supabase
-      .from('groups_players').select(`role, player:players(id, surname, first_name, whs)`).eq('group_id', groupId)
-    if (error) { console.error(error); return }
-    const myRow = (data || []).find((row: any) => row.player?.id === player?.id)
-    setUserRole(myRow?.role ?? null)
-    setMembers((data || []).map((row: any) => ({ ...row.player, role: row.role })))
-    setLoading(false)
-  }
+async function loadMembers() {
+  const [{ data: { user } }, { data, error }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from('groups_players')
+      .select(`role, player:players(id, surname, first_name, whs)`)
+      .eq('group_id', groupId)
+  ])
 
-  const sortedMembers = [...members].sort((a, b) =>
+  if (error) { console.error(error); return }
+
+  const { data: player } = await supabase.from('players')
+    .select('id').eq('user_id', user!.id).single()
+
+  const myRow = (data || []).find((row: any) => row.player?.id === player?.id)
+  setUserRole(myRow?.role ?? null)
+  setMembers((data || []).map((row: any) => ({ ...row.player, role: row.role })))
+  setLoading(false)
+}
+
+  const sortedMembers = useMemo(() =>
+  [...members].sort((a, b) =>
     a[sortKey].localeCompare(b[sortKey], locale, { sensitivity: 'base' })
   )
+, [members, sortKey, locale])
 
   async function removeMember(playerId: string) {
     if (!confirm(t('members.removeConfirm'))) return

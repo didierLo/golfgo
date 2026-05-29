@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Fragment } from 'react'
+import { useEffect, useState, Fragment, useMemo } from 'react'
 import { use4BBB } from '@/lib/hooks/use4BBB'
 import { useTranslations, useLocale } from 'next-intl'
 import type { RoundResult, Flight4BBB, Player4BBB } from '@/lib/golf/flights/generate4BBB'
@@ -405,23 +405,23 @@ export default function Challenge4BBBTab({
   }
 
   // ── Stats participation ──────────────────────────────────────────────────
-  const participationStats = (() => {
-    const stats = new Map<string, { name: string; count: number; going: number }>()
-    for (const ev of events) {
-      for (const p of ev.going) {
-        if (!stats.has(p.id)) stats.set(p.id, { name: `${p.first_name} ${p.surname}`, count: 0, going: 0 })
-        stats.get(p.id)!.going++
+ const participationStats = useMemo(() => {
+  const stats = new Map<string, { name: string; count: number; going: number }>()
+  for (const ev of events) {
+    for (const p of ev.going) {
+      if (!stats.has(p.id)) stats.set(p.id, { name: `${p.first_name} ${p.surname}`, count: 0, going: 0 })
+      stats.get(p.id)!.going++
+    }
+  }
+  for (const round of rounds) {
+    for (const flight of round.flights) {
+      for (const p of flight.players) {
+        if (stats.has(p.id)) stats.get(p.id)!.count++
       }
     }
-    for (const round of rounds) {
-      for (const flight of round.flights) {
-        for (const p of flight.players) {
-          if (stats.has(p.id)) stats.get(p.id)!.count++
-        }
-      }
-    }
-    return [...stats.entries()].sort((a, b) => b[1].count - a[1].count)
-  })()
+  }
+  return [...stats.entries()].sort((a, b) => b[1].count - a[1].count)
+}, [events, rounds])
 
   if (loading) return (
     <div className="space-y-3">

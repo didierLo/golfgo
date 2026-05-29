@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useFlights } from '@/lib/hooks/useFlights'
 import { createClient } from '@/lib/supabase/client'
@@ -8,6 +8,7 @@ import { pairKey } from '@/lib/utils/pairs'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useTranslations, useLocale } from 'next-intl'
 import Challenge4BBBTab from '@/components/flights/Challenge4BBBTab'
+
 
 const supabase = createClient()
 
@@ -75,11 +76,10 @@ export default function FlightsPage() {
 
   useEffect(() => { if (activeEventId) loadData() }, [activeEventId])
 
-  useEffect(() => {
-    if (!groupId) return
-    loadConstraints()
-    loadPastFlights(historyWindow)
-  }, [groupId, activeEventId])
+ useEffect(() => {
+  if (!groupId) return
+  Promise.all([loadConstraints(), loadPastFlights(historyWindow)])
+}, [groupId, activeEventId])
 
   const [flightSize,     setFlightSize]     = useState(4)
   const [balanceWHS,     setBalanceWHS]     = useState(true)
@@ -141,11 +141,13 @@ export default function FlightsPage() {
     if (groupId && activeEventId) loadPastFlights(historyWindow)
   }, [historyWindow])
 
+const { players9front, players9back, players9, players18, has9holers } = useMemo(() => {
   const players9front = players.filter((p: any) => p.holes_played === 9 && p.holes_section === 'out')
   const players9back  = players.filter((p: any) => p.holes_played === 9 && p.holes_section === 'in')
   const players9      = players.filter((p: any) => p.holes_played === 9)
   const players18     = players.filter((p: any) => !p.holes_played || p.holes_played === 18)
-  const has9holers    = players9.length > 0
+  return { players9front, players9back, players9, players18, has9holers: players9.length > 0 }
+}, [players])
 
   async function handleGenerate() {
     setGenerating(true)
@@ -202,14 +204,19 @@ export default function FlightsPage() {
     onDragEnd()
   }
 
-  const sortedFlights = [...flights].sort((a: any, b: any) => a.flight_no - b.flight_no)
-  const flightGroups = holesMode === 'separated' && has9holers
+const sortedFlights = useMemo(() => 
+  [...flights].sort((a: any, b: any) => a.flight_no - b.flight_no)
+, [flights])
+
+const flightGroups = useMemo(() => 
+  holesMode === 'separated' && has9holers
     ? [
         { label: t('holes.18'),   color: '#185FA5', bg: '#EBF3FC', flights: sortedFlights.filter((f: any) => f.groupLabel === '18T' || !f.groupLabel) },
         { label: t('holes.9out'), color: '#92400E', bg: '#FEF3C7', flights: sortedFlights.filter((f: any) => f.groupLabel === '9F') },
         { label: t('holes.9in'),  color: '#9a3412', bg: '#FFF7ED', flights: sortedFlights.filter((f: any) => f.groupLabel === '9B') },
       ].filter(g => g.flights.length > 0)
     : [{ label: null, color: null, bg: null, flights: sortedFlights }]
+, [holesMode, has9holers, sortedFlights])
 
   if (loading || roleLoading || eventsLoading) return (
     <div className="p-6 space-y-3">

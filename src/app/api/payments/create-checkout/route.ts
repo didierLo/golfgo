@@ -1,9 +1,10 @@
-import Stripe from 'stripe';
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(req: Request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-  const { eventId, playerId, amount, description, locale } = await req.json();
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL!;
+  const { eventId, playerId, amount, description, locale } = await req.json()
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card', 'bancontact'],
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     success_url: `${baseUrl}/${locale}/my-events?payment=success`,
     cancel_url:  `${baseUrl}/${locale}/my-events/${eventId}/pay?cancelled=true`,
     metadata: { eventId, playerId },
-  });
+  })
 
-  return Response.json({ url: session.url });
+  return Response.json({ url: session.url })
 }

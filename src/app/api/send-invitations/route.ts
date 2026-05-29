@@ -193,33 +193,32 @@ export async function POST(req: Request) {
 
     const supabase = await createServerClient()
 
-    const { data: event, error: evErr } = await supabase
-      .from('events')
-      .select('id, title, location, starts_at, group_id, email_message')
-      .eq('id', eventId).single()
-    if (evErr || !event) {
-      return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
-    }
+  const { data: event, error: evErr } = await supabase
+  .from('events')
+  .select('id, title, location, starts_at, group_id, email_message')
+  .eq('id', eventId).single()
+if (evErr || !event) {
+  return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
+}
 
-    const { data: groupData } = await supabase
-      .from('groups')
-      .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
-      .eq('id', event.group_id).eq('groups_players.role', 'owner').single()
+
+const [{ data: groupData }, { data: participants, error: pErr }] = await Promise.all([
+  supabase.from('groups')
+    .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
+    .eq('id', event.group_id).eq('groups_players.role', 'owner').single(),
+  supabase.from('event_participants')
+    .select('player_id, invite_token, players(first_name, surname, email)')
+    .eq('event_id', eventId).in('player_id', playerIds)
+])
+
+if (pErr) return Response.json({ success: false, error: pErr.message }, { status: 500 })
 
     const ownerPlayer = (groupData?.owner as any)?.[0]?.players
     const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
-
-    const { data: participants, error: pErr } = await supabase
-      .from('event_participants')
-      .select('player_id, invite_token, players(first_name, surname, email)')
-      .eq('event_id', eventId).in('player_id', playerIds)
-    if (pErr) return Response.json({ success: false, error: pErr.message }, { status: 500 })
-
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const eventLink = `${appUrl}/groups/${event.group_id}/events/${eventId}`
     const eventDate = formatDate(event.starts_at)
     const eventTime = formatTime(event.starts_at)
-
     const subjectTemplate = groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}'
     const bodyTemplate    = groupData?.template_invitation_body    ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
 
@@ -252,7 +251,6 @@ export async function POST(req: Request) {
       const resolvedMessage = practicalNote ? `${resolvedBody}\n\n${practicalNote}` : resolvedBody
 
       if (!EMAIL_ENABLED) {
-        console.log(`[PREVIEW] To: ${player.email} | 18T: ${yes18Link} | 9F: ${yes9frontLink} | 9B: ${yes9backLink} | No: ${noLink}`)
         sent++; continue
       }
 

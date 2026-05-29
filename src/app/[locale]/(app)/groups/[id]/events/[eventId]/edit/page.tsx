@@ -8,6 +8,112 @@ import { useTranslations } from 'next-intl'
 const supabase = createClient()
 const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
 
+function PhotoUploader({ eventId }: { eventId: string }) {
+  const [photos, setPhotos]         = useState<{ id: string; url: string; path: string }[]>([])
+  const [uploading, setUploading]   = useState(false)
+  const [loadingPhotos, setLoadingPhotos] = useState(true)
+
+  useEffect(() => { loadPhotos() }, [eventId])
+
+  async function loadPhotos() {
+    setLoadingPhotos(true)
+    const { data } = await supabase
+      .from('event_photos')
+      .select('id, storage_path')
+      .eq('event_id', eventId)
+      .order('created_at', { ascending: false })
+
+    const withUrls = await Promise.all(
+      (data || []).map(async row => {
+        const { data: signed } = await supabase.storage
+          .from('event-photos')
+          .createSignedUrl(row.storage_path, 3600)
+        return { id: row.id, path: row.storage_path, url: signed?.signedUrl ?? '' }
+      })
+    )
+    setPhotos(withUrls.filter(p => p.url))
+    setLoadingPhotos(false)
+  }
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    setUploading(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: player }   = await supabase.from('players').select('id').eq('user_id', user!.id).single()
+
+    for (const file of files) {
+      const path = `${eventId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const { error } = await supabase.storage.from('event-photos').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+      if (!error) {
+        await supabase.from('event_photos').insert({
+          event_id:     eventId,
+          storage_path: path,
+          uploaded_by:  player?.id,
+        })
+      }
+    }
+
+    await loadPhotos()
+    setUploading(false)
+    e.target.value = ''
+  }
+
+  async function handleDelete(photo: { id: string; path: string }) {
+    await supabase.storage.from('event-photos').remove([photo.path])
+    await supabase.from('event_photos').delete().eq('id', photo.id)
+    setPhotos(prev => prev.filter(p => p.id !== photo.id))
+  }
+
+  return (
+    <div className="space-y-3">
+      <label className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-5 cursor-pointer transition-colors
+        ${uploading ? 'border-slate-200 bg-slate-50 opacity-60 pointer-events-none' : 'border-slate-200 hover:border-[#185FA5] hover:bg-blue-50/40'}`}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-slate-400">
+          <rect x="3" y="5" width="18" height="15" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+          <circle cx="8.5" cy="10.5" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
+          <path d="M3 16l5-4 4 3 3-2.5 6 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M12 2v5M10 4l2-2 2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span className="text-[12px] font-semibold text-slate-500">
+          {uploading ? 'Upload en cours…' : 'Ajouter des photos'}
+        </span>
+        <span className="text-[11px] text-slate-400">JPG, PNG, WEBP · max 10 MB</span>
+        <input type="file" accept="image/*" multiple className="hidden"
+          onChange={handleUpload} disabled={uploading} />
+      </label>
+
+      {loadingPhotos ? (
+        <div className="grid grid-cols-3 gap-2">
+          {[1,2,3].map(i => <div key={i} className="aspect-square bg-slate-100 rounded-xl animate-pulse" />)}
+        </div>
+      ) : photos.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          {photos.map(photo => (
+            <div key={photo.id} className="relative group aspect-square">
+              <img src={photo.url} alt=""
+                className="w-full h-full object-cover rounded-xl"
+                loading="lazy" />
+              <button
+                type="button"
+                onClick={() => handleDelete(photo)}
+                className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[14px] leading-none hover:bg-red-600">
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+
+
 export default function EditEventPage() {
   const params  = useParams()
   const groupId = params.id as string
@@ -59,22 +165,23 @@ export default function EditEventPage() {
     setEmailMessage(event.email_message || '')
     setMaxParticipants(event.max_participants ? String(event.max_participants) : '')
 
-    const { data: clubsData } = await supabase.from('clubs').select('id, name').order('name')
-    setClubs(clubsData || [])
+  const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
+  supabase.from('clubs').select('id, name').order('name'),
+  supabase.from('competition_formats').select('id, name').order('name'),
+])
+setClubs(clubsData || [])
+setFormats(formatsData || [])
 
-    if (event.course_id) {
-      const { data: courseData } = await supabase
-        .from('courses').select('id, course_name, club_id').eq('id', event.course_id).single()
-      if (courseData) {
-        setSelectedClubId(courseData.club_id)
-        const { data: coursesData } = await supabase
-          .from('courses').select('id, course_name').eq('club_id', courseData.club_id).order('course_name')
-        setCourses(coursesData || [])
-      }
-    }
-
-    const { data: formatsData } = await supabase.from('competition_formats').select('id, name').order('name')
-    setFormats(formatsData || [])
+if (event.course_id) {
+  const { data: courseData } = await supabase
+    .from('courses').select('id, course_name, club_id').eq('id', event.course_id).single()
+  if (courseData) {
+    setSelectedClubId(courseData.club_id)
+    const { data: coursesData } = await supabase
+      .from('courses').select('id, course_name').eq('club_id', courseData.club_id).order('course_name')
+    setCourses(coursesData || [])
+  }
+}
     setLoading(false)
   }
 
@@ -220,6 +327,17 @@ export default function EditEventPage() {
             rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
           <p className="text-[11px] text-slate-500 mt-1">{t('editEvent.emailHint')}</p>
         </div>
+
+        {/* ── Photos ── */}
+    <div className="h-px bg-slate-100" />
+
+    <div>
+      <label className="block text-[12px] font-semibold text-slate-600 mb-2">
+        Photos <span className="text-slate-400 font-normal">— optionnel</span>
+      </label>
+
+      <PhotoUploader eventId={eventId} />
+    </div>
 
         {error && (
           <div className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</div>

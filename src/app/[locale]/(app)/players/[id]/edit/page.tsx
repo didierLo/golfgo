@@ -40,30 +40,31 @@ export default function EditPlayerPage() {
   useEffect(() => { loadPlayer() }, [playerId])
 
   async function loadPlayer() {
-    const { data: player, error: pErr } = await supabase
-      .from('players')
-      .select('first_name, surname, federal_no, whs, email, phone, gender, default_tee_color')
-      .eq('id', playerId).single()
-
-    if (pErr || !player) { setError(t('editPlayer.notFound')); setLoading(false); return }
-
-    setForm({
-      first_name:        player.first_name ?? '',
-      surname:           player.surname ?? '',
-      federal_no:        player.federal_no ?? '',
-      whs:               player.whs != null ? String(player.whs) : '',
-      email:             player.email ?? '',
-      phone:             player.phone ?? '',
-      gender:            player.gender ?? 'M',
-      default_tee_color: player.default_tee_color ?? 'yellow',
-    })
-
-    if (groupId) {
-      const { data: gp } = await supabase.from('groups_players').select('role')
+   const [{ data: player, error: pErr }, { data: gp }] = await Promise.all([
+  supabase.from('players')
+    .select('first_name, surname, federal_no, whs, email, phone, gender, default_tee_color')
+    .eq('id', playerId).single(),
+  groupId
+    ? supabase.from('groups_players').select('role')
         .eq('group_id', groupId).eq('player_id', playerId).maybeSingle()
-      if (gp) setRole(gp.role as Role)
-    }
-    setLoading(false)
+    : Promise.resolve({ data: null }),
+])
+
+if (pErr || !player) { setError(t('editPlayer.notFound')); setLoading(false); return }
+
+setForm({
+  first_name:        player.first_name ?? '',
+  surname:           player.surname ?? '',
+  federal_no:        player.federal_no ?? '',
+  whs:               player.whs != null ? String(player.whs) : '',
+  email:             player.email ?? '',
+  phone:             player.phone ?? '',
+  gender:            player.gender ?? 'M',
+  default_tee_color: player.default_tee_color ?? 'yellow',
+})
+
+if (gp) setRole(gp.role as Role)
+setLoading(false)
   }
 
   function setGender(gender: Gender) {

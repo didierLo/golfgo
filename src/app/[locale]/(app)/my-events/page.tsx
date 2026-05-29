@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
@@ -14,6 +14,7 @@ type MyEvent = {
   status: 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
   payment_status?: 'PENDING' | 'PAID' | 'EXEMPT' | null
   goingCount?: number
+  photoCount?: number 
   events: {
     title: string
     starts_at: string
@@ -118,8 +119,8 @@ function daysUntil(dateStr: string): number {
   return Math.round((utcTarget.getTime() - utcNow.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-function EventCard({ event: e, onView, onICS, onPay, past = false, locale }: {
-  event: MyEvent; onView: () => void; onICS: () => void; onPay: () => void; past?: boolean; locale: string
+function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, locale }: {
+  event: MyEvent; onView: () => void; onICS: () => void; onPay: () => void; onPhotos: () => void; past?: boolean; locale: string
 }) {
   const t = useTranslations()
   const groupColor = e.events.groups?.color ?? '#378ADD'
@@ -154,24 +155,41 @@ function EventCard({ event: e, onView, onICS, onPay, past = false, locale }: {
         )}
       </div>
 
-      <div className="flex flex-col items-end gap-2 flex-shrink-0">
-        <Badge status={e.status} />
+     <div className="flex flex-col items-end gap-2 flex-shrink-0">
+  <Badge status={e.status} />
 
-        {e.events.fee_per_person && !past && (
-          e.payment_status === 'PAID' ? (
-            <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#EAF3DE] text-[#3B6D11]">
-              ✓ Payé
-            </span>
-          ) : e.status === 'GOING' && (
-            <button
-              onClick={ev => { ev.stopPropagation(); onPay() }}
-              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
-              Payer {e.events.fee_per_person} €
-            </button>
-          )
-        )}
-        <button
-          onClick={ev => { ev.stopPropagation(); onICS() }}
+  {e.events.fee_per_person && !past && (
+    e.payment_status === 'PAID' ? (
+      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#EAF3DE] text-[#3B6D11]">
+        ✓ Payé
+      </span>
+    ) : e.status === 'GOING' && (
+      <button
+        onClick={ev => { ev.stopPropagation(); onPay() }}
+        className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
+        Payer {e.events.fee_per_person} €
+      </button>
+    )
+  )}
+
+
+  {(e.photoCount ?? 0) > 0 && (
+    <button
+      onClick={ev => { ev.stopPropagation(); onPhotos() }}
+      className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-[#185FA5] transition-colors"
+    >
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+        <circle cx="8" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
+        <path d="M5 4l1.5-2h3L11 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+      {e.photoCount}
+    </button>
+  )}
+
+  <button
+    onClick={ev => { ev.stopPropagation(); onICS() }}
+  
           title={t('myEvents.calendar.addToCalendar')}
           className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#185FA5] hover:bg-blue-50 transition-colors">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -286,6 +304,63 @@ function CalendarView({ events, onView, locale }: { events: MyEvent[]; onView: (
   )
 }
 
+function PhotoModal({ eventId, onClose }: { eventId: string; onClose: () => void }) {
+  const [urls, setUrls] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from('event_photos')
+        .select('storage_path')
+        .eq('event_id', eventId)
+        .order('created_at', { ascending: false })
+
+      const signed = await Promise.all(
+        (data || []).map(async row => {
+          const { data: url } = await supabase.storage
+            .from('event-photos')
+            .createSignedUrl(row.storage_path, 3600)
+          return url?.signedUrl ?? ''
+        })
+      )
+      setUrls(signed.filter(Boolean))
+      setLoading(false)
+    }
+    load()
+  }, [eventId])
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4"
+      onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-4"
+        onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-bold text-slate-900">Photos</span>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 text-xl leading-none">×</button>
+        </div>
+        {loading ? (
+          <div className="grid grid-cols-3 gap-2">
+            {[1,2,3].map(i => <div key={i} className="aspect-square bg-slate-100 rounded-lg animate-pulse"/>)}
+          </div>
+        ) : urls.length === 0 ? (
+          <p className="text-center text-slate-400 text-[13px] py-8">Aucune photo</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {urls.map((url, i) => (
+              <img key={i} src={url} alt=""
+                className="aspect-square object-cover rounded-lg cursor-pointer hover:opacity-90"
+                onClick={() => window.open(url, '_blank')}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function MyEventsPage() {
   const router  = useRouter()
   const t       = useTranslations()
@@ -293,6 +368,8 @@ export default function MyEventsPage() {
   const [events,  setEvents]  = useState<MyEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [view,    setView]    = useState<View>('list')
+
+  const [photoEventId, setPhotoEventId] = useState<string | null>(null)
 
   const locale = useLocale()
   const searchParams = useSearchParams()
@@ -305,41 +382,70 @@ export default function MyEventsPage() {
 
   useEffect(() => { loadData() }, [])
 
-  async function loadData() {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
+async function loadData() {
+  setLoading(true)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { setLoading(false); return }
 
-    const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
-    if (!player) { setLoading(false); return }
+  const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
+  if (!player) { setLoading(false); return }
 
-    const { data, error } = await supabase
+  // ── 1. Les deux requêtes qui ne dépendent pas des event_ids ──
+  const [{ data }, { data: counts }] = await Promise.all([
+    supabase
       .from('event_participants')
-      .select(`event_id, status, payment_status, events(title, starts_at, location, group_id, max_participants, fee_per_person, groups!events_group_id_fkey(name, color))`)
+      .select(`event_id, status, payment_status,
+        events(title, starts_at, location, group_id,
+               max_participants, fee_per_person,
+               groups!events_group_id_fkey(name, color))`)
       .eq('player_id', player.id)
-      .order('starts_at', { foreignTable: 'events', ascending: true })
+      .order('starts_at', { foreignTable: 'events', ascending: true }),
 
-    if (error) { console.error(error); setLoading(false); return }
+    supabase
+      .from('event_participants')
+      .select('event_id, status')
+      .eq('player_id', player.id)
+      .eq('status', 'GOING'),
+  ])
 
-    const eventIds = (data || []).map((e: any) => e.event_id)
-    const { data: counts } = await supabase
-      .from('event_participants').select('event_id, status')
-      .in('event_id', eventIds).eq('status', 'GOING')
+  // ── 2. Maintenant qu'on a data, on peut extraire les ids ──
+  const eventIds = (data || []).map((e: any) => e.event_id)
 
-    const goingByEvent: Record<string, number> = {}
-    for (const row of counts || []) goingByEvent[row.event_id] = (goingByEvent[row.event_id] ?? 0) + 1
+  const { data: photoCounts } = eventIds.length > 0
+    ? await supabase
+        .from('event_photo_counts')
+        .select('event_id, photo_count')
+        .in('event_id', eventIds)
+    : { data: [] }
 
-    setEvents((data || []).map((e: any) => ({ ...e, goingCount: goingByEvent[e.event_id] ?? 0 })) as any)
-    setLoading(false)
-  }
+  // ── 3. Construire les maps ──
+  const goingByEvent: Record<string, number> = {}
+  for (const row of counts || []) goingByEvent[row.event_id] = (goingByEvent[row.event_id] ?? 0) + 1
 
-  const now      = new Date()
-  const sorted   = [...events].sort((a, b) => new Date(a.events.starts_at).getTime() - new Date(b.events.starts_at).getTime())
-  const upcoming = sorted.filter(e => new Date(e.events.starts_at) >= now)
-  const past     = sorted.filter(e => new Date(e.events.starts_at) <  now)
+  const photoCountByEvent: Record<string, number> = {}
+  for (const row of photoCounts || []) photoCountByEvent[row.event_id] = row.photo_count
+
+  setEvents((data || []).map((e: any) => ({
+    ...e,
+    goingCount:  goingByEvent[e.event_id]  ?? 0,
+    photoCount:  photoCountByEvent[e.event_id] ?? 0,
+  })) as any)
+
+  setLoading(false)
+}
+
+const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(() => {
+  const now    = new Date()
+  const sorted = [...events].sort((a, b) =>
+    new Date(a.events.starts_at).getTime() - new Date(b.events.starts_at).getTime()
+  )
+  const upcoming     = sorted.filter(e => new Date(e.events.starts_at) >= now)
+  const past         = sorted.filter(e => new Date(e.events.starts_at) <  now)
   const nextEvent    = upcoming[0] ?? null
   const goingCount   = upcoming.filter(e => e.status === 'GOING').length
   const invitedCount = upcoming.filter(e => e.status === 'INVITED').length
+  return { sorted, upcoming, past, nextEvent, goingCount, invitedCount }
+}, [events])
 
   function goToEvent(e: MyEvent) {
     localStorage.setItem(`golfgo-active-event-${e.events.group_id}`, e.event_id)
@@ -460,7 +566,8 @@ export default function MyEventsPage() {
                   <EventCard key={e.event_id} event={e} locale={
                     locale} onView={() => goToEvent(e)}
                     onPay={() => router.push(`/${locale}/my-events/${e.event_id}/pay`)}
-                    onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} />
+                    onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} 
+                     onPhotos={() => setPhotoEventId(e.event_id)} />
                 ))}
               </div>
             </div>
@@ -474,7 +581,8 @@ export default function MyEventsPage() {
                   <EventCard key={e.event_id} event={e} past locale={locale} 
                     onView={() => goToEvent(e)}
                     onPay={() => {}}
-                    onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} />
+                    onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} 
+                     onPhotos={() => setPhotoEventId(e.event_id)} />
                 ))}
               </div>
             </div>
@@ -489,6 +597,9 @@ export default function MyEventsPage() {
           )}
         </>
       )}
+      {photoEventId && (
+  <PhotoModal eventId={photoEventId} onClose={() => setPhotoEventId(null)} />
+)}
     </div>
   )
 }

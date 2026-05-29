@@ -61,29 +61,19 @@ export async function GET(request: NextRequest) {
     { auth: { persistSession: false } }
   )
 
-  const { error: updateError } = await adminClient
-    .from('players')
+ const [{ error: updateError }, { error: roleError }] = await Promise.all([
+  adminClient.from('players')
     .update({ user_id: authUser.id })
-    .eq('id', player.id)
-
-  if (updateError) {
-    console.error('[auth/callback] Failed to link user_id to player:', updateError)
-    // Non bloquant — l'utilisateur peut quand même continuer
-  } else {
-    console.log(`[auth/callback] Linked auth.user ${authUser.id} → player ${player.id}`)
-  }
-
-  // 5. Mettre à jour le role dans groups_players si la ligne existe sans role
-  //    (ex: invité ajouté par un admin sans role défini)
-  const { error: roleError } = await adminClient
-    .from('groups_players')
+    .eq('id', player.id),
+  adminClient.from('groups_players')
     .update({ role: 'member' })
     .eq('player_id', player.id)
-    .is('role', null)   // seulement si pas encore de role
+    .is('role', null)
+])
 
-  if (roleError) {
-    console.error('[auth/callback] Failed to set default role in groups_players:', roleError)
-  }
+if (updateError) console.error('[auth/callback] Failed to link user_id to player:', updateError)
+if (roleError)   console.error('[auth/callback] Failed to set default role in groups_players:', roleError)
+
 
   return NextResponse.redirect(`${origin}${next}`)
 }

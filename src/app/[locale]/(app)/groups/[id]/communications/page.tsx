@@ -122,31 +122,38 @@ export default function CommunicationsPage() {
   useEffect(() => { if (selectedEventId) loadEventTemplate(selectedEventId) }, [selectedEventId])
 
   async function loadAll() {
-    setLoading(true)
-    const { data: group } = await supabase.from('groups')
+  setLoading(true)
+
+  const [{ data: group }, { data: evts }, { data: membersData }] = await Promise.all([
+    supabase.from('groups')
       .select('template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
-      .eq('id', groupId).single()
-    if (group) setGroupTemplate({
-      template_logo_url:           group.template_logo_url ?? null,
-      template_header_color:       group.template_header_color ?? '#185FA5',
-      template_bg_image_url:       group.template_bg_image_url ?? null,
-      template_invitation_subject: group.template_invitation_subject ?? DEFAULTS.template_invitation_subject,
-      template_invitation_body:    group.template_invitation_body ?? DEFAULTS.template_invitation_body,
-      template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
-      template_teesheet_body:      group.template_teesheet_body ?? DEFAULTS.template_teesheet_body,
-    })
-    const { data: evts } = await supabase.from('events').select('id, title, starts_at').eq('group_id', groupId).order('starts_at', { ascending: false })
-    setEvents(evts || [])
-    if (evts?.length) {
-      const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
-      const retainedExists = evts.find(e => e.id === retained)
-      const defaultId = retainedExists?.id ?? evts[0].id
-      setSelectedEventId(defaultId); setFilterEventId(defaultId)
-    }
-    const { data: membersData } = await supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
-    setMembers((membersData ?? []).map((r: any) => ({ ...r.player, role: r.role })))
-    setLoading(false)
+      .eq('id', groupId).single(),
+    supabase.from('events').select('id, title, starts_at').eq('group_id', groupId).order('starts_at', { ascending: false }),
+    supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
+  ])
+
+  if (group) setGroupTemplate({
+    template_logo_url:           group.template_logo_url ?? null,
+    template_header_color:       group.template_header_color ?? '#185FA5',
+    template_bg_image_url:       group.template_bg_image_url ?? null,
+    template_invitation_subject: group.template_invitation_subject ?? DEFAULTS.template_invitation_subject,
+    template_invitation_body:    group.template_invitation_body ?? DEFAULTS.template_invitation_body,
+    template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
+    template_teesheet_body:      group.template_teesheet_body ?? DEFAULTS.template_teesheet_body,
+  })
+
+  setEvents(evts || [])
+  if (evts?.length) {
+    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+    const retainedExists = evts.find(e => e.id === retained)
+    const defaultId = retainedExists?.id ?? evts[0].id
+    setSelectedEventId(defaultId)
+    setFilterEventId(defaultId)
   }
+
+  setMembers((membersData ?? []).map((r: any) => ({ ...r.player, role: r.role })))
+  setLoading(false)
+}
 
   async function loadEventTemplate(eventId: string) {
     const { data } = await supabase.from('events')

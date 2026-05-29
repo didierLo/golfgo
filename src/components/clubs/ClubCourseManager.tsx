@@ -45,16 +45,15 @@ export default function ClubCourseManager() {
     }
   }, [clubId])
 
-  useEffect(() => {
-    if (courseId) {
-      loadTees(courseId)
-      loadHoles(courseId)
-      localStorage.setItem('courseId', courseId)
-    } else {
-      setTees([])
-      setHoles([])
-    }
-  }, [courseId])
+ useEffect(() => {
+  if (courseId) {
+    Promise.all([loadTees(courseId), loadHoles(courseId)])
+    localStorage.setItem('courseId', courseId)
+  } else {
+    setTees([])
+    setHoles([])
+  }
+}, [courseId])
 
   async function loadClubs() {
     const { data } = await supabase.from('clubs').select('*').order('name')
@@ -128,12 +127,12 @@ export default function ClubCourseManager() {
     setSaving(true)
     setSaveMsg('')
     try {
-      for (const tee of tees) {
-        await supabase.from('course_tees').update({
-          tee_name: tee.tee_name, par_total: tee.par_total,
-          distance_total: tee.distance_total, course_rating: tee.course_rating, slope: tee.slope,
-        }).eq('id', tee.id)
-      }
+      await Promise.all(tees.map(tee =>
+  supabase.from('course_tees').update({
+    tee_name: tee.tee_name, par_total: tee.par_total,
+    distance_total: tee.distance_total, course_rating: tee.course_rating, slope: tee.slope,
+  }).eq('id', tee.id)
+))
       await supabase.from('course_holes').upsert(
         holes.map(h => ({
           ...(h.id ? { id: h.id } : {}),

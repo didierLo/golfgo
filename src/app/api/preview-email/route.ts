@@ -269,18 +269,17 @@ export async function POST(req: Request) {
     // ── Communication preview ───────────────────────────────────────────────
     if (type === 'communication') {
       const { subject, body: commBody, groupId, eventId } = body
-      const { data: group } = await supabase.from('groups').select('name').eq('id', groupId).single()
+     const [{ data: group }, eventResult] = await Promise.all([
+  supabase.from('groups').select('name').eq('id', groupId).single(),
+  eventId
+    ? supabase.from('events').select('title, starts_at').eq('id', eventId).single()
+    : Promise.resolve({ data: null }),
+])
 
-      let eventTitle: string | undefined
-      let eventDate = ''
-      let eventTime = ''
-      if (eventId) {
-        const { data: event } = await supabase.from('events')
-          .select('title, starts_at').eq('id', eventId).single()
-        eventTitle = event?.title
-        eventDate  = event ? formatDate(event.starts_at) : ''
-        eventTime  = event ? formatTime(event.starts_at) : ''
-      }
+const eventTitle = eventResult.data?.title
+const eventDate  = eventResult.data ? formatDate(eventResult.data.starts_at) : ''
+const eventTime  = eventResult.data ? formatTime(eventResult.data.starts_at) : ''
+
 
       const hasButtons = commBody.includes('{{yes_button}}')
 

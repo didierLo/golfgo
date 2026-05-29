@@ -32,22 +32,17 @@ export default function AddGroupPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError(t('addGroup.notConnected')); setSaving(false); return }
 
-    const { data: group, error: insertError } = await supabase
-      .from('groups')
-      .insert({ name: name.trim(), description: description.trim() || null, color, owner_id: user.id })
-      .select('id').single()
+   const [{ data: group, error: insertError }, { data: player }] = await Promise.all([
+  supabase.from('groups')
+    .insert({ name: name.trim(), description: description.trim() || null, color, owner_id: user.id })
+    .select('id').single(),
+  supabase.from('players').select('id').eq('user_id', user.id).single()
+])
 
-    if (insertError || !group) {
-      setError(insertError?.message ?? t('addGroup.errorCreate'))
-      setSaving(false); return
-    }
-
-    const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
-    if (player) {
-      await supabase.from('groups_players').upsert({
-        group_id: group.id, player_id: player.id, role: 'owner', user_id: user.id,
-      }, { onConflict: 'group_id,player_id' })
-    }
+if (insertError || !group) {
+  setError(insertError?.message ?? t('addGroup.errorCreate'))
+  setSaving(false); return
+}
 
     window.location.href = `/groups/${group.id}/members`
   }

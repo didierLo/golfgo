@@ -48,34 +48,40 @@ export default function EventOverviewPage() {
   useEffect(() => { loadData() }, [eventId])
 
   async function loadData() {
-    setLoading(true)
-    const { data: eventData } = await supabase
-      .from('events')
+  setLoading(true)
+
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
+
+  // Requêtes parallèles
+  const [{ data: eventData }, { data: player }, { count }] = await Promise.all([
+    supabase.from('events')
       .select(`id, title, location, starts_at, ends_at, description, max_participants,
         competition_formats(name), courses(course_name, clubs(name))`)
-      .eq('id', eventId).single()
-    if (eventData) setEvent(eventData as any)
+      .eq('id', eventId).single(),
+    user
+      ? supabase.from('players').select('id').eq('user_id', user.id).single()
+      : Promise.resolve({ data: null }),
+    supabase.from('event_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_id', eventId).eq('status', 'GOING'),
+  ])
 
-    const { data: { session } } = await supabase.auth.getSession()
-    const user = session?.user
-    if (user) {
-      const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
-      if (player) {
-        setPlayerId(player.id)
-        const { data: participation } = await supabase.from('event_participants')
-          .select('status, holes_played, holes_section')
-          .eq('event_id', eventId).eq('player_id', player.id).maybeSingle()
-        setStatus((participation?.status as ParticipationStatus) ?? null)
-        setHolesPlayed((participation?.holes_played as 9 | 18) ?? 18)
-        setHolesSection((participation?.holes_section as HolesSection) ?? null)
-      }
-    }
+  if (eventData) setEvent(eventData as any)
+  setParticipantCount(count ?? 0)
 
-    const { count } = await supabase.from('event_participants')
-      .select('*', { count: 'exact', head: true }).eq('event_id', eventId).eq('status', 'GOING')
-    setParticipantCount(count ?? 0)
-    setLoading(false)
+  if (player) {
+    setPlayerId(player.id)
+    const { data: participation } = await supabase.from('event_participants')
+      .select('status, holes_played, holes_section')
+      .eq('event_id', eventId).eq('player_id', player.id).maybeSingle()
+    setStatus((participation?.status as ParticipationStatus) ?? null)
+    setHolesPlayed((participation?.holes_played as 9 | 18) ?? 18)
+    setHolesSection((participation?.holes_section as HolesSection) ?? null)
   }
+
+  setLoading(false)
+}
 
   async function respond(newStatus: 'GOING' | 'DECLINED', holes?: 9 | 18, section?: HolesSection) {
     if (!playerId) return

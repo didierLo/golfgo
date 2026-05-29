@@ -1,5 +1,5 @@
 'use client'
-
+import {useMemo} from 'react'
 import { ScorecardCell } from './ScorecardCell'
 import type { Hole, Player, ScoreMap } from './scorecard-types'
 
@@ -51,12 +51,14 @@ export default function ScorecardTable({ holes, player, scores, setScores, event
     })
   }
 
-  const outTotals = subtotals(front9, player, scores, eventFormat)
-  const inTotals  = subtotals(back9,  player, scores, eventFormat)
-  const totTotals = subtotals(holes,  player, scores, eventFormat)
+ const { outTotals, inTotals, totTotals } = useMemo(() => ({
+  outTotals: subtotals(front9, player, scores, eventFormat),
+  inTotals:  subtotals(back9,  player, scores, eventFormat),
+  totTotals: subtotals(holes,  player, scores, eventFormat),
+}), [front9, back9, holes, player, scores, eventFormat])
   const netLabel  = isStableford ? 'Pts' : 'Net'
 
-console.log('readOnly:', readOnly, 'player:', player?.id)
+
 
   return (
     <div className="overflow-x-auto -mx-4 px-4">
