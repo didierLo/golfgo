@@ -385,6 +385,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </span>
                       <span className="text-[13px] text-red-500 font-semibold">{t('nav.signOut')}</span>
                     </button>
+                  <div className="flex gap-3 px-4 py-2.5 border-t border-slate-100 mt-1">
+                    <Link href={`/${locale}/legal/cgu`} onClick={() => setAvatarMenuOpen(false)}
+                      className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
+                      {t('nav.cgu')}
+                    </Link>
+                    <Link href={`/${locale}/legal/privacy`} onClick={() => setAvatarMenuOpen(false)}
+                      className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
+                      {t('nav.privacy')}
+                    </Link>
+                  </div>
+
                   </div>
                 )}
               </div>
@@ -399,6 +410,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1 max-w-[1280px] w-full mx-auto">
 
+        
+
         {/* Sidebar desktop */}
         <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
@@ -408,6 +421,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label={t('nav.teesheet')}     active={!!teesheetHref && isActive(teesheetHref)} />
             <NavItem href="/scorecard"                    icon={Icons.scorecard}    iconColor="#D85A30" label={t('nav.scorecard')}    active={isActive('/scorecard')} />
           </SidebarSection>
+
+
           <div className="mx-2 my-3 h-px bg-slate-100" />
           <SidebarSection label={t('nav.organiser')} emoji="🏆">
             <NavItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label={t('nav.groups')}         active={isGroupsActive} />
@@ -419,6 +434,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
             <NavItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </SidebarSection>
+
+          <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-slate-100 mx-1">
+            <Link href={`/${locale}/legal/cgu`}
+              className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors px-3 py-1">
+              {t('nav.cgu')}
+            </Link>
+            <Link href={`/${locale}/legal/privacy`}
+              className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors px-3 py-1">
+              {t('nav.privacy')}
+            </Link>
+          </div>
+
         </aside>
 
         {/* Sidebar tablette */}
@@ -472,6 +499,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-[#185FA5]" />}
           </Link>
         ))}
+        <div className="flex gap-4 px-5 py-3 border-t border-slate-100">
+          <Link href={`/${locale}/legal/cgu`} onClick={() => setDrawerOpen(false)}
+            className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
+            {t('nav.cgu')}
+          </Link>
+          <Link href={`/${locale}/legal/privacy`} onClick={() => setDrawerOpen(false)}
+            className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
+            {t('nav.privacy')}
+          </Link>
+        </div>
+
         <div style={{ paddingBottom: 'env(safe-area-inset-bottom)', height: 8 }} />
       </div>
 

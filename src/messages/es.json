@@ -24,7 +24,9 @@
     "constraints": "Restricciones",
     "signOut": "Cerrar sesión",
     "myProfile": "Mi perfil",
-    "payments": "Pagos"
+    "payments": "Pagos",
+    "cgu": "Condiciones",
+    "privacy": "Privacidad"
   },
   "myEvents": {
     "title": "Mis eventos",
