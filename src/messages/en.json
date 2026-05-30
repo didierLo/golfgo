@@ -857,6 +857,8 @@
     "cgu": {
       "title": "Terms of Use",
       "lastUpdated": "Version of {date}",
+      "back": "Back",
+      "linkToCgu": "View terms of use",
       "sections": {
         "presentation": {
           "title": "1. About the application",
@@ -915,6 +917,8 @@
     "privacy": {
       "title": "Privacy Policy",
       "lastUpdated": "Version of {date}",
+      "back": "Back",
+      "linkToPrivacy": "View privacy policy",
       "sections": {
         "controller": {
           "title": "1. Data controller",

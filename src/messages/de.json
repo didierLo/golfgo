@@ -858,6 +858,8 @@
     "cgu": {
       "title": "Allgemeine Nutzungsbedingungen",
       "lastUpdated": "Version vom {date}",
+      "back": "Zurück",
+      "linkToPrivacy": "Datenschutzerklärung ansehen",  
       "sections": {
         "presentation": {
           "title": "1. Über die Anwendung",
@@ -916,6 +918,8 @@
     "privacy": {
       "title": "Datenschutzerklärung",
       "lastUpdated": "Version vom {date}",
+      "back": "Zurück",
+      "linkToCgu": "AGB ansehen",
       "sections": {
         "controller": {
           "title": "1. Verantwortlicher",

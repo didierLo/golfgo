@@ -858,6 +858,8 @@
     "cgu": {
       "title": "Conditions Générales d'Utilisation",
       "lastUpdated": "Version du {date}",
+      "back": "Retour",
+      "linkToPrivacy": "Voir la politique de confidentialité",
       "sections": {
         "presentation": {
           "title": "1. Présentation de l'application",
@@ -916,6 +918,8 @@
     "privacy": {
       "title": "Politique de Confidentialité",
       "lastUpdated": "Version du {date}",
+      "back": "Retour",
+      "linkToCgu": "Voir les conditions générales d'utilisation",
       "sections": {
         "controller": {
           "title": "1. Responsable du traitement",
@@ -1003,6 +1007,7 @@
           "title": "10. Modifications",
           "p1": "Cette politique peut être mise à jour. En cas de modification substantielle, vous serez informé par notification ou par email."
         }
+      
       }
     }
   }

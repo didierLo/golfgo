@@ -857,6 +857,8 @@
     "cgu": {
       "title": "Algemene Gebruiksvoorwaarden",
       "lastUpdated": "Versie van {date}",
+      "back": "Terug",
+      "linkToPrivacy": "Privacybeleid bekijken",
       "sections": {
         "presentation": {
           "title": "1. Over de applicatie",
@@ -915,6 +917,8 @@
     "privacy": {
       "title": "Privacybeleid",
       "lastUpdated": "Versie van {date}",
+      "back": "Terug",
+      "linkToCgu": "Gebruiksvoorwaarden bekijken",
       "sections": {
         "controller": {
           "title": "1. Verwerkingsverantwoordelijke",

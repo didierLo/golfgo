@@ -857,6 +857,8 @@
     "cgu": {
       "title": "Condiciones Generales de Uso",
       "lastUpdated": "Versión del {date}",
+      "back": "Volver",
+      "linkToPrivacy": "Ver política de privacidad",
       "sections": {
         "presentation": {
           "title": "1. Acerca de la aplicación",
@@ -915,6 +917,8 @@
     "privacy": {
       "title": "Política de Privacidad",
       "lastUpdated": "Versión del {date}",
+      "back": "Volver",
+      "linkToCgu": "Ver condiciones de uso",
       "sections": {
         "controller": {
           "title": "1. Responsable del tratamiento",
