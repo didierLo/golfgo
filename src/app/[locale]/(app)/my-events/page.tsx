@@ -405,10 +405,9 @@ async function loadData() {
 
     supabase
       .from('event_participants')
-      .select('event_id, status')
-      .eq('player_id', player.id)
+      .select('event_id')
       .eq('status', 'GOING'),
-  ])
+    ])
 
   // ── 2. Maintenant qu'on a data, on peut extraire les ids ──
   const eventIds = (data || []).map((e: any) => e.event_id)
@@ -422,7 +421,9 @@ async function loadData() {
 
   // ── 3. Construire les maps ──
   const goingByEvent: Record<string, number> = {}
-  for (const row of counts || []) goingByEvent[row.event_id] = (goingByEvent[row.event_id] ?? 0) + 1
+  for (const row of counts || []) {
+  goingByEvent[row.event_id] = (goingByEvent[row.event_id] ?? 0) + 1
+}
 
   const photoCountByEvent: Record<string, number> = {}
   for (const row of photoCounts || []) photoCountByEvent[row.event_id] = row.photo_count
