@@ -26,7 +26,7 @@
     "myProfile": "Mon profil",
     "payments": "Paiements",
     "cgu": "CGU",
-    "privacy": "Confidentialité"
+    
   },
 
   "myEvents": {
@@ -867,7 +867,7 @@
         "presentation": {
           "title": "1. Présentation de l'application",
           "p1": "GolfGo est une application de gestion d'événements de golf permettant à des groupes de joueurs d'organiser des parties, de suivre les scores, de gérer les participations et les préférences de partenaires.",
-          "p2": "Pour toute question, contactez-nous à : support@golfgo.app"
+          "p2": "Pour toute question, contactez-nous à : info@golgo.be"
         },
         "acceptance": {
           "title": "2. Acceptation des conditions",
@@ -990,7 +990,7 @@
             "i5": "Droit d'opposition : vous opposer à certains traitements",
             "i6": "Droit à la limitation : restreindre le traitement de vos données"
           },
-          "p2": "Pour exercer ces droits : support@golfgo.app — Réponse sous 30 jours.",
+          "p2": "Pour exercer ces droits : info@golfgo.be — Réponse sous 30 jours.",
           "p3": "Vous pouvez également contacter l'Autorité de protection des données belge (APD) : www.autoriteprotectiondonnees.be"
         },
         "cookies": {

@@ -865,7 +865,7 @@
         "presentation": {
           "title": "1. Acerca de la aplicación",
           "p1": "GolfGo es una aplicación de gestión de eventos de golf que permite a grupos de jugadores organizar partidas, hacer seguimiento de puntuaciones, gestionar participaciones y preferencias de compañeros.",
-          "p2": "Para cualquier pregunta, contáctenos en: support@golfgo.app"
+          "p2": "Para cualquier pregunta, contáctenos en: info@golfgo.be"
         },
         "acceptance": {
           "title": "2. Aceptación de las condiciones",
@@ -925,7 +925,7 @@
         "controller": {
           "title": "1. Responsable del tratamiento",
           "p1": "El responsable del tratamiento de los datos personales recogidos a través de GolfGo opera desde Bélgica.",
-          "p2": "Contacto: support@golfgo.app"
+          "p2": "Contacto: info@golfgo.be"
         },
         "data": {
           "title": "2. Datos recopilados",
@@ -988,7 +988,7 @@
             "i5": "Derecho de oposición: oponerse a determinados tratamientos",
             "i6": "Derecho de limitación: restringir el tratamiento de sus datos"
           },
-          "p2": "Para ejercer estos derechos: support@golfgo.app — Respuesta en 30 días.",
+          "p2": "Para ejercer estos derechos: info@golfgo.be — Respuesta en 30 días.",
           "p3": "También puede ponerse en contacto con la Autoridad de Protección de Datos belga (APD): www.autoriteprotectiondonnees.be"
         },
         "cookies": {

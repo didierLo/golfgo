@@ -865,7 +865,7 @@
         "presentation": {
           "title": "1. Over de applicatie",
           "p1": "GolfGo is een golfbeheertoepassing waarmee groepen spelers rondes kunnen organiseren, scores kunnen bijhouden, deelnames en partnervoorkeuren kunnen beheren.",
-          "p2": "Voor vragen kunt u contact met ons opnemen via: support@golfgo.app"
+          "p2": "Voor vragen kunt u contact met ons opnemen via: info@golfgo.be"
         },
         "acceptance": {
           "title": "2. Aanvaarding van de voorwaarden",
@@ -925,7 +925,7 @@
         "controller": {
           "title": "1. Verwerkingsverantwoordelijke",
           "p1": "De verwerkingsverantwoordelijke voor de via GolfGo verzamelde persoonsgegevens is gevestigd in België.",
-          "p2": "Contact: support@golfgo.app"
+          "p2": "Contact: info@golfgo.be"
         },
         "data": {
           "title": "2. Verzamelde gegevens",
@@ -988,7 +988,7 @@
             "i5": "Recht van bezwaar: bezwaar maken tegen bepaalde verwerkingen",
             "i6": "Recht op beperking: de verwerking van uw gegevens beperken"
           },
-          "p2": "Om deze rechten uit te oefenen: support@golfgo.app — Antwoord binnen 30 dagen.",
+          "p2": "Om deze rechten uit te oefenen: info@golfgo.be — Antwoord binnen 30 dagen.",
           "p3": "U kunt ook contact opnemen met de Belgische Gegevensbeschermingsautoriteit (GBA): www.autoriteprotectiondonnees.be"
         },
         "cookies": {
