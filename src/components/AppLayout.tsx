@@ -377,6 +377,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         ))}
                       </div>
                     </div>
+
+                    <a href="mailto:info@golfgo.be"
+                      onClick={() => setAvatarMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                      <span className="text-slate-400">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+                          <path d="M1 5l7 5 7-5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                      <span className="text-[13px] text-slate-700 font-medium">{t('nav.support')}</span>
+                    </a>
+                    <div className="flex gap-3 px-4 py-2.5 border-t border-slate-100 mt-1">
+                      ...CGU + Privacy...
+                    </div>
+
                     <div className="mx-3 my-1 h-px bg-slate-100" />
                     <button onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors">
