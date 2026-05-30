@@ -24,8 +24,11 @@
     "constraints": "Contraintes",
     "signOut": "Se déconnecter",
     "myProfile": "Mon profil",
-    "payments": "Paiements"
+    "payments": "Paiements",
+    "cgu": "CGU",
+    "privacy": "Confidentialité"
   },
+
   "myEvents": {
     "title": "Mes événements",
     "subtitle": "{upcoming} à venir · {past} passés",

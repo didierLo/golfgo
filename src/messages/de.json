@@ -24,7 +24,9 @@
     "constraints": "Einschränkungen",
     "signOut": "Abmelden",
     "myProfile": "Mein Profil",
-    "payments": "Zahlungen"
+    "payments": "Zahlungen",
+    "cgu": "AGB",
+    "privacy": "Datenschutz"
   },
   "myEvents": {
     "title": "Meine Veranstaltungen",

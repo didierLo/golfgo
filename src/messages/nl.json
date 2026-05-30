@@ -24,7 +24,9 @@
     "constraints": "Beperkingen",
     "signOut": "Uitloggen",
     "myProfile": "Mijn profiel",
-    "payments": "Betalingen"
+    "payments": "Betalingen",
+    "cgu": "Voorwaarden",
+    "privacy": "Privacy"
   },
   "myEvents": {
     "title": "Mijn evenementen",
