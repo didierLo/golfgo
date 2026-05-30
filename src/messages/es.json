@@ -850,6 +850,161 @@
     "round": "ronda",
     "rounds_plural": "rondas",
     "solo": "Solo"
-  }
+  },
 
+  
+  "legal": {
+    "cgu": {
+      "title": "Condiciones Generales de Uso",
+      "lastUpdated": "Versión del {date}",
+      "sections": {
+        "presentation": {
+          "title": "1. Acerca de la aplicación",
+          "p1": "GolfGo es una aplicación de gestión de eventos de golf que permite a grupos de jugadores organizar partidas, hacer seguimiento de puntuaciones, gestionar participaciones y preferencias de compañeros.",
+          "p2": "Para cualquier pregunta, contáctenos en: support@golfgo.app"
+        },
+        "acceptance": {
+          "title": "2. Aceptación de las condiciones",
+          "p1": "El uso de GolfGo implica la aceptación plena de estas Condiciones Generales de Uso. Si no acepta estas condiciones, no utilice la aplicación.",
+          "p2": "El editor se reserva el derecho de modificar estas condiciones en cualquier momento. Los usuarios serán informados de los cambios importantes mediante notificación en la aplicación o por correo electrónico."
+        },
+        "access": {
+          "title": "3. Acceso y registro",
+          "p1": "El acceso a GolfGo requiere la creación de una cuenta con una dirección de correo electrónico válida. Usted es responsable de mantener la confidencialidad de sus credenciales.",
+          "p2": "El registro está reservado a personas físicas mayores de 16 años.",
+          "p3": "El editor se reserva el derecho de suspender o eliminar cualquier cuenta en caso de incumplimiento de estas Condiciones."
+        },
+        "usage": {
+          "title": "4. Uso de la aplicación",
+          "p1": "En particular, está prohibido:",
+          "items": {
+            "i1": "Publicar contenidos ilegales, ofensivos o perjudiciales",
+            "i2": "Intentar acceder a datos de otros grupos o usuarios sin autorización",
+            "i3": "Utilizar la aplicación con fines comerciales sin acuerdo previo",
+            "i4": "Automatizar solicitudes a la aplicación sin autorización expresa"
+          }
+        },
+        "groups": {
+          "title": "5. Grupos y roles",
+          "p1": "GolfGo está organizado en torno a grupos. Cada grupo tiene un propietario que gestiona sus miembros, eventos y configuración.",
+          "p2": "El propietario del grupo es responsable del uso que hagan de él los miembros que invite.",
+          "p3": "Los miembros de un grupo pueden ver la información de otros miembros del mismo grupo, incluidas sus puntuaciones y preferencias de juego."
+        },
+        "photos": {
+          "title": "6. Contenido y fotos",
+          "p1": "Al publicar fotos en GolfGo, garantiza que posee los derechos sobre este contenido y autoriza su visualización a los miembros de su grupo.",
+          "p2": "Las fotos son visibles para todos los miembros del grupo asociado. No se comparten públicamente.",
+          "p3": "Puede eliminar sus propias fotos en cualquier momento desde la aplicación."
+        },
+        "availability": {
+          "title": "7. Disponibilidad del servicio",
+          "p1": "El editor hace todo lo posible para mantener la aplicación disponible. Sin embargo, pueden producirse interrupciones por mantenimiento o actualizaciones.",
+          "p2": "La aplicación se proporciona 'tal cual', sin garantía de disponibilidad permanente ni de ausencia de errores."
+        },
+        "liability": {
+          "title": "8. Limitación de responsabilidad",
+          "p1": "El editor no será responsable de ningún daño indirecto resultante del uso o la imposibilidad de usar GolfGo.",
+          "p2": "El editor no es responsable del contenido publicado por los usuarios ni de los conflictos que puedan surgir entre miembros del mismo grupo."
+        },
+        "law": {
+          "title": "9. Legislación aplicable",
+          "p1": "Estas Condiciones se rigen por la legislación belga. En caso de conflicto, los tribunales competentes de Bélgica tendrán jurisdicción exclusiva."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Política de Privacidad",
+      "lastUpdated": "Versión del {date}",
+      "sections": {
+        "controller": {
+          "title": "1. Responsable del tratamiento",
+          "p1": "El responsable del tratamiento de los datos personales recogidos a través de GolfGo opera desde Bélgica.",
+          "p2": "Contacto: support@golfgo.app"
+        },
+        "data": {
+          "title": "2. Datos recopilados",
+          "p1": "GolfGo recopila los siguientes datos:",
+          "items": {
+            "i1": "Datos de identidad: apellido, nombre",
+            "i2": "Datos de contacto: dirección de correo electrónico",
+            "i3": "Datos deportivos: puntuaciones de golf, hoyos jugados, hándicap",
+            "i4": "Identificación federal: número de licencia (opcional)",
+            "i5": "Preferencias de juego: compañeros preferidos o excluidos",
+            "i6": "Fotos publicadas en el contexto de eventos",
+            "i7": "Datos de conexión: fecha, hora, dirección IP"
+          }
+        },
+        "purposes": {
+          "title": "3. Finalidades del tratamiento",
+          "p1": "Sus datos se tratan para:",
+          "items": {
+            "i1": "Gestión de su cuenta y autenticación",
+            "i2": "Organización y gestión de eventos de golf",
+            "i3": "Cálculo y visualización de puntuaciones y clasificaciones",
+            "i4": "Formación de grupos de jugadores (flights)",
+            "i5": "Gestión de preferencias de compañeros de juego",
+            "i6": "Comunicación relativa a su participación en eventos",
+            "i7": "Mejora de la aplicación y resolución de problemas técnicos"
+          }
+        },
+        "basis": {
+          "title": "4. Base legal del tratamiento",
+          "items": {
+            "i1": "Ejecución del contrato: gestión de cuenta, participación en eventos",
+            "i2": "Consentimiento: publicación de fotos, preferencias de compañeros",
+            "i3": "Interés legítimo: mejora del servicio, seguridad de la aplicación"
+          }
+        },
+        "sharing": {
+          "title": "5. Compartición de datos",
+          "p1": "Sus datos son accesibles para los miembros de su grupo, en la medida necesaria para organizar las partidas.",
+          "p2": "Servicios de terceros utilizados:",
+          "items": {
+            "i1": "Supabase (base de datos, autenticación) — servidores en Europa",
+            "i2": "Vercel (alojamiento) — servidores en Europa"
+          },
+          "p3": "Sus datos nunca se venden ni se utilizan con fines publicitarios."
+        },
+        "retention": {
+          "title": "6. Período de conservación",
+          "p1": "Sus datos se conservan mientras su cuenta esté activa.",
+          "p2": "Si elimina su cuenta, sus datos se eliminarán en un plazo de 30 días.",
+          "p3": "Las fotos se eliminan inmediatamente a petición suya o cuando se elimina su cuenta."
+        },
+        "rights": {
+          "title": "7. Sus derechos (RGPD)",
+          "p1": "En virtud del RGPD, usted tiene los siguientes derechos:",
+          "items": {
+            "i1": "Derecho de acceso: obtener una copia de sus datos",
+            "i2": "Derecho de rectificación: corregir datos inexactos",
+            "i3": "Derecho de supresión: solicitar la eliminación de sus datos",
+            "i4": "Derecho a la portabilidad: recibir sus datos en formato estructurado",
+            "i5": "Derecho de oposición: oponerse a determinados tratamientos",
+            "i6": "Derecho de limitación: restringir el tratamiento de sus datos"
+          },
+          "p2": "Para ejercer estos derechos: support@golfgo.app — Respuesta en 30 días.",
+          "p3": "También puede ponerse en contacto con la Autoridad de Protección de Datos belga (APD): www.autoriteprotectiondonnees.be"
+        },
+        "cookies": {
+          "title": "8. Cookies",
+          "p1": "GolfGo solo utiliza cookies estrictamente necesarias para el funcionamiento (sesión de autenticación). No se utilizan cookies publicitarias ni de seguimiento de terceros."
+        },
+        "security": {
+          "title": "9. Seguridad",
+          "items": {
+            "i1": "Comunicaciones cifradas (HTTPS/TLS)",
+            "i2": "Control de acceso mediante Row Level Security (Supabase)",
+            "i3": "Autenticación segura a través de Supabase Auth",
+            "i4": "Acceso a datos limitado a los miembros del grupo correspondiente"
+          }
+        },
+        "updates": {
+          "title": "10. Cambios",
+          "p1": "Esta política puede actualizarse. En caso de cambio significativo, se le notificará mediante notificación en la aplicación o por correo electrónico."
+        }
+      }
+    }
+  }
 }
+
+

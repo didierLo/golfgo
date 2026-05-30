@@ -850,6 +850,163 @@
     "round": "round",
     "rounds_plural": "rounds",
     "solo": "Solo"
-  }
+  },
 
+  
+  "legal": {
+    "cgu": {
+      "title": "Terms of Use",
+      "lastUpdated": "Version of {date}",
+      "sections": {
+        "presentation": {
+          "title": "1. About the application",
+          "p1": "GolfGo is a golf event management application that allows groups of players to organise rounds, track scores, manage participation and partner preferences.",
+          "p2": "For any questions, contact us at: support@golfgo.app"
+        },
+        "acceptance": {
+          "title": "2. Acceptance of terms",
+          "p1": "Using GolfGo implies full acceptance of these Terms of Use. If you do not accept these terms, please do not use the application.",
+          "p2": "The publisher reserves the right to modify these terms at any time. Users will be informed of significant changes by in-app notification or email."
+        },
+        "access": {
+          "title": "3. Access and registration",
+          "p1": "Access to GolfGo requires creating an account with a valid email address. You are responsible for keeping your credentials confidential.",
+          "p2": "Registration is reserved for individuals aged 16 or over.",
+          "p3": "The publisher reserves the right to suspend or delete any account in the event of a breach of these Terms."
+        },
+        "usage": {
+          "title": "4. Use of the application",
+          "p1": "In particular, it is prohibited to:",
+          "items": {
+            "i1": "Post unlawful, offensive or harmful content",
+            "i2": "Attempt to access data from other groups or users without authorisation",
+            "i3": "Use the application for commercial purposes without prior agreement",
+            "i4": "Automate requests to the application without express authorisation"
+          }
+        },
+        "groups": {
+          "title": "5. Groups and roles",
+          "p1": "GolfGo is organised around groups. Each group has an owner who manages its members, events and settings.",
+          "p2": "The group owner is responsible for the use made of it by the members they invite.",
+          "p3": "Group members can view information about other members of the same group, including their scores and playing preferences."
+        },
+        "photos": {
+          "title": "6. Content and photos",
+          "p1": "By publishing photos on GolfGo, you guarantee that you hold the rights to this content and authorise it to be displayed to your group members.",
+          "p2": "Photos are visible to all members of the associated group. They are not shared publicly.",
+          "p3": "You can delete your own photos at any time from the application."
+        },
+        "availability": {
+          "title": "7. Service availability",
+          "p1": "The publisher makes every effort to keep the application available. However, interruptions may occur for maintenance or updates.",
+          "p2": "The application is provided 'as is', with no guarantee of permanent availability or freedom from errors."
+        },
+        "liability": {
+          "title": "8. Limitation of liability",
+          "p1": "The publisher shall not be liable for any indirect damages resulting from the use or inability to use GolfGo.",
+          "p2": "The publisher is not responsible for content published by users or disputes that may arise between members of the same group."
+        },
+        "law": {
+          "title": "9. Applicable law",
+          "p1": "These Terms are governed by Belgian law. In the event of a dispute, the competent courts of Belgium shall have sole jurisdiction."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Version of {date}",
+      "sections": {
+        "controller": {
+          "title": "1. Data controller",
+          "p1": "The data controller for personal data collected via GolfGo operates from Belgium.",
+          "p2": "Contact: support@golfgo.app"
+        },
+        "data": {
+          "title": "2. Data collected",
+          "p1": "GolfGo collects the following data:",
+          "items": {
+            "i1": "Identity data: surname, first name",
+            "i2": "Contact data: email address",
+            "i3": "Sports data: golf scores, holes played, handicap",
+            "i4": "Federal ID: licence number (optional)",
+            "i5": "Playing preferences: preferred or excluded partners",
+            "i6": "Photos published in the context of events",
+            "i7": "Connection data: date, time, IP address"
+          }
+        },
+        "purposes": {
+          "title": "3. Purposes of processing",
+          "p1": "Your data is processed for:",
+          "items": {
+            "i1": "Account management and authentication",
+            "i2": "Organisation and management of golf events",
+            "i3": "Calculation and display of scores and rankings",
+            "i4": "Formation of player groups (flights)",
+            "i5": "Management of playing partner preferences",
+            "i6": "Communication relating to your participation in events",
+            "i7": "Application improvement and technical issue resolution"
+          }
+        },
+        "basis": {
+          "title": "4. Legal basis for processing",
+          "items": {
+            "i1": "Contract performance: account management, event participation",
+            "i2": "Consent: photo publishing, partner preferences",
+            "i3": "Legitimate interest: service improvement, application security"
+          }
+        },
+        "sharing": {
+          "title": "5. Data sharing",
+          "p1": "Your data is accessible to members of your group, to the extent necessary for organising rounds.",
+          "p2": "Third-party services used:",
+          "items": {
+            "i1": "Supabase (database, authentication) — servers in Europe",
+            "i2": "Vercel (hosting) — servers in Europe"
+          },
+          "p3": "Your data is never sold or used for advertising purposes."
+        },
+        "retention": {
+          "title": "6. Retention period",
+          "p1": "Your data is retained for as long as your account is active.",
+          "p2": "If your account is deleted, your data will be deleted within 30 days.",
+          "p3": "Photos are deleted immediately upon request or when your account is deleted."
+        },
+        "rights": {
+          "title": "7. Your rights (GDPR)",
+          "p1": "Under the GDPR, you have the following rights:",
+          "items": {
+            "i1": "Right of access: obtain a copy of your data",
+            "i2": "Right of rectification: correct inaccurate data",
+            "i3": "Right to erasure: request deletion of your data",
+            "i4": "Right to portability: receive your data in a structured format",
+            "i5": "Right to object: object to certain processing",
+            "i6": "Right to restriction: restrict the processing of your data"
+          },
+          "p2": "To exercise these rights: support@golfgo.app — Response within 30 days.",
+          "p3": "You may also contact the Belgian Data Protection Authority (APD): www.autoriteprotectiondonnees.be"
+        },
+        "cookies": {
+          "title": "8. Cookies",
+          "p1": "GolfGo only uses cookies strictly necessary for operation (authentication session). No advertising or third-party tracking cookies are used."
+        },
+        "security": {
+          "title": "9. Security",
+          "items": {
+            "i1": "Encrypted communications (HTTPS/TLS)",
+            "i2": "Access control via Row Level Security (Supabase)",
+            "i3": "Secure authentication via Supabase Auth",
+            "i4": "Data access limited to members of the relevant group"
+          }
+        },
+        "updates": {
+          "title": "10. Changes",
+          "p1": "This policy may be updated. In the event of a significant change, you will be notified by in-app notification or email."
+        }
+      }
+    }
+  }
 }
+
+
+
+

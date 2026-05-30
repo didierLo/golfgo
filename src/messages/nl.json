@@ -850,5 +850,159 @@
     "round": "ronde",
     "rounds_plural": "rondes",
     "solo": "Solo"
+  },
+
+  
+  "legal": {
+    "cgu": {
+      "title": "Algemene Gebruiksvoorwaarden",
+      "lastUpdated": "Versie van {date}",
+      "sections": {
+        "presentation": {
+          "title": "1. Over de applicatie",
+          "p1": "GolfGo is een golfbeheertoepassing waarmee groepen spelers rondes kunnen organiseren, scores kunnen bijhouden, deelnames en partnervoorkeuren kunnen beheren.",
+          "p2": "Voor vragen kunt u contact met ons opnemen via: support@golfgo.app"
+        },
+        "acceptance": {
+          "title": "2. Aanvaarding van de voorwaarden",
+          "p1": "Het gebruik van GolfGo impliceert de volledige aanvaarding van deze Algemene Gebruiksvoorwaarden. Als u deze voorwaarden niet aanvaardt, gebruik de applicatie dan niet.",
+          "p2": "De uitgever behoudt zich het recht voor de voorwaarden op elk moment te wijzigen. Gebruikers worden op de hoogte gesteld van belangrijke wijzigingen via een melding in de app of per e-mail."
+        },
+        "access": {
+          "title": "3. Toegang en registratie",
+          "p1": "Toegang tot GolfGo vereist het aanmaken van een account met een geldig e-mailadres. U bent verantwoordelijk voor de vertrouwelijkheid van uw inloggegevens.",
+          "p2": "Registratie is voorbehouden aan natuurlijke personen van 16 jaar of ouder.",
+          "p3": "De uitgever behoudt zich het recht voor accounts te schorsen of te verwijderen bij overtreding van deze Voorwaarden."
+        },
+        "usage": {
+          "title": "4. Gebruik van de applicatie",
+          "p1": "Het is in het bijzonder verboden om:",
+          "items": {
+            "i1": "Onwettige, aanstootgevende of schadelijke inhoud te plaatsen",
+            "i2": "Te proberen toegang te krijgen tot gegevens van andere groepen of gebruikers zonder toestemming",
+            "i3": "De applicatie voor commerciële doeleinden te gebruiken zonder voorafgaande toestemming",
+            "i4": "Verzoeken aan de applicatie te automatiseren zonder uitdrukkelijke toestemming"
+          }
+        },
+        "groups": {
+          "title": "5. Groepen en rollen",
+          "p1": "GolfGo is georganiseerd rond groepen. Elke groep heeft een eigenaar die de leden, evenementen en instellingen beheert.",
+          "p2": "De groepseigenaar is verantwoordelijk voor het gebruik door de leden die hij uitnodigt.",
+          "p3": "Groepsleden kunnen informatie van andere leden van dezelfde groep bekijken, inclusief hun scores en speelvoorkeuren."
+        },
+        "photos": {
+          "title": "6. Inhoud en foto's",
+          "p1": "Door foto's op GolfGo te plaatsen, garandeert u dat u de rechten op deze inhoud bezit en machtigt u de weergave ervan aan uw groepsleden.",
+          "p2": "Foto's zijn zichtbaar voor alle leden van de bijbehorende groep. Ze worden niet openbaar gedeeld.",
+          "p3": "U kunt uw eigen foto's op elk moment verwijderen via de applicatie."
+        },
+        "availability": {
+          "title": "7. Beschikbaarheid van de dienst",
+          "p1": "De uitgever doet zijn best om de applicatie beschikbaar te houden. Er kunnen echter onderbrekingen optreden voor onderhoud of updates.",
+          "p2": "De applicatie wordt geleverd 'zoals hij is', zonder garantie van permanente beschikbaarheid of afwezigheid van fouten."
+        },
+        "liability": {
+          "title": "8. Beperking van aansprakelijkheid",
+          "p1": "De uitgever is niet aansprakelijk voor indirecte schade als gevolg van het gebruik of de onmogelijkheid om GolfGo te gebruiken.",
+          "p2": "De uitgever is niet verantwoordelijk voor inhoud gepubliceerd door gebruikers of geschillen die kunnen ontstaan tussen leden van dezelfde groep."
+        },
+        "law": {
+          "title": "9. Toepasselijk recht",
+          "p1": "Deze Voorwaarden zijn onderworpen aan het Belgisch recht. Bij geschillen zijn uitsluitend de bevoegde rechtbanken van België bevoegd."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacybeleid",
+      "lastUpdated": "Versie van {date}",
+      "sections": {
+        "controller": {
+          "title": "1. Verwerkingsverantwoordelijke",
+          "p1": "De verwerkingsverantwoordelijke voor de via GolfGo verzamelde persoonsgegevens is gevestigd in België.",
+          "p2": "Contact: support@golfgo.app"
+        },
+        "data": {
+          "title": "2. Verzamelde gegevens",
+          "p1": "GolfGo verzamelt de volgende gegevens:",
+          "items": {
+            "i1": "Identiteitsgegevens: naam, voornaam",
+            "i2": "Contactgegevens: e-mailadres",
+            "i3": "Sportgegevens: golfscores, gespeelde holes, handicap",
+            "i4": "Federaal nummer: licentienummer (optioneel)",
+            "i5": "Speelvoorkeuren: voorkeurs- of uitgesloten partners",
+            "i6": "Foto's gepubliceerd in het kader van evenementen",
+            "i7": "Verbindingsgegevens: datum, tijd, IP-adres"
+          }
+        },
+        "purposes": {
+          "title": "3. Doeleinden van de verwerking",
+          "p1": "Uw gegevens worden verwerkt voor:",
+          "items": {
+            "i1": "Accountbeheer en authenticatie",
+            "i2": "Organisatie en beheer van golfevenementen",
+            "i3": "Berekening en weergave van scores en ranglijsten",
+            "i4": "Vorming van spelergroepen (flights)",
+            "i5": "Beheer van speelpartnervoorkeuren",
+            "i6": "Communicatie over uw deelname aan evenementen",
+            "i7": "Verbetering van de applicatie en oplossing van technische problemen"
+          }
+        },
+        "basis": {
+          "title": "4. Rechtsgrondslag van de verwerking",
+          "items": {
+            "i1": "Uitvoering van de overeenkomst: accountbeheer, deelname aan evenementen",
+            "i2": "Toestemming: publicatie van foto's, partnervoorkeuren",
+            "i3": "Gerechtvaardigd belang: verbetering van de dienst, beveiliging van de applicatie"
+          }
+        },
+        "sharing": {
+          "title": "5. Gegevensdeling",
+          "p1": "Uw gegevens zijn toegankelijk voor leden van uw groep, voor zover nodig voor de organisatie van rondes.",
+          "p2": "Gebruikte diensten van derden:",
+          "items": {
+            "i1": "Supabase (database, authenticatie) — servers in Europa",
+            "i2": "Vercel (hosting) — servers in Europa"
+          },
+          "p3": "Uw gegevens worden nooit verkocht of gebruikt voor reclamedoeleinden."
+        },
+        "retention": {
+          "title": "6. Bewaartermijn",
+          "p1": "Uw gegevens worden bewaard zolang uw account actief is.",
+          "p2": "Als uw account wordt verwijderd, worden uw gegevens binnen 30 dagen verwijderd.",
+          "p3": "Foto's worden onmiddellijk verwijderd op verzoek of bij verwijdering van uw account."
+        },
+        "rights": {
+          "title": "7. Uw rechten (AVG)",
+          "p1": "Op grond van de AVG heeft u de volgende rechten:",
+          "items": {
+            "i1": "Recht op inzage: een kopie van uw gegevens verkrijgen",
+            "i2": "Recht op rectificatie: onjuiste gegevens corrigeren",
+            "i3": "Recht op verwijdering: verwijdering van uw gegevens verzoeken",
+            "i4": "Recht op overdraagbaarheid: uw gegevens in een gestructureerd formaat ontvangen",
+            "i5": "Recht van bezwaar: bezwaar maken tegen bepaalde verwerkingen",
+            "i6": "Recht op beperking: de verwerking van uw gegevens beperken"
+          },
+          "p2": "Om deze rechten uit te oefenen: support@golfgo.app — Antwoord binnen 30 dagen.",
+          "p3": "U kunt ook contact opnemen met de Belgische Gegevensbeschermingsautoriteit (GBA): www.autoriteprotectiondonnees.be"
+        },
+        "cookies": {
+          "title": "8. Cookies",
+          "p1": "GolfGo gebruikt alleen strikt noodzakelijke cookies voor de werking (authenticatiesessie). Er worden geen reclame- of tracking-cookies van derden gebruikt."
+        },
+        "security": {
+          "title": "9. Beveiliging",
+          "items": {
+            "i1": "Versleutelde communicatie (HTTPS/TLS)",
+            "i2": "Toegangscontrole via Row Level Security (Supabase)",
+            "i3": "Veilige authenticatie via Supabase Auth",
+            "i4": "Gegevenstoegang beperkt tot leden van de betreffende groep"
+          }
+        },
+        "updates": {
+          "title": "10. Wijzigingen",
+          "p1": "Dit beleid kan worden bijgewerkt. Bij een wezenlijke wijziging wordt u geïnformeerd via een melding in de app of per e-mail."
+        }
+      }
+    }
   }
 }
