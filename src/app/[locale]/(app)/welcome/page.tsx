@@ -76,7 +76,7 @@ export default function WelcomePage() {
             </div>
             <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je gère un groupe</div>
             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-              J’organise les événements de mon groupe, j’invite les membres, je gère les flights et bien plus encore.
+              J’organise les événements de mon groupe, j’invite les membres, je gère les flights, les listes de départ, les résultats et bien plus encore.
             </div>
           </button>
         </div>
