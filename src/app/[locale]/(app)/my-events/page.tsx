@@ -382,13 +382,13 @@ export default function MyEventsPage() {
     }
   }, [])
 
-  useEffect(() => { 
+useEffect(() => {
   const seen = localStorage.getItem('golfgo_welcome_seen')
   if (!seen) {
     router.replace(`/${locale}/welcome`)
     return
   }
-  loadData() 
+  loadData()
 }, [])
 
 async function loadData() {
