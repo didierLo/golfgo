@@ -389,6 +389,7 @@ async function loadData() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) { setLoading(false); return }
 
+
   const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
   if (!player) { setLoading(false); return }
 

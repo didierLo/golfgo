@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale } from 'next-intl'
 
-
 const supabase = createClient()
 
 export default function PayPage() {
@@ -44,19 +43,19 @@ export default function PayPage() {
         locale,
       }),
     })
-      // Debug temporaire
-      const text = await res.text()
-      console.log('API response:', res.status, text)
-      
-      if (!res.ok) {
-        console.error('Erreur API:', text)
-        setPaying(false)
-        return
-      }
 
-      const { url } = JSON.parse(text)
-      window.location.href = url
+    const text = await res.text()
+    console.log('API response:', res.status, text)
+
+    if (!res.ok) {
+      console.error('Erreur API:', text)
+      setPaying(false)
+      return
     }
+
+    const { url } = JSON.parse(text)
+    window.location.href = url
+  }
 
   if (loading) return <div className="p-6 animate-pulse h-40 bg-slate-100 rounded-xl" />
 
@@ -70,14 +69,11 @@ export default function PayPage() {
       <button onClick={() => router.back()} className="text-[13px] text-slate-500 hover:text-slate-700 mb-6 flex items-center gap-1">
         ← Retour
       </button>
-
       <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-5">
         <h1 className="text-[18px] font-black text-slate-900 mb-1">{event.title}</h1>
         <p className="text-[13px] text-slate-500 mb-4">Paiement de votre participation</p>
         <div className="text-[32px] font-black text-[#185FA5]">{event.fee_per_person} €</div>
       </div>
-
-      {/* Bloc sécurité */}
       <div className="bg-[#EAF3DE] border border-[#C0DD97] rounded-xl p-4 mb-5">
         <p className="text-[12px] font-bold text-[#3B6D11] mb-2">🔒 Paiement 100% sécurisé</p>
         <p className="text-[12px] text-[#3B6D11] leading-relaxed">
@@ -86,7 +82,6 @@ export default function PayPage() {
           normes PCI-DSS. Accepte les cartes Visa, Mastercard, Bancontact et Apple/Google Pay.
         </p>
       </div>
-
       <button
         onClick={handlePay}
         disabled={paying}
