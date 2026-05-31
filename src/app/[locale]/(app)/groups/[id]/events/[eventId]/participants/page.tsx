@@ -260,7 +260,7 @@ export default function ParticipantsPage() {
     .select(`player_id, status, responded_at, holes_played, holes_section, response_message, players(first_name, surname, whs)`)
     .eq('event_id', evId)
 
-  console.log('participants =', data?.length, error)
+  console.log('participants data=', data, 'error=', error)
     
   if (error) { console.error(error); setLoading(false); return }
     // FIX — filtre les lignes orphelines (players null = joueur supprimé ou RLS)
