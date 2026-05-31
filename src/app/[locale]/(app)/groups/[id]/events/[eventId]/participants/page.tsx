@@ -249,12 +249,20 @@ export default function ParticipantsPage() {
   }
 
   async function loadParticipants(evId: string) {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('event_participants')
-      .select(`player_id, status, responded_at, holes_played, holes_section, response_message, players(first_name, surname, whs)`)
-      .eq('event_id', evId)
-    if (error) { console.error(error); setLoading(false); return }
+  setLoading(true)
+
+  // test temporaire
+  const { data: me } = await supabase.rpc('auth_player_id')
+  console.log('auth_player_id =', me)
+
+  const { data, error } = await supabase
+    .from('event_participants')
+    .select(`player_id, status, responded_at, holes_played, holes_section, response_message, players(first_name, surname, whs)`)
+    .eq('event_id', evId)
+
+  console.log('participants =', data?.length, error)
+    
+  if (error) { console.error(error); setLoading(false); return }
     // FIX — filtre les lignes orphelines (players null = joueur supprimé ou RLS)
     const clean = (data || []).filter((p: any) => p.players != null)
     setParticipants(clean as any)
