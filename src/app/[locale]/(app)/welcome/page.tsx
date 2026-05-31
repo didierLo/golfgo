@@ -40,8 +40,8 @@ export default function WelcomePage() {
           Comment souhaitez-vous utiliser GolfGo ?
         </h1>
         <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.6, marginBottom: '32px' }}>
-          GolfGo organise vos sorties golf entre amis — invitations, flights équilibrés,
-          cartes de score et leaderboard, tout au même endroit.
+          GolfGo organise vos événements de golf — invitations, flights équilibrés,
+          cartes de score, leaderboard et bien plus, tout au même endroit.
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
