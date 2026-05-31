@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
+  const locale = request.nextUrl.pathname.split('/')[1] ?? 'fr'
 
   if (!code) {
     console.error('[auth/callback] No code in URL')
@@ -75,5 +76,5 @@ if (updateError) console.error('[auth/callback] Failed to link user_id to player
 if (roleError)   console.error('[auth/callback] Failed to set default role in groups_players:', roleError)
 
 
-  return NextResponse.redirect(`${origin}${next}`)
+  return NextResponse.redirect(`${origin}/fr/welcome`)
 }
