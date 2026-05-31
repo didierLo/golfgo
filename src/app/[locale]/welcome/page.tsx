@@ -19,7 +19,7 @@ export default function WelcomePage() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '24px',
-      background: 'linear-gradient(135deg, rgba(42,82,152,0.72) 0%, rgba(15,110,86,0.65) 100%)',
+      background: 'transparent, rgba(42,82,152,0.72) 0%, rgba(15,110,86,0.65) 100%)',
     }}>
       <div style={{
         background: 'rgba(255,255,255,0.95)',
