@@ -56,7 +56,7 @@ export default function WelcomePage() {
             }}>
               <i className="ti ti-user" />
             </div>
-            <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je suis joueur</div>
+            <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je suis un joueur</div>
             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
              Je retrouve tous les événements de mon groupe, je gère facilement mes participations et reste informé(e) en temps réel.
             </div>
