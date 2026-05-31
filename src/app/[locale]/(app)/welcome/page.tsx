@@ -40,7 +40,7 @@ export default function WelcomePage() {
           Comment souhaitez-vous utiliser GolfGo ?
         </h1>
         <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.6, marginBottom: '32px' }}>
-         GolfGo organise vos sorties golf entre amis — invitations, flights équilibrés, cartes de score, leaderboard et plus encore, tout au même endroit.
+         GolfGo organise vos sorties golf entre amis — invitations, flights équilibrés, cartes de score, leaderboard et bien plus encore, tout au même endroit.
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -76,7 +76,7 @@ export default function WelcomePage() {
             </div>
             <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je lance mon groupe</div>
             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-              GolfGo s'occupe de tout — invitations, flights automatiques, feuilles de départ et confirmations par email.
+              GolfGo s'occupe de tout — invitations, flights, feuilles de départ et confirmations par email.
             </div>
           </button>
         </div>
