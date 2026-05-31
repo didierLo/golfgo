@@ -16,8 +16,8 @@ type Participant = {
   responded_at: string | null
   holes_played: number | null
   holes_section: HolesSection
-  response_message: string | null          // ← NOUVEAU
-  players: { first_name: string; surname: string; whs: number | null }
+  response_message: string | null
+  players: { first_name: string; surname: string; whs: number | null } | null  // ← nullable
 }
 type Event     = { id: string; title: string; starts_at: string }
 type Member    = { id: string; first_name: string; surname: string }
@@ -82,7 +82,9 @@ function MessageModal({
   const [saving, setSaving] = useState(false)
   const [saved,  setSaved]  = useState(false)
 
-  const canEdit = !isOwner // le joueur peut éditer le sien; l'owner lit seulement
+  // FIX L126 + L130 — optional chaining sur players
+  const firstName = participant.players?.first_name ?? '?'
+  const surname   = participant.players?.surname    ?? '?'
 
   async function handleSave() {
     if (!text.trim()) return
@@ -123,23 +125,21 @@ function MessageModal({
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
             style={{ background: '#EBF3FC', color: '#0C447C' }}>
-            {participant.players.first_name[0]}{participant.players.surname[0]}
+            {firstName[0]}{surname[0]}
           </div>
           <div>
             <p className="text-[14px] font-bold text-slate-800">
-              {participant.players.first_name} {participant.players.surname}
+              {firstName} {surname}
             </p>
             <p className="text-[11px] text-slate-400">Message de réponse</p>
           </div>
         </div>
 
         {isOwner ? (
-          // Owner : lecture seule
           <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[80px]">
             {participant.response_message || <span className="text-slate-400 italic">Aucun message</span>}
           </div>
         ) : (
-          // Joueur : éditable
           <>
             <textarea
               value={text}
@@ -212,9 +212,8 @@ export default function ParticipantsPage() {
   const [upcomingEvents,  setUpcomingEvents]  = useState<Event[]>([])
   const [statusMatrix,    setStatusMatrix]    = useState<Record<string, Record<string, string>>>({})
   const [overviewLoading, setOverviewLoading] = useState(false)
-  const [msgModal,        setMsgModal]        = useState<Participant | null>(null)  // ← NOUVEAU
+  const [msgModal,        setMsgModal]        = useState<Participant | null>(null)
 
-  // Identifiant du joueur connecté (pour autoriser l'édition de son propre message)
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -240,8 +239,8 @@ export default function ParticipantsPage() {
   }
 
   useEffect(() => { if (groupId) loadEvents() }, [groupId])
-useEffect(() => { if (selectedEventId) loadParticipants(selectedEventId) }, [selectedEventId, groupId])
-useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOverview() }, [viewMode, isOwner, groupId])
+  useEffect(() => { if (selectedEventId) loadParticipants(selectedEventId) }, [selectedEventId, groupId])
+  useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOverview() }, [viewMode, isOwner, groupId])
 
   async function loadEvents() {
     const { data } = await supabase.from('events').select('id, title, starts_at')
@@ -256,46 +255,50 @@ useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOvervie
       .select(`player_id, status, responded_at, holes_played, holes_section, response_message, players(first_name, surname, whs)`)
       .eq('event_id', evId)
     if (error) { console.error(error); setLoading(false); return }
-    setParticipants((data || []) as any)
+    // FIX — filtre les lignes orphelines (players null = joueur supprimé ou RLS)
+    const clean = (data || []).filter((p: any) => p.players != null)
+    setParticipants(clean as any)
     setLoading(false)
   }
 
- async function loadOverview() {
-  if (!groupId) return
-  setOverviewLoading(true)
+  async function loadOverview() {
+    if (!groupId) return
+    setOverviewLoading(true)
 
-  // Requêtes parallèles
-  const [{ data: evts }, { data: mbrs }] = await Promise.all([
-    supabase.from('events').select('id, title, starts_at')
-      .eq('group_id', groupId)
-      .gte('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true }),
-    supabase.from('groups_players')
-      .select(`player:players(id, first_name, surname)`)
-      .eq('group_id', groupId)
-  ])
+    const [{ data: evts }, { data: mbrs }] = await Promise.all([
+      supabase.from('events').select('id, title, starts_at')
+        .eq('group_id', groupId)
+        .gte('starts_at', new Date().toISOString())
+        .order('starts_at', { ascending: true }),
+      supabase.from('groups_players')
+        .select(`player:players(id, first_name, surname)`)
+        .eq('group_id', groupId)
+    ])
 
-  const upcoming = evts || []
-  setUpcomingEvents(upcoming)
+    const upcoming = evts || []
+    setUpcomingEvents(upcoming)
 
-  const members = (mbrs || []).map((m: any) => m.player)
-    .sort((a: Member, b: Member) => a.surname.localeCompare(b.surname, locale))
-  setAllMembers(members)
+    // FIX — .filter(Boolean) éjecte les m.player null (RLS ou joueur supprimé)
+    const members = (mbrs || [])
+      .map((m: any) => m.player)
+      .filter(Boolean)
+      .sort((a: Member, b: Member) => a.surname.localeCompare(b.surname, locale))
+    setAllMembers(members)
 
-  if (upcoming.length > 0 && members.length > 0) {
-    const { data: participations } = await supabase.from('event_participants')
-      .select('player_id, event_id, status')
-      .in('event_id', upcoming.map(e => e.id))
-      .in('player_id', members.map((m: Member) => m.id))
+    if (upcoming.length > 0 && members.length > 0) {
+      const { data: participations } = await supabase.from('event_participants')
+        .select('player_id, event_id, status')
+        .in('event_id', upcoming.map(e => e.id))
+        .in('player_id', members.map((m: Member) => m.id))
 
-    const matrix: Record<string, Record<string, string>> = {}
-    members.forEach((m: Member) => { matrix[m.id] = {} })
-    participations?.forEach(p => { matrix[p.player_id][p.event_id] = p.status })
-    setStatusMatrix(matrix)
+      const matrix: Record<string, Record<string, string>> = {}
+      members.forEach((m: Member) => { matrix[m.id] = {} })
+      participations?.forEach(p => { matrix[p.player_id][p.event_id] = p.status })
+      setStatusMatrix(matrix)
+    }
+
+    setOverviewLoading(false)
   }
-
-  setOverviewLoading(false)
-}
 
   async function updateStatus(playerId: string, status: 'GOING' | 'DECLINED' | 'INVITED') {
     await supabase.from('event_participants')
@@ -330,7 +333,6 @@ useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOvervie
     else { setSortField(field); setSortDir('asc') }
   }
 
-  // Mise à jour locale après sauvegarde du message
   function handleMessageSaved(playerId: string, msg: string) {
     setParticipants(prev => prev.map(p =>
       p.player_id === playerId ? { ...p, response_message: msg || null } : p
@@ -338,33 +340,35 @@ useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOvervie
   }
 
   const statusOrder = { GOING: 0, INVITED: 1, WAITLIST: 2, DECLINED: 3 }
-  const { going, going18, going9front, going9back, going9, invited, declined, has9holers } = useMemo(() => {
-  const going       = participants.filter(p => p.status === 'GOING')
-  const going9      = going.filter(p => p.holes_played === 9)
-  return {
-    going,
-    going18:     going.filter(p => !p.holes_played || p.holes_played === 18),
-    going9front: going.filter(p => p.holes_played === 9 && p.holes_section === 'out'),
-    going9back:  going.filter(p => p.holes_played === 9 && p.holes_section === 'in'),
-    going9,
-    invited:     participants.filter(p => p.status === 'INVITED').length,
-    declined:    participants.filter(p => p.status === 'DECLINED').length,
-    has9holers:  going9.length > 0,
-  }
-}, [participants])
 
-const displayed = useMemo(() => [...participants].sort((a, b) => {
-  const dir = sortDir === 'asc' ? 1 : -1
-  if (sortField === 'name') {
-    const na = `${a.players.surname} ${a.players.first_name}`.toLowerCase()
-    const nb = `${b.players.surname} ${b.players.first_name}`.toLowerCase()
-    return na.localeCompare(nb) * dir
-  }
-  if (sortField === 'whs')    return ((a.players.whs ?? 999) - (b.players.whs ?? 999)) * dir
-  if (sortField === 'status') return ((statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)) * dir
-  if (sortField === 'holes')  return ((a.holes_played ?? 18) - (b.holes_played ?? 18)) * dir
-  return 0
-}), [participants, sortField, sortDir])
+  const { going, going18, going9front, going9back, going9, invited, declined, has9holers } = useMemo(() => {
+    const going  = participants.filter(p => p.status === 'GOING')
+    const going9 = going.filter(p => p.holes_played === 9)
+    return {
+      going,
+      going18:     going.filter(p => !p.holes_played || p.holes_played === 18),
+      going9front: going.filter(p => p.holes_played === 9 && p.holes_section === 'out'),
+      going9back:  going.filter(p => p.holes_played === 9 && p.holes_section === 'in'),
+      going9,
+      invited:     participants.filter(p => p.status === 'INVITED').length,
+      declined:    participants.filter(p => p.status === 'DECLINED').length,
+      has9holers:  going9.length > 0,
+    }
+  }, [participants])
+
+  // FIX L363–L367 — optional chaining + fallback '' pour localeCompare et ?? 999 pour whs
+  const displayed = useMemo(() => [...participants].sort((a, b) => {
+    const dir = sortDir === 'asc' ? 1 : -1
+    if (sortField === 'name') {
+      const na = `${a.players?.surname ?? ''} ${a.players?.first_name ?? ''}`.toLowerCase()
+      const nb = `${b.players?.surname ?? ''} ${b.players?.first_name ?? ''}`.toLowerCase()
+      return na.localeCompare(nb) * dir
+    }
+    if (sortField === 'whs')    return ((a.players?.whs ?? 999) - (b.players?.whs ?? 999)) * dir
+    if (sortField === 'status') return ((statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)) * dir
+    if (sortField === 'holes')  return ((a.holes_played ?? 18) - (b.holes_played ?? 18)) * dir
+    return 0
+  }), [participants, sortField, sortDir])
 
   function SortBtn({ field, label }: { field: SortField; label: string }) {
     const active = sortField === field
@@ -384,10 +388,9 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
     </div>
   )
 
-  // Détermine si le joueur connecté peut éditer le message d'un participant
   function canEditMessage(p: Participant): boolean {
-    if (isOwner) return false            // owner lit seulement
-    return p.player_id === myPlayerId   // le joueur édite uniquement le sien
+    if (isOwner) return false
+    return p.player_id === myPlayerId
   }
   function canSeeMessage(p: Participant): boolean {
     return isOwner || p.player_id === myPlayerId
@@ -395,7 +398,6 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
 
   return (
     <div className="p-5 sm:p-6 max-w-5xl">
-      {/* Modal message */}
       {msgModal && (
         <MessageModal
           participant={msgModal}
@@ -423,8 +425,8 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
         </div>
         {viewMode === 'list' && (
           <a href={`/groups/${groupId}/invitations`}
-              className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] transition-colors whitespace-nowrap ml-auto">
-    ✉️         {t('participants.invitations')}
+            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] transition-colors whitespace-nowrap ml-auto">
+            ✉️ {t('participants.invitations')}
           </a>
         )}
       </div>
@@ -432,17 +434,17 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
       {viewMode === 'list' && (
         <>
           <div className="mb-5 rounded-xl border border-white/60 shadow-sm p-4"
-  style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">
-    {t('participants.byEvent')}
-  </label>
-  <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-    className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 w-full max-w-sm">
-    {events.map(e => (
-      <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>
-    ))}
-  </select>
-</div>
+            style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+              {t('participants.byEvent')}
+            </label>
+            <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
+              className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 w-full max-w-sm">
+              {events.map(e => (
+                <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>
+              ))}
+            </select>
+          </div>
 
           {!isOwner && (
             <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-[12px] text-blue-700 font-medium">
@@ -497,7 +499,7 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
                   : 'grid-cols-[1fr_20px_70px_55px_70px] sm:grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
               }`}>
                 <SortBtn field="name"   label={t('participants.player')} />
-                <span />  {/* colonne badge M */}
+                <span />
                 <SortBtn field="holes"  label={t('participants.holes')} />
                 <SortBtn field="whs"    label={t('participants.whs')} />
                 <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">{t('participants.respondedOn')}</span>
@@ -522,10 +524,10 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
                         : 'grid-cols-[1fr_20px_70px_55px_70px] sm:grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
-                    {/* Nom */}
+                    {/* Nom — FIX L532 */}
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-[13px] font-semibold text-slate-800 truncate">
-                        {p.players.first_name} {p.players.surname}
+                        {p.players?.first_name ?? '—'} {p.players?.surname ?? ''}
                       </span>
                     </div>
 
@@ -534,7 +536,6 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
                       {canSeeMessage(p) && p.response_message ? (
                         <MBadge onClick={() => setMsgModal(p)} />
                       ) : canEditMessage(p) ? (
-                        /* bouton discret pour ajouter un message */
                         <button
                           onClick={() => setMsgModal(p)}
                           title="Ajouter un message"
@@ -566,8 +567,8 @@ const displayed = useMemo(() => [...participants].sort((a, b) => {
                       )}
                     </div>
 
-                    {/* WHS */}
-                    <div className="text-[13px] text-slate-600 text-center">{p.players.whs ?? '—'}</div>
+                    {/* WHS — FIX L574 */}
+                    <div className="text-[13px] text-slate-600 text-center">{p.players?.whs ?? '—'}</div>
 
                     {/* Responded at */}
                     <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
