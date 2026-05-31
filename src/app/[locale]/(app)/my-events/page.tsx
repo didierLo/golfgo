@@ -376,13 +376,10 @@ export default function MyEventsPage() {
   const locale = useLocale()
   const searchParams = useSearchParams()
 
-  useEffect(() => {
-    if (searchParams.get('payment') === 'success') {
-      toast.success('Paiement reçu ! Merci 🎉')
-    }
-  }, [])
-
-useEffect(() => {
+ useEffect(() => {
+  if (searchParams.get('payment') === 'success') {
+    toast.success('Paiement reçu ! Merci 🎉')
+  }
   const seen = localStorage.getItem('golfgo_welcome_seen')
   if (!seen) {
     router.replace(`/${locale}/welcome`)
