@@ -59,7 +59,7 @@ export default function WelcomePage() {
             </div>
             <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je suis joueur</div>
             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-              Je rejoins les événements organisés par mon groupe et je suis mes scores.
+              Je rejoins les événements organisés pour mon groupe, je gère mes participations et bien plus.
             </div>
           </button>
 
@@ -77,7 +77,7 @@ export default function WelcomePage() {
             </div>
             <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je gère un groupe</div>
             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-              J'organise les événements, j'invite les membres et je gère les flights.
+              J'organise les événements, j'invite les membres, je gère les flights et bien plus.
             </div>
           </button>
         </div>
