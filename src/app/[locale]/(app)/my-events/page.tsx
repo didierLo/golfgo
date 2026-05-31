@@ -382,7 +382,14 @@ export default function MyEventsPage() {
     }
   }, [])
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { 
+  const seen = localStorage.getItem('golfgo_welcome_seen')
+  if (!seen) {
+    router.replace(`/${locale}/welcome`)
+    return
+  }
+  loadData() 
+}, [])
 
 async function loadData() {
   setLoading(true)
