@@ -46,12 +46,12 @@ export async function GET(request: NextRequest) {
   if (!player) {
     // Pas de fiche préexistante — premier signup sans invitation
     console.log('[auth/callback] No player found for email:', userEmail)
-    return NextResponse.redirect(`${origin}${next}`)
+    return NextResponse.redirect(`${origin}/${locale}/welcome`)
   }
 
   // 3. Si user_id déjà renseigné et identique → rien à faire
   if (player.user_id === authUser.id) {
-    return NextResponse.redirect(`${origin}${next}`)
+   return NextResponse.redirect(`${origin}/${locale}/welcome`)
   }
 
   // 4. Écrire le user_id dans players
