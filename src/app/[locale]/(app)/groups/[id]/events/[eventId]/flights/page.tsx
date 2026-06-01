@@ -60,7 +60,7 @@ export default function FlightsPage() {
     setEvents(evts)
     if (evts.length) {
       const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
-      const retainedExists = evts.find(e => e.id === retained)
+      const retainedExists = evts.find((e: { id: string }) => e.id === retained)
       if (retainedExists) {
         setActiveEventId(retainedExists.id)
       } else {
