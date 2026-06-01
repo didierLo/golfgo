@@ -191,7 +191,7 @@ if (event.course_id) {
   async function loadCourses(clubId: string) {
     const { data } = await supabase.from('courses').select('id, course_name').eq('club_id', clubId).order('course_name')
     setCourses(data || [])
-    if (!data?.find(c => c.id === courseId)) setCourseId('')
+    if (!data?.find((c: { id: string }) => c.id === courseId)) setCourseId('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
