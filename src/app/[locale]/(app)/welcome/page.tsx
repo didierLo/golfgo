@@ -1,11 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 export default function WelcomePage() {
   const router = useRouter()
   const locale = useLocale()
+  const t = useTranslations('welcome')
 
   function go(destination: string) {
     router.push(`/${locale}/${destination}`)
@@ -31,14 +32,14 @@ export default function WelcomePage() {
           fontSize: '15px', fontWeight: 700,
           padding: '8px 20px', borderRadius: '30px', marginBottom: '24px',
         }}>
-          ⛳ Bienvenue sur GolfGo
+          {t('badge')}
         </div>
 
         <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#1a1a1a', marginBottom: '10px' }}>
-          Comment souhaitez-vous utiliser GolfGo ?
+          {t('title')}
         </h1>
         <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.6, marginBottom: '32px' }}>
-          GolfGo organise vos sorties golf entre amis — invitations, flights équilibrés, cartes de score, leaderboard et bien plus encore, tout au même endroit.
+          {t('subtitle')}
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -54,9 +55,9 @@ export default function WelcomePage() {
             }}>
               <i className="ti ti-user" />
             </div>
-            <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je suis un joueur</div>
+            <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>{t('playerTitle')}</div>
             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-              Je retrouve tous mes événements, je m'inscris en un clic et je consulte ma feuille de départ.
+              {t('playerDesc')}
             </div>
           </button>
 
@@ -72,9 +73,9 @@ export default function WelcomePage() {
             }}>
               <i className="ti ti-users-group" />
             </div>
-            <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>Je lance mon groupe</div>
+            <div style={{ color: '#fff', fontSize: '14px', fontWeight: 600 }}>{t('ownerTitle')}</div>
             <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.5 }}>
-              GolfGo s'occupe de tout — invitations, flights, feuilles de départ et confirmations par email.
+              {t('ownerDesc')}
             </div>
           </button>
         </div>
@@ -88,7 +89,7 @@ export default function WelcomePage() {
             textDecoration: 'underline', textUnderlineOffset: '3px',
           }}
         >
-          Accéder directement au menu →
+          {t('skip')}
         </button>
       </div>
     </div>
