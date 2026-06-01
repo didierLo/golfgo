@@ -24,7 +24,7 @@ function PhotoUploader({ eventId }: { eventId: string }) {
     .eq('event_id', eventId)
     .order('created_at', { ascending: false })
 
-  const withUrls = (data || []).map(row => ({
+ const withUrls = (data || []).map((row: { id: string; storage_path: string }) => ({
     id: row.id,
     path: row.storage_path,
     url: supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
