@@ -249,7 +249,7 @@ export default function CommunicationsPage() {
     if (!filterEventId) return
     const { data } = await supabase.from('event_participants').select('player_id').eq('event_id', filterEventId).eq('status', filterStatus)
     const memberIds = new Set(members.map(m => m.id))
-    setSelectedIds(new Set((data ?? []).map((r: any) => r.player_id as string).filter(id => memberIds.has(id))))
+    setSelectedIds(new Set((data ?? []).map((r: any) => r.player_id as string).filter((id: string) => memberIds.has(id))))
   }
 
   function applyCommTemplate(tplId: string) {
