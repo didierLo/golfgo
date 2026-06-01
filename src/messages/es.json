@@ -1008,7 +1008,18 @@
         "updates": {
           "title": "10. Cambios",
           "p1": "Esta política puede actualizarse. En caso de cambio significativo, se le notificará mediante notificación en la aplicación o por correo electrónico."
-        }
+        },
+
+  "welcome": {
+      "badge": "⛳ Bienvenido a GolfGo",
+      "title": "¿Cómo desea utilizar GolfGo?",
+      "subtitle": "GolfGo organiza sus salidas de golf con amigos — invitaciones, flights equilibrados, tarjetas de puntuación, clasificación y mucho más, todo en un mismo lugar.",
+      "playerTitle": "Soy jugador",
+      "playerDesc": "Encuentro todos mis eventos, me apunto con un clic y consulto mi hoja de salida.",
+      "ownerTitle": "Creo un grupo",
+      "ownerDesc": "GolfGo se encarga de todo — invitaciones, flights, hojas de salida y confirmaciones por correo electrónico.",
+      "skip": "Ir directamente al menú →"
+         }
       }
     }
   }

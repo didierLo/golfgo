@@ -1008,6 +1008,17 @@
         "updates": {
           "title": "10. Wijzigingen",
           "p1": "Dit beleid kan worden bijgewerkt. Bij een wezenlijke wijziging wordt u geïnformeerd via een melding in de app of per e-mail."
+        },
+
+  "welcome": {
+    "badge": "⛳ Welkom bij GolfGo",
+    "title": "Hoe wilt u GolfGo gebruiken?",
+    "subtitle": "GolfGo organiseert uw golfrondjes met vrienden — uitnodigingen, evenwichtige flights, scorecards, leaderboard en nog veel meer, alles op één plek.",
+    "playerTitle": "Ik ben een speler",
+    "playerDesc": "Ik vind al mijn evenementen, schrijf me in met één klik en bekijk mijn startlijst.",
+    "ownerTitle": "Ik start een groep",
+    "ownerDesc": "GolfGo regelt alles — uitnodigingen, flights, startlijsten en e-mailbevestigingen.",
+    "skip": "Direct naar het menu →"
         }
       }
     }

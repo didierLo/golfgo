@@ -1011,7 +1011,19 @@
         "updates": {
           "title": "10. Modifications",
           "p1": "Cette politique peut être mise à jour. En cas de modification substantielle, vous serez informé par notification ou par email."
-        }
+        },
+
+   "welcome": {
+      "badge": "⛳ Bienvenue sur GolfGo",
+      "title": "Comment souhaitez-vous utiliser GolfGo ?",
+      "subtitle": "GolfGo organise vos sorties de golf entre amis — invitations, flights équilibrés, cartes de score, leaderboard et bien plus encore, tout au même endroit.",
+      "playerTitle": "Je suis un joueur",
+      "playerDesc": "Je retrouve tous mes événements, je m'inscris en un clic et je consulte ma feuille de départ.",
+      "ownerTitle": "Je lance mon groupe",
+      "ownerDesc": "GolfGo s'occupe de tout — invitations, flights, feuilles de départ et confirmations par email.",
+      "skip": "Accéder directement au menu →"
+}
+
       
       }
     }

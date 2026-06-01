@@ -1008,7 +1008,20 @@
         "updates": {
           "title": "10. Changes",
           "p1": "This policy may be updated. In the event of a significant change, you will be notified by in-app notification or email."
-        }
+        },
+
+   "welcome": {
+        "badge": "⛳ Welcome to GolfGo",
+        "title": "How would you like to use GolfGo?",
+        "subtitle": "GolfGo organises your golf outings with friends — invitations, balanced flights, scorecards, leaderboard and much more, all in one place.",
+        "playerTitle": "I'm a player",
+        "playerDesc": "I find all my events, sign up in one click and check my tee sheet.",
+        "ownerTitle": "I'm starting a group",
+        "ownerDesc": "GolfGo handles everything — invitations, flights, tee sheets and email confirmations.",
+        "skip": "Go directly to the menu →"
+}
+
+        
       }
     }
   }

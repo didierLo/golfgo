@@ -1009,8 +1009,19 @@
         "updates": {
           "title": "10. Änderungen",
           "p1": "Diese Richtlinie kann aktualisiert werden. Bei wesentlichen Änderungen werden Sie per In-App-Benachrichtigung oder E-Mail informiert."
-        }
-      }
+        },
+
+    "welcome": {  
+      "badge": "⛳ Willkommen bei GolfGo",
+      "title": "Wie möchten Sie GolfGo nutzen?",
+      "subtitle": "GolfGo organisiert Ihre Golfrunden mit Freunden — Einladungen, ausgewogene Flights, Scorekarten, Leaderboard und vieles mehr, alles an einem Ort.",
+      "playerTitle": "Ich bin ein Spieler",
+      "playerDesc": "Ich finde alle meine Veranstaltungen, melde mich mit einem Klick an und schaue mir mein Abschlagblatt an.",
+      "ownerTitle": "Ich gründe eine Gruppe",
+      "ownerDesc": "GolfGo kümmert sich um alles — Einladungen, Flights, Abschlagblätter und E-Mail-Bestätigungen.",
+      "skip": "Direkt zum Menü →"
+           }
+       }
     }
   }
 }

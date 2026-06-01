@@ -316,9 +316,9 @@ function PhotoModal({ eventId, onClose }: { eventId: string; onClose: () => void
     .eq('event_id', eventId)
     .order('created_at', { ascending: false })
 
-  const urls = (data || []).map(row =>
-    supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
-  )
+  const urls = (data || []).map((row: { storage_path: string }) =>
+  supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
+)
   setUrls(urls)
   setLoading(false)
 }
@@ -379,11 +379,6 @@ export default function MyEventsPage() {
  useEffect(() => {
   if (searchParams.get('payment') === 'success') {
     toast.success('Paiement reçu ! Merci 🎉')
-  }
-  const seen = localStorage.getItem('golfgo_welcome_seen')
-  if (!seen) {
-    router.replace(`/${locale}/welcome`)
-    return
   }
   loadData()
 }, [])
