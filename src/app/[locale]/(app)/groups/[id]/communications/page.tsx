@@ -145,7 +145,7 @@ export default function CommunicationsPage() {
   setEvents(evts || [])
   if (evts?.length) {
     const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
-    const retainedExists = evts.find(e => e.id === retained)
+    const retainedExists = evts.find((e: { id: string }) => e.id === retained)
     const defaultId = retainedExists?.id ?? evts[0].id
     setSelectedEventId(defaultId)
     setFilterEventId(defaultId)
