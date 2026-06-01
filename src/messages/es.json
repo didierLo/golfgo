@@ -1008,7 +1008,7 @@
         "updates": {
           "title": "10. Cambios",
           "p1": "Esta política puede actualizarse. En caso de cambio significativo, se le notificará mediante notificación en la aplicación o por correo electrónico."
-        },
+       }}}},
 
   "welcome": {
       "badge": "⛳ Bienvenido a GolfGo",
@@ -1021,8 +1021,6 @@
       "skip": "Ir directamente al menú →"
          }
       }
-    }
-  }
-}
+ 
 
 

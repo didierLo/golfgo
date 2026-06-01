@@ -1009,7 +1009,7 @@
         "updates": {
           "title": "10. Änderungen",
           "p1": "Diese Richtlinie kann aktualisiert werden. Bei wesentlichen Änderungen werden Sie per In-App-Benachrichtigung oder E-Mail informiert."
-        },
+      }}}},
 
     "welcome": {  
       "badge": "⛳ Willkommen bei GolfGo",
@@ -1022,7 +1022,5 @@
       "skip": "Direkt zum Menü →"
            }
        }
-    }
-  }
-}
+    
 

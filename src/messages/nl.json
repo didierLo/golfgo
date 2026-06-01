@@ -1008,7 +1008,7 @@
         "updates": {
           "title": "10. Wijzigingen",
           "p1": "Dit beleid kan worden bijgewerkt. Bij een wezenlijke wijziging wordt u geïnformeerd via een melding in de app of per e-mail."
-        },
+        }}}},
 
   "welcome": {
     "badge": "⛳ Welkom bij GolfGo",
@@ -1021,6 +1021,4 @@
     "skip": "Direct naar het menu →"
         }
       }
-    }
-  }
-}
+
