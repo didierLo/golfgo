@@ -3,7 +3,7 @@ export function matchplayFlights(players: any[]) {
   const shuffled =
     [...players].sort(()=>Math.random()-0.5)
 
-  const flights=[]
+  const flights: { players: any[]; teams: any }[] = []
 
   while(shuffled.length){
 
@@ -49,7 +49,7 @@ function bestTeams(flight: any[]) {
 
     if(diff<bestDiff){
       bestDiff=diff
-      best=[t1,t2]
+      let best: any = null
     }
 
   }

@@ -78,7 +78,7 @@ export function optimizeFlights(
 
   console.log("INITIAL FLIGHTS", current)
 
-  let best = current
+  let best: Flight[] = current
 
   let currentScore = scoreFlights(current, options)
   let bestScore = currentScore
