@@ -591,14 +591,23 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
             </div>
           )}
 
-          {events.length === 0 && (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">⛳</div>
-              <p className="text-[15px] font-semibold text-slate-700">{t('myEvents.empty.title')}</p>
-              <p className="text-[13px] text-slate-600 mt-1">{t('myEvents.empty.subtitle')}</p>
-            </div>
-          )}
-        </>
+         {events.length === 0 && (
+      <div className="flex justify-center py-12">
+        <div className="text-center px-8 py-10 rounded-2xl max-w-sm w-full"
+          style={{
+            background: 'rgba(255,255,255,0.75)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255,255,255,0.6)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          }}>
+          <div className="text-5xl mb-4">⛳</div>
+          <p className="text-[15px] font-semibold text-slate-800">{t('myEvents.empty.title')}</p>
+          <p className="text-[13px] text-slate-500 mt-1.5 leading-relaxed">{t('myEvents.empty.subtitle')}</p>
+        </div>
+      </div>
+    )}
+            </>
       )}
       {photoEventId && (
   <PhotoModal eventId={photoEventId} onClose={() => setPhotoEventId(null)} />
