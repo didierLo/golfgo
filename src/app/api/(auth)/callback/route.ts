@@ -39,18 +39,27 @@ export async function GET(request: NextRequest) {
 
   if (playerError) {
     console.error('[auth/callback] players lookup error:', playerError)
-     return NextResponse.redirect(`${origin}/${locale}/welcome`) 
+   const redirectTo = next.startsWith('/join/') 
+  ? `${origin}/${locale}${next}` 
+  : `${origin}/${locale}/welcome`
+return NextResponse.redirect(redirectTo)
   }
 
   if (!player) {
     // Pas de fiche préexistante — premier signup sans invitation
     console.log('[auth/callback] No player found for email:', userEmail)
-    return NextResponse.redirect(`${origin}/${locale}/welcome`)
+   const redirectTo = next.startsWith('/join/') 
+  ? `${origin}/${locale}${next}` 
+  : `${origin}/${locale}/welcome`
+return NextResponse.redirect(redirectTo)
   }
 
   // 3. Si user_id déjà renseigné et identique → rien à faire
   if (player.user_id === authUser.id) {
-   return NextResponse.redirect(`${origin}/${locale}/welcome`)
+   const redirectTo = next.startsWith('/join/') 
+  ? `${origin}/${locale}${next}` 
+  : `${origin}/${locale}/welcome`
+return NextResponse.redirect(redirectTo)
   }
 
   // 4. Écrire le user_id dans players
@@ -75,5 +84,8 @@ if (updateError) console.error('[auth/callback] Failed to link user_id to player
 if (roleError)   console.error('[auth/callback] Failed to set default role in groups_players:', roleError)
 
 
-    return NextResponse.redirect(`${origin}/${locale}/welcome`)
+    const redirectTo = next.startsWith('/join/') 
+  ? `${origin}/${locale}${next}` 
+  : `${origin}/${locale}/welcome`
+return NextResponse.redirect(redirectTo)
 }

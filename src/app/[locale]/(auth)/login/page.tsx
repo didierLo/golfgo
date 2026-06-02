@@ -32,7 +32,7 @@ function LoginContent() {
       setErrorMsg(error.message || t('common.error'))
       setLoading(false)
     } else {
-      router.push('/my-events')
+      router.push('/welcome')
       router.refresh()
     }
   }
