@@ -80,17 +80,7 @@ export default function WelcomePage() {
           </button>
         </div>
 
-        <button
-          onClick={() => go('my-events')}
-          style={{
-            marginTop: '20px',
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: '13px', color: '#888',
-            textDecoration: 'underline', textUnderlineOffset: '3px',
-          }}
-        >
-          {t('skip')}
-        </button>
+    
       </div>
     </div>
   )

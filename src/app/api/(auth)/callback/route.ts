@@ -39,8 +39,7 @@ export async function GET(request: NextRequest) {
 
   if (playerError) {
     console.error('[auth/callback] players lookup error:', playerError)
-    // On laisse l'utilisateur passer quand même — le lien se fera plus tard
-    return NextResponse.redirect(`${origin}${next}`)
+     return NextResponse.redirect(`${origin}/${locale}/welcome`) 
   }
 
   if (!player) {
@@ -76,5 +75,5 @@ if (updateError) console.error('[auth/callback] Failed to link user_id to player
 if (roleError)   console.error('[auth/callback] Failed to set default role in groups_players:', roleError)
 
 
-  return NextResponse.redirect(`${origin}/fr/welcome`)
+    return NextResponse.redirect(`${origin}/${locale}/welcome`)
 }
