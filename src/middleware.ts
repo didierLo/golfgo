@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware({
   localeDetection: true,
 })
 
-export async function proxy(request: NextRequest) {
+export async function pmiddelware(request: NextRequest) {
   let response = intlMiddleware(request)
 
   const supabase = createServerClient(
