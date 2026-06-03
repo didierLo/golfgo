@@ -84,10 +84,10 @@ export default function JoinPage() {
         <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.35)' }} />
       </div>
 
-      {/* Logo */}
-      <div className="relative z-10 mb-6 flex items-center gap-2">
-        <img src="/logo/GG_Logo_avec_nom.png" alt="GolfGo" className="h-10" />
-      </div>
+     {/* Logo */}
+    <div className="absolute top-6 left-6 z-10">
+      <img src="/logo/GG_Logo_avec_nom.png" alt="GolfGo" className="h-12" />
+    </div>
 
       {/* Carte */}
       <div className="relative z-10 w-full max-w-sm" style={{
