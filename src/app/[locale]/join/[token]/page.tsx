@@ -86,7 +86,7 @@ export default function JoinPage() {
 
      {/* Logo */}
     <div className="absolute top-6 left-6 z-10">
-      <img src="/logo/GG_Logo_avec_nom.png" alt="GolfGo" className="h-192" />
+      <img src="/logo/GG_Logo_avec_nom.png" alt="GolfGo" className="h-86" />
     </div>
 
       {/* Carte */}
