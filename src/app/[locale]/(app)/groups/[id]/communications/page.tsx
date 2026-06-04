@@ -80,7 +80,14 @@ export default function CommunicationsPage() {
   const t      = useTranslations()
   const locale = useLocale()
 
-  const [mainTab,          setMainTab]          = useState<'send' | 'templates'>('send')
+  const [inviteTab, setInviteTab] = useState<'send' | 'templates' | 'invite'>('send')
+  const [inviteEmails, setInviteEmails] = useState('')
+  const [inviteLink, setInviteLink] = useState<{ token: string; expires_at: string } | null>(null)
+  const [inviteLinkLoading, setInviteLinkLoading] = useState(false)
+  const [inviteCopied, setInviteCopied] = useState(false)
+  const [inviteSending, setInviteSending] = useState(false)
+
+  const [mainTab, setMainTab] = useState<'send' | 'templates' | 'invite'>('send')
   const [members,          setMembers]          = useState<Member[]>([])
   const [events,           setEvents]           = useState<EventRow[]>([])
   const [loading,          setLoading]          = useState(true)
@@ -123,6 +130,7 @@ export default function CommunicationsPage() {
 
   async function loadAll() {
   setLoading(true)
+  
 
   const [{ data: group }, { data: evts }, { data: membersData }] = await Promise.all([
     supabase.from('groups')
@@ -152,8 +160,13 @@ export default function CommunicationsPage() {
   }
 
   setMembers((membersData ?? []).map((r: any) => ({ ...r.player, role: r.role })))
-  setLoading(false)
+  
+  await loadInviteLink()  
+  
+  setLoading(false)     
 }
+
+
 
   async function loadEventTemplate(eventId: string) {
     const { data } = await supabase.from('events')
@@ -172,6 +185,17 @@ export default function CommunicationsPage() {
       })
     }
   }
+
+  async function loadInviteLink() {
+  const { data } = await supabase
+    .from('group_invite_links')
+    .select('token, expires_at')
+    .eq('group_id', groupId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+    setInviteLink(data)
+    }
 
   async function handleSaveTemplate() {
     setSaving(true)
@@ -323,7 +347,9 @@ export default function CommunicationsPage() {
       </div>
 
       <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
-        {([{ key: 'send', label: t('communications.tabs.send') }, { key: 'templates', label: t('communications.tabs.templates') }] as const).map(tab => (
+        {([{ key: 'send', label: t('communications.tabs.send') }, 
+        { key: 'templates', label: t('communications.tabs.templates') },
+        { key: 'invite', label: t('communications.groupInvite.tab') }] as const).map(tab => (
           <button key={tab.key} onClick={() => setMainTab(tab.key)}
             className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
             {tab.label}
@@ -561,6 +587,7 @@ export default function CommunicationsPage() {
             ))}
           </div>
 
+    
           {templateTab === 'invitation' && (
             <div className="rounded-xl border border-white/60 shadow-sm p-5 space-y-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div>
@@ -618,6 +645,140 @@ export default function CommunicationsPage() {
           </div>
         </div>
       )}
+
+         {mainTab === 'invite' && (
+          <div className="flex flex-col gap-5">
+
+            {/* ── Lien + QR ── */}
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              <div className="px-5 py-4 border-b border-white/40">
+                <p className="text-[13px] font-bold text-slate-800 mb-1">{t('communications.groupInvite.title')}</p>
+                <p className="text-[12px] text-slate-500">{t('communications.groupInvite.desc')}</p>
+              </div>
+
+              <div className="px-5 py-4 flex flex-col sm:flex-row gap-5 items-start">
+                {/* QR Code */}
+                <div className="flex-shrink-0 flex flex-col items-center gap-2">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {t('communications.groupInvite.qrTitle')}
+                  </p>
+                  {inviteLink ? (
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`${window.location.origin}/${locale}/join/${inviteLink.token}`)}`}
+                      alt="QR Code"
+                      width={120} height={120}
+                      className="rounded-xl border border-slate-100"
+                    />
+                  ) : (
+                    <div className="w-[120px] h-[120px] rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-[11px] text-slate-300">
+                      Aucun lien
+                    </div>
+                  )}
+                </div>
+
+                {/* Lien + instructions */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    {t('communications.groupInvite.linkLabel')}
+                  </p>
+                  {inviteLink ? (
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-[11px] text-slate-600 truncate flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                        {`${window.location.origin}/${locale}/join/${inviteLink.token}`}
+                      </span>
+                      <button
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(`${window.location.origin}/${locale}/join/${inviteLink.token}`)
+                          setInviteCopied(true)
+                          setTimeout(() => setInviteCopied(false), 2000)
+                        }}
+                        className="flex-shrink-0 text-[11px] font-semibold px-3 py-2 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
+                        {inviteCopied ? t('communications.groupInvite.copied') : t('communications.groupInvite.copyLink')}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mb-4 text-[12px] text-slate-400 italic">
+                      Générez un lien depuis la page Membres → 🔗 Lien d'invitation
+                    </div>
+                  )}
+
+                  {/* Instructions PWA */}
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    {t('communications.groupInvite.installTitle')}
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-[16px] flex-shrink-0">🍎</span>
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        {t('communications.groupInvite.installIphone')}
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-[16px] flex-shrink-0">🤖</span>
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        {t('communications.groupInvite.installAndroid')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Emails destinataires ── */}
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              <div className="px-5 py-4">
+                <label className="block text-[12px] font-bold text-slate-600 uppercase tracking-widest mb-2">
+                  {t('communications.groupInvite.emailsLabel')}
+                </label>
+                <textarea
+                  value={inviteEmails}
+                  onChange={e => setInviteEmails(e.target.value)}
+                  rows={5}
+                  placeholder={t('communications.groupInvite.emailsPlaceholder')}
+                  className="w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm resize-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">{t('communications.groupInvite.emailsHint')}</p>
+
+                <button
+                  onClick={async () => {
+                    // Parser les emails
+                    const raw = inviteEmails.replace(/[\n,;]+/g, ' ').split(/\s+/).filter(e => e.includes('@'))
+                    if (raw.length === 0) { toast.error(t('communications.groupInvite.errorEmpty')); return }
+                    setInviteSending(true)
+                    try {
+                      const res = await fetch('/api/send-group-invite', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ groupId, emails: raw, locale }),
+                      })
+                      const json = await res.json()
+                      if (json.success) {
+                        const skippedSuffix = json.skipped > 0
+                          ? t('communications.groupInvite.skippedSuffix', { skipped: json.skipped })
+                          : ''
+                        toast.success(t('communications.groupInvite.successToast', { sent: json.sent, skipped: skippedSuffix }))
+                        setInviteEmails('')
+                      } else {
+                        toast.error(json.error ?? t('common.error'))
+                      }
+                    } catch (e: any) { toast.error(e.message) }
+                    finally { setInviteSending(false) }
+                  }}
+                  disabled={inviteSending || !inviteEmails.trim() || !isOwner}
+                  className="mt-4 w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors"
+                >
+                  {inviteSending
+                    ? t('communications.groupInvite.sending')
+                    : t('communications.groupInvite.send')}
+                </button>
+              </div>
+            </div>
+
+          </div>
+          )}
+
     </div>
   )
 }

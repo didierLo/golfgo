@@ -208,7 +208,28 @@
       "missingSubject": "Asunto faltante",
       "missingBody": "Mensaje faltante",
       "noRecipients": "Sin destinatarios"
+    },
+    "groupInvite": {
+      "tab": "🔗 Invitación al grupo",
+      "title": "Invitar a unirse al grupo",
+      "desc": "Envíe el enlace de registro a personas que aún no son miembros.",
+      "emailsLabel": "Direcciones de correo electrónico de los destinatarios",
+      "emailsPlaceholder": "email1@ejemplo.com\nemail2@ejemplo.com\no separados por coma o espacio",
+      "emailsHint": "Pegue varias direcciones — coma, espacio o nueva línea",
+      "send": "Enviar invitaciones",
+      "sending": "Enviando…",
+      "successToast": "{sent} invitación/invitaciones enviada(s){skipped}",
+      "skippedSuffix": " · {skipped} omitida(s)",
+      "errorEmpty": "No hay dirección de correo válida",
+      "linkLabel": "Enlace de invitación",
+      "copyLink": "Copiar",
+      "copied": "✓ Copiado",
+      "qrTitle": "Código QR",
+      "installTitle": "Instalar la aplicación",
+      "installIphone": "iPhone / Safari — Icono Compartir ↑ → Más → Añadir a pantalla de inicio",
+      "installAndroid": "Android / Chrome — Menú ⋮ arriba a la derecha → Añadir a pantalla de inicio"
     }
+
   },
   "constraints": {
     "title": "Restricciones de flights",

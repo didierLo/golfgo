@@ -208,7 +208,28 @@
       "missingSubject": "Betreff fehlt",
       "missingBody": "Nachricht fehlt",
       "noRecipients": "Keine Empfänger"
+    },
+    "groupInvite": {
+      "tab": "🔗 Gruppeneinladung",
+      "title": "Zur Gruppe einladen",
+      "desc": "Senden Sie den Registrierungslink an Personen, die noch keine Mitglieder sind.",
+      "emailsLabel": "E-Mail-Adressen der Empfänger",
+      "emailsPlaceholder": "email1@beispiel.com\nemail2@beispiel.com\noder durch Komma oder Leerzeichen getrennt",
+      "emailsHint": "Mehrere Adressen einfügen — Komma, Leerzeichen oder Zeilenumbruch",
+      "send": "Einladungen senden",
+      "sending": "Wird gesendet…",
+      "successToast": "{sent} Einladung(en) gesendet{skipped}",
+      "skippedSuffix": " · {skipped} übersprungen",
+      "errorEmpty": "Keine gültige E-Mail-Adresse",
+      "linkLabel": "Einladungslink",
+      "copyLink": "Kopieren",
+      "copied": "✓ Kopiert",
+      "qrTitle": "QR-Code",
+      "installTitle": "App installieren",
+      "installIphone": "iPhone / Safari — Teilen-Symbol ↑ → Mehr → Zum Home-Bildschirm hinzufügen",
+      "installAndroid": "Android / Chrome — Menü ⋮ oben rechts → Zum Startbildschirm hinzufügen"
     }
+
   },
   "constraints": {
     "title": "Flight-Einschränkungen",

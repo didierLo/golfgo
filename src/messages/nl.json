@@ -208,7 +208,29 @@
       "missingSubject": "Onderwerp ontbreekt",
       "missingBody": "Bericht ontbreekt",
       "noRecipients": "Geen ontvangers"
+    },
+
+    "groupInvite": {
+      "tab": "🔗 Groepsuitnodiging",
+      "title": "Uitnodigen om de groep te vervoegen",
+      "desc": "Stuur de registratielink naar personen die nog geen lid zijn.",
+      "emailsLabel": "E-mailadressen van de ontvangers",
+      "emailsPlaceholder": "email1@voorbeeld.com\nemail2@voorbeeld.com\nof gescheiden door komma of spatie",
+      "emailsHint": "Plak meerdere adressen — komma, spatie of nieuwe regel",
+      "send": "Uitnodigingen verzenden",
+      "sending": "Verzenden…",
+      "successToast": "{sent} uitnodiging(en) verzonden{skipped}",
+      "skippedSuffix": " · {skipped} overgeslagen",
+      "errorEmpty": "Geen geldig e-mailadres",
+      "linkLabel": "Uitnodigingslink",
+      "copyLink": "Kopiëren",
+      "copied": "✓ Gekopieerd",
+      "qrTitle": "QR-code",
+      "installTitle": "App installeren",
+      "installIphone": "iPhone / Safari — Deelicoon ↑ → Meer → Voeg toe aan beginscherm",
+      "installAndroid": "Android / Chrome — Menu ⋮ rechtsboven → Voeg toe aan beginscherm"
     }
+
   },
   "constraints": {
     "title": "Flightbeperkingen",

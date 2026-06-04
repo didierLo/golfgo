@@ -208,7 +208,29 @@
       "missingSubject": "Subject missing",
       "missingBody": "Message missing",
       "noRecipients": "No recipients"
+    },
+
+    "groupInvite": {
+      "tab": "🔗 Group invite",
+      "title": "Invite to join the group",
+      "desc": "Send the registration link to people who are not yet members.",
+      "emailsLabel": "Recipients' email addresses",
+      "emailsPlaceholder": "email1@example.com\nemail2@example.com\nor separated by comma or space",
+      "emailsHint": "Paste multiple addresses — comma, space or new line",
+      "send": "Send invitations",
+      "sending": "Sending…",
+      "successToast": "{sent} invitation(s) sent{skipped}",
+      "skippedSuffix": " · {skipped} skipped",
+      "errorEmpty": "No valid email address",
+      "linkLabel": "Invitation link",
+      "copyLink": "Copy",
+      "copied": "✓ Copied",
+      "qrTitle": "QR Code",
+      "installTitle": "Install the app",
+      "installIphone": "iPhone / Safari — Share icon ↑ → More → Add to Home Screen",
+      "installAndroid": "Android / Chrome — Menu ⋮ top right → Add to Home Screen"
     }
+
   },
   "constraints": {
     "title": "Flight constraints",
