@@ -9,6 +9,13 @@ const intlMiddleware = createMiddleware({
 })
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  
+  // Exclure sw.js et fichiers statiques
+  if (pathname === '/sw.js' || pathname === '/offline.html') {
+    return NextResponse.next()
+  }
+
   let response = intlMiddleware(request)
 
   const supabase = createServerClient(
