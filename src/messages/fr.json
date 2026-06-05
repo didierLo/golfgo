@@ -34,9 +34,12 @@
   "myEvents": {
     "title": "Mes événements",
     "subtitle": "{upcoming} à venir · {past} passés",
+    "partners": "Mes partenaires",
+    "partnersMobile": "Partenaires",
     "sections": {
       "upcoming": "À venir",
       "past": "Passés"
+      
     },
     "stats": {
       "next": "Prochain",

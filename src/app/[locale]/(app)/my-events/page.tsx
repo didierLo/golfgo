@@ -515,8 +515,8 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
               <circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
               <path d="M8 6v2.5M8 8.5L3 10.2M8 8.5L13 10.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
             </svg>
-            <span className="hidden sm:inline">Mes partenaires</span>
-            <span className="sm:hidden">Partenaires</span>
+           <span className="hidden sm:inline">{t('myEvents.partners')}</span>
+           <span className="sm:hidden">{t('myEvents.partnersMobile')}</span>
           </a>
 
         </div>
