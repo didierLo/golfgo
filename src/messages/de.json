@@ -606,7 +606,15 @@
     "removeConfirm": "Diesen Spieler aus der Gruppe entfernen? Seine bevorstehenden Veranstaltungsteilnahmen werden ebenfalls gelöscht.",
     "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen",
     "inviteTitle": "🔗 Einladungslink", 
-    "inviteDesc": "Teilen Sie diesen Link, um neue Mitglieder zur Gruppe einzuladen."
+    "inviteDesc": "Teilen Sie diesen Link, um neue Mitglieder zur Gruppe einzuladen.",
+    "inviteCopy": "Kopieren",
+    "inviteCopied": "✓ Kopiert",
+    "inviteExpired": "⚠️ Link abgelaufen",
+    "inviteExpires": "Läuft ab am {date}",
+    "inviteRegen": "↺ Neuen Link generieren",
+    "inviteRegenLoading": "Generieren…",
+    "inviteNoLink": "Kein aktiver Link für diese Gruppe.",
+    "inviteGenerate": "🔗 Einladungslink generieren"
   },
   "addMember": {
     "title": "Mitglied hinzufügen",

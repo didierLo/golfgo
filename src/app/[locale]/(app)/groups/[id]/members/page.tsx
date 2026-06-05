@@ -111,27 +111,27 @@ function InviteModal({
               <span className="text-[11px] text-slate-600 truncate flex-1">{inviteUrl}</span>
               <button onClick={copyLink}
                 className="flex-shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
-                {copying ? '✓ Copié' : 'Copier'}
+               {copying ? t('members.inviteCopied') : t('members.inviteCopy')}
               </button>
             </div>
 
             <p className="text-[11px] text-slate-400 text-center mb-4">
-              {isExpired ? '⚠️ Lien expiré' : `Expire le ${expiresLabel}`}
+              {isExpired ? t('members.inviteExpired') : t('members.inviteExpires', { date: expiresLabel })}
             </p>
 
             <button onClick={generateLink} disabled={regen}
               className="w-full text-[12px] font-semibold py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors disabled:opacity-40">
-              {regen ? 'Génération…' : '↺ Régénérer un nouveau lien'}
+              {regen ? t('members.inviteRegenLoading') : t('members.inviteRegen')}
             </button>
           </>
         ) : (
           <>
             <div className="text-center py-6 text-slate-400 text-[13px] mb-4">
-              {isExpired ? '⚠️ Le lien a expiré.' : 'Aucun lien actif pour ce groupe.'}
+              {isExpired ? t('members.inviteExpired') : t('members.inviteNoLink')}
             </div>
             <button onClick={generateLink} disabled={regen}
               className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] transition-colors disabled:opacity-40">
-              {regen ? 'Génération…' : '🔗 Générer le lien d\'invitation'}
+              {regen ? t('members.inviteRegenLoading') : t('members.inviteGenerate')}
             </button>
           </>
         )}

@@ -606,7 +606,15 @@
     "removeConfirm": "Deze speler uit de groep verwijderen? Zijn deelnames aan komende evenementen worden ook verwijderd.",
     "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
     "inviteTitle": "🔗 Uitnodigingslink", 
-    "inviteDesc": "Deel deze link om nieuwe leden uit te nodigen voor de groep."
+    "inviteDesc": "Deel deze link om nieuwe leden uit te nodigen voor de groep.",
+    "inviteCopy": "Kopiëren",
+    "inviteCopied": "✓ Gekopieerd",
+    "inviteExpired": "⚠️ Link verlopen",
+    "inviteExpires": "Verloopt op {date}",
+    "inviteRegen": "↺ Nieuwe link genereren",
+    "inviteRegenLoading": "Genereren…",
+    "inviteNoLink": "Geen actieve link voor deze groep.",
+    "inviteGenerate": "🔗 Uitnodigingslink genereren"
   },
   "addMember": {
     "title": "Lid toevoegen",

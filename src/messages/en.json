@@ -606,7 +606,15 @@
     "removeConfirm": "Remove this player from the group? Their upcoming event participations will also be deleted.",
     "adminOnly": "You must be an admin to use this feature",
     "inviteTitle": "🔗 Invitation link", 
-    "inviteDesc": "Share this link to invite new members to join the group."
+    "inviteDesc": "Share this link to invite new members to join the group.",
+    "inviteCopy": "Copy",
+    "inviteCopied": "✓ Copied",
+    "inviteExpired": "⚠️ Link expired",
+    "inviteExpires": "Expires on {date}",
+    "inviteRegen": "↺ Generate a new link",
+    "inviteRegenLoading": "Generating…",
+    "inviteNoLink": "No active link for this group.",
+    "inviteGenerate": "🔗 Generate invitation link"
   },
   "addMember": {
     "title": "Add a member",

@@ -605,7 +605,15 @@
     "removeConfirm": "¿Retirar a este jugador del grupo? Sus participaciones en eventos futuros también se eliminarán.",
     "adminOnly": "Debes ser administrador para usar esta función",
     "inviteTitle": "🔗 Enlace de invitación", 
-    "inviteDesc": "Comparte este enlace para invitar a nuevos miembros a unirse al grupo."
+    "inviteDesc": "Comparte este enlace para invitar a nuevos miembros a unirse al grupo.",
+    "inviteCopy": "Copiar",
+    "inviteCopied": "✓ Copiado",
+    "inviteExpired": "⚠️ Enlace caducado",
+    "inviteExpires": "Caduca el {date}",
+    "inviteRegen": "↺ Generar nuevo enlace",
+    "inviteRegenLoading": "Generando…",
+    "inviteNoLink": "No hay enlace activo para este grupo.",
+    "inviteGenerate": "🔗 Generar enlace de invitación"
   },
   "addMember": {
     "title": "Añadir un miembro",
