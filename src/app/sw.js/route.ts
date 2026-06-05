@@ -25,7 +25,10 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.match(/\\.(png|jpg|jpeg|svg|webp|ico|css|js|woff2?)$/)) {
     event.respondWith(
       caches.match(request).then(cached => cached || fetch(request).then(res => {
-        if (res.ok) caches.open(CACHE_NAME).then(c => c.put(request, res.clone()))
+        if (res.ok) {
+        const clone = res.clone()
+        caches.open(CACHE_NAME).then(c => c.put(request, clone))
+        }
         return res
       }))
     )
