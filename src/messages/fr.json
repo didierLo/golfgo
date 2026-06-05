@@ -608,7 +608,9 @@
     "admin": "Admin",
     "visitor": "Visiteur",
     "removeConfirm": "Souhaitez-vous retirer ce joueur du groupe ? Ses participations aux événements à venir seront également supprimées.",
-    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
+    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité",
+    "inviteTitle": "🔗 Lien d'invitation",
+    "inviteDesc": "Partagez ce lien pour inviter de nouveaux membres à rejoindre le groupe."
   },
   "addMember": {
     "title": "Ajouter un membre",

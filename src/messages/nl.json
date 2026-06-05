@@ -32,6 +32,8 @@
   "myEvents": {
     "title": "Mijn evenementen",
     "subtitle": "{upcoming} komende · {past} voorbije",
+    "partners": "Mijn partners", 
+    "partnersMobile": "Partners",
     "sections": {
       "upcoming": "Komende",
       "past": "Voorbije"
@@ -602,7 +604,9 @@
     "admin": "Admin",
     "visitor": "Bezoeker",
     "removeConfirm": "Deze speler uit de groep verwijderen? Zijn deelnames aan komende evenementen worden ook verwijderd.",
-    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken"
+    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
+    "inviteTitle": "🔗 Uitnodigingslink", 
+    "inviteDesc": "Deel deze link om nieuwe leden uit te nodigen voor de groep."
   },
   "addMember": {
     "title": "Lid toevoegen",

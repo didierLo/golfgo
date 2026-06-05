@@ -32,6 +32,8 @@
   "myEvents": {
     "title": "My events",
     "subtitle": "{upcoming} upcoming · {past} past",
+    "partners": "My partners", 
+    "partnersMobile": "Partners",
     "sections": {
       "upcoming": "Upcoming",
       "past": "Past"
@@ -602,7 +604,9 @@
     "admin": "Admin",
     "visitor": "Visitor",
     "removeConfirm": "Remove this player from the group? Their upcoming event participations will also be deleted.",
-    "adminOnly": "You must be an admin to use this feature"
+    "adminOnly": "You must be an admin to use this feature",
+    "inviteTitle": "🔗 Invitation link", 
+    "inviteDesc": "Share this link to invite new members to join the group."
   },
   "addMember": {
     "title": "Add a member",

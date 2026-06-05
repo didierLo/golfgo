@@ -32,6 +32,8 @@
   "myEvents": {
     "title": "Meine Veranstaltungen",
     "subtitle": "{upcoming} bevorstehende · {past} vergangene",
+    "partners": "Meine Partner", 
+    "partnersMobile": "Partner",
     "sections": {
       "upcoming": "Bevorstehende",
       "past": "Vergangene"
@@ -602,7 +604,9 @@
     "admin": "Admin",
     "visitor": "Besucher",
     "removeConfirm": "Diesen Spieler aus der Gruppe entfernen? Seine bevorstehenden Veranstaltungsteilnahmen werden ebenfalls gelöscht.",
-    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen"
+    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen",
+    "inviteTitle": "🔗 Einladungslink", 
+    "inviteDesc": "Teilen Sie diesen Link, um neue Mitglieder zur Gruppe einzuladen."
   },
   "addMember": {
     "title": "Mitglied hinzufügen",

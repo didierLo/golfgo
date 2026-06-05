@@ -5,7 +5,9 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations, useLocale } from 'next-intl'
 
+
 const supabase = createClient()
+const t = useTranslations()
 
 type Member  = { id: string; surname: string; first_name: string; whs: number | null; role: string }
 type SortKey = 'first_name' | 'surname'
@@ -86,10 +88,8 @@ function InviteModal({
         <button onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-[18px] leading-none">✕</button>
 
-        <h2 className="text-[16px] font-bold text-slate-900 mb-1">🔗 Lien d'invitation</h2>
-        <p className="text-[12px] text-slate-500 mb-5">
-          Partagez ce lien pour inviter de nouveaux membres à rejoindre le groupe.
-        </p>
+        <h2 className="text-[16px] font-bold text-slate-900 mb-1">{t('members.inviteTitle')}</h2>
+        <p className="text-[12px] text-slate-500 mb-5">{t('members.inviteDesc')}</p>
 
         {loading ? (
           <div className="flex justify-center py-8">

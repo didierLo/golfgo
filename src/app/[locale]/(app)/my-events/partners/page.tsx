@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
+const t = useTranslations()
 
 type Player = { id: string; first_name: string; surname: string; whs: number | null }
 type PastRound = { eventId: string; eventTitle: string; date: string; partners: Player[] }
@@ -135,7 +137,7 @@ export default function MyPartnersPage() {
           </svg>
         </button>
         <div>
-          <h1 className="text-[20px] font-black text-slate-900 tracking-tight leading-none">Mes partenaires</h1>
+          <h1 className="text-[20px] font-black text-slate-900 tracking-tight leading-none">{t('partners.title')}</h1>
           <p className="text-[12px] text-slate-900 mt-0.5">{me.first_name} {me.surname}</p>
         </div>
       </div>
@@ -143,12 +145,12 @@ export default function MyPartnersPage() {
       {/* ══ PARTIE 1 : Matrice ══ */}
       <section className="mb-8">
         <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.14em] mb-3">
-          Matrice des partenaires
+         {t('partners.subtitle')}
         </p>
 
         {partners.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-900 py-10 text-center text-[13px] text-slate-400">
-            Aucune partie enregistrée.
+            {t('partners.noData')}
           </div>
         ) : (
           <div className="rounded-2xl border border-white/60 shadow-sm overflow-hidden"
@@ -211,12 +213,12 @@ export default function MyPartnersPage() {
       {/* ══ PARTIE 2 : Mes parties ══ */}
       <section>
         <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.14em] mb-3">
-          Mes parties · {pastRounds.length} {pastRounds.length === 1 ? 'partie' : 'parties'}
+         {t('partners.rounds')} · {pastRounds.length} {pastRounds.length === 1 ? t('partners.round') : t('partners.rounds_plural')}
         </p>
 
         {pastRounds.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-200 py-10 text-center text-[13px] text-slate-900">
-            Aucune partie enregistrée.
+           {t('partners.noData')}
           </div>
         ) : (
           <div className="space-y-2">
@@ -235,7 +237,7 @@ export default function MyPartnersPage() {
                 {/* Partenaires */}
                 <div className="flex flex-wrap gap-2">
                   {round.partners.length === 0 ? (
-                    <span className="text-[12px] text-slate-400 italic">Solo</span>
+                    <span className="text-[12px] text-slate-400 italic">{t('partners.solo')}</span>
                   ) : round.partners.map(p => (
                     <div key={p.id} className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
                       <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">

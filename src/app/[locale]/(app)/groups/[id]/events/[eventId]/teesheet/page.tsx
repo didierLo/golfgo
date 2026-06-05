@@ -206,7 +206,7 @@ export default function TeeSheetPage() {
         <div className="flex items-center gap-2">
     <select value={interval} onChange={e => setInterval(Number(e.target.value))}
       className="border border-slate-200 rounded-xl px-2 py-1.5 text-[12px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-      {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>Intervalle {v}'</option>)}
+      {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{t('teesheet.intervalUnit', { count: v })}</option>)}
     </select>
   </div>
 </div>

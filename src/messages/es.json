@@ -32,6 +32,8 @@
   "myEvents": {
     "title": "Mis eventos",
     "subtitle": "{upcoming} próximos · {past} pasados",
+    "partners": "Mis compañeros", 
+    "partnersMobile": "Compañeros",
     "sections": {
       "upcoming": "Próximos",
       "past": "Pasados"
@@ -601,7 +603,9 @@
     "admin": "Admin",
     "visitor": "Visitante",
     "removeConfirm": "¿Retirar a este jugador del grupo? Sus participaciones en eventos futuros también se eliminarán.",
-    "adminOnly": "Debes ser administrador para usar esta función"
+    "adminOnly": "Debes ser administrador para usar esta función",
+    "inviteTitle": "🔗 Enlace de invitación", 
+    "inviteDesc": "Comparte este enlace para invitar a nuevos miembros a unirse al grupo."
   },
   "addMember": {
     "title": "Añadir un miembro",
