@@ -3,15 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useLocale, useTranslations } from 'next-intl'
+import { useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
-
-export default function PartnersPage() {
-  const t = useTranslations()  // ← ici, dans le composant
-  const locale = useLocale()
-  // ...
-}
 
 type Player = { id: string; first_name: string; surname: string; whs: number | null }
 type PastRound = { eventId: string; eventTitle: string; date: string; partners: Player[] }
@@ -19,6 +14,7 @@ type PastRound = { eventId: string; eventTitle: string; date: string; partners: 
 export default function MyPartnersPage() {
   const router = useRouter()
   const locale = useLocale()
+  const t = useTranslations()
 
   const [me,         setMe]         = useState<Player | null>(null)
   const [partners,   setPartners]   = useState<Player[]>([])
