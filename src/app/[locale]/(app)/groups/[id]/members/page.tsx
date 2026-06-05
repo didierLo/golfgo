@@ -7,12 +7,14 @@ import { useTranslations, useLocale } from 'next-intl'
 
 
 const supabase = createClient()
-const t = useTranslations()
+
 
 type Member  = { id: string; surname: string; first_name: string; whs: number | null; role: string }
 type SortKey = 'first_name' | 'surname'
 type InviteLink = { id: string; token: string; expires_at: string } | null
 type JoinRequest = { id: string; status: string; created_at: string; player: { id: string; first_name: string; surname: string; email: string | null } }
+
+
 
 // ─── QR Code (via api.qrserver.com — pas de lib) ──────────────────────────
 function QRCode({ url }: { url: string }) {
@@ -32,6 +34,8 @@ function InviteModal({
   const [loading,   setLoading]   = useState(true)
   const [copying,   setCopying]   = useState(false)
   const [regen,     setRegen]     = useState(false)
+  
+  const t = useTranslations() 
 
   const inviteUrl = link ? `${window.location.origin}/join/${link.token}` : ''
 
@@ -143,6 +147,7 @@ export default function MembersPage() {
   const groupId = params.id as string
   const t       = useTranslations()
   const locale  = useLocale()
+  
 
   const [members,      setMembers]      = useState<Member[]>([])
   const [loading,      setLoading]      = useState(true)

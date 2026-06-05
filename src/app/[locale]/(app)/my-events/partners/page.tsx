@@ -3,11 +3,15 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useLocale } from 'next-intl'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 const supabase = createClient()
-const t = useTranslations()
+
+export default function PartnersPage() {
+  const t = useTranslations()  // ← ici, dans le composant
+  const locale = useLocale()
+  // ...
+}
 
 type Player = { id: string; first_name: string; surname: string; whs: number | null }
 type PastRound = { eventId: string; eventTitle: string; date: string; partners: Player[] }
