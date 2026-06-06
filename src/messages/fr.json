@@ -113,7 +113,26 @@
     "title": "Clubs et Parcours",
     "subtitle": "Gérer les clubs et parcours disponibles",
     "import": "Import depuis fichier Excel",
-    "manual": "Gestion manuelle"
+    "manual": "Gestion manuelle",
+    "chooseClub": "Choisir un club…",
+    "newClub": "Nouveau club",
+    "chooseClub2": "Choisir un parcours…",
+    "newCourse": "Nouveau parcours",
+    "change": "Changer",
+    "tees": "Tees",
+    "holes": "Trous",
+    "save": "Sauvegarder",
+    "saving": "Saving…",
+    "teeName": "Ex: Yellow Men",
+    "colTee": "Tee",
+    "colPar": "Par",
+    "colDistance": "Distance (m)",
+    "colCR": "CR",
+    "colSlope": "Slope",
+    "colHole": "Trou",
+    "colSI": "SI",
+    "colM": "m",
+    "total": "TOT"
   },
   "communications": {
     "title": "Communications",
@@ -200,7 +219,20 @@
       "print": {
         "title": "Personnalisation des documents",
         "desc": "En-tête, pied de page et logo sur les feuilles de départ imprimées"
-      }
+      },
+      "reminder": "⏰ Rappel",
+      "reminderSubject": "Rappel — {{group_name}}",
+      "reminderBody": "Bonjour {{first_name}},\n\nIl reste {{places_restantes}} places pour notre prochaine rencontre le {{event_date}} à {{start_time}}.\n\nSi tu veux jouer, clique sur le bouton ci-dessous\n\nÀ bientôt sur le parcours !\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitation": "✉️ Invitation",
+      "invitationSubject": "Invitation : {{event_title}}",
+      "info": "📢 Information",
+      "infoSubject": "Information — {{group_name}}",
+      "infoBody": "Bonjour {{first_name}},\n\nVoici une information importante concernant notre groupe.\n\n{{owner_name}}",
+      "cancel": "❌ Annulation",
+      "cancelSubject": "Annulation — {{group_name}}",
+      "cancelBody": "Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.\n\n{{owner_name}}",
+      "free": "✏️ Libre"
+      
     },
     "toasts": {
       "groupSaved": "Modèle de groupe enregistré",

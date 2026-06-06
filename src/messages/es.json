@@ -110,7 +110,26 @@
     "title": "Clubs y Campos",
     "subtitle": "Gestionar clubs y campos disponibles",
     "import": "Importar desde archivo Excel",
-    "manual": "Gestión manual"
+    "manual": "Gestión manual",
+    "chooseClub": "Elegir un club…",
+    "newClub": "Nuevo club",
+    "chooseClub2": "Elegir un campo…",
+    "newCourse": "Nuevo campo",
+    "change": "Cambiar",
+    "tees": "Salidas",
+    "holes": "Hoyos",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "teeName": "Ej. Yellow Men",
+    "colTee": "Salida",
+    "colPar": "Par",
+    "colDistance": "Distancia (m)",
+    "colCR": "CR",
+    "colSlope": "Slope",
+    "colHole": "Hoyo",
+    "colSI": "SI",
+    "colM": "m",
+    "total": "TOT"
   },
   "communications": {
     "title": "Comunicaciones",
@@ -197,7 +216,19 @@
       "print": {
         "title": "Personalización de documentos",
         "desc": "Cabecera, pie de página y logo en listas de salidas impresas"
-      }
+      },
+      "reminder": "⏰ Recordatorio",
+      "reminderSubject": "Recordatorio — {{group_name}}",
+      "reminderBody": "Hola {{first_name}},\n\nQuedan {{places_restantes}} plazas para nuestra próxima ronda el {{event_date}} a las {{start_time}}.\n\n¡Haz clic abajo si quieres unirte!\n\n¡Hasta en el campo!\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitation": "✉️ Invitación",
+      "invitationSubject": "Invitación: {{event_title}}",
+      "info": "📢 Información",
+      "infoSubject": "Información — {{group_name}}",
+      "infoBody": "Hola {{first_name}},\n\nAquí hay información importante sobre nuestro grupo.\n\n{{owner_name}}",
+      "cancel": "❌ Cancelación",
+      "cancelSubject": "Cancelación — {{group_name}}",
+      "cancelBody": "Hola {{first_name}},\n\nLamentamos informarle que el evento ha sido cancelado.\n\nLe informaremos lo antes posible sobre una nueva fecha.\n\nDisculpe las molestias.\n\n{{owner_name}}",
+      "free": "✏️ Libre"
     },
     "toasts": {
       "groupSaved": "Plantilla de grupo guardada",

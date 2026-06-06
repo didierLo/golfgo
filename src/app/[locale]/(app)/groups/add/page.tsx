@@ -44,7 +44,16 @@ if (insertError || !group) {
   setSaving(false); return
 }
 
-    window.location.href = `/groups/${group.id}/members`
+if (player) {
+  await supabase.from('groups_players').insert({
+    group_id:  group.id,
+    player_id: player.id,
+    role:      'owner',
+    user_id:   user.id,
+  })
+}
+
+window.location.href = `/groups/${group.id}/members`
   }
 
   return (

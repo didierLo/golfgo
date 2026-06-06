@@ -110,7 +110,26 @@
     "title": "Clubs & Parcours",
     "subtitle": "Beschikbare clubs en parcours beheren",
     "import": "Importeren vanuit Excel-bestand",
-    "manual": "Handmatig beheer"
+    "manual": "Handmatig beheer",
+    "chooseClub": "Kies een club…",
+    "newClub": "Nieuwe club",
+    "chooseClub2": "Kies een parcours…",
+    "newCourse": "Nieuw parcours",
+    "change": "Wijzigen",
+    "tees": "Tees",
+    "holes": "Holes",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "teeName": "Bijv. Yellow Men",
+    "colTee": "Tee",
+    "colPar": "Par",
+    "colDistance": "Afstand (m)",
+    "colCR": "CR",
+    "colSlope": "Slope",
+    "colHole": "Hole",
+    "colSI": "SI",
+    "colM": "m",
+    "total": "TOT"
   },
   "communications": {
     "title": "Communicatie",
@@ -197,7 +216,19 @@
       "print": {
         "title": "Documentaanpassing",
         "desc": "Koptekst, voettekst en logo op afgedrukte startlijsten"
-      }
+      },
+      "reminder": "⏰ Herinnering",
+      "reminderSubject": "Herinnering — {{group_name}}",
+      "reminderBody": "Hallo {{first_name}},\n\nEr zijn nog {{places_restantes}} plaatsen voor onze volgende ronde op {{event_date}} om {{start_time}}.\n\nKlik hieronder als je wilt meedoen!\n\nTot op de baan!\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitation": "✉️ Uitnodiging",
+      "invitationSubject": "Uitnodiging: {{event_title}}",
+      "info": "📢 Informatie",
+      "infoSubject": "Informatie — {{group_name}}",
+      "infoBody": "Hallo {{first_name}},\n\nHier is belangrijke informatie over onze groep.\n\n{{owner_name}}",
+      "cancel": "❌ Annulering",
+      "cancelSubject": "Annulering — {{group_name}}",
+      "cancelBody": "Hallo {{first_name}},\n\nWij betreuren het u te moeten meedelen dat het evenement geannuleerd is.\n\nWij laten u zo snel mogelijk weten wanneer er een nieuwe datum is.\n\nOnze excuses voor het ongemak.\n\n{{owner_name}}",
+      "free": "✏️ Vrij"
     },
     "toasts": {
       "groupSaved": "Groepssjabloon opgeslagen",

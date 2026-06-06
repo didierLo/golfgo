@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
@@ -13,6 +14,7 @@ type Hole   = { id?: string; course_id: string; hole_number: number; par: number
 const inputClass = "w-full border border-gray-200 rounded px-2 py-1.5 text-[12px] focus:outline-none focus:border-blue-300"
 
 export default function ClubCourseManager() {
+  const t = useTranslations()
 
   const [clubs, setClubs]     = useState<Club[]>([])
   const [courses, setCourses] = useState<Course[]>([])
@@ -165,13 +167,13 @@ export default function ClubCourseManager() {
         <label className="block text-[12px] font-medium text-gray-500 mb-1.5">Club</label>
         <select value={clubId || ''} onChange={e => { setClubId(e.target.value || null); setCourseId(null) }}
           className={selectClass}>
-          <option value="">Choisir un club…</option>
+          <option value="">{t('clubs.chooseClub')}</option>
           {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <div className="flex gap-2 mt-2">
           <input value={newClub} onChange={e => setNewClub(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleCreateClub()}
-            placeholder="Nouveau club" className={selectClass} />
+            placeholder={t('clubs.newClub')} className={selectClass} />
           <button onClick={handleCreateClub}
             className="bg-[#185FA5] text-white text-[12px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors">
             +
@@ -191,14 +193,12 @@ export default function ClubCourseManager() {
               <button
                 onClick={() => setCourseId(null)}
                 className="text-[11px] text-gray-400 hover:text-gray-600"
-              >
-                Changer
-              </button>
+             >{t('clubs.change')}</button>
             </div>
           ) : (
             <select value={courseId || ''} onChange={e => setCourseId(e.target.value || null)}
               className={selectClass}>
-              <option value="">Choisir un parcours…</option>
+             <option value="">{t('clubs.chooseClub2')}</option>
               {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
             </select>
           )}
@@ -206,7 +206,7 @@ export default function ClubCourseManager() {
           <div className="flex gap-2 mt-2">
             <input value={newCourse} onChange={e => setNewCourse(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleCreateCourse()}
-              placeholder="Nouveau parcours" className={selectClass} />
+              placeholder={t('clubs.newCourse')} className={selectClass} />
             <button onClick={handleCreateCourse}
               className="bg-[#185FA5] text-white text-[12px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors">
               +
@@ -228,7 +228,7 @@ export default function ClubCourseManager() {
               {saveMsg && <span className="text-[12px] text-green-600">{saveMsg}</span>}
               <button onClick={handleSave} disabled={saving}
                 className="bg-[#185FA5] text-white text-[12px] font-medium px-4 py-1.5 rounded-md hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
-                {saving ? 'Saving…' : 'Sauvegarder'}
+                {saving ? t('clubs.saving') : t('clubs.save')}
               </button>
             </div>
           </div>
@@ -237,11 +237,11 @@ export default function ClubCourseManager() {
 
             {/* ── Tees ── */}
             <div>
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Tees</p>
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{t('clubs.tees')}</p>
               <table className="w-full text-[12px] border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    {['Tee', 'Par', 'Distance (m)', 'CR', 'Slope'].map(h => (
+                    {[t('clubs.colTee'), t('clubs.colPar'), t('clubs.colDistance'), t('clubs.colCR'), t('clubs.colSlope')].map(h => (
                       <th key={h} className="px-3 py-2 text-left text-[11px] font-medium text-gray-400">{h}</th>
                     ))}
                   </tr>
@@ -261,7 +261,7 @@ export default function ClubCourseManager() {
                     <td className="px-2 py-1.5">
                       <input value={newTee} onChange={e => setNewTee(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleCreateTee()}
-                        placeholder="Ex: Yellow Men" className={inputClass} />
+                        placeholder={t('clubs.teeName')} className={inputClass} />
                     </td>
                     <td className="px-2 py-1.5"><input type="number" value={newTeeData.par_total} onChange={e => setNewTeeData(p => ({ ...p, par_total: Number(e.target.value) }))} className={inputClass + ' text-center'} /></td>
                     <td className="px-2 py-1.5"><input type="number" value={newTeeData.distance_total || ''} onChange={e => setNewTeeData(p => ({ ...p, distance_total: Number(e.target.value) }))} placeholder="-" className={inputClass + ' text-center'} /></td>
@@ -282,7 +282,7 @@ export default function ClubCourseManager() {
 
             {/* ── Trous ── */}
             <div>
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Trous</p>
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{t('clubs.holes')}</p>
               <div className="grid grid-cols-2 gap-4">
                 {[0, 1].map(half => {
                   const start    = half * 9
@@ -292,7 +292,7 @@ export default function ClubCourseManager() {
                     <table key={half} className="w-full text-[12px] border-collapse">
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
-                          {['Trou', 'Par', 'SI', 'm'].map(h => (
+                          {[t('clubs.colHole'), t('clubs.colPar'), t('clubs.colSI'), t('clubs.colM')].map(h => (
                             <th key={h} className="px-2 py-1.5 text-center text-[11px] font-medium text-gray-400">{h}</th>
                           ))}
                         </tr>
@@ -317,7 +317,7 @@ export default function ClubCourseManager() {
                 })}
               </div>
               <div className="mt-2 text-right text-[12px] font-medium text-gray-600">
-                TOT : {parTotal}
+               {t('clubs.total')} : {parTotal}
               </div>
             </div>
 

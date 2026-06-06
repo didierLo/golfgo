@@ -110,7 +110,26 @@
     "title": "Clubs & Plätze",
     "subtitle": "Verfügbare Clubs und Plätze verwalten",
     "import": "Import aus Excel-Datei",
-    "manual": "Manuelle Verwaltung"
+    "manual": "Manuelle Verwaltung",
+    "chooseClub": "Club auswählen…",
+    "newClub": "Neuer Club",
+    "chooseClub2": "Platz auswählen…",
+    "newCourse": "Neuer Platz",
+    "change": "Ändern",
+    "tees": "Abschläge",
+    "holes": "Löcher",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "teeName": "z.B. Yellow Men",
+    "colTee": "Abschlag",
+    "colPar": "Par",
+    "colDistance": "Distanz (m)",
+    "colCR": "CR",
+    "colSlope": "Slope",
+    "colHole": "Loch",
+    "colSI": "SI",
+    "colM": "m",
+    "total": "GES"
   },
   "communications": {
     "title": "Kommunikation",
@@ -197,7 +216,19 @@
       "print": {
         "title": "Dokumentanpassung",
         "desc": "Kopfzeile, Fußzeile und Logo auf gedruckten Startlisten"
-      }
+      },
+      "reminder": "⏰ Erinnerung",
+      "reminderSubject": "Erinnerung — {{group_name}}",
+      "reminderBody": "Hallo {{first_name}},\n\nEs gibt noch {{places_restantes}} freie Plätze für unsere nächste Runde am {{event_date}} um {{start_time}}.\n\nKlicken Sie unten, wenn Sie mitspielen möchten!\n\nBis auf dem Platz!\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitation": "✉️ Einladung",
+      "invitationSubject": "Einladung: {{event_title}}",
+      "info": "📢 Information",
+      "infoSubject": "Information — {{group_name}}",
+      "infoBody": "Hallo {{first_name}},\n\nHier sind wichtige Informationen über unsere Gruppe.\n\n{{owner_name}}",
+      "cancel": "❌ Absage",
+      "cancelSubject": "Absage — {{group_name}}",
+      "cancelBody": "Hallo {{first_name}},\n\nWir bedauern, Ihnen mitteilen zu müssen, dass die Veranstaltung abgesagt wurde.\n\nWir werden Sie so bald wie möglich über einen neuen Termin informieren.\n\nWir entschuldigen uns für die Unannehmlichkeiten.\n\n{{owner_name}}",
+      "free": "✏️ Frei"
     },
     "toasts": {
       "groupSaved": "Gruppenvorlage gespeichert",

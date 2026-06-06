@@ -118,11 +118,11 @@ export default function CommunicationsPage() {
   const [showPreview,   setShowPreview]   = useState(false)
 
   const COMM_TEMPLATES = [
-    { id: 'reminder',   label: '⏰ Rappel',      subject: 'Rappel — {{group_name}}',      body: "Bonjour {{first_name}},\n\nIl reste {{places_restantes}} places pour notre prochaine rencontre le {{event_date}} à {{start_time}}.\n\nSi tu veux jouer, clique sur le bouton ci-dessous\n\nÀ bientôt sur le parcours !\n\n{{owner_name}}\n\n{{yes_button}}" },
-    { id: 'invitation', label: '✉️ Invitation',  subject: 'Invitation : {{event_title}}', body: INVITATION_BODY_DEFAULT },
-    { id: 'info',       label: '📢 Information', subject: 'Information — {{group_name}}', body: "Bonjour {{first_name}},\n\nVoici une information importante concernant notre groupe.\n\n{{owner_name}}" },
-    { id: 'cancel',     label: '❌ Annulation',  subject: 'Annulation — {{group_name}}',  body: "Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.\n\n{{owner_name}}" },
-    { id: 'free',       label: '✏️ Libre',       subject: '', body: '' },
+    { id: 'reminder',   label: t('communications.templates.reminder'),   subject: t('communications.templates.reminderSubject'),   body: t('communications.templates.reminderBody') },
+    { id: 'invitation', label: t('communications.templates.invitation'),  subject: t('communications.templates.invitationSubject'),  body: INVITATION_BODY_DEFAULT },
+    { id: 'info',       label: t('communications.templates.info'),        subject: t('communications.templates.infoSubject'),        body: t('communications.templates.infoBody') },
+    { id: 'cancel',     label: t('communications.templates.cancel'),      subject: t('communications.templates.cancelSubject'),      body: t('communications.templates.cancelBody') },
+    { id: 'free',       label: t('communications.templates.free'),        subject: '', body: '' },
   ]
 
   useEffect(() => { loadAll() }, [groupId])

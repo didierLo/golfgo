@@ -110,7 +110,26 @@
     "title": "Clubs & Courses",
     "subtitle": "Manage available clubs and courses",
     "import": "Import from Excel file",
-    "manual": "Manual management"
+    "manual": "Manual management",
+    "chooseClub": "Choose a club…",
+    "newClub": "New club",
+    "chooseClub2": "Choose a course…",
+    "newCourse": "New course",
+    "change": "Change",
+    "tees": "Tees",
+    "holes": "Holes",
+    "save": "Save",
+    "saving": "Saving…",
+    "teeName": "e.g. Yellow Men",
+    "colTee": "Tee",
+    "colPar": "Par",
+    "colDistance": "Distance (m)",
+    "colCR": "CR",
+    "colSlope": "Slope",
+    "colHole": "Hole",
+    "colSI": "SI",
+    "colM": "m",
+    "total": "TOT"
   },
   "communications": {
     "title": "Communications",
@@ -197,7 +216,19 @@
       "print": {
         "title": "Document customisation",
         "desc": "Header, footer and logo on printed tee sheets"
-      }
+      },
+      "reminder": "⏰ Reminder",
+      "reminderSubject": "Reminder — {{group_name}}",
+      "reminderBody": "Hi {{first_name}},\n\nThere are {{places_restantes}} spots left for our next round on {{event_date}} at {{start_time}}.\n\nClick below if you'd like to join!\n\nSee you on the course!\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitation": "✉️ Invitation",
+      "invitationSubject": "Invitation: {{event_title}}",
+      "info": "📢 Information",
+      "infoSubject": "Information — {{group_name}}",
+      "infoBody": "Hi {{first_name}},\n\nHere is some important information about our group.\n\n{{owner_name}}",
+      "cancel": "❌ Cancellation",
+      "cancelSubject": "Cancellation — {{group_name}}",
+      "cancelBody": "Hi {{first_name}},\n\nWe regret to inform you that the event has been cancelled.\n\nWe will let you know as soon as a new date is available.\n\nWe apologise for any inconvenience.\n\n{{owner_name}}",
+      "free": "✏️ Free"
     },
     "toasts": {
       "groupSaved": "Group template saved",
