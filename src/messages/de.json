@@ -288,7 +288,11 @@
     "save": "Speichern",
     "saving": "Speichern...",
     "cancel": "Abbrechen",
-    "notFound": "Veranstaltung nicht gefunden"
+    "notFound": "Veranstaltung nicht gefunden",
+    "photosLabel": "Fotos",
+    "photosOptional": "optional",
+    "photosAdd": "Fotos hinzufügen",
+    "photosUploading": "Hochladen…"
   },
   "editGroup": {
     "title": "Gruppe bearbeiten",

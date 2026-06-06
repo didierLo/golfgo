@@ -292,8 +292,12 @@
     "save": "Enregistrer",
     "saving": "Enregistrement en cours...",
     "cancel": "Annuler",
-    "notFound": "Événement introuvable"
-  },
+    "notFound": "Événement introuvable",
+    "photosLabel": "Photos",
+    "photosOptional": "optionnel",
+    "photosAdd": "Ajouter des photos",
+    "photosUploading": "Chargement en cours…"
+      },
   "editGroup": {
     "title": "Modifier le groupe",
     "nameLabel": "Nom du groupe *",

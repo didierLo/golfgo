@@ -289,7 +289,11 @@
     "save": "Opslaan",
     "saving": "Opslaan...",
     "cancel": "Annuleren",
-    "notFound": "Evenement niet gevonden"
+    "notFound": "Evenement niet gevonden",
+    "photosLabel": "Foto's",
+    "photosOptional": "optioneel",
+    "photosAdd": "Foto's toevoegen",
+    "photosUploading": "Uploaden…"
   },
   "editGroup": {
     "title": "Groep bewerken",

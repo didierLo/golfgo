@@ -177,6 +177,9 @@ export default function MembersPage() {
       .select('id').eq('user_id', user!.id).single()
 
     const myRow = (data || []).find((row: any) => row.player?.id === player?.id)
+    console.log('data:', data)
+    console.log('player:', player)
+    console.log('myRow:', myRow)
     setUserRole(myRow?.role ?? null)
     setMembers((data || []).map((row: any) => ({ ...row.player, role: row.role })))
     setLoading(false)

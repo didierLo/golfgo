@@ -288,7 +288,11 @@
     "save": "Guardar",
     "saving": "Guardando...",
     "cancel": "Cancelar",
-    "notFound": "Evento no encontrado"
+    "notFound": "Evento no encontrado",
+    "photosLabel": "Fotos",
+    "photosOptional": "opcional",
+    "photosAdd": "Añadir fotos",
+    "photosUploading": "Subiendo…"
   },
   "editGroup": {
     "title": "Editar grupo",

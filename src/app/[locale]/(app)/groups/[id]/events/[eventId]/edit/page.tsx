@@ -9,6 +9,8 @@ const supabase = createClient()
 const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
 
 function PhotoUploader({ eventId }: { eventId: string }) {
+  const t = useTranslations() 
+  
   const [photos, setPhotos]         = useState<{ id: string; url: string; path: string }[]>([])
   const [uploading, setUploading]   = useState(false)
   const [loadingPhotos, setLoadingPhotos] = useState(true)
@@ -83,7 +85,7 @@ async function handleDelete(photo: { id: string; path: string }) {
           <path d="M12 2v5M10 4l2-2 2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         <span className="text-[12px] font-semibold text-slate-500">
-          {uploading ? 'Upload en cours…' : 'Ajouter des photos'}
+          {uploading ? t('editEvent.photosUploading') : t('editEvent.photosAdd')}
         </span>
         <span className="text-[11px] text-slate-400">JPG, PNG, WEBP · max 10 MB</span>
         <input type="file" accept="image/*" multiple className="hidden"
@@ -336,8 +338,8 @@ if (event.course_id) {
 
     <div>
       <label className="block text-[12px] font-semibold text-slate-600 mb-2">
-        Photos <span className="text-slate-400 font-normal">— optionnel</span>
-      </label>
+      {t('editEvent.photosLabel')} <span className="text-slate-400 font-normal">— {t('editEvent.photosOptional')}</span>
+    </label>
 
       <PhotoUploader eventId={eventId} />
     </div>
