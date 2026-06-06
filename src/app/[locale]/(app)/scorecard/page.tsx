@@ -188,8 +188,8 @@ export default function MyScorecardPage() {
   }
 
   async function loadScorecardData(evId: string, courseId: string, pId: string, myTeeId: string | null) {
-    const [{ data: holesData }, { data: teesData }, { data: myFlight }] = await Promise.all([
-  supabase.from('course_holes')
+    const [{ data: holesData }, { data: teesData }, { data: myFlight }] = await Promise.all([supabase.from('course_holes')
+    
     .select('hole_number, par, stroke_index')
     .eq('course_id', courseId).order('hole_number'),
   supabase.from('course_tees')
@@ -199,6 +199,7 @@ export default function MyScorecardPage() {
     .select('flights(id, event_id)')
     .eq('player_id', pId),
 ])
+    setHoles(holesData || []) 
     const myFlightRow = (myFlight || []).find((f: any) => f.flights?.event_id === evId)
     const flightId = (myFlightRow as any)?.flights?.id ?? null
     let flightPlayerIds: string[] = [pId]
