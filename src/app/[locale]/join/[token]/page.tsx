@@ -60,18 +60,30 @@ export default function JoinPage() {
     setState('ready')
   }
 
-  async function requestJoin() {
-    if (!linkInfo || !playerId) return
-    setSubmitting(true)
-    const { error } = await supabase.from('group_join_requests').insert({
-      group_id:  linkInfo.group_id,
-      player_id: playerId,
-      token,
-    })
-    if (error) { console.error(error); setSubmitting(false); return }
-    setState('success')
-    setSubmitting(false)
-  }
+async function requestJoin() {
+  if (!linkInfo || !playerId) return
+  setSubmitting(true)
+  const { error } = await supabase.from('group_join_requests').insert({
+    group_id:  linkInfo.group_id,
+    player_id: playerId,
+    token,
+  })
+  if (error) { console.error(error); setSubmitting(false); return }
+
+  // ← notifier l'owner
+  await fetch('/api/send-join-notification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      groupId:  linkInfo.group_id,
+      playerId,
+      locale,
+    }),
+  })
+
+  setState('success')
+  setSubmitting(false)
+}
 
   const group      = linkInfo?.groups
   const groupColor = group?.color ?? '#185FA5'
