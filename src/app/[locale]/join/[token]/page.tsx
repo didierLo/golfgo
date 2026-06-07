@@ -71,7 +71,7 @@ async function requestJoin() {
   if (error) { console.error(error); setSubmitting(false); return }
 
   // ← notifier l'owner
-  await fetch('/api/send-join-notification', {
+  const res = await fetch('/api/send-join-notification', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
