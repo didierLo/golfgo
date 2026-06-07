@@ -129,7 +129,8 @@
     "colHole": "Hole",
     "colSI": "SI",
     "colM": "m",
-    "total": "TOT"
+    "total": "TOT",
+    "courseLabel": "Parcours"
   },
   "communications": {
     "title": "Communicatie",
@@ -495,7 +496,15 @@
       "PAID": "Betaald",
       "PENDING": "Uitstaand",
       "EXEMPT": "Vrijgesteld"
-    }
+    },
+    "noFee": "Geen tarief gedefinieerd voor dit evenement.",
+    "back": "← Terug",
+    "paymentTitle": "Betaling voor uw deelname",
+    "secureTitle": "🔒 100% veilige betaling",
+    "secureDesc": "Uw betaling wordt verwerkt door <strong>Stripe</strong>, wereldleider in veilige online betalingen. GolfGo slaat uw bankgegevens nooit op. De transactie is versleuteld en voldoet aan PCI-DSS-normen. Accepteert Visa, Mastercard, Bancontact en Apple/Google Pay.",
+    "paying": "Doorverwijzen...",
+    "pay": "Betalen {amount} €"
+
    
   },
   "results": {

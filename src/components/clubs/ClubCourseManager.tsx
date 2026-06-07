@@ -184,7 +184,9 @@ export default function ClubCourseManager() {
       {/* ── Parcours ─────────────────────────────────────────────────────── */}
       {clubId && (
         <div>
-          <label className="block text-[12px] font-medium text-gray-500 mb-1.5">Parcours</label>
+         <label className="block text-[12px] font-medium text-gray-500 mb-1.5">
+            {t('clubs.courseLabel')}
+          </label>
 
           {/* Si un seul parcours → afficher directement sans dropdown */}
           {courses.length === 1 ? (

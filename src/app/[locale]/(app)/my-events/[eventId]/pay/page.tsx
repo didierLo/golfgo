@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
@@ -12,6 +12,7 @@ export default function PayPage() {
   const eventId = params.eventId as string
   const locale  = useLocale()
   const router  = useRouter()
+  const t       = useTranslations()
 
   const [event,   setEvent]   = useState<{ title: string; fee_per_person: number } | null>(null)
   const [loading, setLoading] = useState(true)
@@ -67,26 +68,23 @@ export default function PayPage() {
   return (
     <div className="p-5 sm:p-8 max-w-md mx-auto">
       <button onClick={() => router.back()} className="text-[13px] text-slate-500 hover:text-slate-700 mb-6 flex items-center gap-1">
-        ← Retour
+        {t('payments.back')}
       </button>
       <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-5">
         <h1 className="text-[18px] font-black text-slate-900 mb-1">{event.title}</h1>
-        <p className="text-[13px] text-slate-500 mb-4">Paiement de votre participation</p>
+          <p className="text-[13px] text-slate-500 mb-4">{t('payments.paymentTitle')}</p>
         <div className="text-[32px] font-black text-[#185FA5]">{event.fee_per_person} €</div>
       </div>
       <div className="bg-[#EAF3DE] border border-[#C0DD97] rounded-xl p-4 mb-5">
-        <p className="text-[12px] font-bold text-[#3B6D11] mb-2">🔒 Paiement 100% sécurisé</p>
-        <p className="text-[12px] text-[#3B6D11] leading-relaxed">
-          Votre paiement est traité par <strong>Stripe</strong>, leader mondial du paiement en ligne sécurisé.
-          GolfGo ne stocke jamais vos données bancaires. La transaction est chiffrée et conforme aux
-          normes PCI-DSS. Accepte les cartes Visa, Mastercard, Bancontact et Apple/Google Pay.
-        </p>
+        <p className="text-[12px] font-bold text-[#3B6D11] mb-2">{t('payments.secureTitle')}</p>
+      <p className="text-[12px] text-[#3B6D11] leading-relaxed"
+           dangerouslySetInnerHTML={{ __html: t('payments.secureDesc') }} />
       </div>
       <button
         onClick={handlePay}
         disabled={paying}
         className="w-full py-4 rounded-xl bg-[#185FA5] text-white font-bold text-[15px] hover:bg-[#0C447C] transition-colors disabled:opacity-60">
-        {paying ? 'Redirection...' : `Payer ${event.fee_per_person} €`}
+          {paying ? t('payments.paying') : t('payments.pay', { amount: event.fee_per_person })}
       </button>
     </div>
   )

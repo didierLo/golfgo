@@ -167,7 +167,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, loc
       <button
         onClick={ev => { ev.stopPropagation(); onPay() }}
         className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
-        Payer {e.events.fee_per_person} €
+        {t('payments.pay', { amount: e.events.fee_per_person })}
       </button>
     )
   )}

@@ -130,7 +130,7 @@ setLoading(false)
       {!fee && (
         <div className="mb-5 px-5 py-4 rounded-xl border border-white/60 shadow-sm text-[13px] font-semibold text-slate-500"
           style={{ background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-          Pas de tarif défini pour cet événement.
+          {t('payments.noFee')}
         </div>
       )}
 

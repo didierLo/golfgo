@@ -132,7 +132,8 @@
     "colHole": "Trou",
     "colSI": "SI",
     "colM": "m",
-    "total": "TOT"
+    "total": "TOT",
+    "courseLabel": "Parcours"
   },
   "communications": {
     "title": "Communications",
@@ -499,8 +500,15 @@
       "PAID": "Payé",
       "PENDING": "En attente",
       "EXEMPT": "Exempté"
-    }
-   
+    },
+    "noFee": "Pas de tarif défini pour cet événement.",
+    "back": "← Retour",
+    "paymentTitle": "Paiement de votre participation",
+    "secureTitle": "🔒 Paiement 100% sécurisé",
+    "secureDesc": "Votre paiement est traité par <strong>Stripe</strong>, leader mondial du paiement en ligne sécurisé. GolfGo ne stocke jamais vos données bancaires. La transaction est chiffrée et conforme aux normes PCI-DSS. Accepte les cartes Visa, Mastercard, Bancontact et Apple/Google Pay.",
+    "paying": "Redirection...",
+    "pay": "Payer {amount} €" 
+      
   },
   "results": {
     "title": "Résultats",

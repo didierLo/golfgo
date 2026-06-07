@@ -338,9 +338,9 @@ export default function MembersPage() {
         </button>
 
         {userRole === 'owner' && (
-          <button onClick={() => setShowInvite(true)}
-            className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl border border-[#185FA5] text-[#185FA5] hover:bg-[#EBF3FC] transition-colors">
-            🔗 Lien d'invitation
+        <button onClick={() => setShowInvite(true)}
+          className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl border border-[#185FA5] text-[#185FA5] hover:bg-[#EBF3FC] transition-colors">
+          {t('members.inviteTitle')}
           </button>
         )}
       </div>

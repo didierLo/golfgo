@@ -129,7 +129,8 @@
     "colHole": "Loch",
     "colSI": "SI",
     "colM": "m",
-    "total": "GES"
+    "total": "GES",
+    "courseLabel": "Platz"
   },
   "communications": {
     "title": "Kommunikation",
@@ -494,7 +495,14 @@
       "PAID": "Bezahlt",
       "PENDING": "Ausstehend",
       "EXEMPT": "Befreit"
-    }
+    },
+    "noFee": "Kein Tarif für diese Veranstaltung festgelegt.",
+    "back": "← Zurück",
+    "paymentTitle": "Zahlung Ihrer Teilnahme",
+    "secureTitle": "🔒 100% sichere Zahlung",
+    "secureDesc": "Ihre Zahlung wird von <strong>Stripe</strong>, dem weltweiten Marktführer für sichere Online-Zahlungen, verarbeitet. GolfGo speichert niemals Ihre Bankdaten. Die Transaktion ist verschlüsselt und PCI-DSS-konform. Akzeptiert Visa, Mastercard, Bancontact und Apple/Google Pay.",
+    "paying": "Weiterleitung...",
+    "pay": "Bezahlen {amount} €"
   
 
   },
