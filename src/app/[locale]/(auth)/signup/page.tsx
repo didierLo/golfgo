@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ export default function SignupPage() {
   const router = useRouter()
   const t      = useTranslations()
   const searchParams = useSearchParams()
-  
+
   const [fullName, setFullName]           = useState('')
   const [email, setEmail]                 = useState('')
   const [password, setPassword]           = useState('')
@@ -40,7 +40,10 @@ export default function SignupPage() {
       setLoading(false); return
     }
 
-    if (data.user) router.push('/welcome')
+   if (data.user) {
+  const next = searchParams.get('next')
+  router.push(next ?? '/welcome')
+}
     setLoading(false)
   }
 
