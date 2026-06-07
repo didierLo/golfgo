@@ -39,7 +39,7 @@ export default function SignupPage() {
       setLoading(false); return
     }
 
-    if (data.user) router.push('/mwelcome')
+    if (data.user) router.push('/welcome')
     setLoading(false)
   }
 
