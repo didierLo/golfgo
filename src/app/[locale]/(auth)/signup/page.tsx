@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { AuthCard, AuthInput, AuthButton, AuthError, EyeButton } from '@/components/auth/AuthCard'
@@ -12,7 +12,8 @@ const supabase = createClient()
 export default function SignupPage() {
   const router = useRouter()
   const t      = useTranslations()
-
+  const searchParams = useSearchParams()
+  
   const [fullName, setFullName]           = useState('')
   const [email, setEmail]                 = useState('')
   const [password, setPassword]           = useState('')

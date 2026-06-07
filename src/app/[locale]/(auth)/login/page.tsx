@@ -32,9 +32,10 @@ function LoginContent() {
       setErrorMsg(error.message || t('common.error'))
       setLoading(false)
     } else {
-      router.push('/welcome')
-      router.refresh()
-    }
+  const next = searchParams.get('next')
+  router.push(next ?? '/welcome')
+  router.refresh()
+}
   }
 
   return (
