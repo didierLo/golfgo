@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale } from 'next-intl'
-import Image from 'next/image'
 
 const supabase = createClient()
 
@@ -12,11 +11,13 @@ type GroupInfo = { id: string; name: string; color: string | null }
 type LinkInfo  = { id: string; group_id: string; expires_at: string; groups: GroupInfo }
 type State = 'loading' | 'invalid' | 'expired' | 'already_member' | 'pending' | 'ready' | 'success' | 'need_auth'
 
-export default function JoinPage() {
-  const params = useParams()
-  const token  = params.token as string
-  const router = useRouter()
-  const locale = useLocale()
+function JoinContent() {
+  const params       = useParams()
+  const token        = params.token as string
+  const router       = useRouter()
+  const locale       = useLocale()
+  const searchParams = useSearchParams()
+  const justJoined   = searchParams.get('joined') === '1'
 
   const [state,      setState]      = useState<State>('loading')
   const [linkInfo,   setLinkInfo]   = useState<LinkInfo | null>(null)
@@ -24,6 +25,13 @@ export default function JoinPage() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => { load() }, [token])
+
+  // Auto-join si on vient d'un signup via le lien
+  useEffect(() => {
+    if (state === 'ready' && justJoined) {
+      requestJoin()
+    }
+  }, [state, justJoined])
 
   async function load() {
     const { data: link, error } = await supabase
@@ -60,30 +68,32 @@ export default function JoinPage() {
     setState('ready')
   }
 
-async function requestJoin() {
-  if (!linkInfo || !playerId) return
-  setSubmitting(true)
-  const { error } = await supabase.from('group_join_requests').insert({
-    group_id:  linkInfo.group_id,
-    player_id: playerId,
-    token,
-  })
-  if (error) { console.error(error); setSubmitting(false); return }
+  async function requestJoin() {
+    if (!linkInfo || !playerId) return
+    setSubmitting(true)
+    const { error } = await supabase.from('group_join_requests').insert({
+      group_id:  linkInfo.group_id,
+      player_id: playerId,
+      token,
+    })
+    if (error) { console.error(error); setSubmitting(false); return }
 
-  // ← notifier l'owner
-  const res = await fetch('/api/send-join-notification', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      groupId:  linkInfo.group_id,
-      playerId,
-      locale,
-    }),
-  })
+    // Notifier l'owner
+    const res = await fetch('/api/send-join-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        groupId:  linkInfo.group_id,
+        playerId,
+        locale,
+      }),
+    })
+    const json = await res.json()
+    console.log('join notification response:', json)
 
-  setState('success')
-  setSubmitting(false)
-}
+    setState('success')
+    setSubmitting(false)
+  }
 
   const group      = linkInfo?.groups
   const groupColor = group?.color ?? '#185FA5'
@@ -96,10 +106,10 @@ async function requestJoin() {
         <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.35)' }} />
       </div>
 
-     {/* Logo */}
-    <div className="absolute top-6 left-6 z-10">
-     <img src="/logo/GG_Logo_transparent.png" alt="GolfGo" className="h-48" />
-    </div>
+      {/* Logo */}
+      <div className="absolute top-6 left-6 z-10">
+        <img src="/logo/GG_Logo_transparent.png" alt="GolfGo" className="h-16" />
+      </div>
 
       {/* Carte */}
       <div className="relative z-10 w-full max-w-sm" style={{
@@ -165,7 +175,8 @@ async function requestJoin() {
           </>
         )}
 
-        {state === 'ready' && group && (
+        {/* state === 'ready' sans justJoined → bouton manuel */}
+        {state === 'ready' && !justJoined && group && (
           <>
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4"
               style={{ background: `${groupColor}22` }}>⛳</div>
@@ -180,6 +191,13 @@ async function requestJoin() {
               {submitting ? 'Envoi…' : 'Demander à rejoindre'}
             </button>
           </>
+        )}
+
+        {/* state === 'ready' avec justJoined → spinner pendant l'auto-join */}
+        {state === 'ready' && justJoined && (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-2 border-[#185FA5] border-t-transparent rounded-full animate-spin" />
+          </div>
         )}
 
         {state === 'pending' && group && (
@@ -223,5 +241,13 @@ async function requestJoin() {
 
       </div>
     </div>
+  )
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={null}>
+      <JoinContent />
+    </Suspense>
   )
 }

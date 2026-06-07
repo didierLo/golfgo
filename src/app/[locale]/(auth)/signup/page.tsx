@@ -40,10 +40,11 @@ export default function SignupPage() {
       setLoading(false); return
     }
 
-   if (data.user) {
+  if (data.user) {
   const next = searchParams.get('next')
-  router.push(next ?? '/welcome')
+  router.push(next ? `${next}?joined=1` : '/welcome')
 }
+
     setLoading(false)
   }
 
