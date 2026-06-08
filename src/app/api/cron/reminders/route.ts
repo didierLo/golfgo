@@ -221,6 +221,8 @@ export async function GET(req: Request) {
   .lte('starts_at', new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString())
   .eq('groups_players.role', 'owner')
 
+  console.log('events count:', events?.length ?? 0)
+
   for (const event of events || []) {
   const days        = daysDiff(event.starts_at)
   console.log(`Event: ${event.title}, starts_at: ${event.starts_at}, days: ${days}, auto_reminders: ${(event.groups as any)?.auto_reminders}, auto_teesheet: ${(event.groups as any)?.auto_teesheet}`)
