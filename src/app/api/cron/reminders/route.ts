@@ -206,28 +206,29 @@ export async function GET(req: Request) {
   }
 
   // ── 1. Récupérer les événements J-3 et J-1 ──────────────────────────────────
-  const { data: events } = await supabase
-    .from('events')
-    .select(`
-      id, title, starts_at, location, group_id, tee_interval, is_golf,
-      groups!events_group_id_fkey(
-        id, name, auto_reminders, auto_teesheet,
-        owner:groups_players(
-          role, player:players(id, first_name, surname, email)
-        )
+ const { data: events, error: eventsError } = await supabase
+  .from('events')
+  .select(`
+    id, title, starts_at, location, group_id, tee_interval, is_golf,
+    groups!events_group_id_fkey(
+      id, name, auto_reminders, auto_teesheet,
+      owner:groups_players(
+        role, player:players(id, first_name, surname, email)
       )
-    `)
-    .gte('starts_at', new Date().toISOString())
-    .lte('starts_at', new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString())
+    )
+  `)
+  .gte('starts_at', new Date().toISOString())
+  .lte('starts_at', new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString())
 
-  console.log('events count:', events?.length ?? 0)
+console.log('events count:', events?.length ?? 0)
+console.log('events error:', JSON.stringify(eventsError))
+console.log('events data:', JSON.stringify(events?.slice(0, 2)))
 
-  for (const event of (events || []) as any[]) {
-    const days        = daysDiff(event.starts_at)
-    const group       = event.groups as any
-    const ownerPlayer = group?.owner?.find((o: any) => o.role === 'owner')?.player
+for (const event of (events || []) as any[]) {
+  const days        = daysDiff(event.starts_at)
+  const group       = event.groups as any
+  const ownerPlayer = group?.owner?.find((o: any) => o.role === 'owner')?.player
 
-    // ── J-3 : Rappel à tous les participants ─────────────────────────────────
 
     // ── J-3 : Rappel à tous les participants ─────────────────────────────────
     if (days === 3 && group?.auto_reminders) {
