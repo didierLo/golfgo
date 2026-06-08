@@ -64,10 +64,6 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Pages — network-first avec fallback offline
-  event.respondWith(
-    fetch(request).catch(() => {
-      return caches.match('/offline.html') || new Response('Offline', { status: 503 })
-    })
-  )
+  // Pages — network-first sans fallback offline
+ event.respondWith(fetch(request))
 })
