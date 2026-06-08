@@ -53,5 +53,10 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  event.respondWith(fetch(request))
+  // Pages — network-first sans fallback
+event.respondWith(
+  fetch(request).catch(() => {
+    return new Response('', { status: 503 })
+  })
+)
 })
