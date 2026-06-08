@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -162,30 +162,40 @@ function buildTeesheetEmail({
 
 export async function POST(req: Request) {
   try {
+    const cronSecret = req.headers.get('x-cron-secret')
+    const isCron     = cronSecret === process.env.CRON_SECRET
+
     const { eventId, flights } = await req.json() as { eventId: string; flights: Flight[] }
 
     if (!eventId || !flights?.length) {
       return Response.json({ success: false, error: 'eventId et flights requis' }, { status: 400 })
     }
 
-    const supabase = await createServerClient()
+    let supabase
+    if (isCron) {
+      supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } }
+      )
+    } else {
+      supabase = await createServerClient()
+    }
 
     const [{ data: event }, { data: participants }] = await Promise.all([
-  supabase.from('events')
-    .select('title, starts_at, location, group_id')
-    .eq('id', eventId).single(),
-  supabase.from('event_participants')
-    .select('player_id, players(id, first_name, surname, email)')
-    .eq('event_id', eventId).eq('status', 'GOING')
-])
+      supabase.from('events')
+        .select('title, starts_at, location, group_id')
+        .eq('id', eventId).single(),
+      supabase.from('event_participants')
+        .select('player_id, players(id, first_name, surname, email)')
+        .eq('event_id', eventId).eq('status', 'GOING')
+    ])
 
-if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
+    if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
 
-const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
-  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
-})
-
-    
+    const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+    })
 
     let sent = 0, skipped = 0
     const errors: string[] = []
@@ -199,7 +209,6 @@ const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
       if (!playerFlight) { skipped++; continue }
 
       if (!EMAIL_ENABLED) {
-       
         sent++
         continue
       }
