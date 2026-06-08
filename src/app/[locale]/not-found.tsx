@@ -1,26 +1,17 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import Link from 'next/link'
 
 export default function NotFound() {
-  const router = useRouter()
-  const locale = useLocale()
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Image de fond */}
       <div className="absolute inset-0 z-0">
         <img src="/golf-bg.jpg" alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.35)' }} />
       </div>
 
-      {/* Logo */}
       <div className="absolute top-6 left-6 z-10">
         <img src="/logo/GG_Logo_transparent.png" alt="GolfGo" className="h-16" />
       </div>
 
-      {/* Carte */}
       <div className="relative z-10 w-full max-w-sm" style={{
         background: 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(16px)',
@@ -33,23 +24,19 @@ export default function NotFound() {
       }}>
         <div className="text-[64px] font-black text-[#185FA5] leading-none mb-2">404</div>
         <div className="text-4xl mb-4">⛳</div>
-        <h1 className="text-[20px] font-bold text-slate-900 mb-2">
-          Balle hors limites
-        </h1>
+        <h1 className="text-[20px] font-bold text-slate-900 mb-2">Balle hors limites</h1>
         <p className="text-[13px] text-slate-500 mb-6 leading-relaxed">
           Cette page n'existe pas ou a été déplacée. Retournez au départ !
         </p>
         <div className="flex flex-col gap-2">
-          <button
-            onClick={() => router.push(`/${locale}/my-events`)}
-            className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] transition-colors">
+          <Link href="/fr/my-events"
+            className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] transition-colors text-center block">
             Mes événements
-          </button>
-          <button
-            onClick={() => router.back()}
-            className="w-full border border-slate-200 text-slate-700 text-[13px] font-semibold py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-            ← Retour
-          </button>
+          </Link>
+          <Link href="/"
+            className="w-full border border-slate-200 text-slate-700 text-[13px] font-semibold py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-center block">
+            ← Accueil
+          </Link>
         </div>
       </div>
     </div>
