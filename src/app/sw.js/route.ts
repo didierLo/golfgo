@@ -21,6 +21,8 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   if (url.pathname.startsWith('/api/')) return
   if (url.hostname.includes('supabase')) return
+  if (url.pathname.includes('not-found')) return 
+  if (url.hostname.includes('resend')) return
 
   if (url.pathname.match(/\\.(png|jpg|jpeg|svg|webp|ico|css|js|woff2?)$/)) {
     event.respondWith(
