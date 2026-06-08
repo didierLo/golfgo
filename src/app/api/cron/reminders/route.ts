@@ -203,27 +203,27 @@ export async function GET(req: Request) {
 
   // ── 1. Récupérer les événements J-3 et J-1 ──────────────────────────────────
   const { data: events } = await supabase
-    .from('events')
-    .select(`
-      id, title, starts_at, location, group_id, tee_interval, is_golf,
-      groups!events_group_id_fkey(
-        id, name,
-        owner:groups_players(
-          player:players(id, first_name, surname, email)
-        )
+  .from('events')
+  .select(`
+    id, title, starts_at, location, group_id, tee_interval, is_golf,
+    groups!events_group_id_fkey(
+      id, name, auto_reminders, auto_teesheet,
+      owner:groups_players(
+        player:players(id, first_name, surname, email)
       )
-    `)
-    .gte('starts_at', new Date().toISOString())
-    .lte('starts_at', new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString())
-    .eq('groups_players.role', 'owner')
+    )
+  `)
+  .gte('starts_at', new Date().toISOString())
+  .lte('starts_at', new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString())
+  .eq('groups_players.role', 'owner')
 
   for (const event of events || []) {
-    const days = daysDiff(event.starts_at)
-    const group = event.groups as any
-    const ownerPlayer = group?.owner?.[0]?.player
+  const days        = daysDiff(event.starts_at)
+  const group       = event.groups as any
+  const ownerPlayer = group?.owner?.[0]?.player
 
     // ── J-3 : Rappel à tous les participants ─────────────────────────────────
-    if (days === 3) {
+    if (days === 3 && group?.auto_reminders) {
       const { data: participants } = await supabase
         .from('event_participants')
         .select('player_id, invite_token, players(first_name, surname, email)')
@@ -266,7 +266,7 @@ export async function GET(req: Request) {
     }
 
     // ── J-1 : Teesheet auto ou avertissement owner ───────────────────────────
-    if (days === 1 && event.is_golf) {
+     if (days === 1 && event.is_golf && group?.auto_teesheet) {
       // Vérifier si des flights existent
       const { data: flightsData } = await supabase
         .from('flights')
