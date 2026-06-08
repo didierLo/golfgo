@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef} from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
@@ -79,6 +79,17 @@ export default function TeeSheetPage() {
   }, [nearestEventId, nearestLoading, eventIdFromRoute])
 
   useEffect(() => { if (selectedEventId) loadData(selectedEventId) }, [selectedEventId])
+
+ const isFirstLoad = useRef(true)
+
+useEffect(() => {
+  if (!selectedEventId) return
+  if (isFirstLoad.current) { isFirstLoad.current = false; return }
+  supabase.from('events')
+    .update({ tee_interval: interval })
+    .eq('id', selectedEventId)
+    .then(() => {})
+}, [interval, selectedEventId])
 
   async function loadData(evId: string) {
   setLoading(true); setError(null)

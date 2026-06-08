@@ -12,7 +12,7 @@ const supabase = createClient()
 type Member  = { id: string; surname: string; first_name: string; whs: number | null; role: string }
 type SortKey = 'first_name' | 'surname'
 type InviteLink = { id: string; token: string; expires_at: string } | null
-type JoinRequest = { id: string; status: string; created_at: string; player: { id: string; first_name: string; surname: string; email: string | null } }
+
 
 
 
@@ -155,11 +155,11 @@ export default function MembersPage() {
   const [userRole,     setUserRole]     = useState<string | null>(null)
   const [toast,        setToast]        = useState<string | null>(null)
   const [showInvite,   setShowInvite]   = useState(false)
-  const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([])
-  const [approvingId,  setApprovingId]  = useState<string | null>(null)
+ 
+  
 
   useEffect(() => { if (!groupId) return; loadMembers() }, [groupId])
-  useEffect(() => { if (userRole === 'owner') loadJoinRequests() }, [userRole])
+  
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
@@ -185,43 +185,7 @@ export default function MembersPage() {
     setLoading(false)
   }
 
-  async function loadJoinRequests() {
-    const { data } = await supabase
-      .from('group_join_requests')
-      .select(`id, status, created_at, player:players(id, first_name, surname, email)`)
-      .eq('group_id', groupId)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true })
-    setJoinRequests((data || []) as any)
-  }
-
-  async function approveRequest(requestId: string, playerId: string) {
-    setApprovingId(requestId)
-    // Ajouter dans groups_players
-    await supabase.from('groups_players').insert({
-      group_id: groupId,
-      player_id: playerId,
-      role: 'member',
-    })
-    // Mettre à jour le statut
-    await supabase.from('group_join_requests')
-      .update({ status: 'approved' })
-      .eq('id', requestId)
-    setApprovingId(null)
-    loadMembers()
-    loadJoinRequests()
-    showToast('Membre ajouté au groupe')
-  }
-
-  async function rejectRequest(requestId: string) {
-    setApprovingId(requestId)
-    await supabase.from('group_join_requests')
-      .update({ status: 'rejected' })
-      .eq('id', requestId)
-    setApprovingId(null)
-    loadJoinRequests()
-    showToast('Demande refusée')
-  }
+  
 
   const sortedMembers = useMemo(() =>
     [...members].sort((a, b) =>
@@ -345,50 +309,7 @@ export default function MembersPage() {
         )}
       </div>
 
-      {/* ── Demandes en attente ── */}
-      {userRole === 'owner' && joinRequests.length > 0 && (
-        <div className="mb-5 rounded-xl border border-amber-200 overflow-hidden"
-          style={{ background: 'rgba(254,243,199,0.6)', backdropFilter: 'blur(8px)' }}>
-          <div className="px-4 py-3 border-b border-amber-200">
-            <span className="text-[12px] font-bold text-amber-800 uppercase tracking-widest">
-              {joinRequests.length} demande{joinRequests.length > 1 ? 's' : ''} en attente
-            </span>
-          </div>
-          {joinRequests.map((req, i) => (
-            <div key={req.id}
-              className={`flex items-center justify-between gap-3 px-4 py-3 ${i < joinRequests.length - 1 ? 'border-b border-amber-100' : ''}`}>
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 bg-amber-100 text-amber-800">
-                  {req.player.first_name[0]}{req.player.surname[0]}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-slate-900 truncate">
-                    {req.player.first_name} {req.player.surname}
-                  </p>
-                  {req.player.email && (
-                    <p className="text-[11px] text-slate-500 truncate">{req.player.email}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <button
-                  onClick={() => approveRequest(req.id, req.player.id)}
-                  disabled={approvingId === req.id}
-                  className="text-[11px] font-semibold px-3 py-1.5 rounded-lg bg-[#3B6D11] text-white hover:bg-[#27500A] transition-colors disabled:opacity-40">
-                  ✓ Accepter
-                </button>
-                <button
-                  onClick={() => rejectRequest(req.id)}
-                  disabled={approvingId === req.id}
-                  className="text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40">
-                  ✕
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
+     
       {/* ── Liste membres ── */}
       {members.length === 0 ? (
         <div className="text-center py-16 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
