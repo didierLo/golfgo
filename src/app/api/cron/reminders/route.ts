@@ -223,6 +223,7 @@ export async function GET(req: Request) {
 
   for (const event of events || []) {
   const days        = daysDiff(event.starts_at)
+  console.log(`Event: ${event.title}, starts_at: ${event.starts_at}, days: ${days}, auto_reminders: ${(event.groups as any)?.auto_reminders}, auto_teesheet: ${(event.groups as any)?.auto_teesheet}`)
   const group       = event.groups as any
   const ownerPlayer = group?.owner?.[0]?.player
 
