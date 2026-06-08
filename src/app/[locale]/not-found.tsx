@@ -1,7 +1,5 @@
 import Link from 'next/link'
 
-
-
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -31,16 +29,12 @@ export default function NotFound() {
           Cette page n'existe pas ou a été déplacée. Retournez au départ !
         </p>
         <div className="flex flex-col gap-2">
-          <Link
-            href="/my-events"
-            className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] transition-colors text-center block"
-          >
+          <Link href="/fr/my-events"
+            className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] transition-colors text-center block">
             Mes événements
           </Link>
-          <Link
-            href="/"
-            className="w-full border border-slate-200 text-slate-700 text-[13px] font-semibold py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-center block"
-          >
+          <Link href="/"
+            className="w-full border border-slate-200 text-slate-700 text-[13px] font-semibold py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-center block">
             ← Accueil
           </Link>
         </div>
