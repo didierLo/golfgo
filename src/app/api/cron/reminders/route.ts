@@ -337,17 +337,20 @@ for (const event of (events || []) as any[]) {
         })
 
         // Envoyer via l'API send-teesheet
-        const res = await fetch(`${appUrl}/api/send-teesheet`, {
+       const teesheetRes = await fetch(`${appUrl}/api/send-teesheet`, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ eventId: event.id, flights }),
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-cron-secret': CRON_SECRET ?? '',
+          },
+          body: JSON.stringify({ eventId: event.id, flights }),
         })
-        const json = await res.json()
-        if (json.success) {
-          results.teesheets.sent    += json.sent    ?? 0
-          results.teesheets.skipped += json.skipped ?? 0
+        const teesheetJson = await teesheetRes.json()
+        if (teesheetJson.success) {
+          results.teesheets.sent    += teesheetJson.sent    ?? 0
+          results.teesheets.skipped += teesheetJson.skipped ?? 0
         } else {
-          results.teesheets.errors.push(`${event.title}: ${json.error}`)
+          results.teesheets.errors.push(`${event.title}: ${teesheetJson.error}`)
         }
       }
     }

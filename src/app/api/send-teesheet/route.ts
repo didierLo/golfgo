@@ -11,7 +11,7 @@ type FlightPlayer = {
   surname: string
   whs: number | null
   holes_played?: number | null
-  holes_section?: 'out' | 'in' | null   // ← AJOUT
+  holes_section?: 'out' | 'in' | null  
 }
 type Flight = { flight_number: number; start_time: string; players: FlightPlayer[] }
 
