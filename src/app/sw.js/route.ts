@@ -1,7 +1,7 @@
 export async function GET() {
   const sw = `
 const CACHE_NAME = 'golfgo-v1'
-const STATIC_ASSETS = ['/', '/offline.html', '/golf-bg.jpg', '/icon-192.png', '/icon-512.png']
+const STATIC_ASSETS = ['/', '/golf-bg.jpg', '/icon-192.png', '/icon-512.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)))

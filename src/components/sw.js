@@ -2,7 +2,6 @@ const CACHE_NAME = 'golfgo-v1'
 
 const STATIC_ASSETS = [
   '/',
-  '/offline.html',
   '/golf-bg.jpg',
   '/icon-192.png',
   '/icon-512.png',
