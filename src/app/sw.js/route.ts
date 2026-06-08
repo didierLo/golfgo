@@ -1,7 +1,7 @@
 export async function GET() {
   const sw = `
 const CACHE_NAME = 'golfgo-v1'
-const STATIC_ASSETS = ['/', '/golf-bg.jpg', '/icon-192.png', '/icon-512.png']
+const STATIC_ASSETS = ['/', '/golf-bg.jpg', '/icon-192.png', '/icon-512.png', '/icon-512.png', '/logo/GG_Logo_transparent.png', '/favicon.ico']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)))
@@ -21,15 +21,15 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   if (url.pathname.startsWith('/api/')) return
   if (url.hostname.includes('supabase')) return
-  if (url.pathname.includes('not-found')) return 
   if (url.hostname.includes('resend')) return
 
-  if (url.pathname.match(/\\.(png|jpg|jpeg|svg|webp|ico|css|js|woff2?)$/)) {
+  if (url.pathname.match(/\\.(png|jpg|jpeg|svg|webp|ico|css|js|woff2?)$/) ||
+      STATIC_ASSETS.includes(url.pathname)) {
     event.respondWith(
       caches.match(request).then(cached => cached || fetch(request).then(res => {
         if (res.ok) {
-        const clone = res.clone()
-        caches.open(CACHE_NAME).then(c => c.put(request, clone))
+          const clone = res.clone()
+          caches.open(CACHE_NAME).then(c => c.put(request, clone))
         }
         return res
       }))
@@ -37,9 +37,8 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  event.respondWith(
-    fetch(request).catch(() => caches.match('/offline.html') || new Response('Offline', { status: 503 }))
-  )
+  // Pages — network-first sans fallback
+  event.respondWith(fetch(request))
 })
 `
   return new Response(sw, {
