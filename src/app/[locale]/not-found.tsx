@@ -1,7 +1,6 @@
 import Link from 'next/link'
 
-// ❌ Pas de `params` disponible dans not-found.tsx — il faut lire le locale autrement
-// On hardcode les liens sans locale, next-intl s'en charge via le middleware
+
 
 export default function NotFound() {
   return (
