@@ -14,27 +14,52 @@ const GROUP_COLORS = [
 
 const inputClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
 
+function Toggle({ value, onChange, label, desc }: {
+  value: boolean; onChange: (v: boolean) => void; label: string; desc: string
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <button type="button" onClick={() => onChange(!value)}
+        style={{ backgroundColor: value ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
+        className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
+        <div style={{ transform: value ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
+          className="w-4 h-4 rounded-full bg-white shadow-sm" />
+      </button>
+      <div>
+        <p className="text-[13px] font-semibold text-slate-800">{label}</p>
+        <p className="text-[11px] text-slate-500 mt-0.5">{desc}</p>
+      </div>
+    </div>
+  )
+}
+
 export default function EditGroupPage() {
   const router = useRouter()
   const params = useParams()
-  const id = params.id as string
-  const t = useTranslations()
+  const id     = params.id as string
+  const t      = useTranslations()
 
-  const [name,        setName]        = useState('')
-  const [description, setDescription] = useState('')
-  const [color,       setColor]       = useState(GROUP_COLORS[0])
-  const [loading,     setLoading]     = useState(true)
-  const [saving,      setSaving]      = useState(false)
+  const [name,           setName]           = useState('')
+  const [description,    setDescription]    = useState('')
+  const [color,          setColor]          = useState(GROUP_COLORS[0])
+  const [autoReminders,  setAutoReminders]  = useState(false)
+  const [autoTeesheet,   setAutoTeesheet]   = useState(false)
+  const [loading,        setLoading]        = useState(true)
+  const [saving,         setSaving]         = useState(false)
 
   useEffect(() => { fetchGroup() }, [])
 
   async function fetchGroup() {
     const { data, error } = await supabase
-      .from('groups').select('name, description, color').eq('id', id).single()
+      .from('groups')
+      .select('name, description, color, auto_reminders, auto_teesheet')
+      .eq('id', id).single()
     if (error) { alert(error.message); router.push('/groups'); return }
     setName(data.name)
     setDescription(data.description || '')
     setColor(data.color ?? GROUP_COLORS[0])
+    setAutoReminders(data.auto_reminders ?? false)
+    setAutoTeesheet(data.auto_teesheet ?? false)
     setLoading(false)
   }
 
@@ -45,9 +70,11 @@ export default function EditGroupPage() {
     const { error } = await supabase
       .from('groups')
       .update({
-        name:        name.trim(),
-        description: description.trim() || null,
+        name:           name.trim(),
+        description:    description.trim() || null,
         color,
+        auto_reminders: autoReminders,
+        auto_teesheet:  autoTeesheet,
       })
       .eq('id', id)
     if (error) { alert(error.message); setSaving(false); return }
@@ -88,6 +115,26 @@ export default function EditGroupPage() {
                 style={{ background: c, outline: color === c ? `3px solid ${c}` : 'none', outlineOffset: '2px' }} />
             ))}
           </div>
+        </div>
+
+        {/* ── Automatisations ── */}
+        <div className="rounded-xl border border-white/60 shadow-sm p-4 flex flex-col gap-4"
+          style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            {t('editGroup.automations')}
+          </p>
+          <Toggle
+            value={autoReminders}
+            onChange={setAutoReminders}
+            label={t('editGroup.autoRemindersLabel')}
+            desc={t('editGroup.autoRemindersDesc')}
+          />
+          <Toggle
+            value={autoTeesheet}
+            onChange={setAutoTeesheet}
+            label={t('editGroup.autoTeesheetLabel')}
+            desc={t('editGroup.autoTeesheetDesc')}
+          />
         </div>
 
         <div className="flex gap-2 pt-2">

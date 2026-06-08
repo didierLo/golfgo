@@ -338,7 +338,12 @@
     "whatsappLinkTest": "Test the link",
     "save": "Save",
     "saving": "Saving...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "automations": "Automations",
+    "autoRemindersLabel": "Automatic reminders D-3",
+    "autoRemindersDesc": "Sends a reminder to all participants 3 days before the event",
+    "autoTeesheetLabel": "Automatic teesheet D-1",
+    "autoTeesheetDesc": "Sends the tee sheet the day before if flights are generated, otherwise notifies the organiser"
   },
   "flightHistory": {
     "title": "Flight history",

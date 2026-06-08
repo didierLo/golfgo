@@ -338,7 +338,12 @@
     "whatsappLinkTest": "Link testen",
     "save": "Opslaan",
     "saving": "Opslaan...",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "automations": "Automatiseringen",
+    "autoRemindersLabel": "Automatische herinneringen D-3",
+    "autoRemindersDesc": "Stuurt een herinnering naar alle deelnemers 3 dagen voor het evenement",
+    "autoTeesheetLabel": "Automatische startlijst D-1",
+    "autoTeesheetDesc": "Stuurt de startlijst de dag ervoor als flights gegenereerd zijn, anders wordt de organisator gewaarschuwd"
   },
   "flightHistory": {
     "title": "Flightgeschiedenis",

@@ -342,7 +342,12 @@
     "whatsappLinkTest": "Tester le lien",
     "save": "Enregistrer",
     "saving": "Enregistrement en cours...",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "automations": "Automatisations",
+    "autoRemindersLabel": "Rappels automatiques J-3",
+    "autoRemindersDesc": "Envoie un rappel à tous les participants 3 jours avant l'événement",
+    "autoTeesheetLabel": "Teesheet automatique J-1",
+    "autoTeesheetDesc": "Envoie la feuille de départ la veille si les flights sont générés, sinon avertit l'organisateur"
   },
   "flightHistory": {
     "title": "Historique des flights",

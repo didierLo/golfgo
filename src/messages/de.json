@@ -337,7 +337,12 @@
     "whatsappLinkTest": "Link testen",
     "save": "Speichern",
     "saving": "Speichern...",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "automations": "Automatisierungen",
+    "autoRemindersLabel": "Automatische Erinnerungen T-3",
+    "autoRemindersDesc": "Sendet 3 Tage vor der Veranstaltung eine Erinnerung an alle Teilnehmer",
+    "autoTeesheetLabel": "Automatisches Abschlagblatt T-1",
+    "autoTeesheetDesc": "Sendet das Abschlagblatt am Vortag, wenn Flights generiert wurden, sonst wird der Organisator benachrichtigt"
   },
   "flightHistory": {
     "title": "Flight-Verlauf",
