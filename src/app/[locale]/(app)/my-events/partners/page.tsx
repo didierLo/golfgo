@@ -126,21 +126,16 @@ export default function MyPartnersPage() {
   )
 
   return (
-    <div className="p-5 sm:p-6 max-w-4xl">
+  
+  <div className="p-5 sm:p-6 max-w-4xl">
 
-      {/* En-tête */}
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => router.back()}
-          className="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 bg-white/80 text-slate-500 hover:text-slate-800 transition-all shadow-sm">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <div>
-          <h1 className="text-[20px] font-black text-slate-900 tracking-tight leading-none">{t('partners.title')}</h1>
-          <p className="text-[12px] text-slate-900 mt-0.5">{me.first_name} {me.surname}</p>
-        </div>
+    {/* En-tête */}
+    <div className="flex items-center gap-3 mb-6">
+      <div>
+        <h1 className="text-[20px] font-black text-slate-900 tracking-tight leading-none">{t('partners.title')}</h1>
+        <p className="text-[12px] text-slate-900 mt-0.5">{me.first_name} {me.surname}</p>
       </div>
+    </div>
 
       {/* ══ PARTIE 1 : Matrice ══ */}
       <section className="mb-8">

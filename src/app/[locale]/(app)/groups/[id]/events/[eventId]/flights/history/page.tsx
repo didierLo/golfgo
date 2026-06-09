@@ -8,6 +8,7 @@ import { useTranslations, useLocale } from 'next-intl'
 const supabase = createClient()
 
 type Player = { id: string; first_name: string; surname: string }
+type FlightRow = { id: string; created_at: string; players: Player[] }
 
 export default function FlightHistoryPage() {
   const params  = useParams()
@@ -26,6 +27,7 @@ export default function FlightHistoryPage() {
   const [tooltip,    setTooltip]    = useState<{ x: number; y: number; text: string } | null>(null)
   const [sortKey,    setSortKey]    = useState<'name' | 'count'>('name')
   const [periodDays, setPeriodDays] = useState<number>(365)
+  const [flightRows, setFlightRows] = useState<FlightRow[]>([])
 
   useEffect(() => { loadData() }, [groupId, periodDays])
 
@@ -36,6 +38,8 @@ export default function FlightHistoryPage() {
       .select('player:players(id, first_name, surname)')
       .eq('group_id', groupId)
     const allPlayers: Player[] = (membersData ?? []).map((r: any) => r.player)
+    const playerMap: Record<string, Player> = {}
+    for (const p of allPlayers) playerMap[p.id] = p
 
     const eventIds = await getGroupEventIds()
 
@@ -43,6 +47,7 @@ export default function FlightHistoryPage() {
       .from('flights')
       .select(`id, created_at, flight_players(player_id)`)
       .in('event_id', eventIds.length ? eventIds : ['_none_'])
+      .order('created_at', { ascending: false })
 
     if (periodDays > 0) {
       const since = new Date()
@@ -53,6 +58,8 @@ export default function FlightHistoryPage() {
     const { data: flightsData } = await query
 
     const counts: Record<string, number> = {}
+    const rows: FlightRow[] = []
+
     for (const flight of flightsData ?? []) {
       const ids = (flight.flight_players ?? []).map((fp: any) => fp.player_id as string)
       for (let i = 0; i < ids.length; i++) {
@@ -61,6 +68,11 @@ export default function FlightHistoryPage() {
           counts[key] = (counts[key] ?? 0) + 1
         }
       }
+      rows.push({
+        id: flight.id,
+        created_at: flight.created_at,
+        players: ids.map((id: string) => playerMap[id]).filter(Boolean),
+      })
     }
 
     const { data: overrides } = await supabase
@@ -79,6 +91,7 @@ export default function FlightHistoryPage() {
     setMatrix(counts)
     setEdits(savedEdits)
     setMaxCount(max)
+    setFlightRows(rows)
     setLoading(false)
   }
 
@@ -133,6 +146,12 @@ export default function FlightHistoryPage() {
     return Math.min(value / maxCount, 1) > 0.5 ? '#ffffff' : '#1e3a12'
   }
 
+  function formatDate(d: string) {
+    return new Date(d).toLocaleDateString(locale, {
+      day: 'numeric', month: 'short', year: 'numeric',
+    })
+  }
+
   const sortedPlayers = useMemo(() => {
     if (sortKey === 'name') {
       return [...players].sort((a, b) => a.surname.localeCompare(b.surname, locale))
@@ -174,6 +193,7 @@ export default function FlightHistoryPage() {
         </div>
       </div>
 
+      {/* Période + tri */}
       <div className="flex flex-wrap items-end gap-4 mb-5">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('flightHistory.period')}</span>
@@ -212,95 +232,4 @@ export default function FlightHistoryPage() {
                 const rv = Math.round(255 - r * (255 - 59))
                 const gv = Math.round(255 - r * (255 - 109))
                 const bv = Math.round(255 - r * (255 - 17))
-                return <div key={i} className="flex-1" style={{ background: r === 0 ? '#F8FAFC' : `rgb(${rv},${gv},${bv})` }} />
-              })}
-            </div>
-            <span className="text-[11px] text-slate-400">{maxCount}×</span>
-          </div>
-        </div>
-      </div>
-
-      <p className="text-[11px] text-slate-400 mb-4">{t('flightHistory.manualNote')}</p>
-
-      {loading ? (
-        <div className="space-y-2">
-          {[1,2,3,4].map(i => <div key={i} className="h-8 bg-slate-100 rounded-xl animate-pulse" />)}
-        </div>
-      ) : players.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 text-[13px]">{t('flightHistory.noMembers')}</div>
-      ) : (
-        <div className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="border-collapse" style={{ fontSize: '11px' }}>
-            <thead>
-              <tr>
-                <th className="sticky left-0 z-20 bg-slate-50 border-b border-r border-slate-200 w-28 min-w-28" />
-                {sortedPlayers.map(p => (
-                  <th key={p.id}
-                    className="bg-slate-50 border-b border-slate-200 px-1 py-2 font-semibold text-slate-600 whitespace-nowrap"
-                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: '90px', verticalAlign: 'bottom', minWidth: '32px' }}>
-                    {p.first_name[0]}. {p.surname}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {sortedPlayers.map((rowPlayer, ri) => (
-                <tr key={rowPlayer.id} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                  <td className="sticky left-0 z-10 bg-inherit border-r border-slate-200 px-3 py-1.5 font-semibold text-slate-700 whitespace-nowrap text-[12px]">
-                    {rowPlayer.first_name[0]}. {rowPlayer.surname}
-                  </td>
-                  {sortedPlayers.map(colPlayer => {
-                    const isSelf = rowPlayer.id === colPlayer.id
-                    const val    = getValue(rowPlayer.id, colPlayer.id)
-                    const isEdit = !isSelf && edits[pairKey(rowPlayer.id, colPlayer.id)] !== undefined
-
-                    if (isSelf) return (
-                      <td key={colPlayer.id} className="border border-slate-100 text-center"
-                        style={{ background: '#F1F5F9', width: '32px', height: '32px' }}>
-                        <span className="text-slate-300">—</span>
-                      </td>
-                    )
-
-                    return (
-                      <td key={colPlayer.id}
-                        className="border border-slate-100 text-center relative group cursor-default select-none"
-                        style={{ background: val > 0 ? cellColor(val) : '#F8FAFC', width: '32px', height: '32px', transition: 'background 0.2s' }}
-                        onMouseEnter={e => {
-                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                          setTooltip({ x: rect.left + rect.width / 2, y: rect.top - 8,
-                            text: `${rowPlayer.first_name} & ${colPlayer.first_name} : ${val}×${isEdit ? ' ✎' : ''}` })
-                        }}
-                        onMouseLeave={() => setTooltip(null)}>
-                        <span className="text-[11px] font-bold" style={{ color: val > 0 ? cellTextColor(val) : '#CBD5E1' }}>
-                          {val > 0 ? val : ''}
-                        </span>
-                        {isEdit && <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400" />}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-0.5 bg-black/10 transition-opacity">
-                          <button onClick={e => { e.stopPropagation(); adjustCell(rowPlayer.id, colPlayer.id, +1) }}
-                            className="w-5 h-5 rounded text-white bg-black/40 hover:bg-black/60 flex items-center justify-center text-[10px] font-bold leading-none">+</button>
-                          <button onClick={e => { e.stopPropagation(); adjustCell(rowPlayer.id, colPlayer.id, -1) }}
-                            className="w-5 h-5 rounded text-white bg-black/40 hover:bg-black/60 flex items-center justify-center text-[10px] font-bold leading-none">−</button>
-                        </div>
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {tooltip && (
-        <div className="fixed z-50 pointer-events-none px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-[11px] font-medium shadow-lg -translate-x-1/2 -translate-y-full"
-          style={{ left: tooltip.x, top: tooltip.y }}>
-          {tooltip.text}
-        </div>
-      )}
-
-      <p className="mt-4 text-[11px] text-slate-400">
-        Corrections sauvegardées dans <code className="bg-slate-100 px-1 rounded">flight_history_overrides</code> (group_id, player_a, player_b, count)
-      </p>
-    </div>
-  )
-}
+                return <div key={i} className="flex-1" style={{ background: r === 0 ? '#F8FAFC' :
