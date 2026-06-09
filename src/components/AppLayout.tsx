@@ -299,7 +299,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                               router.refresh()
                               return
                             } else if (pagesWithEvent.includes(lastSegment ?? '') && targetEventId) {
-                              router.push(`/groups/${g.id}/events/${targetEventId}/${lastSegment}`)
+                              const flightsPrefix = lastSegment === 'history' ? 'flights/' : ''
+                              router.push(`/groups/${g.id}/events/${targetEventId}/${flightsPrefix}${lastSegment}`)
                             } else {
                               const afterGroupId = pathname.match(/\/groups\/[^/]+\/(.+)/)?.[1]
                               const newPath = afterGroupId
