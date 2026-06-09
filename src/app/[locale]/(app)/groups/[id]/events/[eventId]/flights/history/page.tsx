@@ -232,4 +232,126 @@ export default function FlightHistoryPage() {
                 const rv = Math.round(255 - r * (255 - 59))
                 const gv = Math.round(255 - r * (255 - 109))
                 const bv = Math.round(255 - r * (255 - 17))
-                return <div key={i} className="flex-1" style={{ background: r === 0 ? '#F8FAFC' :
+                return <div key={i} className="flex-1" style={{ background: r === 0 ? '#F8FAFC' : `rgb(${rv},${gv},${bv})` }} />
+              })}
+            </div>
+            <span className="text-[11px] text-slate-400">{maxCount}×</span>
+          </div>
+        </div>
+      </div>
+
+      <p className="text-[11px] text-slate-400 mb-4">{t('flightHistory.manualNote')}</p>
+
+      {/* Matrice */}
+      {loading ? (
+        <div className="space-y-2">
+          {[1,2,3,4].map(i => <div key={i} className="h-8 bg-slate-100 rounded-xl animate-pulse" />)}
+        </div>
+      ) : players.length === 0 ? (
+        <div className="text-center py-16 text-slate-400 text-[13px]">{t('flightHistory.noMembers')}</div>
+      ) : (
+        <div className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="border-collapse" style={{ fontSize: '11px' }}>
+            <thead>
+              <tr>
+                <th className="sticky left-0 z-20 bg-slate-50 border-b border-r border-slate-200 w-28 min-w-28" />
+                {sortedPlayers.map(p => (
+                  <th key={p.id}
+                    className="bg-slate-50 border-b border-slate-200 px-1 py-2 font-semibold text-slate-600 whitespace-nowrap"
+                    style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: '90px', verticalAlign: 'bottom', minWidth: '32px' }}>
+                    {p.first_name[0]}. {p.surname}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {sortedPlayers.map((rowPlayer, ri) => (
+                <tr key={rowPlayer.id} className={ri % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                  <td className="sticky left-0 z-10 bg-inherit border-r border-slate-200 px-3 py-1.5 font-semibold text-slate-700 whitespace-nowrap text-[12px]">
+                    {rowPlayer.first_name[0]}. {rowPlayer.surname}
+                  </td>
+                  {sortedPlayers.map(colPlayer => {
+                    const isSelf = rowPlayer.id === colPlayer.id
+                    const val    = getValue(rowPlayer.id, colPlayer.id)
+                    const isEdit = !isSelf && edits[pairKey(rowPlayer.id, colPlayer.id)] !== undefined
+
+                    if (isSelf) return (
+                      <td key={colPlayer.id} className="border border-slate-100 text-center"
+                        style={{ background: '#F1F5F9', width: '32px', height: '32px' }}>
+                        <span className="text-slate-300">—</span>
+                      </td>
+                    )
+
+                    return (
+                      <td key={colPlayer.id}
+                        className="border border-slate-100 text-center relative group cursor-default select-none"
+                        style={{ background: val > 0 ? cellColor(val) : '#F8FAFC', width: '32px', height: '32px', transition: 'background 0.2s' }}
+                        onMouseEnter={e => {
+                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                          setTooltip({ x: rect.left + rect.width / 2, y: rect.top - 8,
+                            text: `${rowPlayer.first_name} & ${colPlayer.first_name} : ${val}×${isEdit ? ' ✎' : ''}` })
+                        }}
+                        onMouseLeave={() => setTooltip(null)}>
+                        <span className="text-[11px] font-bold" style={{ color: val > 0 ? cellTextColor(val) : '#CBD5E1' }}>
+                          {val > 0 ? val : ''}
+                        </span>
+                        {isEdit && <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-0.5 bg-black/10 transition-opacity">
+                          <button onClick={e => { e.stopPropagation(); adjustCell(rowPlayer.id, colPlayer.id, +1) }}
+                            className="w-5 h-5 rounded text-white bg-black/40 hover:bg-black/60 flex items-center justify-center text-[10px] font-bold leading-none">+</button>
+                          <button onClick={e => { e.stopPropagation(); adjustCell(rowPlayer.id, colPlayer.id, -1) }}
+                            className="w-5 h-5 rounded text-white bg-black/40 hover:bg-black/60 flex items-center justify-center text-[10px] font-bold leading-none">−</button>
+                        </div>
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tooltip && (
+        <div className="fixed z-50 pointer-events-none px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-[11px] font-medium shadow-lg -translate-x-1/2 -translate-y-full"
+          style={{ left: tooltip.x, top: tooltip.y }}>
+          {tooltip.text}
+        </div>
+      )}
+
+      {/* Historique des flights */}
+      {!loading && flightRows.length > 0 && (
+        <div className="mt-8">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+            {t('flightHistory.title')} · {flightRows.length}
+          </p>
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            {flightRows.map((flight, i) => (
+              <div key={flight.id}
+                className={`flex items-center gap-4 px-4 py-3 ${i < flightRows.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                <span className="text-[11px] font-semibold text-slate-400 w-24 flex-shrink-0">
+                  {formatDate(flight.created_at)}
+                </span>
+                <span className="text-[10px] font-bold text-slate-300 flex-shrink-0">
+                  #{i + 1}
+                </span>
+                <div className="flex flex-wrap gap-1.5 flex-1">
+                  {flight.players.map(p => (
+                    <span key={p.id}
+                      className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg">
+                      {p.first_name[0]}. {p.surname}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="mt-4 text-[11px] text-slate-400">
+        Corrections sauvegardées dans <code className="bg-slate-100 px-1 rounded">flight_history_overrides</code> (group_id, player_a, player_b, count)
+      </p>
+    </div>
+  )
+}

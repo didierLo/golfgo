@@ -277,7 +277,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                               setPillMenuOpen(false)
 
                               const lastSegment = pathname.split('/').pop()
-                              const pagesWithEvent = ['participants', 'flights', 'results', 'teesheet', 'scorecards']
+                              const pagesWithEvent = ['participants', 'flights', 'results', 'teesheet', 'scorecards', 'history']
                              
                               let targetEventId = nearestEventId
                               
