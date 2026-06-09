@@ -1,4 +1,4 @@
-const CACHE_NAME = 'golfgo-v1'
+const CACHE_NAME = 'golfgo-v2'
 
 const STATIC_ASSETS = [
   '/',
