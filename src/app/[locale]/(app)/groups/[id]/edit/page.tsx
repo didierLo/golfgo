@@ -90,6 +90,13 @@ export default function EditGroupPage() {
   return (
     <div className="p-5 sm:p-6 max-w-lg">
       <div className="mb-6">
+        <button onClick={() => router.back()}
+          className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-4">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          {t('common.back')}
+        </button>
         <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('editGroup.title')}</h1>
         <p className="text-[13px] text-slate-900 mt-0.5">{name}</p>
       </div>

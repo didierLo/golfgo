@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import ScorecardTable from '@/components/scorecards/ScorecardTable'
 import { useTranslations, useLocale } from 'next-intl'
+import { useRouter } from 'next/navigation'
 
 const supabase = createClient()
 
@@ -33,6 +34,7 @@ const selectClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-
 export default function MyScorecardPage() {
   const t      = useTranslations()
   const locale = useLocale()
+  const router = useRouter()
 
   function formatShortDate(d: string) {
     return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
@@ -274,7 +276,13 @@ export default function MyScorecardPage() {
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
-
+      <button onClick={() => router.back()}
+        className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-4">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {t('common.back')}
+      </button>
       <h1 className="text-[22px] font-black text-slate-900 tracking-tight mb-4">{t('scorecard.title')}</h1>
 
       {allEvents.length > 0 && (

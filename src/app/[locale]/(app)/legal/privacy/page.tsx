@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 
 export default function PrivacyPage() {
-  const t = useTranslations('legal.privacy')
+  const t = useTranslations('.privacy')
   const locale = useLocale()
 
   const today = new Date().toLocaleDateString(locale, {
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
 
       <div className="mt-6 text-center">
         <Link
-          href={`/${locale}/legal/cgu`}
+          href={`/${locale}//cgu`}
           className="text-[12px] text-slate-400 hover:text-slate-600 transition-colors underline underline-offset-2"
         >
           {t('linkToCgu')} →
