@@ -80,8 +80,11 @@ function GroupDot({ color, size = 8 }: { color: string; size?: number }) {
   return <span className="rounded-full flex-shrink-0 ring-2 ring-white" style={{ width: size, height: size, background: color, display: 'inline-block' }} />
 }
 
-const ORGANISER_SEGMENTS = ['/events/', '/invitations', '/flights', '/results', '/participants', '/teesheet', '/scorecards', '/leaderboard', '/communications']
-
+const ORGANISER_SEGMENTS = [
+  '/events/', '/invitations', '/flights', '/results', '/participants',
+  '/teesheet', '/scorecards', '/leaderboard', '/communications',
+  '/members', '/constraints', '/edit', '/scorecard', '/admin/clubs',
+]
 const supabase = createClient()
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -237,9 +240,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="w-px h-full bg-white/30 flex-shrink-0 self-stretch" />
           <div className="flex items-center gap-3 flex-1 px-4">
 
-            {showBack && (
+           {showBack && (
               <button onClick={() => router.back()}
-                className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all flex-shrink-0">
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all flex-shrink-0">
                 {Icons.back}
                 <span>{t('nav.back')}</span>
               </button>
