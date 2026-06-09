@@ -1,7 +1,6 @@
-const CACHE_NAME = 'golfgo-v2'
+const CACHE_NAME = 'golfgo-v3'
 
 const STATIC_ASSETS = [
-  '/',
   '/golf-bg.jpg',
   '/icon-192.png',
   '/icon-512.png',
@@ -30,6 +29,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
 
   if (request.method !== 'GET') return
+  if (request.mode === 'navigate') return
   if (url.pathname.startsWith('/api/')) return
   if (url.hostname.includes('supabase')) return
   if (url.hostname.includes('resend')) return
@@ -52,9 +52,4 @@ self.addEventListener('fetch', (event) => {
     )
     return
   }
-
-  // Pages — network-first sans fallback
-if (request.mode === 'navigate') return
-
-  event.respondWith(fetch(request))
 })
