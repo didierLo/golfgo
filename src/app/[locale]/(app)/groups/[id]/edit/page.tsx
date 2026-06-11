@@ -47,12 +47,14 @@ export default function EditGroupPage() {
   const [loading,        setLoading]        = useState(true)
   const [saving,         setSaving]         = useState(false)
 
+const [autoInvitation,   setAutoInvitation] = useState(false)
+
   useEffect(() => { fetchGroup() }, [])
 
   async function fetchGroup() {
     const { data, error } = await supabase
       .from('groups')
-      .select('name, description, color, auto_reminders, auto_teesheet')
+      .select('name, description, color, auto_reminders, auto_teesheet, auto_invitation')
       .eq('id', id).single()
     if (error) { alert(error.message); router.push('/groups'); return }
     setName(data.name)
@@ -61,6 +63,7 @@ export default function EditGroupPage() {
     setAutoReminders(data.auto_reminders ?? false)
     setAutoTeesheet(data.auto_teesheet ?? false)
     setLoading(false)
+    setAutoInvitation(data.auto_invitation ?? false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -75,6 +78,7 @@ export default function EditGroupPage() {
         color,
         auto_reminders: autoReminders,
         auto_teesheet:  autoTeesheet,
+        auto_invitation: autoInvitation,
       })
       .eq('id', id)
     if (error) { alert(error.message); setSaving(false); return }
@@ -130,6 +134,12 @@ export default function EditGroupPage() {
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             {t('editGroup.automations')}
           </p>
+          <Toggle
+            value={autoInvitation}
+            onChange={setAutoInvitation}
+            label={t('editGroup.autoInvitationLabel')}
+            desc={t('editGroup.autoInvitationDesc')}
+/>
           <Toggle
             value={autoReminders}
             onChange={setAutoReminders}
