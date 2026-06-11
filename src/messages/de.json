@@ -342,8 +342,11 @@
     "autoRemindersLabel": "Automatische Erinnerungen T-3",
     "autoRemindersDesc": "Sendet 3 Tage vor der Veranstaltung eine Erinnerung an alle Teilnehmer",
     "autoTeesheetLabel": "Automatisches Abschlagblatt T-1",
-    "autoTeesheetDesc": "Sendet das Abschlagblatt am Vortag, wenn Flights generiert wurden, sonst wird der Organisator benachrichtigt"
+    "autoTeesheetDesc": "Sendet das Abschlagblatt am Vortag, wenn Flights generiert wurden, sonst wird der Organisator benachrichtigt",
+    "autoInvitationLabel": "Automatische Einladung 14 Tage vor der Veranstaltung",
+    "autoInvitationDesc": "Sendet 14 Tage vor der Veranstaltung eine Einladung an alle Mitglieder."
   },
+  
   "flightHistory": {
     "title": "Flight-Verlauf",
     "subtitle": "Gemeinsame Teilnahmen · zum manuellen Korrigieren mit der Maus überfahren",

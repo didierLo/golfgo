@@ -347,8 +347,12 @@
     "autoRemindersLabel": "Rappels automatiques J-3",
     "autoRemindersDesc": "Envoie un rappel à tous les participants 3 jours avant l'événement",
     "autoTeesheetLabel": "Teesheet automatique J-1",
-    "autoTeesheetDesc": "Envoie la feuille de départ la veille si les flights sont générés, sinon avertit l'organisateur"
-  },
+    "autoTeesheetDesc": "Envoie la feuille de départ la veille si les flights sont générés, sinon avertit l'organisateur",
+    "autoInvitationLabel": "Invitation automatique J-14",
+    "autoInvitationDesc": "Envoie une invitation à tous les membres 14 jours avant l'événement"
+  } ,
+
+ 
   "flightHistory": {
     "title": "Historique des flights",
     "subtitle": "Co-participations · passer la souris dessus pour corriger manuellement",
@@ -739,6 +743,7 @@
     "deleteConfirm": "Supprimer ce groupe ?",
     "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
   },
+  
   "editPlayer": {
     "title": "Modifier le profil du joueur",
     "notFound": "Joueur introuvable",

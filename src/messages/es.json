@@ -342,7 +342,9 @@
     "autoRemindersLabel": "Recordatorios automáticos D-3",
     "autoRemindersDesc": "Envía un recordatorio a todos los participantes 3 días antes del evento",
     "autoTeesheetLabel": "Hoja de salida automática D-1",
-    "autoTeesheetDesc": "Envía la hoja de salida el día anterior si los flights están generados, sino notifica al organizador"
+    "autoTeesheetDesc": "Envía la hoja de salida el día anterior si los flights están generados, sino notifica al organizador",
+    "autoInvitationLabel": "Invitación automática 14 días antes del evento",
+    "autoInvitationDesc": "Envía una invitación a todos los miembros 14 días antes del evento"
   },
   "flightHistory": {
     "title": "Historial de flights",

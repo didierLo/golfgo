@@ -343,8 +343,11 @@
     "autoRemindersLabel": "Automatische herinneringen D-3",
     "autoRemindersDesc": "Stuurt een herinnering naar alle deelnemers 3 dagen voor het evenement",
     "autoTeesheetLabel": "Automatische startlijst D-1",
-    "autoTeesheetDesc": "Stuurt de startlijst de dag ervoor als flights gegenereerd zijn, anders wordt de organisator gewaarschuwd"
+    "autoTeesheetDesc": "Stuurt de startlijst de dag ervoor als flights gegenereerd zijn, anders wordt de organisator gewaarschuwd",
+    "autoInvitationLabel": "Automatische uitnodiging 14 dagen voor het evenement",
+    "autoInvitationDesc": "Verstuurt een uitnodiging naar alle leden 14 dagen voor het evenement"
   },
+  
   "flightHistory": {
     "title": "Flightgeschiedenis",
     "subtitle": "Samen gespeeld · beweeg de muis om handmatig te corrigeren",

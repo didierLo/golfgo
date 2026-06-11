@@ -343,8 +343,12 @@
     "autoRemindersLabel": "Automatic reminders D-3",
     "autoRemindersDesc": "Sends a reminder to all participants 3 days before the event",
     "autoTeesheetLabel": "Automatic teesheet D-1",
-    "autoTeesheetDesc": "Sends the tee sheet the day before if flights are generated, otherwise notifies the organiser"
+    "autoTeesheetDesc": "Sends the tee sheet the day before if flights are generated, otherwise notifies the organiser",
+    "autoInvitationLabel": "Automatic invitation 14 days before the event",
+    "autoInvitationDesc": "Sends an invitation to all members 14 days before the event"
   },
+
+
   "flightHistory": {
     "title": "Flight history",
     "subtitle": "Co-participations · hover to correct manually",
