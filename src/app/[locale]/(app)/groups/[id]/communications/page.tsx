@@ -48,7 +48,6 @@ const COMM_VARS = [
   { key: '{{yes_button}}', label: '✓/✗ Boutons réponse' },
 ]
 
-// ── Bouton icône compact ──────────────────────────────────────────────────────
 function IconBtn({ onClick, href, title, disabled, color, children }: {
   onClick?: () => void; href?: string; title: string
   disabled?: boolean; color?: 'blue' | 'green'; children: React.ReactNode
@@ -80,31 +79,23 @@ export default function CommunicationsPage() {
   const t      = useTranslations()
   const locale = useLocale()
 
-  const [inviteTab, setInviteTab] = useState<'send' | 'templates' | 'invite'>('send')
-  const [inviteEmails, setInviteEmails] = useState('')
-  const [inviteLink, setInviteLink] = useState<{ token: string; expires_at: string } | null>(null)
-  const [inviteLinkLoading, setInviteLinkLoading] = useState(false)
-  const [inviteCopied, setInviteCopied] = useState(false)
-  const [inviteSending, setInviteSending] = useState(false)
+  const [mainTab, setMainTab] = useState<'send' | 'settings' | 'invite'>('send')
 
-  const [mainTab, setMainTab] = useState<'send' | 'templates' | 'invite'>('send')
+  const [inviteEmails,      setInviteEmails]      = useState('')
+  const [inviteLink,        setInviteLink]        = useState<{ token: string; expires_at: string } | null>(null)
+  const [inviteCopied,      setInviteCopied]      = useState(false)
+  const [inviteSending,     setInviteSending]     = useState(false)
+
   const [members,          setMembers]          = useState<Member[]>([])
   const [events,           setEvents]           = useState<EventRow[]>([])
   const [loading,          setLoading]          = useState(true)
   const [groupTemplate,    setGroupTemplate]    = useState<Template>(DEFAULTS)
-  const [useGroupTemplate, setUseGroupTemplate] = useState(true)
-  const [eventTemplate,    setEventTemplate]    = useState<Template>(DEFAULTS)
   const [selectedEventId,  setSelectedEventId]  = useState<string>('')
   const [saving,           setSaving]           = useState(false)
   const [uploading,        setUploading]        = useState(false)
-  const [templateTab,      setTemplateTab]      = useState<'invitation' | 'teesheet' | 'print'>('invitation')
+  const [settingsTab,      setSettingsTab]      = useState<'invitation' | 'teesheet' | 'visual'>('invitation')
   const fileInputRef   = useRef<HTMLInputElement>(null)
   const bgFileInputRef = useRef<HTMLInputElement>(null)
-
-  const template    = useGroupTemplate ? groupTemplate : eventTemplate
-  const setTemplate = useGroupTemplate
-    ? (fn: (t: Template) => Template) => setGroupTemplate(fn)
-    : (fn: (t: Template) => Template) => setEventTemplate(fn)
 
   const [selectedIds,   setSelectedIds]   = useState<Set<string>>(new Set())
   const [filterMode,    setFilterMode]    = useState<'all' | 'event' | 'role'>('all')
@@ -126,125 +117,82 @@ export default function CommunicationsPage() {
   ]
 
   useEffect(() => { loadAll() }, [groupId])
-  useEffect(() => { if (selectedEventId) loadEventTemplate(selectedEventId) }, [selectedEventId])
 
   async function loadAll() {
-  setLoading(true)
-  
+    setLoading(true)
+    const [{ data: group }, { data: evts }, { data: membersData }] = await Promise.all([
+      supabase.from('groups')
+        .select('template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
+        .eq('id', groupId).single(),
+      supabase.from('events').select('id, title, starts_at').eq('group_id', groupId).order('starts_at', { ascending: false }),
+      supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
+    ])
 
-  const [{ data: group }, { data: evts }, { data: membersData }] = await Promise.all([
-    supabase.from('groups')
-      .select('template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
-      .eq('id', groupId).single(),
-    supabase.from('events').select('id, title, starts_at').eq('group_id', groupId).order('starts_at', { ascending: false }),
-    supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
-  ])
+    if (group) setGroupTemplate({
+      template_logo_url:           group.template_logo_url ?? null,
+      template_header_color:       group.template_header_color ?? '#185FA5',
+      template_bg_image_url:       group.template_bg_image_url ?? null,
+      template_invitation_subject: group.template_invitation_subject ?? DEFAULTS.template_invitation_subject,
+      template_invitation_body:    group.template_invitation_body ?? DEFAULTS.template_invitation_body,
+      template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
+      template_teesheet_body:      group.template_teesheet_body ?? DEFAULTS.template_teesheet_body,
+    })
 
-  if (group) setGroupTemplate({
-    template_logo_url:           group.template_logo_url ?? null,
-    template_header_color:       group.template_header_color ?? '#185FA5',
-    template_bg_image_url:       group.template_bg_image_url ?? null,
-    template_invitation_subject: group.template_invitation_subject ?? DEFAULTS.template_invitation_subject,
-    template_invitation_body:    group.template_invitation_body ?? DEFAULTS.template_invitation_body,
-    template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
-    template_teesheet_body:      group.template_teesheet_body ?? DEFAULTS.template_teesheet_body,
-  })
-
-  setEvents(evts || [])
-  if (evts?.length) {
-    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
-    const retainedExists = evts.find((e: { id: string }) => e.id === retained)
-    const defaultId = retainedExists?.id ?? evts[0].id
-    setSelectedEventId(defaultId)
-    setFilterEventId(defaultId)
-  }
-
-  setMembers((membersData ?? []).map((r: any) => ({ ...r.player, role: r.role })))
-  
-  await loadInviteLink()  
-  
-  setLoading(false)     
-}
-
-
-
-  async function loadEventTemplate(eventId: string) {
-    const { data } = await supabase.from('events')
-      .select('use_group_template, template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
-      .eq('id', eventId).single()
-    if (data) {
-      setUseGroupTemplate(data.use_group_template ?? true)
-      setEventTemplate({
-        template_logo_url:           data.template_logo_url ?? groupTemplate.template_logo_url,
-        template_header_color:       data.template_header_color ?? groupTemplate.template_header_color,
-        template_bg_image_url:       data.template_bg_image_url ?? groupTemplate.template_bg_image_url,
-        template_invitation_subject: data.template_invitation_subject ?? groupTemplate.template_invitation_subject,
-        template_invitation_body:    data.template_invitation_body ?? groupTemplate.template_invitation_body,
-        template_teesheet_subject:   data.template_teesheet_subject ?? groupTemplate.template_teesheet_subject,
-        template_teesheet_body:      data.template_teesheet_body ?? groupTemplate.template_teesheet_body,
-      })
+    setEvents(evts || [])
+    if (evts?.length) {
+      const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+      const retainedExists = evts.find((e: { id: string }) => e.id === retained)
+      const defaultId = retainedExists?.id ?? evts[0].id
+      setSelectedEventId(defaultId)
+      setFilterEventId(defaultId)
     }
+
+    setMembers((membersData ?? []).map((r: any) => ({ ...r.player, role: r.role })))
+    await loadInviteLink()
+    setLoading(false)
   }
 
   async function loadInviteLink() {
-  const { data } = await supabase
-    .from('group_invite_links')
-    .select('token, expires_at')
-    .eq('group_id', groupId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+    const { data } = await supabase
+      .from('group_invite_links')
+      .select('token, expires_at')
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
     setInviteLink(data)
-    }
+  }
 
   async function handleSaveTemplate() {
     setSaving(true)
-    if (useGroupTemplate) {
-      const { error } = await supabase.from('groups').update(groupTemplate).eq('id', groupId)
-      if (error) { toast.error(error.message); setSaving(false); return }
-      toast.success(t('communications.toasts.groupSaved'))
-    } else {
-      const { error } = await supabase.from('events').update({ use_group_template: false, ...eventTemplate }).eq('id', selectedEventId)
-      if (error) { toast.error(error.message); setSaving(false); return }
-      toast.success(t('communications.toasts.eventSaved'))
-    }
+    const { error } = await supabase.from('groups').update(groupTemplate).eq('id', groupId)
+    if (error) { toast.error(error.message); setSaving(false); return }
+    toast.success(t('communications.toasts.groupSaved'))
     setSaving(false)
-  }
-
-  async function handleToggleGroupTemplate(val: boolean) {
-    setUseGroupTemplate(val)
-    if (val && selectedEventId) {
-      await supabase.from('events').update({ use_group_template: true }).eq('id', selectedEventId)
-      setEventTemplate({ ...groupTemplate })
-    }
   }
 
   async function handleReset() {
     if (!confirm(t('communications.templates.reset'))) return
-    if (useGroupTemplate) {
-      const { error } = await supabase.from('groups').update({
-        template_invitation_subject: DEFAULTS.template_invitation_subject,
-        template_invitation_body:    DEFAULTS.template_invitation_body,
-        template_teesheet_subject:   DEFAULTS.template_teesheet_subject,
-        template_teesheet_body:      DEFAULTS.template_teesheet_body,
-        template_logo_url:           null,
-        template_header_color:       '#185FA5',
-      }).eq('id', groupId)
-      if (error) { toast.error(error.message); return }
-      setGroupTemplate({ ...DEFAULTS }); toast.success(t('communications.toasts.groupReset'))
-    } else {
-      await supabase.from('events').update({ use_group_template: true, template_invitation_subject: null, template_invitation_body: null, template_teesheet_subject: null, template_teesheet_body: null, template_logo_url: null, template_header_color: null }).eq('id', selectedEventId)
-      setUseGroupTemplate(true); setEventTemplate({ ...groupTemplate }); toast.success(t('communications.toasts.eventReset'))
-    }
+    const { error } = await supabase.from('groups').update({
+      template_invitation_subject: DEFAULTS.template_invitation_subject,
+      template_invitation_body:    DEFAULTS.template_invitation_body,
+      template_teesheet_subject:   DEFAULTS.template_teesheet_subject,
+      template_teesheet_body:      DEFAULTS.template_teesheet_body,
+      template_logo_url:           null,
+      template_header_color:       '#185FA5',
+    }).eq('id', groupId)
+    if (error) { toast.error(error.message); return }
+    setGroupTemplate({ ...DEFAULTS })
+    toast.success(t('communications.toasts.groupReset'))
   }
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file) return; setUploading(true)
-    const path = `${useGroupTemplate ? groupId : selectedEventId}/logo.${file.name.split('.').pop()}`
+    const path = `${groupId}/logo.${file.name.split('.').pop()}`
     const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
     if (error) { toast.error(error.message); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
-    setTemplate(t => ({ ...t, template_logo_url: publicUrl }))
+    setGroupTemplate(t => ({ ...t, template_logo_url: publicUrl }))
     toast.success(t('communications.toasts.logoUploaded')); setUploading(false)
   }
 
@@ -254,13 +202,17 @@ export default function CommunicationsPage() {
     const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
     if (error) { toast.error(error.message); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
-    setTemplate(t => ({ ...t, template_bg_image_url: publicUrl }))
+    setGroupTemplate(t => ({ ...t, template_bg_image_url: publicUrl }))
     await supabase.from('groups').update({ template_bg_image_url: publicUrl }).eq('id', groupId)
     toast.success(t('communications.toasts.bgUploaded')); setUploading(false)
   }
 
-  function setTpl(field: keyof Template, value: string) { setTemplate(t => ({ ...t, [field]: value })) }
-  function insertTplVar(field: keyof Template, v: string) { setTemplate(t => ({ ...t, [field]: ((t[field] as string) ?? '') + v })) }
+  function setTpl(field: keyof Template, value: string) {
+    setGroupTemplate(t => ({ ...t, [field]: value }))
+  }
+  function insertTplVar(field: keyof Template, v: string) {
+    setGroupTemplate(t => ({ ...t, [field]: ((t[field] as string) ?? '') + v }))
+  }
 
   const membersWithEmail = useMemo(() => [...members].sort((a, b) => a.surname.localeCompare(b.surname, locale)), [members])
   const selectedMembers  = membersWithEmail.filter(m => selectedIds.has(m.id))
@@ -325,6 +277,8 @@ export default function CommunicationsPage() {
 
   return (
     <div className="p-5 sm:p-6 max-w-3xl">
+
+      {/* ── Header ── */}
       <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('communications.title')}</h1>
@@ -332,24 +286,23 @@ export default function CommunicationsPage() {
         </div>
         {mainTab === 'send' && (
           <div className="flex items-center gap-1.5">
-            {/* 🖨 Imprimer */}
             <IconBtn onClick={() => window.print()} title="Imprimer">🖨</IconBtn>
-            {/* 👁 Aperçu */}
             <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
-            {/* 📤 Envoyer email */}
+            <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
             <IconBtn onClick={handleSend} disabled={!canSend} title={sending ? t('communications.message.sending') : t('communications.message.send')} color="blue">
               {sending ? '⏳' : '📤'}
             </IconBtn>
-            {/* 💬 WhatsApp */}
-            <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
           </div>
         )}
       </div>
 
+      {/* ── Onglets ── */}
       <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
-        {([{ key: 'send', label: t('communications.tabs.send') }, 
-        { key: 'templates', label: t('communications.tabs.templates') },
-        { key: 'invite', label: t('communications.groupInvite.tab') }] as const).map(tab => (
+        {([
+          { key: 'send',     label: t('communications.tabs.send') },
+          { key: 'settings', label: t('communications.tabs.settings') },
+          { key: 'invite',   label: t('communications.tabs.invite') },
+        ] as const).map(tab => (
           <button key={tab.key} onClick={() => setMainTab(tab.key)}
             className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
             {tab.label}
@@ -357,8 +310,10 @@ export default function CommunicationsPage() {
         ))}
       </div>
 
+      {/* ══ ONGLET MESSAGE ══ */}
       {mainTab === 'send' && (
         <div className="flex flex-col gap-6">
+
           {/* ── Destinataires ── */}
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -471,132 +426,50 @@ export default function CommunicationsPage() {
                 </div>
               )}
             </div>
-
-            {showPreview && (
-              <EmailPreviewModal
-                onClose={() => setShowPreview(false)}
-                onConfirm={() => { setShowPreview(false); handleSend() }}
-                confirmLabel={`${t('communications.message.send')} (${selectedIds.size})`}
-                loading={sending}
-                fetchPreview={() => fetch('/api/preview-email', {
-                  method: 'POST', headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ type: 'communication', subject: commSubject, body: commBody, groupId, eventId: filterEventId || null }),
-                }).then(r => r.json())}
-              />
-            )}
           </div>
+
+          {showPreview && (
+            <EmailPreviewModal
+              onClose={() => setShowPreview(false)}
+              onConfirm={() => { setShowPreview(false); handleSend() }}
+              confirmLabel={`${t('communications.message.send')} (${selectedIds.size})`}
+              loading={sending}
+              fetchPreview={() => fetch('/api/preview-email', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'communication', subject: commSubject, body: commBody, groupId, eventId: filterEventId || null }),
+              }).then(r => r.json())}
+            />
+          )}
         </div>
       )}
 
-      {mainTab === 'templates' && (
+      {/* ══ ONGLET PARAMÈTRES ══ */}
+      {mainTab === 'settings' && (
         <div>
-          <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">{t('communications.templates.applyTo')}</p>
-            <div className="flex items-start gap-3 mb-3">
-              <button type="button" onClick={() => handleToggleGroupTemplate(!useGroupTemplate)}
-                style={{ backgroundColor: useGroupTemplate ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
-                className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
-                <div style={{ transform: useGroupTemplate ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }} className="w-4 h-4 rounded-full bg-white shadow-sm" />
-              </button>
-              <div>
-                <p className="text-[13px] font-semibold text-slate-800">{useGroupTemplate ? t('communications.templates.groupTemplate') : t('communications.templates.eventTemplate')}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">{useGroupTemplate ? t('communications.templates.groupTemplateDesc') : t('communications.templates.eventTemplateDesc')}</p>
-              </div>
-            </div>
-            {!useGroupTemplate && (
-              <div className="mt-3 pt-3 border-t border-slate-100">
-                <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('communications.templates.event')}</label>
-                <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-                  className="w-full border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-                  {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at, locale)}</option>)}
-                </select>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">{t('communications.templates.visualIdentity')}</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('communications.templates.headerLogo')}</label>
-                {template.template_logo_url ? (
-                  <div className="flex items-center gap-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={template.template_logo_url} alt="Logo" className="h-12 object-contain border border-white/50 rounded-xl p-1 bg-white/30" />
-                    <div className="flex flex-col gap-1">
-                      <button onClick={() => fileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
-                      <button onClick={() => setTemplate(t => ({ ...t, template_logo_url: null }))} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
-                    </div>
-                  </div>
-                ) : (
-                  <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                    className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
-                    {uploading ? t('communications.templates.uploading') : t('communications.templates.addLogo')}
-                  </button>
-                )}
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-                <p className="text-[10px] text-slate-400 mt-1">{t('communications.templates.logoDesc')}</p>
-              </div>
-              <div>
-                <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('communications.templates.headerColor')}</label>
-                <div className="flex items-center gap-3">
-                  <input type="color" value={template.template_header_color} onChange={e => setTpl('template_header_color', e.target.value)} className="w-10 h-10 rounded-xl border border-white/50 cursor-pointer p-0.5" />
-                  <div>
-                    <p className="text-[13px] font-semibold text-slate-700">{template.template_header_color}</p>
-                    <button onClick={() => setTpl('template_header_color', '#185FA5')} className="text-[11px] font-medium text-slate-400 hover:text-slate-600">{t('communications.templates.defaultColor')}</button>
-                  </div>
-                </div>
-                <div className="mt-3 rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: template.template_header_color }}>
-                  {template.template_logo_url
-                    ? <img src={template.template_logo_url} alt="Logo" className="h-6 object-contain" />
-                    : <><span className="text-[15px] font-black text-white">Golf</span><span className="text-[15px] font-black" style={{ color: '#4CAF1A' }}>Go</span></>}
-                  <span className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Aperçu</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5 pt-5 border-t border-slate-100">
-              <label className="block text-[12px] font-semibold text-slate-600 mb-2">
-                {t('communications.templates.bgImage')} <span className="text-slate-400 font-normal">— {t('communications.templates.bgImageDesc')}</span>
-              </label>
-              {template.template_bg_image_url ? (
-                <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={template.template_bg_image_url} alt="Fond" className="h-16 w-32 object-cover rounded-xl border border-white/50" />
-                  <div className="flex flex-col gap-1">
-                    <button onClick={() => bgFileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
-                    <button onClick={async () => { setTemplate(t => ({ ...t, template_bg_image_url: null })); await supabase.from('groups').update({ template_bg_image_url: null }).eq('id', groupId); toast.success(t('communications.toasts.bgDeleted')) }} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
-                  </div>
-                </div>
-              ) : (
-                <button onClick={() => bgFileInputRef.current?.click()} disabled={uploading}
-                  className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
-                  {uploading ? t('communications.templates.uploading') : t('communications.templates.addBgImage')}
-                </button>
-              )}
-              <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
-              <p className="text-[10px] text-slate-400 mt-1.5">{t('communications.templates.bgImageDesc2')}</p>
-            </div>
-          </div>
-
+          {/* Sous-onglets */}
           <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-5">
-            {([{ key: 'invitation', label: t('communications.templates.tabs.invitation') }, { key: 'teesheet', label: t('communications.templates.tabs.teesheet') }, { key: 'print', label: t('communications.templates.tabs.print') }] as const).map(tab => (
-              <button key={tab.key} onClick={() => setTemplateTab(tab.key)}
-                className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${templateTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+            {([
+              { key: 'invitation', label: t('communications.templates.tabs.invitation') },
+              { key: 'teesheet',   label: t('communications.templates.tabs.teesheet') },
+              { key: 'visual',     label: t('communications.tabs.visual') },
+            ] as const).map(tab => (
+              <button key={tab.key} onClick={() => setSettingsTab(tab.key)}
+                className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${settingsTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
                 {tab.label}
               </button>
             ))}
           </div>
 
-    
-          {templateTab === 'invitation' && (
+          {/* Modèle invitation */}
+          {settingsTab === 'invitation' && (
             <div className="rounded-xl border border-white/60 shadow-sm p-5 space-y-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div>
                 <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('communications.templates.subject')}</label>
-                <input value={template.template_invitation_subject ?? ''} onChange={e => setTpl('template_invitation_subject', e.target.value)} className={inputClass} />
+                <input value={groupTemplate.template_invitation_subject ?? ''} onChange={e => setTpl('template_invitation_subject', e.target.value)} className={inputClass} />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('communications.templates.body')}</label>
-                <textarea value={template.template_invitation_body ?? ''} onChange={e => setTpl('template_invitation_body', e.target.value)} rows={6} className={textareaClass} />
+                <textarea value={groupTemplate.template_invitation_body ?? ''} onChange={e => setTpl('template_invitation_body', e.target.value)} rows={6} className={textareaClass} />
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {TEMPLATE_VARS.map(v => <button key={v.value} onClick={() => insertTplVar('template_invitation_body', v.value)} className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>)}
                 </div>
@@ -604,15 +477,16 @@ export default function CommunicationsPage() {
             </div>
           )}
 
-          {templateTab === 'teesheet' && (
+          {/* Modèle teesheet */}
+          {settingsTab === 'teesheet' && (
             <div className="rounded-xl border border-white/60 shadow-sm p-5 space-y-4" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div>
                 <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('communications.templates.subject')}</label>
-                <input value={template.template_teesheet_subject ?? ''} onChange={e => setTpl('template_teesheet_subject', e.target.value)} className={inputClass} />
+                <input value={groupTemplate.template_teesheet_subject ?? ''} onChange={e => setTpl('template_teesheet_subject', e.target.value)} className={inputClass} />
               </div>
               <div>
                 <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('communications.templates.body')}</label>
-                <textarea value={template.template_teesheet_body ?? ''} onChange={e => setTpl('template_teesheet_body', e.target.value)} rows={6} className={textareaClass} />
+                <textarea value={groupTemplate.template_teesheet_body ?? ''} onChange={e => setTpl('template_teesheet_body', e.target.value)} rows={6} className={textareaClass} />
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {TEMPLATE_VARS.map(v => <button key={v.value} onClick={() => insertTplVar('template_teesheet_body', v.value)} className="text-[10px] font-mono bg-blue-50 text-[#185FA5] border border-blue-200 px-2 py-0.5 rounded-lg hover:bg-blue-100 transition-colors">{v.value}</button>)}
                 </div>
@@ -621,23 +495,81 @@ export default function CommunicationsPage() {
             </div>
           )}
 
-          {templateTab === 'print' && (
-            <div className="rounded-xl border border-white/60 shadow-sm p-8 text-center" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M9 21h6v-6H9v6z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          {/* Identité visuelle */}
+          {settingsTab === 'visual' && (
+            <div className="rounded-xl border border-white/60 shadow-sm p-5" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+              <p className="text-[11px] text-slate-400 mb-4">{t('communications.tabs.visualDesc')}</p>
+              <div className="grid grid-cols-2 gap-4 mb-5">
+                <div>
+                  <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('communications.templates.headerLogo')}</label>
+                  {groupTemplate.template_logo_url ? (
+                    <div className="flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={groupTemplate.template_logo_url} alt="Logo" className="h-12 object-contain border border-white/50 rounded-xl p-1 bg-white/30" />
+                      <div className="flex flex-col gap-1">
+                        <button onClick={() => fileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
+                        <button onClick={() => setGroupTemplate(t => ({ ...t, template_logo_url: null }))} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                      className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
+                      {uploading ? t('communications.templates.uploading') : t('communications.templates.addLogo')}
+                    </button>
+                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                  <p className="text-[10px] text-slate-400 mt-1">{t('communications.templates.logoDesc')}</p>
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('communications.templates.headerColor')}</label>
+                  <div className="flex items-center gap-3">
+                    <input type="color" value={groupTemplate.template_header_color} onChange={e => setTpl('template_header_color', e.target.value)} className="w-10 h-10 rounded-xl border border-white/50 cursor-pointer p-0.5" />
+                    <div>
+                      <p className="text-[13px] font-semibold text-slate-700">{groupTemplate.template_header_color}</p>
+                      <button onClick={() => setTpl('template_header_color', '#185FA5')} className="text-[11px] font-medium text-slate-400 hover:text-slate-600">{t('communications.templates.defaultColor')}</button>
+                    </div>
+                  </div>
+                  <div className="mt-3 rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: groupTemplate.template_header_color }}>
+                    {groupTemplate.template_logo_url
+                      ? <img src={groupTemplate.template_logo_url} alt="Logo" className="h-6 object-contain" />
+                      : <><span className="text-[15px] font-black text-white">Golf</span><span className="text-[15px] font-black" style={{ color: '#4CAF1A' }}>Go</span></>}
+                    <span className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Aperçu</span>
+                  </div>
+                </div>
               </div>
-              <p className="text-[14px] font-bold text-slate-700 mb-1">{t('communications.templates.print.title')}</p>
-              <p className="text-[12px] text-slate-500">{t('communications.templates.print.desc')}</p>
+              <div className="pt-4 border-t border-slate-100">
+                <label className="block text-[12px] font-semibold text-slate-600 mb-2">
+                  {t('communications.templates.bgImage')} <span className="text-slate-400 font-normal">— {t('communications.templates.bgImageDesc')}</span>
+                </label>
+                {groupTemplate.template_bg_image_url ? (
+                  <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={groupTemplate.template_bg_image_url} alt="Fond" className="h-16 w-32 object-cover rounded-xl border border-white/50" />
+                    <div className="flex flex-col gap-1">
+                      <button onClick={() => bgFileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
+                      <button onClick={async () => {
+                        setGroupTemplate(t => ({ ...t, template_bg_image_url: null }))
+                        await supabase.from('groups').update({ template_bg_image_url: null }).eq('id', groupId)
+                        toast.success(t('communications.toasts.bgDeleted'))
+                      }} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={() => bgFileInputRef.current?.click()} disabled={uploading}
+                    className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
+                    {uploading ? t('communications.templates.uploading') : t('communications.templates.addBgImage')}
+                  </button>
+                )}
+                <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
+                <p className="text-[10px] text-slate-400 mt-1.5">{t('communications.templates.bgImageDesc2')}</p>
+              </div>
             </div>
           )}
 
           <div className="flex items-center justify-between mt-5 gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <button onClick={handleReset} className="text-[12px] font-semibold px-4 py-2 rounded-xl border border-white/50 text-slate-500 hover:bg-white/30 transition-colors">{t('communications.templates.reset')}</button>
-              <p className="text-[12px] text-slate-500">
-                {useGroupTemplate ? t('communications.templates.saveGroup') : t('communications.templates.saveEvent', { name: events.find(e => e.id === selectedEventId)?.title ?? '' })}
-              </p>
-            </div>
+            <button onClick={handleReset} className="text-[12px] font-semibold px-4 py-2 rounded-xl border border-white/50 text-slate-500 hover:bg-white/30 transition-colors">
+              {t('communications.templates.reset')}
+            </button>
             <button onClick={handleSaveTemplate} disabled={saving}
               className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
               {saving ? t('communications.templates.saving') : t('communications.templates.save')}
@@ -646,139 +578,104 @@ export default function CommunicationsPage() {
         </div>
       )}
 
-         {mainTab === 'invite' && (
-          <div className="flex flex-col gap-5">
+      {/* ══ ONGLET INVITATIONS ══ */}
+      {mainTab === 'invite' && (
+        <div className="flex flex-col gap-5">
 
-            {/* ── Lien + QR ── */}
-            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-              <div className="px-5 py-4 border-b border-white/40">
-                <p className="text-[13px] font-bold text-slate-800 mb-1">{t('communications.groupInvite.title')}</p>
-                <p className="text-[12px] text-slate-500">{t('communications.groupInvite.desc')}</p>
+          {/* Lien + QR */}
+          <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+            style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+            <div className="px-5 py-4 border-b border-white/40">
+              <p className="text-[13px] font-bold text-slate-800 mb-1">{t('communications.groupInvite.title')}</p>
+              <p className="text-[12px] text-slate-500">{t('communications.groupInvite.desc')}</p>
+            </div>
+            <div className="px-5 py-4 flex flex-col sm:flex-row gap-5 items-start">
+              <div className="flex-shrink-0 flex flex-col items-center gap-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('communications.groupInvite.qrTitle')}</p>
+                {inviteLink ? (
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`${window.location.origin}/${locale}/join/${inviteLink.token}`)}`}
+                    alt="QR Code" width={120} height={120} className="rounded-xl border border-slate-100"
+                  />
+                ) : (
+                  <div className="w-[120px] h-[120px] rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-[11px] text-slate-300">
+                    Aucun lien
+                  </div>
+                )}
               </div>
-
-              <div className="px-5 py-4 flex flex-col sm:flex-row gap-5 items-start">
-                {/* QR Code */}
-                <div className="flex-shrink-0 flex flex-col items-center gap-2">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    {t('communications.groupInvite.qrTitle')}
-                  </p>
-                  {inviteLink ? (
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`${window.location.origin}/${locale}/join/${inviteLink.token}`)}`}
-                      alt="QR Code"
-                      width={120} height={120}
-                      className="rounded-xl border border-slate-100"
-                    />
-                  ) : (
-                    <div className="w-[120px] h-[120px] rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-[11px] text-slate-300">
-                      Aucun lien
-                    </div>
-                  )}
-                </div>
-
-                {/* Lien + instructions */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                    {t('communications.groupInvite.linkLabel')}
-                  </p>
-                  {inviteLink ? (
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-[11px] text-slate-600 truncate flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                        {`${window.location.origin}/${locale}/join/${inviteLink.token}`}
-                      </span>
-                      <button
-                        onClick={async () => {
-                          await navigator.clipboard.writeText(`${window.location.origin}/${locale}/join/${inviteLink.token}`)
-                          setInviteCopied(true)
-                          setTimeout(() => setInviteCopied(false), 2000)
-                        }}
-                        className="flex-shrink-0 text-[11px] font-semibold px-3 py-2 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
-                        {inviteCopied ? t('communications.groupInvite.copied') : t('communications.groupInvite.copyLink')}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="mb-4 text-[12px] text-slate-400 italic">
-                      Générez un lien depuis la page Membres → 🔗 Lien d'invitation
-                    </div>
-                  )}
-
-                  {/* Instructions PWA */}
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                    {t('communications.groupInvite.installTitle')}
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-[16px] flex-shrink-0">🍎</span>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                        {t('communications.groupInvite.installIphone')}
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-[16px] flex-shrink-0">🤖</span>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">
-                        {t('communications.groupInvite.installAndroid')}
-                      </p>
-                    </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('communications.groupInvite.linkLabel')}</p>
+                {inviteLink ? (
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-[11px] text-slate-600 truncate flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                      {`${window.location.origin}/${locale}/join/${inviteLink.token}`}
+                    </span>
+                    <button
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(`${window.location.origin}/${locale}/join/${inviteLink.token}`)
+                        setInviteCopied(true)
+                        setTimeout(() => setInviteCopied(false), 2000)
+                      }}
+                      className="flex-shrink-0 text-[11px] font-semibold px-3 py-2 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
+                      {inviteCopied ? t('communications.groupInvite.copied') : t('communications.groupInvite.copyLink')}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mb-4 text-[12px] text-slate-400 italic">
+                    Générez un lien depuis la page Membres → 🔗 Lien d'invitation
+                  </div>
+                )}
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('communications.groupInvite.installTitle')}</p>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-[16px] flex-shrink-0">🍎</span>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">{t('communications.groupInvite.installIphone')}</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-[16px] flex-shrink-0">🤖</span>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">{t('communications.groupInvite.installAndroid')}</p>
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* ── Emails destinataires ── */}
-            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-              <div className="px-5 py-4">
-                <label className="block text-[12px] font-bold text-slate-600 uppercase tracking-widest mb-2">
-                  {t('communications.groupInvite.emailsLabel')}
-                </label>
-                <textarea
-                  value={inviteEmails}
-                  onChange={e => setInviteEmails(e.target.value)}
-                  rows={5}
-                  placeholder={t('communications.groupInvite.emailsPlaceholder')}
-                  className="w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm resize-none"
-                />
-                <p className="text-[11px] text-slate-400 mt-1">{t('communications.groupInvite.emailsHint')}</p>
-
-                <button
-                  onClick={async () => {
-                    // Parser les emails
-                    const raw = inviteEmails.replace(/[\n,;]+/g, ' ').split(/\s+/).filter(e => e.includes('@'))
-                    if (raw.length === 0) { toast.error(t('communications.groupInvite.errorEmpty')); return }
-                    setInviteSending(true)
-                    try {
-                      const res = await fetch('/api/send-group-invite', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ groupId, emails: raw, locale }),
-                      })
-                      const json = await res.json()
-                      if (json.success) {
-                        const skippedSuffix = json.skipped > 0
-                          ? t('communications.groupInvite.skippedSuffix', { skipped: json.skipped })
-                          : ''
-                        toast.success(t('communications.groupInvite.successToast', { sent: json.sent, skipped: skippedSuffix }))
-                        setInviteEmails('')
-                      } else {
-                        toast.error(json.error ?? t('common.error'))
-                      }
-                    } catch (e: any) { toast.error(e.message) }
-                    finally { setInviteSending(false) }
-                  }}
-                  disabled={inviteSending || !inviteEmails.trim() || !isOwner}
-                  className="mt-4 w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors"
-                >
-                  {inviteSending
-                    ? t('communications.groupInvite.sending')
-                    : t('communications.groupInvite.send')}
-                </button>
-              </div>
-            </div>
-
           </div>
-          )}
 
+          {/* Emails */}
+          <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+            style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+            <div className="px-5 py-4">
+              <label className="block text-[12px] font-bold text-slate-600 uppercase tracking-widest mb-2">{t('communications.groupInvite.emailsLabel')}</label>
+              <textarea value={inviteEmails} onChange={e => setInviteEmails(e.target.value)} rows={5}
+                placeholder={t('communications.groupInvite.emailsPlaceholder')}
+                className="w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm resize-none" />
+              <p className="text-[11px] text-slate-400 mt-1">{t('communications.groupInvite.emailsHint')}</p>
+              <button
+                onClick={async () => {
+                  const raw = inviteEmails.replace(/[\n,;]+/g, ' ').split(/\s+/).filter(e => e.includes('@'))
+                  if (raw.length === 0) { toast.error(t('communications.groupInvite.errorEmpty')); return }
+                  setInviteSending(true)
+                  try {
+                    const res = await fetch('/api/send-group-invite', {
+                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ groupId, emails: raw, locale }),
+                    })
+                    const json = await res.json()
+                    if (json.success) {
+                      const skippedSuffix = json.skipped > 0 ? t('communications.groupInvite.skippedSuffix', { skipped: json.skipped }) : ''
+                      toast.success(t('communications.groupInvite.successToast', { sent: json.sent, skipped: skippedSuffix }))
+                      setInviteEmails('')
+                    } else { toast.error(json.error ?? t('common.error')) }
+                  } catch (e: any) { toast.error(e.message) }
+                  finally { setInviteSending(false) }
+                }}
+                disabled={inviteSending || !inviteEmails.trim() || !isOwner}
+                className="mt-4 w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
+                {inviteSending ? t('communications.groupInvite.sending') : t('communications.groupInvite.send')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

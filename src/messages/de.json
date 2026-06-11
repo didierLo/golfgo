@@ -137,7 +137,11 @@
     "subtitle": "Vorlagen",
     "tabs": {
       "send": "✉️ Neue Nachricht",
-      "templates": "🎨 Vorlagen"
+      "templates": "🎨 Vorlagen",
+      "settings": "Einstellungen",
+    "invite": "Einladungen",
+    "visual": "Visuelle Identität",
+    "visualDesc": "Diese Einstellungen gelten für alle E-Mails dieser Gruppe (Einladungen, Tee-Sheets, Erinnerungen)."
     },
     "recipients": {
       "title": "Empfänger",
@@ -346,7 +350,7 @@
     "autoInvitationLabel": "Automatische Einladung 14 Tage vor der Veranstaltung",
     "autoInvitationDesc": "Sendet 14 Tage vor der Veranstaltung eine Einladung an alle Mitglieder."
   },
-  
+
   "flightHistory": {
     "title": "Flight-Verlauf",
     "subtitle": "Gemeinsame Teilnahmen · zum manuellen Korrigieren mit der Maus überfahren",

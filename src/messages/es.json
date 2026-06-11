@@ -137,7 +137,11 @@
     "subtitle": "Plantillas",
     "tabs": {
       "send": "✉️ Nuevo mensaje",
-      "templates": "🎨 Plantillas"
+      "templates": "🎨 Plantillas",
+      "settings": "Configuración",
+    "invite": "Invitaciones",
+    "visual": "Identidad visual",
+    "visualDesc": "Estos ajustes se aplican a todos los correos enviados desde este grupo (invitaciones, teesheets, recordatorios)."
     },
     "recipients": {
       "title": "Destinatarios",

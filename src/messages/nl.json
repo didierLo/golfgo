@@ -137,7 +137,11 @@
     "subtitle": "Sjablonen",
     "tabs": {
       "send": "✉️ Nieuw bericht",
-      "templates": "🎨 Sjablonen"
+      "templates": "🎨 Sjablonen",
+      "settings": "Instellingen",
+    "invite": "Uitnodigingen",
+    "visual": "Visuele identiteit",
+    "visualDesc": "Deze instellingen gelden voor alle e-mails van deze groep (uitnodigingen, teesheets, herinneringen)."
     },
     "recipients": {
       "title": "Ontvangers",
@@ -347,7 +351,7 @@
     "autoInvitationLabel": "Automatische uitnodiging 14 dagen voor het evenement",
     "autoInvitationDesc": "Verstuurt een uitnodiging naar alle leden 14 dagen voor het evenement"
   },
-  
+
   "flightHistory": {
     "title": "Flightgeschiedenis",
     "subtitle": "Samen gespeeld · beweeg de muis om handmatig te corrigeren",

@@ -140,7 +140,11 @@
     "subtitle": "Modèles",
     "tabs": {
       "send": "✉️ Nouveau message",
-      "templates": "🎨 Modèles"
+      "templates": "🎨 Modèles",
+      "settings": "Paramètres",
+    "invite": "Invitations",
+    "visual": "Identité visuelle",
+    "visualDesc": "Ces paramètres s'appliquent à tous les emails envoyés depuis ce groupe (invitations, teesheets, rappels)."
     },
     "recipients": {
       "title": "Destinataires",

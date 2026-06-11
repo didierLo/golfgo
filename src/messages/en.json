@@ -137,7 +137,11 @@
     "subtitle": "Templates",
     "tabs": {
       "send": "✉️ New message",
-      "templates": "🎨 Templates"
+      "templates": "🎨 Templates",
+      "settings": "Settings",
+"invite": "Invitations",
+"visual": "Visual identity",
+"visualDesc": "These settings apply to all emails sent from this group (invitations, teesheets, reminders)."
     },
     "recipients": {
       "title": "Recipients",
