@@ -8,7 +8,7 @@ import { useTranslations, useLocale } from 'next-intl'
 const supabase = createClient()
 
 type Player = { id: string; first_name: string; surname: string }
-type FlightRow = { id: string; created_at: string; players: Player[] }
+type FlightRow = { id: string; date: string; players: Player[] }
 
 export default function FlightHistoryPage() {
   const params  = useParams()
@@ -43,9 +43,9 @@ export default function FlightHistoryPage() {
 
     const eventIds = await getGroupEventIds()
 
-    let query = supabase
+   let query = supabase
       .from('flights')
-      .select(`id, created_at, flight_players(player_id)`)
+      .select(`id, created_at, flight_players(player_id), events(starts_at)`)
       .in('event_id', eventIds.length ? eventIds : ['_none_'])
       .order('created_at', { ascending: false })
 
@@ -68,11 +68,11 @@ export default function FlightHistoryPage() {
           counts[key] = (counts[key] ?? 0) + 1
         }
       }
-      rows.push({
+     rows.push({
         id: flight.id,
-        created_at: flight.created_at,
+        date: (flight.events as any)?.starts_at ?? flight.created_at,
         players: ids.map((id: string) => playerMap[id]).filter(Boolean),
-      })
+            })
     }
 
     const { data: overrides } = await supabase
@@ -330,7 +330,7 @@ export default function FlightHistoryPage() {
               <div key={flight.id}
                 className={`flex items-center gap-4 px-4 py-3 ${i < flightRows.length - 1 ? 'border-b border-slate-100' : ''}`}>
                 <span className="text-[11px] font-semibold text-slate-400 w-24 flex-shrink-0">
-                  {formatDate(flight.created_at)}
+                  {formatDate(flight.date)}
                 </span>
                 <span className="text-[10px] font-bold text-slate-300 flex-shrink-0">
                   #{i + 1}

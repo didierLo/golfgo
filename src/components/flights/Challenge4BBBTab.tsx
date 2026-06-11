@@ -436,11 +436,23 @@ export default function Challenge4BBBTab({
       <div className="rounded-2xl border border-white/60 shadow-sm overflow-hidden"
         style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
-        <div className="px-5 pt-4 pb-3 border-b border-slate-100">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">
-            {t('parameters')}
-          </span>
-        </div>
+                  <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.14em]">
+              {t('parameters')}
+            </span>
+            <div className="flex items-center gap-2">
+              <a href={`/groups/${groupId}/events/${events[0]?.eventId ?? ''}/flights/history`}
+                className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors flex items-center gap-1">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 5h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                Matrice
+              </a>
+              <span className="text-slate-200 text-[10px]">·</span>
+              <a href={`/groups/${groupId}/constraints`}
+                className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors">
+                Contraintes
+              </a>
+            </div>
+          </div>
 
         <div className="px-5 py-4 flex flex-wrap gap-x-6 gap-y-4 items-end">
           <div>
