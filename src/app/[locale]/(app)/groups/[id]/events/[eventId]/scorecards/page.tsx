@@ -14,6 +14,23 @@ const supabase = createClient()
 export type { Hole, TeeInfo, Player, ScoreMap }
 export { computePhcp }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function strokesReceived(phcp: number, strokeIndex: number): number {
+  if (phcp <= 0) return 0
+  const full = Math.floor(phcp / 18)
+  const remainder = phcp % 18
+  return full + (strokeIndex <= remainder ? 1 : 0)
+}
+
+const thStyle: React.CSSProperties = {
+  padding: '2px 3px', textAlign: 'center', fontWeight: '700',
+  borderBottom: '1px solid #CBD5E1', color: '#475569',
+}
+const tdStyle: React.CSSProperties = {
+  padding: '2px 3px', textAlign: 'center', color: '#334155',
+}
+
 type EventItem = { id: string; title: string; starts_at: string; isPast: boolean }
 
 function fallbackHoles(): Hole[] {
@@ -59,7 +76,6 @@ function EventPill({ event, isSelected, onSelect, locale }: { event: EventItem; 
   )
 }
 
-// ── Bouton icône compact ──────────────────────────────────────────────────────
 function IconBtn({ onClick, href, title, disabled, color, children }: {
   onClick?: () => void; href?: string; title: string
   disabled?: boolean; color?: string; children: React.ReactNode
@@ -81,9 +97,11 @@ function IconBtn({ onClick, href, title, disabled, color, children }: {
 
 const selectClass = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
 
+// ── Page principale ───────────────────────────────────────────────────────────
+
 export default function ScorecardsPage() {
-  const params  = useParams()
-  const groupId = params.id as string
+  const params     = useParams()
+  const groupId    = params.id as string
   const urlEventId = params.eventId as string
   const [activeEventId, setActiveEventId] = useState<string>(urlEventId)
   const t      = useTranslations()
@@ -118,6 +136,8 @@ export default function ScorecardsPage() {
   const [activePlayerId, setActivePlayerId]     = useState<string | null>(null)
   const [validatedAt, setValidatedAt]           = useState<string | null>(null)
   const [playersWithPush, setPlayersWithPush]   = useState<Set<string>>(new Set())
+  const [clubName, setClubName]                 = useState('')
+  const [courseName, setCourseName]             = useState('')
 
   const isValidated = !!validatedAt
 
@@ -153,11 +173,15 @@ export default function ScorecardsPage() {
       if (event.course_id) {
         const { data: course } = await supabase.from('courses').select('id, course_name, club_id').eq('id', event.course_id).single()
         if (course) {
-          setSelectedClubId(course.club_id); setSelectedCourseId(event.course_id)
+          setSelectedClubId(course.club_id)
+          setSelectedCourseId(event.course_id)
+          setCourseName(course.course_name ?? '')
+          const clubFound = clubsData?.find((c: any) => c.id === course.club_id)
+          setClubName(clubFound?.name ?? '')
           const { data: coursesData } = await supabase.from('courses').select('id, course_name').eq('club_id', course.club_id).order('course_name')
           setCourses(coursesData || [])
         }
-      } else { setSelectedClubId(''); setSelectedCourseId('') }
+      } else { setSelectedClubId(''); setSelectedCourseId(''); setClubName(''); setCourseName('') }
     }
     setLoading(false)
   }
@@ -205,13 +229,9 @@ export default function ScorecardsPage() {
         }
         const playerIds = built.map(p => p.id)
         const [{ data: savedData }, { data: scoresData }] = await Promise.all([
-  supabase.from('saved_scorecards')
-    .select('player_id, hole, strokes')
-    .eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds),
-  supabase.from('scores')
-    .select('player_id, hole, strokes')
-    .eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds),
-])
+          supabase.from('saved_scorecards').select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds),
+          supabase.from('scores').select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds),
+        ])
         const map: ScoreMap = {}; built.forEach(p => { map[p.id] = {} })
         scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
         savedData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
@@ -298,12 +318,13 @@ export default function ScorecardsPage() {
   const activePlayer   = players.find(p => p.id === activePlayerId) ?? null
   const upcomingEvents = allEvents.filter(e => !e.isPast)
   const pastEvents     = allEvents.filter(e => e.isPast)
+  const activeEvent    = allEvents.find(e => e.id === activeEventId)
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
       {!eventsLoading && allEvents.length > 1 && (
-        <div className="mb-6 rounded-xl border border-white/60 shadow-sm p-4"
+        <div className="mb-6 rounded-xl border border-white/60 shadow-sm p-4 print:hidden"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">{t('scorecards.events')}</p>
           {upcomingEvents.length > 0 && (
@@ -328,7 +349,7 @@ export default function ScorecardsPage() {
       )}
 
       {isValidated && (
-        <div className="mb-4 flex items-center gap-2 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50">
+        <div className="mb-4 flex items-center gap-2 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 print:hidden">
           <span className="text-[16px]">🏆</span>
           <div>
             <p className="text-[12px] font-bold text-amber-800">{t('scorecards.validated')}</p>
@@ -338,13 +359,13 @@ export default function ScorecardsPage() {
       )}
 
       {!isOwner && !isValidated && (
-        <div className="mb-4 px-4 py-3 rounded-xl border border-blue-200/60 text-[12px] text-blue-700 font-medium"
+        <div className="mb-4 px-4 py-3 rounded-xl border border-blue-200/60 text-[12px] text-blue-700 font-medium print:hidden"
           style={{ background: "rgba(219,234,254,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
           {t('scorecards.readOnly')}
         </div>
       )}
 
-      <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6"
+      <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6 print:hidden"
         style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">{t('scorecards.clubCourse')}</p>
         <div className="mb-4">
@@ -399,12 +420,13 @@ export default function ScorecardsPage() {
         )}
       </div>
 
-      {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium">{error}</div>}
-      {scorecardLoading && <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}</div>}
+      {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium print:hidden">{error}</div>}
+      {scorecardLoading && <div className="space-y-3 print:hidden">{[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}</div>}
 
       {!scorecardLoading && selectedCourseId && (
         <>
-          <div className="flex gap-2 items-center mb-5 flex-wrap">
+          {/* ── Avatars joueurs ── */}
+          <div className="flex gap-2 items-center mb-5 flex-wrap print:hidden">
             {players.map(p => {
               const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
               const isActive = p.id === activePlayerId; const hasPush = playersWithPush.has(p.id)
@@ -421,8 +443,9 @@ export default function ScorecardsPage() {
             })}
           </div>
 
+          {/* ── Info joueur actif ── */}
           {activePlayer && (
-            <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5"
+            <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5 print:hidden"
               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               {playersWithPush.has(activePlayer.id) && (
                 <div className="flex items-center gap-1.5 mb-3 px-2.5 py-1.5 rounded-lg bg-[#3B6D11]/10 border border-[#3B6D11]/20 w-fit">
@@ -459,7 +482,7 @@ export default function ScorecardsPage() {
             </div>
           )}
 
-          {/* ── Barre d'actions compacte ── */}
+          {/* ── Barre d'actions ── */}
           {isOwner && (
             <div className="flex items-center justify-between gap-2 mb-4 print:hidden">
               <div>
@@ -470,16 +493,16 @@ export default function ScorecardsPage() {
                 )}
               </div>
               <div className="flex items-center gap-1.5">
-                {/* 💬 WhatsApp leaderboard */}
+                {players.length > 0 && holes.length > 0 && (
+                  <IconBtn onClick={() => window.print()} title="Imprimer les cartes">🖨</IconBtn>
+                )}
                 {players.length > 0 && (
                   <IconBtn href={buildWhatsAppLeaderboard()} title="WhatsApp leaderboard">💬</IconBtn>
                 )}
                 {!isValidated && (<>
-                  {/* 💾 Enregistrer */}
                   <IconBtn onClick={handleSave} disabled={saving} title={t('scorecards.save')}>
                     {saving ? '⏳' : '💾'}
                   </IconBtn>
-                  {/* 🏆 Valider */}
                   <IconBtn onClick={handleValidate} disabled={validating || saving} title={t('scorecards.validate')} color="blue">
                     {validating ? '⏳' : '🏆'}
                   </IconBtn>
@@ -488,8 +511,9 @@ export default function ScorecardsPage() {
             </div>
           )}
 
+          {/* ── Scorecard interactive ── */}
           {activePlayer ? (
-            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden print:hidden"
               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <ScorecardTable
                 holes={holes} player={activePlayer} scores={scores}
@@ -498,7 +522,7 @@ export default function ScorecardsPage() {
               />
             </div>
           ) : (
-            <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+            <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl print:hidden">
               {t('scorecards.noParticipants')}
             </div>
           )}
@@ -506,10 +530,160 @@ export default function ScorecardsPage() {
       )}
 
       {!scorecardLoading && !selectedCourseId && (
-        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl print:hidden">
           {isOwner ? t('scorecards.noCourse') : t('scorecards.noCourseReadOnly')}
         </div>
       )}
+
+      {/* ── Cartes à imprimer ── */}
+      {players.length > 0 && holes.length > 0 && (
+        <PrintScorecards
+          players={players}
+          holes={holes}
+          eventTitle={activeEvent?.title ?? ''}
+          clubName={clubName}
+          courseName={courseName}
+          eventDate={activeEvent
+            ? new Date(activeEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+            : ''}
+        />
+      )}
+
     </div>
+  )
+}
+
+// ── PrintScorecards ───────────────────────────────────────────────────────────
+
+function PrintScorecards({
+  players, holes, eventTitle, clubName, courseName, eventDate,
+}: {
+  players: Player[]
+  holes: Hole[]
+  eventTitle: string
+  clubName: string
+  courseName: string
+  eventDate: string
+}) {
+  const front9 = holes.filter(h => h.hole_number <= 9)
+  const back9  = holes.filter(h => h.hole_number > 9)
+
+  return (
+    <div className="hidden print:block">
+      <style>{`
+        @media print {
+          @page { size: A4 portrait; margin: 8mm; }
+          body * { visibility: hidden; }
+          .print-area, .print-area * { visibility: visible; }
+          .print-area { position: fixed; top: 0; left: 0; width: 100%; }
+          .print-page { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-bottom: 6mm; page-break-after: always; }
+          .print-page:last-child { page-break-after: auto; }
+          .print-card { break-inside: avoid; }
+        }
+      `}</style>
+      <div className="print-area">
+        {Array.from({ length: Math.ceil(players.length / 2) }, (_, pageIdx) => {
+          const pagePlayers = players.slice(pageIdx * 2, pageIdx * 2 + 2)
+          return (
+            <div key={pageIdx} className="print-page">
+              {pagePlayers.map(player => (
+                <div key={player.id} className="print-card" style={{
+                  fontFamily: 'Arial, sans-serif', fontSize: '8px',
+                  border: '1px solid #CBD5E1', borderRadius: '4px', padding: '5px',
+                }}>
+                  {/* En-tête */}
+                  <div style={{ borderBottom: '2px solid #185FA5', paddingBottom: '4px', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '900', color: '#0F172A' }}>
+                      {player.first_name} {player.surname}
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '2px', color: '#64748B', fontSize: '7px', flexWrap: 'wrap' }}>
+                      {clubName && <span>{clubName}</span>}
+                      {courseName && <><span>·</span><span>{courseName}</span></>}
+                      {eventDate && <><span>·</span><span>{eventDate}</span></>}
+                      <span>·</span>
+                      <span>HCP {player.whs}</span>
+                      <span>·</span>
+                      <span>Phcp {player.phcp}</span>
+                    </div>
+                    {eventTitle && (
+                      <div style={{ fontSize: '7px', color: '#185FA5', fontWeight: '600', marginTop: '1px' }}>{eventTitle}</div>
+                    )}
+                  </div>
+
+                  {/* Tableau */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '7.5px' }}>
+                    <thead>
+                      <tr style={{ background: '#F1F5F9' }}>
+                        <th style={thStyle}>Trou</th>
+                        <th style={thStyle}>Par</th>
+                        <th style={thStyle}>SI</th>
+                        <th style={thStyle}>Recv</th>
+                        <th style={{ ...thStyle, width: '22px', background: '#EBF3FC' }}>Brut</th>
+                        <th style={{ ...thStyle, width: '22px', background: '#EAF3DE' }}>Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {front9.map(h => {
+                        const recv = strokesReceived(player.phcp, h.stroke_index)
+                        return (
+                          <tr key={h.hole_number} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                            <td style={{ ...tdStyle, fontWeight: '700' }}>{h.hole_number}</td>
+                            <td style={tdStyle}>{h.par}</td>
+                            <td style={{ ...tdStyle, color: '#94A3B8' }}>{h.stroke_index}</td>
+                            <td style={{ ...tdStyle, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0' }}>
+                              {recv > 0 ? '*'.repeat(recv) : '·'}
+                            </td>
+                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
+                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
+                          </tr>
+                        )
+                      })}
+                      <SubtotalPrintRow label="OUT" holes={front9} />
+                      {back9.map(h => {
+                        const recv = strokesReceived(player.phcp, h.stroke_index)
+                        return (
+                          <tr key={h.hole_number} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                            <td style={{ ...tdStyle, fontWeight: '700' }}>{h.hole_number}</td>
+                            <td style={tdStyle}>{h.par}</td>
+                            <td style={{ ...tdStyle, color: '#94A3B8' }}>{h.stroke_index}</td>
+                            <td style={{ ...tdStyle, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0' }}>
+                              {recv > 0 ? '*'.repeat(recv) : '·'}
+                            </td>
+                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
+                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
+                          </tr>
+                        )
+                      })}
+                      <SubtotalPrintRow label="IN" holes={back9} />
+                      <SubtotalPrintRow label="TOT" holes={holes} isTot />
+                    </tbody>
+                  </table>
+
+                  {/* Signature */}
+                  <div style={{ marginTop: '4px', borderTop: '1px solid #E2E8F0', paddingTop: '3px', display: 'flex', justifyContent: 'space-between', color: '#94A3B8', fontSize: '7px' }}>
+                    <span>Signature marqueur : _______________</span>
+                    <span>Signature joueur : _______________</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function SubtotalPrintRow({ label, holes, isTot = false }: { label: string; holes: Hole[]; isTot?: boolean }) {
+  const parSum = holes.reduce((s, h) => s + h.par, 0)
+  return (
+    <tr style={{ background: isTot ? '#CBD5E1' : '#E2E8F0', fontWeight: '700', borderTop: '1px solid #94A3B8' }}>
+      <td style={{ ...tdStyle, fontWeight: '900' }}>{label}</td>
+      <td style={tdStyle}>{parSum}</td>
+      <td style={tdStyle}></td>
+      <td style={tdStyle}></td>
+      <td style={{ ...tdStyle, borderLeft: '1px solid #CBD5E1' }}></td>
+      <td style={{ ...tdStyle, borderLeft: '1px solid #CBD5E1' }}></td>
+    </tr>
   )
 }
