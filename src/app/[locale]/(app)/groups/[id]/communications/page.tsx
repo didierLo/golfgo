@@ -47,6 +47,7 @@ const COMM_VARS = [
   { key: '{{event_date}}', label: 'Date event' },
   { key: '{{event_time}}', label: 'Heure event' },
   { key: '{{yes_button}}', label: '✓/✗ Boutons réponse' },
+  { key: '{{places_restantes}}', label: 'Places restantes' },
 ]
 
 function IconBtn({ onClick, href, title, disabled, color, children }: {
@@ -537,7 +538,7 @@ export default function CommunicationsPage() {
             {messageType !== 'free' && (
             <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
               <p className="text-[11px] text-amber-700">
-                ⚠️ {t('communications.msgTypes.templateWarning')}
+                {t('communications.msgTypes.templateWarning')}
               </p>
             </div>
           )}
