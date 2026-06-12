@@ -22,6 +22,10 @@ type Template = {
   template_invitation_body:    string | null
   template_teesheet_subject:   string | null
   template_teesheet_body:      string | null
+  template_reminder_subject:   string | null
+  template_reminder_body:      string | null
+  template_newmember_subject:  string | null
+  template_newmember_body:     string | null
 }
 type Member = { id: string; first_name: string; surname: string; email: string | null; role: string }
 type EventRow = { id: string; title: string; starts_at: string }
@@ -35,6 +39,10 @@ const DEFAULTS: Template = {
   template_invitation_body: INVITATION_BODY_DEFAULT,
   template_teesheet_subject: 'Tee Sheet — {{event_title}}',
   template_teesheet_body: "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
+  template_reminder_subject:  '⏰ Rappel — {{event_title}} dans 3 jours',
+template_reminder_body:     "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}",
+template_newmember_subject: 'Bienvenue dans le groupe !',
+template_newmember_body:    "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nTu peux dès maintenant consulter les événements et confirmer ta participation.\n\nÀ bientôt,\n{{owner_name}}",
 }
 
 const COMM_VARS = [
@@ -119,8 +127,8 @@ export default function CommunicationsPage() {
     setLoading(true)
     const [{ data: group }, { data: evts }, { data: membersData }] = await Promise.all([
       supabase.from('groups')
-        .select('template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body')
-        .eq('id', groupId).single(),
+      .select('template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body, template_reminder_subject, template_reminder_body, template_newmember_subject, template_newmember_body')
+      .eq('id', groupId).single(),
       supabase.from('events').select('id, title, starts_at').eq('group_id', groupId).order('starts_at', { ascending: false }),
       supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
     ])
@@ -133,6 +141,10 @@ export default function CommunicationsPage() {
       template_invitation_body:    group.template_invitation_body ?? DEFAULTS.template_invitation_body,
       template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
       template_teesheet_body:      group.template_teesheet_body ?? DEFAULTS.template_teesheet_body,
+      template_reminder_subject:  group.template_reminder_subject  ?? DEFAULTS.template_reminder_subject,
+      template_reminder_body:     group.template_reminder_body     ?? DEFAULTS.template_reminder_body,
+      template_newmember_subject: group.template_newmember_subject ?? DEFAULTS.template_newmember_subject,
+      template_newmember_body:    group.template_newmember_body    ?? DEFAULTS.template_newmember_body,
     })
 
     setEvents(evts || [])
@@ -156,8 +168,12 @@ export default function CommunicationsPage() {
         setCommBody(groupTemplate.template_invitation_body ?? DEFAULTS.template_invitation_body ?? '')
         break
       case 'reminder':
-        setCommSubject(t('communications.msgTypes.reminderSubject'))
-        setCommBody(t('communications.msgTypes.reminderBody'))
+        setCommSubject(groupTemplate.template_reminder_subject ?? DEFAULTS.template_reminder_subject ?? '')
+        setCommBody(groupTemplate.template_reminder_body ?? DEFAULTS.template_reminder_body ?? '')
+        break
+      case 'newmember':
+        setCommSubject(groupTemplate.template_newmember_subject ?? DEFAULTS.template_newmember_subject ?? '')
+        setCommBody(groupTemplate.template_newmember_body ?? DEFAULTS.template_newmember_body ?? '')
         break
       case 'teesheet':
         setCommSubject(groupTemplate.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject ?? '')
@@ -269,8 +285,11 @@ export default function CommunicationsPage() {
       update.template_teesheet_subject = commSubject
       update.template_teesheet_body    = commBody
     } else if (messageType === 'reminder') {
-      update.template_invitation_subject = commSubject  // pas de colonne dédiée
-      // rappel : pas de template en base pour l'instant
+      update.template_reminder_subject = commSubject
+      update.template_reminder_body    = commBody
+    } else if (messageType === 'newmember') {
+      update.template_newmember_subject = commSubject
+      update.template_newmember_body    = commBody
     }
     if (Object.keys(update).length > 0) {
       await supabase.from('groups').update(update).eq('id', groupId)
