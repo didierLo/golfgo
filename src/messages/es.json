@@ -162,8 +162,27 @@
       "chooseEvent": "Elige un evento...",
       "apply": "Aplicar"
     },
+    "msgTypes": {
+      "invitation": "Invitación D-14",
+      "reminder": "Recordatorio D-3",
+      "teesheet": "Teesheet D-1",
+      "newmember": "Nuevo miembro",
+      "free": "Libre",
+      "reminderSubject": "⏰ Recordatorio — {{event_title}} en 3 días",
+      "reminderBody": "Hola {{first_name}},\n\nRecordatorio para {{event_title}} en 3 días.\n\nHasta pronto,\n{{owner_name}}",
+      "newmemberSubject": "¡Bienvenido al grupo!",
+      "newmemberBody": "Hola {{first_name}},\n\n¡Bienvenido a nuestro grupo de GolfGo!\n\nYa puedes ver los eventos y confirmar tu participación.\n\nHasta pronto,\n{{owner_name}}",
+      "invitationNote": "Este texto se usa para las invitaciones automáticas D-14. Los cambios aquí se enviarán tal cual sin modificar la plantilla guardada.",
+      "teesheetNote": "Este texto se usa para los teesheets automáticos D-1. Los cambios aquí se enviarán tal cual sin modificar la plantilla guardada."
+    },
+    "settings": {
+      "title": "Configuración",
+      "visualIdentity": "Identidad visual",
+      "visualDesc": "Logo y colores usados en los correos de este grupo."
+    },
     "message": {
       "title": "Mensaje",
+      "event": "Evento relacionado",
       "subject": "Asunto",
       "subjectPlaceholder": "Asunto del correo...",
       "body": "Cuerpo del mensaje",

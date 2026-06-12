@@ -162,12 +162,31 @@
       "chooseEvent": "Kies een evenement...",
       "apply": "Toepassen"
     },
+    "msgTypes": {
+      "invitation": "Uitnodiging D-14",
+      "reminder": "Herinnering D-3",
+      "teesheet": "Teesheet D-1",
+      "newmember": "Nieuw lid",
+      "free": "Vrij",
+      "reminderSubject": "⏰ Herinnering — {{event_title}} over 3 dagen",
+      "reminderBody": "Hallo {{first_name}},\n\nHerinnering voor {{event_title}} over 3 dagen.\n\nTot snel,\n{{owner_name}}",
+      "newmemberSubject": "Welkom in de groep!",
+      "newmemberBody": "Hallo {{first_name}},\n\nWelkom in onze GolfGo-groep!\n\nJe kunt nu evenementen bekijken en je deelname bevestigen.\n\nTot snel,\n{{owner_name}}",
+      "invitationNote": "Deze tekst wordt gebruikt voor automatische D-14-uitnodigingen. Wijzigingen hier worden zo verzonden zonder de opgeslagen sjabloon te wijzigen.",
+      "teesheetNote": "Deze tekst wordt gebruikt voor automatische D-1-teesheets. Wijzigingen hier worden zo verzonden zonder de opgeslagen sjabloon te wijzigen."
+    },
+    "settings": {
+      "title": "Instellingen",
+      "visualIdentity": "Visuele identiteit",
+      "visualDesc": "Logo en kleuren voor e-mails van deze groep."
+    },
     "message": {
       "title": "Bericht",
+      "event": "Betrokken evenement",
       "subject": "Onderwerp",
       "subjectPlaceholder": "E-mailonderwerp...",
       "body": "Berichttekst",
-      "bodyPlaceholder": "Schrijf hier uw bericht...",
+      "bodyPlaceholder": "Schrijf hier uw bericht...",s
       "insert": "Invoegen:",
       "preview": "👁 Voorbeeld",
       "send": "Verzenden",

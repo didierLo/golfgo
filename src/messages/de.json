@@ -162,8 +162,27 @@
       "chooseEvent": "Veranstaltung auswählen...",
       "apply": "Anwenden"
     },
+    "msgTypes": {
+      "invitation": "Einladung T-14",
+      "reminder": "Erinnerung T-3",
+      "teesheet": "Teesheet T-1",
+      "newmember": "Neues Mitglied",
+      "free": "Frei",
+      "reminderSubject": "⏰ Erinnerung — {{event_title}} in 3 Tagen",
+      "reminderBody": "Hallo {{first_name}},\n\nErinnerung für {{event_title}} in 3 Tagen.\n\nBis bald,\n{{owner_name}}",
+      "newmemberSubject": "Willkommen in der Gruppe!",
+      "newmemberBody": "Hallo {{first_name}},\n\nWillkommen in unserer GolfGo-Gruppe!\n\nDu kannst jetzt Veranstaltungen einsehen und deine Teilnahme bestätigen.\n\nBis bald,\n{{owner_name}}",
+      "invitationNote": "Dieser Text wird für automatische T-14-Einladungen verwendet. Änderungen hier werden so gesendet, ohne die gespeicherte Vorlage zu ändern.",
+      "teesheetNote": "Dieser Text wird für automatische T-1-Teesheets verwendet. Änderungen hier werden so gesendet, ohne die gespeicherte Vorlage zu ändern."
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "visualIdentity": "Visuelle Identität",
+      "visualDesc": "Logo und Farben für E-Mails dieser Gruppe."
+    },
     "message": {
       "title": "Nachricht",
+      "event": "Betreffende Veranstaltung",
       "subject": "Betreff",
       "subjectPlaceholder": "E-Mail-Betreff...",
       "body": "Nachrichtentext",

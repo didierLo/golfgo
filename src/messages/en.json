@@ -139,9 +139,9 @@
       "send": "✉️ New message",
       "templates": "🎨 Templates",
       "settings": "Settings",
-"invite": "Invitations",
-"visual": "Visual identity",
-"visualDesc": "These settings apply to all emails sent from this group (invitations, teesheets, reminders)."
+      "invite": "Invitations",
+      "visual": "Visual identity",
+      "visualDesc": "These settings apply to all emails sent from this group (invitations, teesheets, reminders)."
     },
     "recipients": {
       "title": "Recipients",
@@ -162,8 +162,27 @@
       "chooseEvent": "Choose an event...",
       "apply": "Apply"
     },
+     "msgTypes": {
+      "invitation": "Invitation D-14",
+      "reminder": "Reminder D-3",
+      "teesheet": "Teesheet D-1",
+      "newmember": "New member",
+      "free": "Free",
+      "reminderSubject": "⏰ Reminder — {{event_title}} in 3 days",
+      "reminderBody": "Hi {{first_name}},\n\nReminder for {{event_title}} in 3 days.\n\nSee you soon,\n{{owner_name}}",
+      "newmemberSubject": "Welcome to the group!",
+      "newmemberBody": "Hi {{first_name}},\n\nWelcome to our GolfGo group!\n\nYou can now view events and confirm your participation.\n\nSee you soon,\n{{owner_name}}",
+      "invitationNote": "This text is used for automatic D-14 invitations. Any changes here will be sent as-is without modifying the saved template.",
+      "teesheetNote": "This text is used for automatic D-1 teesheets. Any changes here will be sent as-is without modifying the saved template."
+    },
+    "settings": {
+      "title": "Settings",
+      "visualIdentity": "Visual identity",
+      "visualDesc": "Logo and colors used in emails sent from this group."
+    },
     "message": {
       "title": "Message",
+      "event": "Related event",
       "subject": "Subject",
       "subjectPlaceholder": "Email subject...",
       "body": "Message body",
