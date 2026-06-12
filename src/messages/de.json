@@ -174,7 +174,7 @@
       "newmemberBody": "Hallo {{first_name}},\n\nWillkommen in unserer GolfGo-Gruppe!\n\nDu kannst jetzt Veranstaltungen einsehen und deine Teilnahme bestätigen.\n\nBis bald,\n{{owner_name}}",
       "invitationNote": "Dieser Text wird für automatische T-14-Einladungen verwendet. Änderungen hier werden so gesendet, ohne die gespeicherte Vorlage zu ändern.",
       "teesheetNote": "Dieser Text wird für automatische T-1-Teesheets verwendet. Änderungen hier werden so gesendet, ohne die gespeicherte Vorlage zu ändern.",
-      "templateWarning": "Diese Nachricht wird gesendet und die Vorlage für automatische Versendungen gespeichert."
+      "templateWarning": "⚠️ Achtung: Nach dem Absenden werden die Änderungen an dieser Vorlage für alle automatischen Übermittlungen gespeichert."
     },
     "settings": {
       "title": "Einstellungen",

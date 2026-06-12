@@ -174,7 +174,7 @@
       "newmemberBody": "Hola {{first_name}},\n\n¡Bienvenido a nuestro grupo de GolfGo!\n\nYa puedes ver los eventos y confirmar tu participación.\n\nHasta pronto,\n{{owner_name}}",
       "invitationNote": "Este texto se usa para las invitaciones automáticas D-14. Los cambios aquí se enviarán tal cual sin modificar la plantilla guardada.",
       "teesheetNote": "Este texto se usa para los teesheets automáticos D-1. Los cambios aquí se enviarán tal cual sin modificar la plantilla guardada.",
-      "templateWarning": "Este mensaje se enviará y la plantilla se guardará para envíos automáticos."
+      "templateWarning": "⚠️ Advertencia: tras el envío, los cambios realizados en esta plantilla se guardarán para todos los envíos automáticos."
     },
     "settings": {
       "title": "Configuración",

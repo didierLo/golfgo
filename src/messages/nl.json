@@ -174,7 +174,7 @@
       "newmemberBody": "Hallo {{first_name}},\n\nWelkom in onze GolfGo-groep!\n\nJe kunt nu evenementen bekijken en je deelname bevestigen.\n\nTot snel,\n{{owner_name}}",
       "invitationNote": "Deze tekst wordt gebruikt voor automatische D-14-uitnodigingen. Wijzigingen hier worden zo verzonden zonder de opgeslagen sjabloon te wijzigen.",
       "teesheetNote": "Deze tekst wordt gebruikt voor automatische D-1-teesheets. Wijzigingen hier worden zo verzonden zonder de opgeslagen sjabloon te wijzigen.",
-      "templateWarning": "Dit bericht wordt verzonden en de sjabloon opgeslagen voor automatische verzending."
+      "templateWarning": "⚠️ Waarschuwing: na verzending worden de wijzigingen in dit sjabloon opgeslagen voor alle automatische inzendingen."
     },
     "settings": {
       "title": "Instellingen",

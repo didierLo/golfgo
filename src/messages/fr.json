@@ -177,7 +177,7 @@
           "newmemberBody": "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nTu peux dès maintenant consulter les événements et confirmer ta participation.\n\nÀ bientôt,\n{{owner_name}}",
           "invitationNote": "Ce texte est celui utilisé pour les invitations automatiques J-14. Toute modification ici sera envoyée telle quelle sans modifier le template sauvegardé.",
           "teesheetNote": "Ce texte est celui utilisé pour les teesheets automatiques J-1. Toute modification ici sera envoyée telle quelle sans modifier le template sauvegardé.",
-          "templateWarning": "Ce message sera envoyé et le template sauvegardé pour les envois automatiques."
+          "templateWarning": "⚠️ Attention, après l'envoi, les modifications de ce template seront sauvegardées pour tous les envois automatiques."
         },
         "settings": {
           "title": "Paramètres",
