@@ -294,20 +294,24 @@ if (eventId) {
       const yes9backLink  = token ? `${appUrl}/invite/yes?token=${token}&holes=9&section=in` : eventLink
       const noLink        = token ? `${appUrl}/invite/no?token=${token}` : eventLink
 
-      const templateVars: Record<string, string> = {
-        first_name:       player.first_name,
-        surname:          player.surname,
-        player_name:      `${player.first_name} ${player.surname}`,
-        group_name:       groupName,
-        owner_name:       ownerName,
-        event_title:      event?.title ?? '',
-        event_date:       eventDate,
-        event_time:       eventTime,
-        start_time:       eventTime,
-        places_restantes: placesRestantes,
-        liste_inscrits:   listeInscrits,  // ← NOUVEAU
-        yes_button:       '',             // retiré du body, géré via hasButtons
-      }
+     const templateVars: Record<string, string> = {
+      first_name:       player.first_name,
+      surname:          player.surname,
+      player_name:      `${player.first_name} ${player.surname}`,
+      group_name:       groupName,
+      owner_name:       ownerName,
+      event_title:      event?.title ?? '',
+      event_date:       eventDate,
+      event_time:       eventTime,
+      start_time:       eventTime,
+      places_restantes: placesRestantes,
+      liste_inscrits:   listeInscrits,
+      yes_button:       '',
+      app_url:          appUrl,
+      qr_code:          `<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(appUrl)}" width="120" height="120" style="border-radius:8px;border:1px solid #E2E8F0;" />`,
+      install_iphone:   "Ouvre le lien dans Safari → icône Partager → « Sur l'écran d'accueil »",
+      install_android:  "Ouvre le lien dans Chrome → menu ⋮ → « Ajouter à l'écran d'accueil »",
+    }
 
       const resolvedSubject = applyTemplateVariables(commSubject, templateVars)
       const resolvedBody    = applyTemplateVariables(

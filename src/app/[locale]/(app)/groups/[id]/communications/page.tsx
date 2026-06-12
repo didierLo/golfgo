@@ -40,9 +40,9 @@ const DEFAULTS: Template = {
   template_teesheet_subject: 'Tee Sheet — {{event_title}}',
   template_teesheet_body: "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
   template_reminder_subject:  '⏰ Rappel — {{event_title}} dans 3 jours',
-template_reminder_body:     "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}",
-template_newmember_subject: 'Bienvenue dans le groupe !',
-template_newmember_body:    "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nTu peux dès maintenant consulter les événements et confirmer ta participation.\n\nÀ bientôt,\n{{owner_name}}",
+  template_reminder_body:     "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}",
+  template_newmember_subject: 'Bienvenue dans le groupe !',
+  template_newmember_body: "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nPour accéder à l'app, clique sur le lien ou scanne le QR code :\n{{app_url}}\n\n{{qr_code}}\n\n📱 iPhone : {{install_iphone}}\n🤖 Android : {{install_android}}\n\nÀ bientôt,\n{{owner_name}}",
 }
 
 const COMM_VARS = [
@@ -56,6 +56,10 @@ const COMM_VARS = [
   { key: '{{event_time}}', label: 'Heure event' },
   { key: '{{yes_button}}', label: '✓/✗ Boutons réponse' },
   { key: '{{places_restantes}}', label: 'Places restantes' },
+  { key: '{{app_url}}',          label: 'URL app' },
+  { key: '{{qr_code}}',          label: 'QR Code' },
+  { key: '{{install_iphone}}',   label: 'Instructions iPhone' },
+  { key: '{{install_android}}',  label: 'Instructions Android' },
 ]
 
 function IconBtn({ onClick, href, title, disabled, color, children }: {
