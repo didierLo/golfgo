@@ -173,7 +173,8 @@
       "newmemberSubject": "Welcome to the group!",
       "newmemberBody": "Hi {{first_name}},\n\nWelcome to our GolfGo group!\n\nYou can now view events and confirm your participation.\n\nSee you soon,\n{{owner_name}}",
       "invitationNote": "This text is used for automatic D-14 invitations. Any changes here will be sent as-is without modifying the saved template.",
-      "teesheetNote": "This text is used for automatic D-1 teesheets. Any changes here will be sent as-is without modifying the saved template."
+      "teesheetNote": "This text is used for automatic D-1 teesheets. Any changes here will be sent as-is without modifying the saved template.",
+      "templateWarning": "This message will be sent and the template saved for automatic sending."
     },
     "settings": {
       "title": "Settings",

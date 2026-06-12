@@ -253,11 +253,31 @@ export default function CommunicationsPage() {
     return `https://wa.me/?text=${encodeURIComponent(text)}`
   }
 
-  async function handleSend() {
-    if (!commSubject.trim()) { toast.error(t('communications.toasts.missingSubject')); return }
-    if (!commBody.trim())    { toast.error(t('communications.toasts.missingBody')); return }
-    if (selectedIds.size === 0) { toast.error(t('communications.toasts.noRecipients')); return }
-    setSending(true)
+ async function handleSend() {
+  if (!commSubject.trim()) { toast.error(t('communications.toasts.missingSubject')); return }
+  if (!commBody.trim())    { toast.error(t('communications.toasts.missingBody')); return }
+  if (selectedIds.size === 0) { toast.error(t('communications.toasts.noRecipients')); return }
+
+  // Sauvegarder le template si ce n'est pas un message libre
+  if (messageType !== 'free') {
+    const update: Partial<Template> = {}
+    if (messageType === 'invitation') {
+      update.template_invitation_subject = commSubject
+      update.template_invitation_body    = commBody
+    } else if (messageType === 'teesheet') {
+      update.template_teesheet_subject = commSubject
+      update.template_teesheet_body    = commBody
+    } else if (messageType === 'reminder') {
+      update.template_invitation_subject = commSubject  // pas de colonne dédiée
+      // rappel : pas de template en base pour l'instant
+    }
+    if (Object.keys(update).length > 0) {
+      await supabase.from('groups').update(update).eq('id', groupId)
+      setGroupTemplate(prev => ({ ...prev, ...update }))
+    }
+  }
+
+  setSending(true)
     try {
       const res = await fetch('/api/send-communication', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -514,15 +534,13 @@ export default function CommunicationsPage() {
             </div>
 
             {/* Note pour les templates auto */}
-            {(messageType === 'invitation' || messageType === 'teesheet') && (
-              <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                <p className="text-[11px] text-amber-700">
-                  {messageType === 'invitation'
-                    ? t('communications.msgTypes.invitationNote')
-                    : t('communications.msgTypes.teesheetNote')}
-                </p>
-              </div>
-            )}
+            {messageType !== 'free' && (
+            <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-[11px] text-amber-700">
+                ⚠️ {t('communications.msgTypes.templateWarning')}
+              </p>
+            </div>
+          )}
 
             {selectedMembers.length > 0 && (commSubject || commBody) && (
               <div>
