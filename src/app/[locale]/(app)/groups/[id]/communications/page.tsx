@@ -30,7 +30,7 @@ type Template = {
 type Member = { id: string; first_name: string; surname: string; email: string | null; role: string }
 type EventRow = { id: string; title: string; starts_at: string }
 type ParticipantStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
-type MessageType = 'invitation' | 'reminder' | 'teesheet' | 'newmember' | 'free'
+type MessageType = 'invitation' | 'reminder' | 'teesheet' | 'newmember' | 'scorecards' | 'free'
 type HolePrint    = { hole_number: number; par: number; stroke_index: number }
 type PlayerPrint  = { id: string; first_name: string; surname: string; whs: number; phcp: number; tee_name: string | null }
 
@@ -87,187 +87,7 @@ function IconBtn({ onClick, href, title, disabled, color, children }: {
 
 // ── Styles print ──────────────────────────────────────────────────────────────
 
-function PrintScorecardsComm({
-  players, holes, eventTitle, clubName, courseName, eventDate,
-}: {
-  players: PlayerPrint[]
-  holes: HolePrint[]
-  eventTitle: string
-  clubName: string
-  courseName: string
-  eventDate: string
-}) {
-  const front9   = holes.filter(h => h.hole_number <= 9)
-  const back9    = holes.filter(h => h.hole_number > 9)
-  const frontPar = front9.reduce((s, h) => s + h.par, 0)
-  const backPar  = back9.reduce((s, h) => s + h.par, 0)
-  const totalPar = frontPar + backPar
 
-  function getMarker(idx: number): PlayerPrint {
-    return players[(idx + 1) % players.length]
-  }
-
-  return (
-    <div className="hidden print:block">
-      <style>{`
-        @media print {
-          @page { size: A4 landscape; margin: 8mm; }
-          body * { visibility: hidden; }
-          .psc, .psc * { visibility: visible; }
-          .psc { position: fixed; top: 0; left: 0; width: 100%; }
-          .psc-card { page-break-after: always; break-after: page; width: 100%; }
-          .psc-card:last-child { page-break-after: auto; break-after: auto; }
-        }
-      `}</style>
-      <div className="psc">
-        {players.map((player, idx) => {
-          const marker = getMarker(idx)
-          return (
-            <div key={player.id} className="psc-card" style={{ fontFamily: 'Arial, sans-serif', boxSizing: 'border-box' }}>
-
-              {/* ── En-tête ── */}
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5mm', gap: '4mm' }}>
-                {/* Logo */}
-                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', background: '#185FA5', borderRadius: '6px', padding: '5px 10px' }}>
-                  <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="24" height="24" style={{ borderRadius: '3px' }} />
-                  <span style={{ fontSize: '14px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px' }}>Golf</span>
-                  <span style={{ fontSize: '14px', fontWeight: '900', color: '#97C459', letterSpacing: '-0.5px' }}>Go</span>
-                </div>
-
-                {/* Event — centre */}
-                <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ fontSize: '15px', fontWeight: '900', color: '#0F172A', textDecoration: 'underline' }}>{eventTitle}</div>
-                  <div style={{ fontSize: '10px', color: '#475569', marginTop: '2px' }}>
-                    {eventDate}{clubName ? ` · ${clubName}` : ''}{courseName ? ` · ${courseName}` : ''}
-                    {player.tee_name ? ` · ${player.tee_name}` : ''}
-                  </div>
-                </div>
-
-                {/* Joueur + Marqueur — droite */}
-                <div style={{ flexShrink: 0, textAlign: 'right', fontSize: '12px', minWidth: '220px' }}>
-                  <div style={{ fontWeight: '700', color: '#0F172A' }}>
-                    Player : <span style={{ textDecoration: 'underline' }}>{player.first_name} {player.surname}</span>
-                    <span style={{ fontWeight: '400', color: '#64748B', marginLeft: '8px', fontSize: '11px' }}>HCP {player.whs} · Phcp {player.phcp}</span>
-                  </div>
-                  <div style={{ color: '#475569', marginTop: '3px' }}>
-                    Marker : <span style={{ textDecoration: 'underline' }}>{marker.first_name} {marker.surname}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Tableau ── */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', tableLayout: 'fixed', border: '2px solid #185FA5' }}>
-                <colgroup>
-                  <col style={{ width: '60px' }} />
-                  {holes.map(h => <col key={h.hole_number} />)}
-                  <col style={{ width: '32px' }} />
-                  <col style={{ width: '32px' }} />
-                  <col style={{ width: '32px' }} />
-                </colgroup>
-                <thead>
-                  <tr style={{ background: '#3B6D11', color: '#fff' }}>
-                    <th style={{ ...thCard, textAlign: 'left', paddingLeft: '6px', fontSize: '11px' }}>Hole</th>
-                    {front9.map(h => <th key={h.hole_number} style={thCard}>{h.hole_number}</th>)}
-                    <th style={{ ...thCard, background: '#2A5009' }}>Out</th>
-                    {back9.map(h => <th key={h.hole_number} style={thCard}>{h.hole_number}</th>)}
-                    <th style={{ ...thCard, background: '#2A5009' }}>In</th>
-                    <th style={{ ...thCard, background: '#185FA5' }}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Par */}
-                  <tr style={{ borderBottom: '1px solid #185FA5' }}>
-                    <td style={{ ...tdLabel, background: '#F8FAFC' }}>Par</td>
-                    {front9.map(h => <td key={h.hole_number} style={tdCell}>{h.par}</td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', fontWeight: '700', borderLeft: '1px solid #185FA5' }}>{frontPar}</td>
-                    {back9.map(h => <td key={h.hole_number} style={tdCell}>{h.par}</td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', fontWeight: '700', borderLeft: '1px solid #185FA5' }}>{backPar}</td>
-                    <td style={{ ...tdCell, background: '#DBEAFE', fontWeight: '900', borderLeft: '1px solid #185FA5' }}>{totalPar}</td>
-                  </tr>
-
-                  {/* Stroke index */}
-                  <tr style={{ borderBottom: '1px solid #185FA5' }}>
-                    <td style={{ ...tdLabel, background: '#F8FAFC' }}>Stroke index</td>
-                    {front9.map(h => <td key={h.hole_number} style={{ ...tdCell, color: '#64748B' }}>{h.stroke_index}</td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
-                    {back9.map(h => <td key={h.hole_number} style={{ ...tdCell, color: '#64748B' }}>{h.stroke_index}</td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
-                    <td style={{ ...tdCell, background: '#DBEAFE', borderLeft: '1px solid #185FA5' }}></td>
-                  </tr>
-
-                  {/* HCP */}
-                  <tr style={{ borderBottom: '2px solid #185FA5' }}>
-                    <td style={{ ...tdLabel, background: '#EBF3FC', color: '#185FA5', fontWeight: '700' }}>HCP</td>
-                    {front9.map(h => {
-                      const recv = strokesReceived(player.phcp, h.stroke_index)
-                      return <td key={h.hole_number} style={{ ...tdCell, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0', background: '#EBF3FC' }}>
-                        {recv > 0 ? '*'.repeat(recv) : '·'}
-                      </td>
-                    })}
-                    <td style={{ ...tdCell, background: '#BFDBFE', fontWeight: '700', color: '#185FA5', borderLeft: '1px solid #185FA5' }}>
-                      {front9.reduce((s, h) => s + strokesReceived(player.phcp, h.stroke_index), 0)}
-                    </td>
-                    {back9.map(h => {
-                      const recv = strokesReceived(player.phcp, h.stroke_index)
-                      return <td key={h.hole_number} style={{ ...tdCell, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0', background: '#EBF3FC' }}>
-                        {recv > 0 ? '*'.repeat(recv) : '·'}
-                      </td>
-                    })}
-                    <td style={{ ...tdCell, background: '#BFDBFE', fontWeight: '700', color: '#185FA5', borderLeft: '1px solid #185FA5' }}>
-                      {back9.reduce((s, h) => s + strokesReceived(player.phcp, h.stroke_index), 0)}
-                    </td>
-                    <td style={{ ...tdCell, background: '#93C5FD', fontWeight: '900', color: '#1E40AF', borderLeft: '1px solid #185FA5' }}>
-                      {holes.reduce((s, h) => s + strokesReceived(player.phcp, h.stroke_index), 0)}
-                    </td>
-                  </tr>
-
-                  {/* Score brut */}
-                  <tr style={{ borderBottom: '1px solid #185FA5' }}>
-                    <td style={{ ...tdLabel, fontWeight: '700', color: '#0F172A', fontSize: '9px' }}>{player.first_name} {player.surname}</td>
-                    {front9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '20px' }}></td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
-                    {back9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '20px' }}></td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
-                    <td style={{ ...tdCell, background: '#DBEAFE', borderLeft: '1px solid #185FA5' }}></td>
-                  </tr>
-
-                  {/* Net */}
-                  <tr>
-                    <td style={{ ...tdLabel, color: '#475569', fontStyle: 'italic' }}>Net</td>
-                    {front9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '18px', background: '#F8FAFC' }}></td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
-                    {back9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '18px', background: '#F8FAFC' }}></td>)}
-                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
-                    <td style={{ ...tdCell, background: '#DBEAFE', borderLeft: '1px solid #185FA5' }}></td>
-                  </tr>
-                </tbody>
-              </table>
-
-              {/* ── Pied ── */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px 100px', marginTop: '4mm', border: '2px solid #185FA5', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ padding: '8px 12px', borderRight: '1px solid #185FA5' }}>
-                  <div style={{ fontSize: '9px', color: '#64748B', marginBottom: '10px' }}>Marker's signature</div>
-                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#0F172A' }}>{marker.first_name} {marker.surname}</div>
-                </div>
-                <div style={{ padding: '8px 12px', borderRight: '1px solid #185FA5' }}>
-                  <div style={{ fontSize: '9px', color: '#64748B', marginBottom: '10px' }}>Player's signature</div>
-                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#0F172A' }}>{player.first_name} {player.surname}</div>
-                </div>
-                <div style={{ padding: '8px 12px', borderRight: '1px solid #185FA5', background: '#F8FAFC' }}>
-                  <div style={{ fontSize: '9px', color: '#64748B' }}>Brut :</div>
-                </div>
-                <div style={{ padding: '8px 12px', background: '#F8FAFC' }}>
-                  <div style={{ fontSize: '9px', color: '#64748B' }}>Net :</div>
-                </div>
-              </div>
-
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
 
 const thCard: React.CSSProperties = {
   padding: '4px 2px', textAlign: 'center', fontWeight: '700',
@@ -294,6 +114,245 @@ function strokesReceived(phcp: number, strokeIndex: number): number {
   return full + (strokeIndex <= remainder ? 1 : 0)
 }
 
+
+function buildPrintHtml(
+  players: PlayerPrint[],
+  holes: HolePrint[],
+  eventTitle: string,
+  clubName: string,
+  courseName: string,
+  eventDate: string,
+): string {
+  const front9   = holes.filter(h => h.hole_number <= 9)
+  const back9    = holes.filter(h => h.hole_number > 9)
+  const frontPar = front9.reduce((s, h) => s + h.par, 0)
+  const backPar  = back9.reduce((s, h) => s + h.par, 0)
+  const totalPar = frontPar + backPar
+
+  function getMarker(idx: number): PlayerPrint {
+    return players[(idx + 1) % players.length]
+  }
+
+  function recvFront(phcp: number) {
+    return front9.reduce((s, h) => s + strokesReceived(phcp, h.stroke_index), 0)
+  }
+  function recvBack(phcp: number) {
+    return back9.reduce((s, h) => s + strokesReceived(phcp, h.stroke_index), 0)
+  }
+  function recvTotal(phcp: number) {
+    return holes.reduce((s, h) => s + strokesReceived(phcp, h.stroke_index), 0)
+  }
+
+  const cards = players.map((player, idx) => {
+    const marker = getMarker(idx)
+
+    const holeHeaders = [
+      ...front9.map(h => `<th>${h.hole_number}</th>`),
+      `<th class="sub">Out</th>`,
+      ...back9.map(h => `<th>${h.hole_number}</th>`),
+      `<th class="sub">In</th>`,
+      `<th class="tot">Total</th>`,
+    ].join('')
+
+    const parRow = [
+      ...front9.map(h => `<td>${h.par}</td>`),
+      `<td class="sub-val">${frontPar}</td>`,
+      ...back9.map(h => `<td>${h.par}</td>`),
+      `<td class="sub-val">${backPar}</td>`,
+      `<td class="tot-val">${totalPar}</td>`,
+    ].join('')
+
+    const siRow = [
+      ...front9.map(h => `<td class="si">${h.stroke_index}</td>`),
+      `<td class="sub-val"></td>`,
+      ...back9.map(h => `<td class="si">${h.stroke_index}</td>`),
+      `<td class="sub-val"></td>`,
+      `<td class="tot-val"></td>`,
+    ].join('')
+
+    const hcpRow = [
+      ...front9.map(h => {
+        const r = strokesReceived(player.phcp, h.stroke_index)
+        return `<td class="hcp-cell">${r > 0 ? '*'.repeat(r) : '·'}</td>`
+      }),
+      `<td class="hcp-sub">${recvFront(player.phcp)}</td>`,
+      ...back9.map(h => {
+        const r = strokesReceived(player.phcp, h.stroke_index)
+        return `<td class="hcp-cell">${r > 0 ? '*'.repeat(r) : '·'}</td>`
+      }),
+      `<td class="hcp-sub">${recvBack(player.phcp)}</td>`,
+      `<td class="hcp-tot">${recvTotal(player.phcp)}</td>`,
+    ].join('')
+
+    const brutRow = [
+      ...front9.map(() => `<td class="score-cell"></td>`),
+      `<td class="sub-val"></td>`,
+      ...back9.map(() => `<td class="score-cell"></td>`),
+      `<td class="sub-val"></td>`,
+      `<td class="tot-val"></td>`,
+    ].join('')
+
+    const netRow = [
+      ...front9.map(() => `<td class="net-cell"></td>`),
+      `<td class="sub-val"></td>`,
+      ...back9.map(() => `<td class="net-cell"></td>`),
+      `<td class="sub-val"></td>`,
+      `<td class="tot-val"></td>`,
+    ].join('')
+
+    return `
+<div class="card">
+  <div class="header">
+    <div class="logo">
+      <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="32" height="32"/>
+      <span class="golf">Golf</span><span class="go">Go</span>
+    </div>
+    <div class="event-info">
+      <div class="event-title">${eventTitle}</div>
+      <div class="event-sub">${eventDate}${clubName ? ' · ' + clubName : ''}${courseName ? ' · ' + courseName : ''}</div>
+    </div>
+    <div class="player-info">
+      <div><strong>Player : <u>${player.first_name} ${player.surname}</u></strong> &nbsp; HCP ${player.whs} · Phcp ${player.phcp}</div>
+      <div>Marker : <u>${marker.first_name} ${marker.surname}</u></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr class="hole-row">
+        <th class="label-col">Hole</th>
+        ${holeHeaders}
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="par-row">
+        <td class="label-col">Par</td>
+        ${parRow}
+      </tr>
+      <tr class="si-row">
+        <td class="label-col">Stroke index</td>
+        ${siRow}
+      </tr>
+      <tr class="hcp-row">
+        <td class="label-col hcp-label">HCP</td>
+        ${hcpRow}
+      </tr>
+      <tr class="score-row">
+        <td class="label-col player-label">${player.first_name} ${player.surname}</td>
+        ${brutRow}
+      </tr>
+      <tr class="net-row">
+        <td class="label-col net-label">Net</td>
+        ${netRow}
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <div class="footer-cell">
+      <div class="footer-label">Marker's signature</div>
+      <div class="footer-name">${marker.first_name} ${marker.surname}</div>
+    </div>
+    <div class="footer-cell">
+      <div class="footer-label">Player's signature</div>
+      <div class="footer-name">${player.first_name} ${player.surname}</div>
+    </div>
+    <div class="footer-cell footer-score">
+      <div class="footer-label">Brut :</div>
+    </div>
+    <div class="footer-cell footer-score">
+      <div class="footer-label">Net :</div>
+    </div>
+  </div>
+</div>`
+  }).join('')
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Scorecards — ${eventTitle}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: white; }
+  @page { size: A4 landscape; margin: 8mm; }
+  @media print {
+    .card { page-break-after: always; }
+    .card:last-child { page-break-after: auto; }
+  }
+  .card { width: 100%; padding: 4mm; display: flex; flex-direction: column; gap: 4mm; min-height: 180mm; }
+
+  /* Header */
+  .header { display: flex; align-items: center; gap: 6mm; }
+  .logo { display: flex; align-items: center; gap: 5px; background: #185FA5; border-radius: 8px; padding: 6px 14px; flex-shrink: 0; }
+  .logo img { border-radius: 4px; }
+  .golf { font-size: 18px; font-weight: 900; color: white; letter-spacing: -0.5px; }
+  .go   { font-size: 18px; font-weight: 900; color: #97C459; letter-spacing: -0.5px; }
+  .event-info { flex: 1; text-align: center; }
+  .event-title { font-size: 16px; font-weight: 900; color: #0F172A; text-decoration: underline; }
+  .event-sub { font-size: 11px; color: #64748B; margin-top: 3px; }
+  .player-info { text-align: right; font-size: 13px; flex-shrink: 0; min-width: 240px; }
+  .player-info div { margin-bottom: 3px; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 2px solid #185FA5; flex: 1; }
+  .label-col { width: 68px; text-align: left; padding: 0 6px; font-size: 10px; font-weight: 600; color: #475569; border: 1px solid #CBD5E1; white-space: nowrap; }
+
+  /* Hole header */
+  .hole-row th { background: #3B6D11; color: white; font-size: 11px; font-weight: 700; text-align: center; padding: 5px 2px; border: 1px solid rgba(255,255,255,0.3); }
+  .hole-row .label-col { background: #3B6D11; color: white; font-size: 12px; }
+  .hole-row th.sub { background: #2A5009; }
+  .hole-row th.tot { background: #185FA5; }
+
+  /* Par */
+  .par-row td { text-align: center; padding: 5px 2px; font-size: 11px; border: 1px solid #CBD5E1; color: #334155; background: #F8FAFC; }
+  .par-row .label-col { text-align: left; padding: 5px 6px; }
+  .par-row .sub-val { background: #EAF3DE; font-weight: 700; border-left: 1px solid #185FA5; }
+  .par-row .tot-val { background: #DBEAFE; font-weight: 900; border-left: 1px solid #185FA5; }
+
+  /* Stroke index */
+  .si-row td { text-align: center; padding: 4px 2px; font-size: 10px; border: 1px solid #CBD5E1; color: #94A3B8; }
+  .si-row .label-col { text-align: left; padding: 4px 6px; color: #475569; font-weight: 600; font-size: 10px; }
+  .si-row .sub-val { background: #EAF3DE; border-left: 1px solid #185FA5; }
+  .si-row .tot-val { background: #DBEAFE; border-left: 1px solid #185FA5; }
+
+  /* HCP */
+  .hcp-row td { text-align: center; padding: 5px 2px; font-size: 11px; font-weight: 700; border: 1px solid #CBD5E1; background: #EBF3FC; color: #185FA5; border-bottom: 2px solid #185FA5; }
+  .hcp-row .hcp-label { text-align: left; padding: 5px 6px; color: #185FA5; font-weight: 700; font-size: 11px; background: #EBF3FC; }
+  .hcp-row .hcp-cell { color: #185FA5; }
+  .hcp-row .hcp-sub { background: #BFDBFE; font-weight: 700; border-left: 1px solid #185FA5; }
+  .hcp-row .hcp-tot { background: #93C5FD; font-weight: 900; color: #1E40AF; border-left: 1px solid #185FA5; }
+
+  /* Score brut */
+  .score-row td { border: 1px solid #CBD5E1; }
+  .score-row .label-col.player-label { font-size: 10px; font-weight: 700; color: #0F172A; padding: 0 6px; }
+  .score-row .score-cell { height: 28px; background: white; }
+  .score-row .sub-val { background: #EAF3DE; border-left: 1px solid #185FA5; }
+  .score-row .tot-val { background: #DBEAFE; border-left: 1px solid #185FA5; }
+
+  /* Net */
+  .net-row td { border: 1px solid #CBD5E1; }
+  .net-row .net-label { font-size: 10px; font-style: italic; color: #64748B; padding: 0 6px; }
+  .net-row .net-cell { height: 24px; background: #F8FAFC; }
+  .net-row .sub-val { background: #EAF3DE; border-left: 1px solid #185FA5; }
+  .net-row .tot-val { background: #DBEAFE; border-left: 1px solid #185FA5; }
+
+  /* Footer */
+  .footer { display: grid; grid-template-columns: 1fr 1fr 110px 110px; border: 2px solid #185FA5; border-radius: 4px; overflow: hidden; }
+  .footer-cell { padding: 10px 14px; border-right: 1px solid #185FA5; }
+  .footer-cell:last-child { border-right: none; }
+  .footer-score { background: #F8FAFC; }
+  .footer-label { font-size: 9px; color: #94A3B8; margin-bottom: 10px; }
+  .footer-name { font-size: 12px; font-weight: 700; color: #0F172A; }
+</style>
+</head>
+<body>
+${cards}
+<script>window.onload = () => window.print()</script>
+</body>
+</html>`
+}
+
 export default function CommunicationsPage() {
   const params  = useParams()
   const groupId = params.id as string
@@ -310,16 +369,12 @@ export default function CommunicationsPage() {
   const [saving,          setSaving]          = useState(false)
   const [uploading,       setUploading]       = useState(false)
   const [showSettings,    setShowSettings]    = useState(false)
-  const [printEventId,      setPrintEventId]      = useState<string>('')
-  const [printHoles,        setPrintHoles]        = useState<HolePrint[]>([])
-  const [printPlayers,      setPrintPlayers]      = useState<PlayerPrint[]>([])
-  const [printSelectedIds,  setPrintSelectedIds]  = useState<Set<string>>(new Set())
-  const [printLoading,      setPrintLoading]      = useState(false)
-  const [printClubName,     setPrintClubName]     = useState('')
-  const [printCourseName,   setPrintCourseName]   = useState('')
-  const [printEventTitle,   setPrintEventTitle]   = useState('')
-  const [printEventDate,    setPrintEventDate]    = useState('')
-  const [printError,        setPrintError]        = useState<string | null>(null)
+  
+
+  const [printPhcpMap,  setPrintPhcpMap]  = useState<Record<string, { phcp: number; tee_name: string | null }>>({})
+ 
+ 
+
 
   const fileInputRef   = useRef<HTMLInputElement>(null)
   const bgFileInputRef = useRef<HTMLInputElement>(null)
@@ -338,16 +393,19 @@ export default function CommunicationsPage() {
 
   const [mainTab, setMainTab] = useState<'send' | 'settings' | 'invite' | 'scorecards'>('send')
 
+  const [printHoles, setPrintHoles] = useState<HolePrint[]>([])
+
   const MESSAGE_TYPES: { id: MessageType; label: string }[] = [
-    { id: 'invitation', label: t('communications.msgTypes.invitation') },
-    { id: 'reminder',   label: t('communications.msgTypes.reminder') },
-    { id: 'teesheet',   label: t('communications.msgTypes.teesheet') },
-    { id: 'newmember',  label: t('communications.msgTypes.newmember') },
-    { id: 'free',       label: t('communications.msgTypes.free') },
-  ]
+  { id: 'invitation', label: t('communications.msgTypes.invitation') },
+  { id: 'reminder',   label: t('communications.msgTypes.reminder') },
+  { id: 'teesheet',   label: t('communications.msgTypes.teesheet') },
+  { id: 'newmember',  label: t('communications.msgTypes.newmember') },
+  { id: 'scorecards', label: '🖨 Scorecards' },
+  { id: 'free',       label: t('communications.msgTypes.free') },
+]
 
   useEffect(() => { loadAll() }, [groupId])
-  useEffect(() => {if (printEventId) loadPrintData(printEventId)}, [printEventId])
+
 
   async function loadAll() {
     setLoading(true)
@@ -405,12 +463,20 @@ export default function CommunicationsPage() {
         setCommSubject(groupTemplate.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject ?? '')
         setCommBody(groupTemplate.template_teesheet_body ?? DEFAULTS.template_teesheet_body ?? '')
         break
+      case 'scorecards':
+        setCommSubject('')
+        setCommBody('')
+        break
       case 'free':
         setCommSubject('')
         setCommBody('')
         break
     }
   }, [messageType, groupTemplate])
+
+  useEffect(() => {
+  if (messageType === 'scorecards' && selectedEventId) loadPrintHoles(selectedEventId)
+}, [messageType, selectedEventId])
 
   async function handleSaveTemplate() {
     setSaving(true)
@@ -545,57 +611,35 @@ export default function CommunicationsPage() {
       {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
-async function loadPrintData(eventId: string) {
-  setPrintLoading(true); setPrintError(null)
-  setPrintHoles([]); setPrintPlayers([])
+  async function loadPrintHoles(eventId: string) {
+    const { data: event } = await supabase.from('events')
+      .select('course_id').eq('id', eventId).single()
+    if (!(event as any)?.course_id) { setPrintHoles([]); return }
 
-  const { data: event } = await supabase.from('events')
-    .select('id, title, starts_at, course_id, courses(course_name, clubs(name))')
-    .eq('id', eventId).single()
+    const [{ data: holesData }, { data: teesData }, { data: participants }] = await Promise.all([
+      supabase.from('course_holes').select('hole_number, par, stroke_index')
+        .eq('course_id', (event as any).course_id).order('hole_number'),
+      supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
+        .eq('course_id', (event as any).course_id),
+      supabase.from('event_participants')
+        .select('player_id, tee_id, players(id, first_name, surname, whs)')
+        .eq('event_id', eventId).eq('status', 'GOING'),
+    ])
 
-  if (!event) { setPrintError('Événement introuvable'); setPrintLoading(false); return }
+    setPrintHoles(holesData || [])
 
-  setPrintEventTitle((event as any).title ?? '')
-  setPrintEventDate(new Date((event as any).starts_at).toLocaleDateString('fr-BE', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  }))
-  setPrintClubName((event as any).courses?.clubs?.name ?? '')
-  setPrintCourseName((event as any).courses?.course_name ?? '')
-
-  if (!(event as any).course_id) {
-    setPrintError('Aucun parcours lié à cet événement')
-    setPrintLoading(false); return
-  }
-
-  const [{ data: holesData }, { data: teesData }, { data: participants }] = await Promise.all([
-    supabase.from('course_holes').select('hole_number, par, stroke_index')
-      .eq('course_id', (event as any).course_id).order('hole_number'),
-    supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
-      .eq('course_id', (event as any).course_id),
-    supabase.from('event_participants')
-      .select('player_id, tee_id, players(id, first_name, surname, whs)')
-      .eq('event_id', eventId).eq('status', 'GOING'),
-  ])
-
-  setPrintHoles(holesData || [])
-
-  const built: PlayerPrint[] = (participants || []).map((ep: any) => {
-    const p   = ep.players
-    const tee = (teesData || []).find(t => t.id === ep.tee_id)
-    const phcp = tee
-      ? Math.round((p.whs ?? 0) * (tee.slope / 113) + tee.course_rating - tee.par_total)
-      : Math.round(p.whs ?? 0)
-    return {
-      id: p.id, first_name: p.first_name, surname: p.surname,
-      whs: p.whs ?? 0, phcp,
-      tee_name: tee?.tee_name ?? null,
+    const phcpMap: Record<string, { phcp: number; tee_name: string | null }> = {}
+    for (const ep of participants || []) {
+      const p = (ep as any).players
+      const tee = (teesData || []).find((t: any) => t.id === (ep as any).tee_id)
+      const phcp = tee
+        ? Math.round((p.whs ?? 0) * (tee.slope / 113) + tee.course_rating - tee.par_total)
+        : Math.round(p.whs ?? 0)
+      phcpMap[p.id] = { phcp, tee_name: tee?.tee_name ?? null }
     }
-  })
-
-  setPrintPlayers(built)
-  setPrintSelectedIds(new Set(built.map(p => p.id)))
-  setPrintLoading(false)
-}
+    setPrintPhcpMap(phcpMap)
+  }
+  
 
 
   return (
@@ -713,7 +757,6 @@ async function loadPrintData(eventId: string) {
         {([
           { key: 'send',       label: t('communications.tabs.send') },
           { key: 'settings',   label: t('communications.tabs.settings') },
-          { key: 'scorecards', label: '🖨 Scorecards' },
         ] as const).map(tab => (
           <button key={tab.key} onClick={() => setMainTab(tab.key)}
             className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -812,10 +855,14 @@ async function loadPrintData(eventId: string) {
             </div>
 
             {/* Sélecteur event pour teesheet/invitation/rappel */}
-            {(messageType === 'invitation' || messageType === 'reminder' || messageType === 'teesheet') && events.length > 0 && (
+           {(messageType === 'invitation' || messageType === 'reminder' || messageType === 'teesheet' || messageType === 'scorecards') && events.length > 0 && (
               <div className="mb-3">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.event')}</label>
-                <select value={selectedEventId} onChange={e => { setSelectedEventId(e.target.value); localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value) }} className={`${selectClass} w-full`}>
+                <select value={selectedEventId} onChange={e => {
+                        setSelectedEventId(e.target.value)
+                        localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
+                        if (messageType === 'scorecards') loadPrintHoles(e.target.value)
+                      }}className={`${selectClass} w-full`}>
                   {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at, locale)}</option>)}
                 </select>
               </div>
@@ -889,102 +936,7 @@ async function loadPrintData(eventId: string) {
         />
       )}
      
-      {mainTab === 'scorecards' && (
-  <div className="flex flex-col gap-5">
-
-    {/* Sélecteur event */}
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-      <div className="px-5 py-4 border-b border-slate-100">
-        <p className="text-[13px] font-bold text-slate-800 mb-3">Événement</p>
-        <select
-          value={printEventId}
-          onChange={e => setPrintEventId(e.target.value)}
-          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white">
-          <option value="">Choisir un événement</option>
-          {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at, locale)}</option>)}
-        </select>
-      </div>
-
-      {printLoading && (
-        <div className="px-5 py-4 space-y-2">
-          {[1,2,3].map(i => <div key={i} className="h-8 bg-slate-100 rounded-xl animate-pulse" />)}
-        </div>
-      )}
-
-      {printError && (
-        <div className="px-5 py-4 text-[13px] text-red-500">{printError}</div>
-      )}
-
-      {!printLoading && printPlayers.length > 0 && (
-        <>
-          <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <p className="text-[12px] font-semibold text-slate-600">
-              Joueurs
-              {printSelectedIds.size > 0 && (
-                <span className="ml-2 text-[11px] font-semibold text-white bg-[#185FA5] px-2 py-0.5 rounded-full">
-                  {printSelectedIds.size} sélectionné{printSelectedIds.size > 1 ? 's' : ''}
-                </span>
-              )}
-            </p>
-            <div className="flex gap-1">
-              <button onClick={() => setPrintSelectedIds(new Set(printPlayers.map(p => p.id)))}
-                className="text-[11px] font-semibold text-[#185FA5] hover:underline px-2 py-1">Tous</button>
-              <button onClick={() => setPrintSelectedIds(new Set())}
-                className="text-[11px] font-semibold text-slate-400 hover:underline px-2 py-1">Aucun</button>
-            </div>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {printPlayers.map(player => {
-              const isSelected = printSelectedIds.has(player.id)
-              return (
-                <label key={player.id} className={`flex items-center gap-3 px-5 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-[#EBF3FC]/50' : 'hover:bg-slate-50'}`}>
-                  <input type="checkbox" checked={isSelected}
-                    onChange={() => {
-                      setPrintSelectedIds(prev => {
-                        const n = new Set(prev)
-                        n.has(player.id) ? n.delete(player.id) : n.add(player.id)
-                        return n
-                      })
-                    }}
-                    className="rounded border-slate-300 text-[#185FA5] focus:ring-[#185FA5]/30" />
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 bg-[#EBF3FC] text-[#0C447C]">
-                    {player.first_name[0]}{player.surname[0]}
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-[13px] font-semibold text-slate-800">{player.first_name} {player.surname}</span>
-                    <span className="text-[11px] text-slate-400 ml-2">HCP {player.whs} · Phcp {player.phcp}</span>
-                    {player.tee_name && <span className="text-[11px] text-slate-400 ml-1">· {player.tee_name}</span>}
-                  </div>
-                </label>
-              )
-            })}
-          </div>
-          <div className="px-5 py-4 border-t border-slate-100 flex justify-end">
-            <button
-              onClick={() => window.print()}
-              disabled={printSelectedIds.size === 0 || printHoles.length === 0}
-              className="flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-              🖨 Imprimer {printSelectedIds.size > 0 ? `(${printSelectedIds.size})` : ''}
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-
-    {/* Cartes à imprimer */}
-    {printSelectedIds.size > 0 && printHoles.length > 0 && (
-      <PrintScorecardsComm
-        players={printPlayers.filter(p => printSelectedIds.has(p.id))}
-        holes={printHoles}
-        eventTitle={printEventTitle}
-        clubName={printClubName}
-        courseName={printCourseName}
-        eventDate={printEventDate}
-      />
-    )}
-
-  </div>
-)}
+     
     </div>
   )
 }
