@@ -101,13 +101,6 @@ const tdLabelPrint: React.CSSProperties = {
   whiteSpace: 'nowrap' as const,
 }
 
-function strokesReceivedComm(phcp: number, strokeIndex: number): number {
-  if (phcp <= 0) return 0
-  const full = Math.floor(phcp / 18)
-  const remainder = phcp % 18
-  return full + (strokeIndex <= remainder ? 1 : 0)
-}
-
 function PrintScorecardsComm({
   players, holes, eventTitle, clubName, courseName, eventDate,
 }: {
@@ -132,134 +125,153 @@ function PrintScorecardsComm({
     <div className="hidden print:block">
       <style>{`
         @media print {
-          @page { size: A4 landscape; margin: 6mm; }
+          @page { size: A4 landscape; margin: 8mm; }
           body * { visibility: hidden; }
-          .print-area-comm, .print-area-comm * { visibility: visible; }
-          .print-area-comm { position: fixed; top: 0; left: 0; width: 100%; }
-          .print-card-comm { page-break-after: always; break-after: page; }
-          .print-card-comm:last-child { page-break-after: auto; break-after: auto; }
+          .psc, .psc * { visibility: visible; }
+          .psc { position: fixed; top: 0; left: 0; width: 100%; }
+          .psc-card { page-break-after: always; break-after: page; width: 100%; }
+          .psc-card:last-child { page-break-after: auto; break-after: auto; }
         }
       `}</style>
-      <div className="print-area-comm">
+      <div className="psc">
         {players.map((player, idx) => {
           const marker = getMarker(idx)
           return (
-            <div key={player.id} className="print-card-comm" style={{ fontFamily: 'Arial, sans-serif', padding: '4mm', boxSizing: 'border-box' }}>
+            <div key={player.id} className="psc-card" style={{ fontFamily: 'Arial, sans-serif', boxSizing: 'border-box' }}>
 
-              {/* En-tête */}
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4mm', gap: '8mm' }}>
-                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px', background: '#185FA5', borderRadius: '8px', padding: '6px 12px' }}>
-                  <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="28" height="28" style={{ borderRadius: '4px' }} />
-                  <span style={{ fontSize: '16px', fontWeight: '900', color: '#fff' }}>Golf</span>
-                  <span style={{ fontSize: '16px', fontWeight: '900', color: '#97C459' }}>Go</span>
+              {/* ── En-tête ── */}
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5mm', gap: '4mm' }}>
+                {/* Logo */}
+                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', background: '#185FA5', borderRadius: '6px', padding: '5px 10px' }}>
+                  <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="24" height="24" style={{ borderRadius: '3px' }} />
+                  <span style={{ fontSize: '14px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px' }}>Golf</span>
+                  <span style={{ fontSize: '14px', fontWeight: '900', color: '#97C459', letterSpacing: '-0.5px' }}>Go</span>
                 </div>
+
+                {/* Event — centre */}
                 <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>{eventTitle}</div>
-                  <div style={{ fontSize: '10px', color: '#64748B', marginTop: '2px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: '900', color: '#0F172A', textDecoration: 'underline' }}>{eventTitle}</div>
+                  <div style={{ fontSize: '10px', color: '#475569', marginTop: '2px' }}>
                     {eventDate}{clubName ? ` · ${clubName}` : ''}{courseName ? ` · ${courseName}` : ''}
+                    {player.tee_name ? ` · ${player.tee_name}` : ''}
                   </div>
                 </div>
-                <div style={{ flexShrink: 0, textAlign: 'right', fontSize: '11px' }}>
+
+                {/* Joueur + Marqueur — droite */}
+                <div style={{ flexShrink: 0, textAlign: 'right', fontSize: '12px', minWidth: '220px' }}>
                   <div style={{ fontWeight: '700', color: '#0F172A' }}>
-                    Player : {player.first_name} {player.surname}
-                    <span style={{ fontWeight: '400', color: '#64748B', marginLeft: '6px' }}>HCP {player.whs} · Phcp {player.phcp}</span>
+                    Player : <span style={{ textDecoration: 'underline' }}>{player.first_name} {player.surname}</span>
+                    <span style={{ fontWeight: '400', color: '#64748B', marginLeft: '8px', fontSize: '11px' }}>HCP {player.whs} · Phcp {player.phcp}</span>
                   </div>
-                  <div style={{ color: '#64748B', marginTop: '2px' }}>Marker : {marker.first_name} {marker.surname}</div>
+                  <div style={{ color: '#475569', marginTop: '3px' }}>
+                    Marker : <span style={{ textDecoration: 'underline' }}>{marker.first_name} {marker.surname}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Tableau */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px', tableLayout: 'fixed' }}>
+              {/* ── Tableau ── */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', tableLayout: 'fixed', border: '2px solid #185FA5' }}>
+                <colgroup>
+                  <col style={{ width: '60px' }} />
+                  {holes.map(h => <col key={h.hole_number} />)}
+                  <col style={{ width: '32px' }} />
+                  <col style={{ width: '32px' }} />
+                  <col style={{ width: '32px' }} />
+                </colgroup>
                 <thead>
-                  <tr style={{ background: '#185FA5', color: '#fff' }}>
-                    <th style={{ ...thPrint, width: '52px' }}>Hole</th>
-                    {front9.map(h => <th key={h.hole_number} style={thPrint}>{h.hole_number}</th>)}
-                    <th style={{ ...thPrint, background: '#3B6D11', width: '28px' }}>Out</th>
-                    {back9.map(h => <th key={h.hole_number} style={thPrint}>{h.hole_number}</th>)}
-                    <th style={{ ...thPrint, background: '#3B6D11', width: '28px' }}>In</th>
-                    <th style={{ ...thPrint, background: '#0C447C', width: '28px' }}>Total</th>
+                  <tr style={{ background: '#3B6D11', color: '#fff' }}>
+                    <th style={{ ...thCard, textAlign: 'left', paddingLeft: '6px', fontSize: '11px' }}>Hole</th>
+                    {front9.map(h => <th key={h.hole_number} style={thCard}>{h.hole_number}</th>)}
+                    <th style={{ ...thCard, background: '#2A5009' }}>Out</th>
+                    {back9.map(h => <th key={h.hole_number} style={thCard}>{h.hole_number}</th>)}
+                    <th style={{ ...thCard, background: '#2A5009' }}>In</th>
+                    <th style={{ ...thCard, background: '#185FA5' }}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {/* Par */}
-                  <tr style={{ background: '#F1F5F9' }}>
-                    <td style={tdLabelPrint}>Par</td>
-                    {front9.map(h => <td key={h.hole_number} style={tdPrint}>{h.par}</td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE', fontWeight: '700' }}>{frontPar}</td>
-                    {back9.map(h => <td key={h.hole_number} style={tdPrint}>{h.par}</td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE', fontWeight: '700' }}>{backPar}</td>
-                    <td style={{ ...tdPrint, background: '#DBEAFE', fontWeight: '900' }}>{totalPar}</td>
+                  <tr style={{ borderBottom: '1px solid #185FA5' }}>
+                    <td style={{ ...tdLabel, background: '#F8FAFC' }}>Par</td>
+                    {front9.map(h => <td key={h.hole_number} style={tdCell}>{h.par}</td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', fontWeight: '700', borderLeft: '1px solid #185FA5' }}>{frontPar}</td>
+                    {back9.map(h => <td key={h.hole_number} style={tdCell}>{h.par}</td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', fontWeight: '700', borderLeft: '1px solid #185FA5' }}>{backPar}</td>
+                    <td style={{ ...tdCell, background: '#DBEAFE', fontWeight: '900', borderLeft: '1px solid #185FA5' }}>{totalPar}</td>
                   </tr>
 
                   {/* Stroke index */}
-                  <tr style={{ background: '#F8FAFC' }}>
-                    <td style={tdLabelPrint}>Stroke index</td>
-                    {front9.map(h => <td key={h.hole_number} style={{ ...tdPrint, color: '#94A3B8' }}>{h.stroke_index}</td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
-                    {back9.map(h => <td key={h.hole_number} style={{ ...tdPrint, color: '#94A3B8' }}>{h.stroke_index}</td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
-                    <td style={{ ...tdPrint, background: '#DBEAFE' }}></td>
+                  <tr style={{ borderBottom: '1px solid #185FA5' }}>
+                    <td style={{ ...tdLabel, background: '#F8FAFC' }}>Stroke index</td>
+                    {front9.map(h => <td key={h.hole_number} style={{ ...tdCell, color: '#64748B' }}>{h.stroke_index}</td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
+                    {back9.map(h => <td key={h.hole_number} style={{ ...tdCell, color: '#64748B' }}>{h.stroke_index}</td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
+                    <td style={{ ...tdCell, background: '#DBEAFE', borderLeft: '1px solid #185FA5' }}></td>
                   </tr>
 
-                  {/* HCP reçus */}
-                  <tr style={{ background: '#EBF3FC', borderBottom: '2px solid #185FA5' }}>
-                    <td style={tdLabelPrint}>HCP</td>
+                  {/* HCP */}
+                  <tr style={{ borderBottom: '2px solid #185FA5' }}>
+                    <td style={{ ...tdLabel, background: '#EBF3FC', color: '#185FA5', fontWeight: '700' }}>HCP</td>
                     {front9.map(h => {
-                      const recv = strokesReceivedComm(player.phcp, h.stroke_index)
-                      return <td key={h.hole_number} style={{ ...tdPrint, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#CBD5E1' }}>{recv > 0 ? '*'.repeat(recv) : '·'}</td>
+                      const recv = strokesReceived(player.phcp, h.stroke_index)
+                      return <td key={h.hole_number} style={{ ...tdCell, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0', background: '#EBF3FC' }}>
+                        {recv > 0 ? '*'.repeat(recv) : '·'}
+                      </td>
                     })}
-                    <td style={{ ...tdPrint, background: '#D1E9FF', fontWeight: '700' }}>
-                      {front9.reduce((s, h) => s + strokesReceivedComm(player.phcp, h.stroke_index), 0)}
+                    <td style={{ ...tdCell, background: '#BFDBFE', fontWeight: '700', color: '#185FA5', borderLeft: '1px solid #185FA5' }}>
+                      {front9.reduce((s, h) => s + strokesReceived(player.phcp, h.stroke_index), 0)}
                     </td>
                     {back9.map(h => {
-                      const recv = strokesReceivedComm(player.phcp, h.stroke_index)
-                      return <td key={h.hole_number} style={{ ...tdPrint, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#CBD5E1' }}>{recv > 0 ? '*'.repeat(recv) : '·'}</td>
+                      const recv = strokesReceived(player.phcp, h.stroke_index)
+                      return <td key={h.hole_number} style={{ ...tdCell, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0', background: '#EBF3FC' }}>
+                        {recv > 0 ? '*'.repeat(recv) : '·'}
+                      </td>
                     })}
-                    <td style={{ ...tdPrint, background: '#D1E9FF', fontWeight: '700' }}>
-                      {back9.reduce((s, h) => s + strokesReceivedComm(player.phcp, h.stroke_index), 0)}
+                    <td style={{ ...tdCell, background: '#BFDBFE', fontWeight: '700', color: '#185FA5', borderLeft: '1px solid #185FA5' }}>
+                      {back9.reduce((s, h) => s + strokesReceived(player.phcp, h.stroke_index), 0)}
                     </td>
-                    <td style={{ ...tdPrint, background: '#BFDBFE', fontWeight: '900' }}>
-                      {holes.reduce((s, h) => s + strokesReceivedComm(player.phcp, h.stroke_index), 0)}
+                    <td style={{ ...tdCell, background: '#93C5FD', fontWeight: '900', color: '#1E40AF', borderLeft: '1px solid #185FA5' }}>
+                      {holes.reduce((s, h) => s + strokesReceived(player.phcp, h.stroke_index), 0)}
                     </td>
                   </tr>
 
                   {/* Score brut */}
-                  <tr>
-                    <td style={tdLabelPrint}>{player.first_name} {player.surname}</td>
-                    {front9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '16px' }}></td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
-                    {back9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '16px' }}></td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
-                    <td style={{ ...tdPrint, background: '#DBEAFE' }}></td>
+                  <tr style={{ borderBottom: '1px solid #185FA5' }}>
+                    <td style={{ ...tdLabel, fontWeight: '700', color: '#0F172A', fontSize: '9px' }}>{player.first_name} {player.surname}</td>
+                    {front9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '20px' }}></td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
+                    {back9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '20px' }}></td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
+                    <td style={{ ...tdCell, background: '#DBEAFE', borderLeft: '1px solid #185FA5' }}></td>
                   </tr>
 
                   {/* Net */}
-                  <tr style={{ borderBottom: '2px solid #185FA5' }}>
-                    <td style={{ ...tdLabelPrint, color: '#64748B' }}>Net</td>
-                    {front9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '14px', background: '#F8FAFC' }}></td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
-                    {back9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '14px', background: '#F8FAFC' }}></td>)}
-                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
-                    <td style={{ ...tdPrint, background: '#DBEAFE' }}></td>
+                  <tr>
+                    <td style={{ ...tdLabel, color: '#475569', fontStyle: 'italic' }}>Net</td>
+                    {front9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '18px', background: '#F8FAFC' }}></td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
+                    {back9.map(h => <td key={h.hole_number} style={{ ...tdCell, height: '18px', background: '#F8FAFC' }}></td>)}
+                    <td style={{ ...tdCell, background: '#EAF3DE', borderLeft: '1px solid #185FA5' }}></td>
+                    <td style={{ ...tdCell, background: '#DBEAFE', borderLeft: '1px solid #185FA5' }}></td>
                   </tr>
                 </tbody>
               </table>
 
-              {/* Pied */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px', gap: '0', marginTop: '3mm', border: '1px solid #CBD5E1', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ padding: '6px 8px', borderRight: '1px solid #CBD5E1' }}>
-                  <div style={{ fontSize: '8px', color: '#64748B', marginBottom: '8px' }}>Marker's signature</div>
-                  <div style={{ fontSize: '9px', fontWeight: '600', color: '#0F172A' }}>{marker.first_name} {marker.surname}</div>
+              {/* ── Pied ── */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px 100px', marginTop: '4mm', border: '2px solid #185FA5', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ padding: '8px 12px', borderRight: '1px solid #185FA5' }}>
+                  <div style={{ fontSize: '9px', color: '#64748B', marginBottom: '10px' }}>Marker's signature</div>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#0F172A' }}>{marker.first_name} {marker.surname}</div>
                 </div>
-                <div style={{ padding: '6px 8px', borderRight: '1px solid #CBD5E1' }}>
-                  <div style={{ fontSize: '8px', color: '#64748B', marginBottom: '8px' }}>Player's signature</div>
-                  <div style={{ fontSize: '9px', fontWeight: '600', color: '#0F172A' }}>{player.first_name} {player.surname}</div>
+                <div style={{ padding: '8px 12px', borderRight: '1px solid #185FA5' }}>
+                  <div style={{ fontSize: '9px', color: '#64748B', marginBottom: '10px' }}>Player's signature</div>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#0F172A' }}>{player.first_name} {player.surname}</div>
                 </div>
-                <div style={{ padding: '6px 8px', borderRight: '1px solid #CBD5E1', background: '#F8FAFC' }}>
-                  <div style={{ fontSize: '8px', color: '#64748B' }}>Brut :</div>
+                <div style={{ padding: '8px 12px', borderRight: '1px solid #185FA5', background: '#F8FAFC' }}>
+                  <div style={{ fontSize: '9px', color: '#64748B' }}>Brut :</div>
                 </div>
-                <div style={{ padding: '6px 8px', background: '#F8FAFC' }}>
-                  <div style={{ fontSize: '8px', color: '#64748B' }}>Net :</div>
+                <div style={{ padding: '8px 12px', background: '#F8FAFC' }}>
+                  <div style={{ fontSize: '9px', color: '#64748B' }}>Net :</div>
                 </div>
               </div>
 
@@ -270,6 +282,21 @@ function PrintScorecardsComm({
     </div>
   )
 }
+
+const thCard: React.CSSProperties = {
+  padding: '4px 2px', textAlign: 'center', fontWeight: '700',
+  border: '1px solid rgba(255,255,255,0.3)', fontSize: '10px',
+}
+const tdCell: React.CSSProperties = {
+  padding: '3px 2px', textAlign: 'center',
+  border: '1px solid #CBD5E1', color: '#334155', fontSize: '10px',
+}
+const tdLabel: React.CSSProperties = {
+  padding: '3px 6px', textAlign: 'left', fontWeight: '600',
+  border: '1px solid #CBD5E1', color: '#475569', fontSize: '9px',
+  whiteSpace: 'nowrap' as const, background: '#fff',
+}
+
 
 function formatDate(d: string, locale: string) {
   return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
