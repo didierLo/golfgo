@@ -87,20 +87,6 @@ function IconBtn({ onClick, href, title, disabled, color, children }: {
 
 // ── Styles print ──────────────────────────────────────────────────────────────
 
-const thPrint: React.CSSProperties = {
-  padding: '3px 2px', textAlign: 'center', fontWeight: '700',
-  border: '1px solid rgba(255,255,255,0.3)', fontSize: '9px',
-}
-const tdPrint: React.CSSProperties = {
-  padding: '3px 2px', textAlign: 'center',
-  border: '1px solid #E2E8F0', color: '#334155',
-}
-const tdLabelPrint: React.CSSProperties = {
-  padding: '3px 6px', textAlign: 'left', fontWeight: '600',
-  border: '1px solid #E2E8F0', color: '#475569', fontSize: '8px',
-  whiteSpace: 'nowrap' as const,
-}
-
 function PrintScorecardsComm({
   players, holes, eventTitle, clubName, courseName, eventDate,
 }: {
