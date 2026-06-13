@@ -335,9 +335,7 @@ export default function CommunicationsPage() {
   ]
 
   useEffect(() => { loadAll() }, [groupId])
-  useEffect(() => {
-  if (printEventId) loadPrintData(printEventId)
-}, [printEventId])
+  useEffect(() => {if (printEventId) loadPrintData(printEventId)}, [printEventId])
 
   async function loadAll() {
     setLoading(true)
@@ -394,10 +392,6 @@ export default function CommunicationsPage() {
       case 'teesheet':
         setCommSubject(groupTemplate.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject ?? '')
         setCommBody(groupTemplate.template_teesheet_body ?? DEFAULTS.template_teesheet_body ?? '')
-        break
-      case 'newmember':
-        setCommSubject(t('communications.msgTypes.newmemberSubject'))
-        setCommBody(t('communications.msgTypes.newmemberBody'))
         break
       case 'free':
         setCommSubject('')
@@ -702,6 +696,21 @@ async function loadPrintData(eventId: string) {
         </div>
       )}
 
+       {/* ── Onglets ── */}
+      <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
+        {([
+          { key: 'send',       label: t('communications.tabs.send') },
+          { key: 'settings',   label: t('communications.tabs.settings') },
+          { key: 'scorecards', label: '🖨 Scorecards' },
+        ] as const).map(tab => (
+          <button key={tab.key} onClick={() => setMainTab(tab.key)}
+            className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {mainTab === 'send' && (
       <div className="flex flex-col gap-6">
 
         {/* ── Destinataires ── */}
@@ -850,6 +859,7 @@ async function loadPrintData(eventId: string) {
           </div>
         </div>
       </div>
+      )}
 
       {showPreview && (
         <EmailPreviewModal
@@ -866,22 +876,7 @@ async function loadPrintData(eventId: string) {
           }).then(r => r.json())}
         />
       )}
-      {/* ── Onglets ── */}
-      <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
-        {([
-          { key: 'send',       label: t('communications.tabs.send') },
-          { key: 'settings',   label: t('communications.tabs.settings') },
-          { key: 'scorecards', label: '🖨 Scorecards' },
-        ] as const).map(tab => (
-          <button key={tab.key} onClick={() => setMainTab(tab.key)}
-            className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-
-
+     
       {mainTab === 'scorecards' && (
   <div className="flex flex-col gap-5">
 
