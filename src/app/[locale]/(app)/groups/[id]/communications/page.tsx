@@ -63,7 +63,7 @@ const COMM_VARS = [
   { key: '{{qr_code}}',          label: 'QR Code' },
   { key: '{{install_iphone}}',   label: 'Instructions iPhone' },
   { key: '{{install_android}}',  label: 'Instructions Android' },
-  { key: 'scorecards', label: '🖨 Scorecards' },
+ 
 ]
 
 function IconBtn({ onClick, href, title, disabled, color, children }: {
@@ -866,6 +866,22 @@ async function loadPrintData(eventId: string) {
           }).then(r => r.json())}
         />
       )}
+      {/* ── Onglets ── */}
+      <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
+        {([
+          { key: 'send',       label: t('communications.tabs.send') },
+          { key: 'settings',   label: t('communications.tabs.settings') },
+          { key: 'scorecards', label: '🖨 Scorecards' },
+        ] as const).map(tab => (
+          <button key={tab.key} onClick={() => setMainTab(tab.key)}
+            className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+
+
       {mainTab === 'scorecards' && (
   <div className="flex flex-col gap-5">
 
