@@ -476,7 +476,7 @@ export default function CommunicationsPage() {
 
   useEffect(() => {
   if (messageType === 'scorecards' && filterEventId) loadPrintHoles(filterEventId)
-}, [messageType, filterEventId])
+  }, [messageType, filterEventId])
 
   async function handleSaveTemplate() {
     setSaving(true)
@@ -855,7 +855,8 @@ export default function CommunicationsPage() {
             </div>
 
             {/* Sélecteur event pour teesheet/invitation/rappel */}
-           {(messageType === 'invitation' || messageType === 'reminder' || messageType === 'teesheet' || messageType === 'scorecards') && events.length > 0 && (
+          
+        
               <div className="mb-3">
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.event')}</label>
                 <select value={selectedEventId} onChange={e => {
@@ -866,8 +867,7 @@ export default function CommunicationsPage() {
                   {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at, locale)}</option>)}
                 </select>
               </div>
-            )}
-
+          
             <div className="mb-3">
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.subject')}</label>
               <input type="text" value={commSubject} onChange={e => setCommSubject(e.target.value)}
