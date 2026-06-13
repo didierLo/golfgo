@@ -652,7 +652,37 @@ export default function CommunicationsPage() {
           <p className="text-[13px] text-slate-900 mt-0.5">{t('communications.subtitle')}</p>
         </div>
         <div className="flex items-center gap-1.5">
-          <IconBtn onClick={() => window.print()} title="Imprimer">🖨</IconBtn>
+         <IconBtn
+            onClick={() => {
+              console.log('holes:', printHoles.length, 'members:', selectedMembers.length, 'filterEventId:', filterEventId)
+              if (messageType === 'scorecards') {
+                if (printHoles.length === 0) { toast.error('Aucun parcours lié'); return }
+                if (selectedMembers.length === 0) { toast.error('Aucun joueur sélectionné'); return }
+                const activeEvent = events.find(e => e.id === filterEventId)
+                const html = buildPrintHtml(
+                  selectedMembers.map(m => ({
+                    id: m.id,
+                    first_name: m.first_name,
+                    surname: m.surname,
+                    whs: 0,
+                    phcp: printPhcpMap[m.id]?.phcp ?? 0,
+                    tee_name: printPhcpMap[m.id]?.tee_name ?? null,
+                  })),
+                  printHoles,
+                  activeEvent?.title ?? '',
+                  '',
+                  '',
+                  activeEvent ? new Date(activeEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' }) : '',
+                )
+                const win = window.open('', '_blank')
+                if (win) { win.document.write(html); win.document.close() }
+              } else {
+                window.print()
+              }
+            }}
+            title="Imprimer">🖨
+          </IconBtn>
+
           <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
           <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
           <IconBtn onClick={handleSend} disabled={!canSend} title={sending ? t('communications.message.sending') : t('communications.message.send')} color="blue">
