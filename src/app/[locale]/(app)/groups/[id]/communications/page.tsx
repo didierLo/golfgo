@@ -475,8 +475,8 @@ export default function CommunicationsPage() {
   }, [messageType, groupTemplate])
 
   useEffect(() => {
-  if (messageType === 'scorecards' && selectedEventId) loadPrintHoles(selectedEventId)
-}, [messageType, selectedEventId])
+  if (messageType === 'scorecards' && filterEventId) loadPrintHoles(filterEventId)
+}, [messageType, filterEventId])
 
   async function handleSaveTemplate() {
     setSaving(true)
