@@ -31,6 +31,9 @@ type Member = { id: string; first_name: string; surname: string; email: string |
 type EventRow = { id: string; title: string; starts_at: string }
 type ParticipantStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST'
 type MessageType = 'invitation' | 'reminder' | 'teesheet' | 'newmember' | 'free'
+type HolePrint    = { hole_number: number; par: number; stroke_index: number }
+type PlayerPrint  = { id: string; first_name: string; surname: string; whs: number; phcp: number; tee_name: string | null }
+
 
 const INVITATION_BODY_DEFAULT = "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
 const DEFAULTS: Template = {
@@ -60,6 +63,7 @@ const COMM_VARS = [
   { key: '{{qr_code}}',          label: 'QR Code' },
   { key: '{{install_iphone}}',   label: 'Instructions iPhone' },
   { key: '{{install_android}}',  label: 'Instructions Android' },
+  { key: 'scorecards', label: '🖨 Scorecards' },
 ]
 
 function IconBtn({ onClick, href, title, disabled, color, children }: {
@@ -81,8 +85,201 @@ function IconBtn({ onClick, href, title, disabled, color, children }: {
   return <button type="button" onClick={onClick} disabled={disabled} title={title} className={cls}>{children}</button>
 }
 
+// ── Styles print ──────────────────────────────────────────────────────────────
+
+const thPrint: React.CSSProperties = {
+  padding: '3px 2px', textAlign: 'center', fontWeight: '700',
+  border: '1px solid rgba(255,255,255,0.3)', fontSize: '9px',
+}
+const tdPrint: React.CSSProperties = {
+  padding: '3px 2px', textAlign: 'center',
+  border: '1px solid #E2E8F0', color: '#334155',
+}
+const tdLabelPrint: React.CSSProperties = {
+  padding: '3px 6px', textAlign: 'left', fontWeight: '600',
+  border: '1px solid #E2E8F0', color: '#475569', fontSize: '8px',
+  whiteSpace: 'nowrap' as const,
+}
+
+function strokesReceivedComm(phcp: number, strokeIndex: number): number {
+  if (phcp <= 0) return 0
+  const full = Math.floor(phcp / 18)
+  const remainder = phcp % 18
+  return full + (strokeIndex <= remainder ? 1 : 0)
+}
+
+function PrintScorecardsComm({
+  players, holes, eventTitle, clubName, courseName, eventDate,
+}: {
+  players: PlayerPrint[]
+  holes: HolePrint[]
+  eventTitle: string
+  clubName: string
+  courseName: string
+  eventDate: string
+}) {
+  const front9   = holes.filter(h => h.hole_number <= 9)
+  const back9    = holes.filter(h => h.hole_number > 9)
+  const frontPar = front9.reduce((s, h) => s + h.par, 0)
+  const backPar  = back9.reduce((s, h) => s + h.par, 0)
+  const totalPar = frontPar + backPar
+
+  function getMarker(idx: number): PlayerPrint {
+    return players[(idx + 1) % players.length]
+  }
+
+  return (
+    <div className="hidden print:block">
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 6mm; }
+          body * { visibility: hidden; }
+          .print-area-comm, .print-area-comm * { visibility: visible; }
+          .print-area-comm { position: fixed; top: 0; left: 0; width: 100%; }
+          .print-card-comm { page-break-after: always; break-after: page; }
+          .print-card-comm:last-child { page-break-after: auto; break-after: auto; }
+        }
+      `}</style>
+      <div className="print-area-comm">
+        {players.map((player, idx) => {
+          const marker = getMarker(idx)
+          return (
+            <div key={player.id} className="print-card-comm" style={{ fontFamily: 'Arial, sans-serif', padding: '4mm', boxSizing: 'border-box' }}>
+
+              {/* En-tête */}
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4mm', gap: '8mm' }}>
+                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px', background: '#185FA5', borderRadius: '8px', padding: '6px 12px' }}>
+                  <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="28" height="28" style={{ borderRadius: '4px' }} />
+                  <span style={{ fontSize: '16px', fontWeight: '900', color: '#fff' }}>Golf</span>
+                  <span style={{ fontSize: '16px', fontWeight: '900', color: '#97C459' }}>Go</span>
+                </div>
+                <div style={{ flex: 1, textAlign: 'center' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>{eventTitle}</div>
+                  <div style={{ fontSize: '10px', color: '#64748B', marginTop: '2px' }}>
+                    {eventDate}{clubName ? ` · ${clubName}` : ''}{courseName ? ` · ${courseName}` : ''}
+                  </div>
+                </div>
+                <div style={{ flexShrink: 0, textAlign: 'right', fontSize: '11px' }}>
+                  <div style={{ fontWeight: '700', color: '#0F172A' }}>
+                    Player : {player.first_name} {player.surname}
+                    <span style={{ fontWeight: '400', color: '#64748B', marginLeft: '6px' }}>HCP {player.whs} · Phcp {player.phcp}</span>
+                  </div>
+                  <div style={{ color: '#64748B', marginTop: '2px' }}>Marker : {marker.first_name} {marker.surname}</div>
+                </div>
+              </div>
+
+              {/* Tableau */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px', tableLayout: 'fixed' }}>
+                <thead>
+                  <tr style={{ background: '#185FA5', color: '#fff' }}>
+                    <th style={{ ...thPrint, width: '52px' }}>Hole</th>
+                    {front9.map(h => <th key={h.hole_number} style={thPrint}>{h.hole_number}</th>)}
+                    <th style={{ ...thPrint, background: '#3B6D11', width: '28px' }}>Out</th>
+                    {back9.map(h => <th key={h.hole_number} style={thPrint}>{h.hole_number}</th>)}
+                    <th style={{ ...thPrint, background: '#3B6D11', width: '28px' }}>In</th>
+                    <th style={{ ...thPrint, background: '#0C447C', width: '28px' }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Par */}
+                  <tr style={{ background: '#F1F5F9' }}>
+                    <td style={tdLabelPrint}>Par</td>
+                    {front9.map(h => <td key={h.hole_number} style={tdPrint}>{h.par}</td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE', fontWeight: '700' }}>{frontPar}</td>
+                    {back9.map(h => <td key={h.hole_number} style={tdPrint}>{h.par}</td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE', fontWeight: '700' }}>{backPar}</td>
+                    <td style={{ ...tdPrint, background: '#DBEAFE', fontWeight: '900' }}>{totalPar}</td>
+                  </tr>
+
+                  {/* Stroke index */}
+                  <tr style={{ background: '#F8FAFC' }}>
+                    <td style={tdLabelPrint}>Stroke index</td>
+                    {front9.map(h => <td key={h.hole_number} style={{ ...tdPrint, color: '#94A3B8' }}>{h.stroke_index}</td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
+                    {back9.map(h => <td key={h.hole_number} style={{ ...tdPrint, color: '#94A3B8' }}>{h.stroke_index}</td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
+                    <td style={{ ...tdPrint, background: '#DBEAFE' }}></td>
+                  </tr>
+
+                  {/* HCP reçus */}
+                  <tr style={{ background: '#EBF3FC', borderBottom: '2px solid #185FA5' }}>
+                    <td style={tdLabelPrint}>HCP</td>
+                    {front9.map(h => {
+                      const recv = strokesReceivedComm(player.phcp, h.stroke_index)
+                      return <td key={h.hole_number} style={{ ...tdPrint, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#CBD5E1' }}>{recv > 0 ? '*'.repeat(recv) : '·'}</td>
+                    })}
+                    <td style={{ ...tdPrint, background: '#D1E9FF', fontWeight: '700' }}>
+                      {front9.reduce((s, h) => s + strokesReceivedComm(player.phcp, h.stroke_index), 0)}
+                    </td>
+                    {back9.map(h => {
+                      const recv = strokesReceivedComm(player.phcp, h.stroke_index)
+                      return <td key={h.hole_number} style={{ ...tdPrint, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#CBD5E1' }}>{recv > 0 ? '*'.repeat(recv) : '·'}</td>
+                    })}
+                    <td style={{ ...tdPrint, background: '#D1E9FF', fontWeight: '700' }}>
+                      {back9.reduce((s, h) => s + strokesReceivedComm(player.phcp, h.stroke_index), 0)}
+                    </td>
+                    <td style={{ ...tdPrint, background: '#BFDBFE', fontWeight: '900' }}>
+                      {holes.reduce((s, h) => s + strokesReceivedComm(player.phcp, h.stroke_index), 0)}
+                    </td>
+                  </tr>
+
+                  {/* Score brut */}
+                  <tr>
+                    <td style={tdLabelPrint}>{player.first_name} {player.surname}</td>
+                    {front9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '16px' }}></td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
+                    {back9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '16px' }}></td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
+                    <td style={{ ...tdPrint, background: '#DBEAFE' }}></td>
+                  </tr>
+
+                  {/* Net */}
+                  <tr style={{ borderBottom: '2px solid #185FA5' }}>
+                    <td style={{ ...tdLabelPrint, color: '#64748B' }}>Net</td>
+                    {front9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '14px', background: '#F8FAFC' }}></td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
+                    {back9.map(h => <td key={h.hole_number} style={{ ...tdPrint, height: '14px', background: '#F8FAFC' }}></td>)}
+                    <td style={{ ...tdPrint, background: '#EAF3DE' }}></td>
+                    <td style={{ ...tdPrint, background: '#DBEAFE' }}></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* Pied */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px 120px', gap: '0', marginTop: '3mm', border: '1px solid #CBD5E1', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ padding: '6px 8px', borderRight: '1px solid #CBD5E1' }}>
+                  <div style={{ fontSize: '8px', color: '#64748B', marginBottom: '8px' }}>Marker's signature</div>
+                  <div style={{ fontSize: '9px', fontWeight: '600', color: '#0F172A' }}>{marker.first_name} {marker.surname}</div>
+                </div>
+                <div style={{ padding: '6px 8px', borderRight: '1px solid #CBD5E1' }}>
+                  <div style={{ fontSize: '8px', color: '#64748B', marginBottom: '8px' }}>Player's signature</div>
+                  <div style={{ fontSize: '9px', fontWeight: '600', color: '#0F172A' }}>{player.first_name} {player.surname}</div>
+                </div>
+                <div style={{ padding: '6px 8px', borderRight: '1px solid #CBD5E1', background: '#F8FAFC' }}>
+                  <div style={{ fontSize: '8px', color: '#64748B' }}>Brut :</div>
+                </div>
+                <div style={{ padding: '6px 8px', background: '#F8FAFC' }}>
+                  <div style={{ fontSize: '8px', color: '#64748B' }}>Net :</div>
+                </div>
+              </div>
+
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function formatDate(d: string, locale: string) {
   return new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+}
+
+function strokesReceived(phcp: number, strokeIndex: number): number {
+  if (phcp <= 0) return 0
+  const full = Math.floor(phcp / 18)
+  const remainder = phcp % 18
+  return full + (strokeIndex <= remainder ? 1 : 0)
 }
 
 export default function CommunicationsPage() {
@@ -101,6 +298,16 @@ export default function CommunicationsPage() {
   const [saving,          setSaving]          = useState(false)
   const [uploading,       setUploading]       = useState(false)
   const [showSettings,    setShowSettings]    = useState(false)
+  const [printEventId,      setPrintEventId]      = useState<string>('')
+  const [printHoles,        setPrintHoles]        = useState<HolePrint[]>([])
+  const [printPlayers,      setPrintPlayers]      = useState<PlayerPrint[]>([])
+  const [printSelectedIds,  setPrintSelectedIds]  = useState<Set<string>>(new Set())
+  const [printLoading,      setPrintLoading]      = useState(false)
+  const [printClubName,     setPrintClubName]     = useState('')
+  const [printCourseName,   setPrintCourseName]   = useState('')
+  const [printEventTitle,   setPrintEventTitle]   = useState('')
+  const [printEventDate,    setPrintEventDate]    = useState('')
+  const [printError,        setPrintError]        = useState<string | null>(null)
 
   const fileInputRef   = useRef<HTMLInputElement>(null)
   const bgFileInputRef = useRef<HTMLInputElement>(null)
@@ -117,6 +324,8 @@ export default function CommunicationsPage() {
   const [preview,       setPreview]       = useState(false)
   const [showPreview,   setShowPreview]   = useState(false)
 
+  const [mainTab, setMainTab] = useState<'send' | 'settings' | 'invite' | 'scorecards'>('send')
+
   const MESSAGE_TYPES: { id: MessageType; label: string }[] = [
     { id: 'invitation', label: t('communications.msgTypes.invitation') },
     { id: 'reminder',   label: t('communications.msgTypes.reminder') },
@@ -126,6 +335,9 @@ export default function CommunicationsPage() {
   ]
 
   useEffect(() => { loadAll() }, [groupId])
+  useEffect(() => {
+  if (printEventId) loadPrintData(printEventId)
+}, [printEventId])
 
   async function loadAll() {
     setLoading(true)
@@ -327,6 +539,58 @@ export default function CommunicationsPage() {
       {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
     </div>
   )
+async function loadPrintData(eventId: string) {
+  setPrintLoading(true); setPrintError(null)
+  setPrintHoles([]); setPrintPlayers([])
+
+  const { data: event } = await supabase.from('events')
+    .select('id, title, starts_at, course_id, courses(course_name, clubs(name))')
+    .eq('id', eventId).single()
+
+  if (!event) { setPrintError('Événement introuvable'); setPrintLoading(false); return }
+
+  setPrintEventTitle((event as any).title ?? '')
+  setPrintEventDate(new Date((event as any).starts_at).toLocaleDateString('fr-BE', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  }))
+  setPrintClubName((event as any).courses?.clubs?.name ?? '')
+  setPrintCourseName((event as any).courses?.course_name ?? '')
+
+  if (!(event as any).course_id) {
+    setPrintError('Aucun parcours lié à cet événement')
+    setPrintLoading(false); return
+  }
+
+  const [{ data: holesData }, { data: teesData }, { data: participants }] = await Promise.all([
+    supabase.from('course_holes').select('hole_number, par, stroke_index')
+      .eq('course_id', (event as any).course_id).order('hole_number'),
+    supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
+      .eq('course_id', (event as any).course_id),
+    supabase.from('event_participants')
+      .select('player_id, tee_id, players(id, first_name, surname, whs)')
+      .eq('event_id', eventId).eq('status', 'GOING'),
+  ])
+
+  setPrintHoles(holesData || [])
+
+  const built: PlayerPrint[] = (participants || []).map((ep: any) => {
+    const p   = ep.players
+    const tee = (teesData || []).find(t => t.id === ep.tee_id)
+    const phcp = tee
+      ? Math.round((p.whs ?? 0) * (tee.slope / 113) + tee.course_rating - tee.par_total)
+      : Math.round(p.whs ?? 0)
+    return {
+      id: p.id, first_name: p.first_name, surname: p.surname,
+      whs: p.whs ?? 0, phcp,
+      tee_name: tee?.tee_name ?? null,
+    }
+  })
+
+  setPrintPlayers(built)
+  setPrintSelectedIds(new Set(built.map(p => p.id)))
+  setPrintLoading(false)
+}
+
 
   return (
     <div className="p-5 sm:p-6 max-w-3xl">
@@ -602,6 +866,102 @@ export default function CommunicationsPage() {
           }).then(r => r.json())}
         />
       )}
+      {mainTab === 'scorecards' && (
+  <div className="flex flex-col gap-5">
+
+    {/* Sélecteur event */}
+    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-100">
+        <p className="text-[13px] font-bold text-slate-800 mb-3">Événement</p>
+        <select
+          value={printEventId}
+          onChange={e => setPrintEventId(e.target.value)}
+          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white">
+          <option value="">Choisir un événement</option>
+          {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at, locale)}</option>)}
+        </select>
+      </div>
+
+      {printLoading && (
+        <div className="px-5 py-4 space-y-2">
+          {[1,2,3].map(i => <div key={i} className="h-8 bg-slate-100 rounded-xl animate-pulse" />)}
+        </div>
+      )}
+
+      {printError && (
+        <div className="px-5 py-4 text-[13px] text-red-500">{printError}</div>
+      )}
+
+      {!printLoading && printPlayers.length > 0 && (
+        <>
+          <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <p className="text-[12px] font-semibold text-slate-600">
+              Joueurs
+              {printSelectedIds.size > 0 && (
+                <span className="ml-2 text-[11px] font-semibold text-white bg-[#185FA5] px-2 py-0.5 rounded-full">
+                  {printSelectedIds.size} sélectionné{printSelectedIds.size > 1 ? 's' : ''}
+                </span>
+              )}
+            </p>
+            <div className="flex gap-1">
+              <button onClick={() => setPrintSelectedIds(new Set(printPlayers.map(p => p.id)))}
+                className="text-[11px] font-semibold text-[#185FA5] hover:underline px-2 py-1">Tous</button>
+              <button onClick={() => setPrintSelectedIds(new Set())}
+                className="text-[11px] font-semibold text-slate-400 hover:underline px-2 py-1">Aucun</button>
+            </div>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {printPlayers.map(player => {
+              const isSelected = printSelectedIds.has(player.id)
+              return (
+                <label key={player.id} className={`flex items-center gap-3 px-5 py-2.5 cursor-pointer transition-colors ${isSelected ? 'bg-[#EBF3FC]/50' : 'hover:bg-slate-50'}`}>
+                  <input type="checkbox" checked={isSelected}
+                    onChange={() => {
+                      setPrintSelectedIds(prev => {
+                        const n = new Set(prev)
+                        n.has(player.id) ? n.delete(player.id) : n.add(player.id)
+                        return n
+                      })
+                    }}
+                    className="rounded border-slate-300 text-[#185FA5] focus:ring-[#185FA5]/30" />
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 bg-[#EBF3FC] text-[#0C447C]">
+                    {player.first_name[0]}{player.surname[0]}
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-[13px] font-semibold text-slate-800">{player.first_name} {player.surname}</span>
+                    <span className="text-[11px] text-slate-400 ml-2">HCP {player.whs} · Phcp {player.phcp}</span>
+                    {player.tee_name && <span className="text-[11px] text-slate-400 ml-1">· {player.tee_name}</span>}
+                  </div>
+                </label>
+              )
+            })}
+          </div>
+          <div className="px-5 py-4 border-t border-slate-100 flex justify-end">
+            <button
+              onClick={() => window.print()}
+              disabled={printSelectedIds.size === 0 || printHoles.length === 0}
+              className="flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
+              🖨 Imprimer {printSelectedIds.size > 0 ? `(${printSelectedIds.size})` : ''}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+
+    {/* Cartes à imprimer */}
+    {printSelectedIds.size > 0 && printHoles.length > 0 && (
+      <PrintScorecardsComm
+        players={printPlayers.filter(p => printSelectedIds.has(p.id))}
+        holes={printHoles}
+        eventTitle={printEventTitle}
+        clubName={printClubName}
+        courseName={printCourseName}
+        eventDate={printEventDate}
+      />
+    )}
+
+  </div>
+)}
     </div>
   )
 }
