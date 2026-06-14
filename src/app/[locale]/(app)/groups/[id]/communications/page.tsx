@@ -443,9 +443,16 @@ function handleFilterEventChange(eventId: string) {
                   printClubName,
                   printCourseName,
                 )
-                const win = window.open('', '_blank')
-                if (win) { win.document.write(html); win.document.close() }
-                else { toast.error('Pop-up bloquée — autorisez les pop-ups pour imprimer') }
+               const blob = new Blob([html], { type: 'text/html' })
+                const url  = URL.createObjectURL(blob)
+                const win  = window.open(url, '_blank')
+                if (!win) {
+                  toast.error('Pop-up bloquée — autorisez les pop-ups pour imprimer')
+                  URL.revokeObjectURL(url)
+                } else {
+                  // libérer l'URL après chargement pour éviter les fuites mémoire
+                  setTimeout(() => URL.revokeObjectURL(url), 10000)
+}
               } else {
                 window.print()
               }
