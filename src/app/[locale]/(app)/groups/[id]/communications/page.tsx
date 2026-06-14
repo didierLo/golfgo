@@ -424,18 +424,25 @@ function handleFilterEventChange(eventId: string) {
         <div className="flex items-center gap-1.5">
          <IconBtn
             onClick={() => {
-              if (messageType === 'scorecards') {
+             if (messageType === 'scorecards') {
                 if (printHoles.length === 0) { toast.error('Aucun parcours lié'); return }
-                if (selectedMembers.length === 0) { toast.error('Aucun joueur sélectionné'); return }
+                const printableMembers = selectedMembers.filter(m => printPhcpMap[m.id])
+                if (printableMembers.length === 0) {
+                  toast.error('Aucun joueur sélectionné n\'est inscrit (GOING) à cet événement')
+                  return
+                }
+                if (printableMembers.length < selectedMembers.length) {
+                  toast.error(`${selectedMembers.length - printableMembers.length} joueur(s) ignoré(s) (non inscrits)`)
+                }
                 const activeEvent = events.find(e => e.id === filterEventId)
                 const html = buildScorecardHtml(
-                  selectedMembers.map((m): PrintPlayer => ({
+                  printableMembers.map((m): PrintPlayer => ({
                     id: m.id,
                     first_name: m.first_name,
                     surname: m.surname,
-                    whs: printPhcpMap[m.id]?.whs ?? 0,
-                    phcp: printPhcpMap[m.id]?.phcp ?? 0,
-                    tee: printPhcpMap[m.id]?.tee,
+                    whs: printPhcpMap[m.id].whs,
+                    phcp: printPhcpMap[m.id].phcp,
+                    tee: printPhcpMap[m.id].tee,
                   })),
                   printHoles,
                   activeEvent?.title ?? '',
