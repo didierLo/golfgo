@@ -101,7 +101,23 @@ export function buildScorecardHtml(
       `<td class="hole-cell tot-val"></td>`,
     ].join('')
 
+    const brutRow2 = [
+      ...front9.map(() => `<td class="hole-cell score-cell"></td>`),
+      `<td class="hole-cell sub-val"></td>`,
+      ...back9.map(() => `<td class="hole-cell score-cell"></td>`),
+      `<td class="hole-cell sub-val"></td>`,
+      `<td class="hole-cell tot-val"></td>`,
+    ].join('')
+
     const netRow = [
+      ...front9.map(() => `<td class="hole-cell net-cell"></td>`),
+      `<td class="hole-cell sub-val"></td>`,
+      ...back9.map(() => `<td class="hole-cell net-cell"></td>`),
+      `<td class="hole-cell sub-val"></td>`,
+      `<td class="hole-cell tot-val"></td>`,
+    ].join('')
+
+    const netRow2 = [
       ...front9.map(() => `<td class="hole-cell net-cell"></td>`),
       `<td class="hole-cell sub-val"></td>`,
       ...back9.map(() => `<td class="hole-cell net-cell"></td>`),
@@ -154,12 +170,20 @@ export function buildScorecardHtml(
         ${hcpRow}
       </tr>
       <tr class="score-row">
-        <td class="label-col player-label">${player.first_name} ${player.surname}</td>
+        <td class="label-col player-label">Player 1</td>
         ${brutRow}
       </tr>
       <tr class="net-row">
         <td class="label-col net-label">Net</td>
         ${netRow}
+      </tr>
+      <tr class="score-row">
+        <td class="label-col player-label">Player 2</td>
+        ${brutRow2}
+      </tr>
+      <tr class="net-row">
+        <td class="label-col net-label">Net</td>
+        ${netRow2}
       </tr>
     </tbody>
   </table>
