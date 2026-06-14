@@ -222,7 +222,7 @@ ${cards}
 }
 
 const SCORECARD_PRINT_STYLES = `
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
   body { font-family: Arial, sans-serif; background: white; }
   @page { size: A4 landscape; margin: 8mm; }
   @media print {
