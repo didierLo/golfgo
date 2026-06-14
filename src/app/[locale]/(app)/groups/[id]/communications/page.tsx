@@ -537,73 +537,9 @@ function handleFilterEventChange(eventId: string) {
           selectedMembers={selectedMembers}
           preview={preview}
           setPreview={setPreview}
-          applyPreviewVars={applyPreviewVars}
+        applyPreviewVars={applyPreviewVars}
         />
-
-       
-
-            {/* Sélecteur event pour teesheet/invitation/rappel */}
-          
-        
-              <div className="mb-3">
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.event')}</label>
-                <select value={selectedEventId} onChange={e => {
-                        setSelectedEventId(e.target.value)
-                        localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value)
-                        if (messageType === 'scorecards') loadPrintHoles(e.target.value)
-                      }}className={`${selectClass} w-full`}>
-                  {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at, locale)}</option>)}
-                </select>
-              </div>
-          
-            <div className="mb-3">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.subject')}</label>
-              <input type="text" value={commSubject} onChange={e => setCommSubject(e.target.value)}
-                readOnly={!isOwner} placeholder={t('communications.message.subjectPlaceholder')} className={inputClass} />
-            </div>
-
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="text-[11px] font-semibold text-slate-400">{t('communications.message.insert')}</span>
-              {COMM_VARS.map(v => (
-                <button key={v.key} onClick={() => setCommBody(p => p + v.key)}
-                  className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">{v.key}</button>
-              ))}
-            </div>
-
-            <div className="mb-3">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.body')}</label>
-              <textarea value={commBody} onChange={e => setCommBody(e.target.value)} rows={10}
-                readOnly={!isOwner} placeholder={t('communications.message.bodyPlaceholder')}
-                className={`${textareaClass} font-mono leading-relaxed`} />
-            </div>
-
-            {/* Note pour les templates auto */}
-            {messageType !== 'free' && (
-            <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-              <p className="text-[11px] text-amber-700">
-                {t('communications.msgTypes.templateWarning')}
-              </p>
-            </div>
-          )}
-
-            {selectedMembers.length > 0 && (commSubject || commBody) && (
-              <div>
-                <button onClick={() => setPreview(v => !v)} className="text-[12px] font-semibold text-[#185FA5] hover:underline mb-2">
-                  {preview
-                    ? t('communications.message.hidePreview')
-                    : t('communications.message.showPreview', { name: selectedMembers[0].first_name })}
-                </button>
-                {preview && (
-                  <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 text-[13px] text-slate-700 leading-relaxed">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                      {t('communications.message.subject')} : {applyPreviewVars(commSubject)}
-                    </p>
-                    <div className="whitespace-pre-wrap">{applyPreviewVars(commBody)}</div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+      </div>
       )}
 
       {showPreview && (
