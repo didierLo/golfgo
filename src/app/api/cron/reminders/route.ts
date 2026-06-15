@@ -28,14 +28,21 @@ function daysDiff(dateStr: string): number {
   return Math.round((utcTarget.getTime() - utcNow.getTime()) / (1000 * 60 * 60 * 24))
 }
 
+function applyTemplateVars(text: string, vars: Record<string, string>): string {
+  return Object.entries(vars).reduce(
+    (acc, [key, value]) => acc.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value),
+    text
+  )
+}
+
 // ── Email rappel J-3 ─────────────────────────────────────────────────────────
 
 function buildReminderHtml({
-  firstName, eventTitle, eventDate, eventTime, eventLocation,
+  firstName, eventTitle, eventDate, eventTime, eventLocation, bodyText,
   yes18Link, yes9frontLink, yes9backLink, noLink,
 }: {
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
-  eventLocation: string | null; yes18Link: string; yes9frontLink: string
+  eventLocation: string | null; bodyText: string; yes18Link: string; yes9frontLink: string
   yes9backLink: string; noLink: string
 }) {
   return `
@@ -56,9 +63,7 @@ function buildReminderHtml({
         </tr>
         <tr>
           <td style="background:#ffffff;padding:36px 32px;">
-            <p style="margin:0 0 6px;font-size:14px;color:#64748B;">Bonjour ${firstName},</p>
-            <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;">⏰ Rappel — dans 3 jours</h1>
-            <p style="margin:0 0 24px;font-size:16px;font-weight:600;color:#185FA5;">${eventTitle}</p>
+            <div style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.7;white-space:pre-wrap;">${bodyText}</div>
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
               <tr><td style="padding:16px 20px;">
                 <table cellpadding="0" cellspacing="0">
@@ -183,13 +188,14 @@ function buildNoTeesheetHtml({
 </body></html>`.trim()
 }
 function buildInvitationHtml({
-  firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName,
+  firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName, bodyText,
   yes18Link, yes9frontLink, yes9backLink, noLink,
 }: {
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
-  eventLocation: string | null; ownerName: string
+  eventLocation: string | null; ownerName: string; bodyText: string
   yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string
 }) {
+
   return `
 <!DOCTYPE html>
 <html lang="fr">
@@ -208,9 +214,7 @@ function buildInvitationHtml({
         </tr>
         <tr>
           <td style="background:#ffffff;padding:36px 32px;">
-            <p style="margin:0 0 6px;font-size:14px;color:#64748B;">Bonjour ${firstName},</p>
-            <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;">⛳ Invitation</h1>
-            <p style="margin:0 0 24px;font-size:16px;font-weight:600;color:#185FA5;">${eventTitle}</p>
+            <div style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.7;white-space:pre-wrap;">${bodyText}</div>
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
               <tr><td style="padding:16px 20px;">
                 <table cellpadding="0" cellspacing="0">
@@ -315,12 +319,15 @@ export async function GET(req: Request) {
   .select(`
     id, title, starts_at, location, group_id, tee_interval, is_golf,
     groups!events_group_id_fkey(
-      id, name, auto_reminders, auto_teesheet,
+      id, name, auto_reminders, auto_teesheet, auto_invitation,
+      template_reminder_subject, template_reminder_body,
+      template_invitation_subject, template_invitation_body,
       owner:groups_players(
         role, player:players(id, first_name, surname, email)
       )
     )
   `)
+
   .gte('starts_at', new Date().toISOString())
   .lte('starts_at', new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString())
 
@@ -335,11 +342,17 @@ for (const event of (events || []) as any[]) {
 
 
     // ── J-3 : Rappel à tous les participants ─────────────────────────────────
-    if (days === 3 && group?.auto_reminders) {
+if (days === 3 && group?.auto_reminders) {
       const { data: participants } = await supabase
         .from('event_participants')
         .select('player_id, invite_token, players(first_name, surname, email)')
         .eq('event_id', event.id)
+
+      const reminderSubjectTpl = group?.template_reminder_subject ?? '⏰ Rappel — {{event_title}} dans 3 jours'
+      const reminderBodyTpl    = group?.template_reminder_body
+        ?? "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}"
+
+      const ownerName = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
 
       for (const ep of participants || []) {
         const player = ep.players as any
@@ -355,19 +368,34 @@ for (const event of (events || []) as any[]) {
 
         if (!EMAIL_ENABLED) { results.reminders.sent++; continue }
 
+        const vars = {
+          first_name:  player.first_name,
+          surname:     player.surname,
+          player_name: `${player.first_name} ${player.surname}`,
+          group_name:  group?.name ?? '',
+          owner_name:  ownerName,
+          event_title: event.title,
+          event_date:  formatDate(event.starts_at),
+          event_time:  formatTime(event.starts_at),
+        }
+
+        const subject = applyTemplateVars(reminderSubjectTpl, vars)
+        const bodyText = applyTemplateVars(reminderBodyTpl, vars)
+
         const html = buildReminderHtml({
           firstName:    player.first_name,
           eventTitle:   event.title,
           eventDate:    formatDate(event.starts_at),
           eventTime:    formatTime(event.starts_at),
           eventLocation: event.location,
+          bodyText,
           yes18Link, yes9frontLink, yes9backLink, noLink,
         })
 
         const { error } = await resend.emails.send({
           from:    'GolfGo <info@golfgo.be>',
           to:      player.email,
-          subject: `⏰ Rappel — ${event.title} dans 3 jours`,
+          subject,
           html,
         })
 
@@ -378,14 +406,19 @@ for (const event of (events || []) as any[]) {
     }
 
     // ── J-14 : Invitation automatique à tous les membres ─────────────────────
-    if (days === 14 && group?.auto_invitation) {
+ if (days === 14 && group?.auto_invitation) {
       // Récupérer tous les membres du groupe
       const { data: members } = await supabase
         .from('groups_players')
         .select('player_id, players(id, first_name, surname, email)')
         .eq('group_id', event.group_id)
 
+      const invitationSubjectTpl = group?.template_invitation_subject ?? 'Invitation : {{event_title}}'
+      const invitationBodyTpl    = group?.template_invitation_body
+        ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
+
       for (const member of members || []) {
+
         const player = member.players as any
         if (!player?.email) { results.invitations.skipped++; continue }
 
@@ -414,10 +447,24 @@ for (const event of (events || []) as any[]) {
         const yes9backLink  = `${appUrl}/invite/yes?token=${token}&holes=9&section=in`
         const noLink        = `${appUrl}/invite/no?token=${token}`
 
-        if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
+if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
 
         const ownerName = ownerPlayer
           ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
+
+        const vars = {
+          first_name:  player.first_name,
+          surname:     player.surname,
+          player_name: `${player.first_name} ${player.surname}`,
+          group_name:  group?.name ?? '',
+          owner_name:  ownerName,
+          event_title: event.title,
+          event_date:  formatDate(event.starts_at),
+          event_time:  formatTime(event.starts_at),
+        }
+
+        const subject  = applyTemplateVars(invitationSubjectTpl, vars)
+        const bodyText = applyTemplateVars(invitationBodyTpl, vars)
 
         const html = buildInvitationHtml({
           firstName:     player.first_name,
@@ -426,13 +473,14 @@ for (const event of (events || []) as any[]) {
           eventTime:     formatTime(event.starts_at),
           eventLocation: event.location,
           ownerName,
+          bodyText,
           yes18Link, yes9frontLink, yes9backLink, noLink,
         })
 
-        const { error } = await resend.emails.send({
+     const { error } = await resend.emails.send({
           from:    'GolfGo <info@golfgo.be>',
           to:      player.email,
-          subject: `⛳ Invitation — ${event.title}`,
+          subject,
           html,
         })
 
