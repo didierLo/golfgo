@@ -334,8 +334,18 @@ export default function CommunicationsPage() {
       update.template_newmember_body    = commBody
     }
     if (Object.keys(update).length > 0) {
-      await supabase.from('groups').update(update).eq('id', groupId)
-      setGroupTemplate(prev => ({ ...prev, ...update }))
+    const { error: tplError, data: tplData } = await supabase
+      .from('groups')
+      .update(update)
+      .eq('id', groupId)
+      .select('id, template_reminder_subject, template_reminder_body')
+    if (tplError) {
+      console.error('Erreur sauvegarde template:', tplError)
+      toast.error('Template non sauvegardé : ' + tplError.message)
+    } else {
+      console.log('Template sauvegardé:', tplData)
+    }
+    setGroupTemplate(prev => ({ ...prev, ...update }))
     }
   }
 
