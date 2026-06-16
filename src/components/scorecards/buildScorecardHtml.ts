@@ -1,6 +1,6 @@
 import type { Hole, TeeInfo } from './scorecard-types'
 
-const LOGO_URL = 'https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/GG_Logo_avec_nom_bandeau.png'
+const LOGO_URL = 'https://golfgo.be/logo/GG_Logo_avec_nom_bandeau.jpeg'
 
 export type PrintPlayer = {
   id: string
@@ -10,7 +10,6 @@ export type PrintPlayer = {
   phcp: number
   tee?: TeeInfo
 }
-
 function strokesReceived(phcp: number, strokeIndex: number): number {
   if (phcp <= 0) return 0
   const full = Math.floor(phcp / 18)

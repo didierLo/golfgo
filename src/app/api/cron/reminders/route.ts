@@ -537,21 +537,30 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         })
 
         const teeInterval = event.tee_interval ?? 9
-        const flights = flightsData.map((f: any, index: number) => {
-          const ms = new Date(event.starts_at).getTime() + index * teeInterval * 60 * 1000
-          const startTime = new Date(ms).toLocaleTimeString('fr-BE', {
-            hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
-          })
-          return {
-            flight_number: f.flight_number,
-            start_time:    startTime,
-            players: (f.flight_players || []).map((fp: any) => ({
-              ...fp.players,
-              holes_played:  holesMap[fp.player_id]?.holes_played  ?? null,
-              holes_section: holesMap[fp.player_id]?.holes_section ?? null,
-            })).filter(Boolean),
-          }
+
+      const flightsMapped = flightsData.map((f: any) => ({
+        flight_number: f.flight_number,
+        players: (f.flight_players || []).map((fp: any) => ({
+          ...fp.players,
+          holes_played:  holesMap[fp.player_id]?.holes_played  ?? null,
+          holes_section: holesMap[fp.player_id]?.holes_section ?? null,
+        })).filter(Boolean),
+      }))
+
+      // Même tri que l'écran : flight le moins nombreux en premier
+      flightsMapped.sort((a: any, b: any) => a.players.length - b.players.length)
+
+      const flights = flightsMapped.map((f: any, index: number) => {
+        const ms = new Date(event.starts_at).getTime() + index * teeInterval * 60 * 1000
+        const startTime = new Date(ms).toLocaleTimeString('fr-BE', {
+          hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
         })
+        return {
+          flight_number: index + 1,  // renuméroter après le tri
+          start_time:    startTime,
+          players:       f.players,
+        }
+      })
 
         // Envoyer via l'API send-teesheet
        const teesheetRes = await fetch(`${appUrl}/api/send-teesheet`, {
