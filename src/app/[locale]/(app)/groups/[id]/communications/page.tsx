@@ -415,8 +415,9 @@ export default function CommunicationsPage() {
     finally { setSending(false) }
   }
 
-  const canSend = !sending && selectedIds.size > 0 && !!commSubject.trim() && !!commBody.trim() && isOwner
-  const hasMsg  = !!commSubject && !!commBody
+  const isTeesheet = messageType === 'teesheet'
+  const canSend = !sending && selectedIds.size > 0 && isOwner && (isTeesheet || (!!commSubject.trim() && !!commBody.trim()))
+  const hasMsg  = isTeesheet || (!!commSubject && !!commBody)
 
   if (loading || roleLoading) return (
     <div className="p-6 space-y-3 max-w-3xl">
@@ -525,8 +526,8 @@ function handleFilterEventChange(eventId: string) {
             title="Imprimer">🖨
           </IconBtn>        
 
-          <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
-          <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
+         <IconBtn onClick={() => setShowPreview(true)} disabled={isTeesheet || !hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
+          <IconBtn href={!isTeesheet && hasMsg ? buildWhatsAppComm() : undefined} disabled={isTeesheet || !hasMsg} title="WhatsApp">💬</IconBtn>
           <IconBtn onClick={handleSend} disabled={!canSend} title={sending ? t('communications.message.sending') : t('communications.message.send')} color="blue">
             {sending ? '⏳' : '📤'}
           </IconBtn>
