@@ -16,6 +16,13 @@ type FlightPlayer = {
 }
 type Flight = { flight_number: number; start_time: string; players: FlightPlayer[] }
 
+function applyTemplateVars(text: string, vars: Record<string, string>): string {
+  return Object.entries(vars).reduce(
+    (acc, [key, value]) => acc.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value),
+    text
+  )
+}
+
 // Retourne le label correct selon holes_played + holes_section
 function holesLabel(p: FlightPlayer): string | null {
   if (!p.holes_played || p.holes_played === 18) return null
@@ -31,6 +38,7 @@ function buildTeesheetEmail({
   eventDate,
   eventLocation,
   flights,
+  bodyText,
 }: {
   playerName: string
   playerFlightNumber: number
@@ -38,6 +46,7 @@ function buildTeesheetEmail({
   eventDate: string
   eventLocation: string | null
   flights: Flight[]
+  bodyText?: string
 }) {
   const flightsHtml = flights.map(flight => {
     const isMyFlight  = flight.flight_number === playerFlightNumber
@@ -137,10 +146,14 @@ function buildTeesheetEmail({
                   </td>
                 </tr>
               </table>
+             ${bodyText ? `
+              <div style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.7;white-space:pre-wrap;">${bodyText.replace('{{teesheet}}', `
+              <p style="margin:16px 0 14px;font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">Ordre de départ</p>
+              ${flightsHtml}`)}</div>` : `
               <p style="margin:0 0 14px;font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">
                 Ordre de départ
               </p>
-              ${flightsHtml}
+              ${flightsHtml}`}
             </td>
           </tr>
 
@@ -166,7 +179,15 @@ export async function POST(req: Request) {
     const cronSecret = req.headers.get('x-cron-secret')
     const isCron     = cronSecret === process.env.CRON_SECRET
 
-    const { eventId, flights } = await req.json() as { eventId: string; flights: Flight[] }
+
+
+    const { eventId, flights, bodyText, subject: customSubject, templateVars: baseVars } = await req.json() as { 
+      eventId: string
+      flights: Flight[]
+      bodyText?: string
+      subject?: string
+      templateVars?: Record<string, string>
+    }
 
     if (!eventId || !flights?.length) {
       return Response.json({ success: false, error: 'eventId et flights requis' }, { status: 400 })
@@ -209,6 +230,16 @@ export async function POST(req: Request) {
       const playerFlight = flights.find(f => f.players.some(p => p.id === player.id))
       if (!playerFlight) { skipped++; continue }
 
+      // Substituer les variables par joueur
+      const perPlayerVars = {
+        ...(baseVars ?? {}),
+        first_name:  player.first_name,
+        surname:     player.surname,
+        player_name: playerName,
+      }
+      const resolvedSubject  = customSubject ? applyTemplateVars(customSubject, perPlayerVars) : `Tee Sheet — ${event.title}`
+      const resolvedBodyText = bodyText ? applyTemplateVars(bodyText, perPlayerVars) : undefined
+
       if (!EMAIL_ENABLED) {
         sent++
         continue
@@ -221,12 +252,13 @@ export async function POST(req: Request) {
         eventDate,
         eventLocation: event.location,
         flights,
+        bodyText:      resolvedBodyText,
       })
 
       const { error: emailErr } = await resend.emails.send({
         from:    'GolfGo <info@golfgo.be>',
         to:      player.email,
-        subject: `Tee Sheet — ${event.title}`,
+        subject: resolvedSubject,
         html,
       })
 

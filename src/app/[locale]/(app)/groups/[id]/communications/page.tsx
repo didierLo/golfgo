@@ -69,7 +69,7 @@ const COMM_VARS = [
   { key: '{{qr_code}}',          label: 'QR Code' },
   { key: '{{install_iphone}}',   label: 'Instructions iPhone' },
   { key: '{{install_android}}',  label: 'Instructions Android' },
- 
+  { key: '{{teesheet}}', label: 'Tableau flights' },
 ]
 
 function IconBtn({ onClick, href, title, disabled, color, children }: {
@@ -351,14 +351,64 @@ export default function CommunicationsPage() {
 
   setSending(true)
     try {
-      const res = await fetch('/api/send-communication', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          groupId, playerIds: [...selectedIds],
-          subject: commSubject, body: commBody,
-          eventId: filterEventId || selectedEventId || null,
-        }),
-      })
+     let res: Response
+      if (messageType === 'teesheet') {
+        // Récupérer les flights depuis la DB pour cet event
+        const { data: flightsData } = await supabase
+          .from('flights')
+          .select('id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))')
+          .eq('event_id', filterEventId || selectedEventId || '')
+          .order('flight_number')
+
+        const { data: participants } = await supabase
+          .from('event_participants')
+          .select('player_id, holes_played, holes_section')
+          .eq('event_id', filterEventId || selectedEventId || '')
+
+        const holesMap: Record<string, { holes_played: number | null; holes_section: string | null }> = {}
+        participants?.forEach((p: any) => {
+          holesMap[p.player_id] = { holes_played: p.holes_played, holes_section: p.holes_section }
+        })
+
+        const flights = (flightsData || [])
+          .map((f: any) => ({
+            flight_number: f.flight_number,
+            players: (f.flight_players || []).map((fp: any) => ({
+              ...fp.players,
+              holes_played:  holesMap[fp.player_id]?.holes_played  ?? null,
+              holes_section: holesMap[fp.player_id]?.holes_section ?? null,
+            })).filter(Boolean),
+          }))
+          .sort((a: any, b: any) => a.players.length - b.players.length)
+          .map((f: any, i: number) => ({ ...f, flight_number: i + 1, start_time: '' }))
+
+        res = await fetch('/api/send-teesheet', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eventId: filterEventId || selectedEventId || null,
+            flights,
+            bodyText: commBody,
+            subject:  commSubject,
+            templateVars: {
+              group_name:  '',
+              owner_name:  '',
+              event_title: events.find(e => e.id === (filterEventId || selectedEventId))?.title ?? '',
+              event_date:  '',
+              event_time:  '',
+            },
+          }),
+        })
+      } else {
+        res = await fetch('/api/send-communication', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            groupId, playerIds: [...selectedIds],
+            subject: commSubject, body: commBody,
+            eventId: filterEventId || selectedEventId || null,
+          }),
+        })
+      }
+      
       const json = await res.json()
       if (json.success) toast.success(`${json.sent} email${json.sent > 1 ? 's' : ''} envoyé${json.sent > 1 ? 's' : ''}${json.skipped ? ` · ${json.skipped} ignoré(s)` : ''}`)
       else toast.error(json.error ?? t('common.error'))

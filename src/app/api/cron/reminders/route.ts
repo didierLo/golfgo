@@ -562,14 +562,33 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         }
       })
 
+    // Template teesheet personnalisé
+        const teesheetSubjectTpl = group?.template_teesheet_subject ?? 'Tee Sheet — {{event_title}}'
+        const teesheetBodyTpl    = group?.template_teesheet_body
+          ?? "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\n{{teesheet}}"
+
+        const ownerName = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
+
         // Envoyer via l'API send-teesheet
-       const teesheetRes = await fetch(`${appUrl}/api/send-teesheet`, {
+        const teesheetRes = await fetch(`${appUrl}/api/send-teesheet`, {
           method:  'POST',
           headers: { 
             'Content-Type': 'application/json',
             'x-cron-secret': CRON_SECRET ?? '',
           },
-          body: JSON.stringify({ eventId: event.id, flights }),
+          body: JSON.stringify({
+            eventId: event.id,
+            flights,
+            bodyText: teesheetBodyTpl,        // sera substitué par joueur dans send-teesheet
+            subject:  teesheetSubjectTpl,     // idem
+            templateVars: {                   // variables à substituer dans send-teesheet
+              group_name:  group?.name ?? '',
+              owner_name:  ownerName,
+              event_title: event.title,
+              event_date:  formatDate(event.starts_at),
+              event_time:  formatTime(event.starts_at),
+            },
+          }),
         })
         const teesheetJson = await teesheetRes.json()
         if (teesheetJson.success) {
