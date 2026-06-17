@@ -69,7 +69,7 @@ const COMM_VARS = [
   { key: '{{qr_code}}',          label: 'QR Code' },
   { key: '{{install_iphone}}',   label: 'Instructions iPhone' },
   { key: '{{install_android}}',  label: 'Instructions Android' },
-  { key: '{{teesheet}}', label: 'Tableau flights' },
+ 
 ]
 
 function IconBtn({ onClick, href, title, disabled, color, children }: {
@@ -351,25 +351,28 @@ export default function CommunicationsPage() {
 
   setSending(true)
     try {
-     let res: Response
+    let res: Response
       if (messageType === 'teesheet') {
-        // Récupérer les flights depuis la DB pour cet event
+        const eventId = filterEventId || selectedEventId || ''
+        const activeEvent = events.find(e => e.id === eventId)
+
         const { data: flightsData } = await supabase
           .from('flights')
           .select('id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))')
-          .eq('event_id', filterEventId || selectedEventId || '')
+          .eq('event_id', eventId)
           .order('flight_number')
 
-        const { data: participants } = await supabase
+        const { data: eventParticipants } = await supabase
           .from('event_participants')
           .select('player_id, holes_played, holes_section')
-          .eq('event_id', filterEventId || selectedEventId || '')
+          .eq('event_id', eventId)
 
         const holesMap: Record<string, { holes_played: number | null; holes_section: string | null }> = {}
-        participants?.forEach((p: any) => {
+        eventParticipants?.forEach((p: any) => {
           holesMap[p.player_id] = { holes_played: p.holes_played, holes_section: p.holes_section }
         })
 
+        const startsAt = activeEvent?.starts_at ?? ''
         const flights = (flightsData || [])
           .map((f: any) => ({
             flight_number: f.flight_number,
@@ -380,23 +383,18 @@ export default function CommunicationsPage() {
             })).filter(Boolean),
           }))
           .sort((a: any, b: any) => a.players.length - b.players.length)
-          .map((f: any, i: number) => ({ ...f, flight_number: i + 1, start_time: '' }))
+          .map((f: any, i: number) => ({
+            ...f,
+            flight_number: i + 1,
+            start_time: startsAt
+              ? new Date(new Date(startsAt).getTime() + i * 9 * 60 * 1000)
+                  .toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+              : '',
+          }))
 
         res = await fetch('/api/send-teesheet', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            eventId: filterEventId || selectedEventId || null,
-            flights,
-            bodyText: commBody,
-            subject:  commSubject,
-            templateVars: {
-              group_name:  '',
-              owner_name:  '',
-              event_title: events.find(e => e.id === (filterEventId || selectedEventId))?.title ?? '',
-              event_date:  '',
-              event_time:  '',
-            },
-          }),
+          body: JSON.stringify({ eventId, flights }),
         })
       } else {
         res = await fetch('/api/send-communication', {
@@ -482,9 +480,9 @@ function handleFilterEventChange(eventId: string) {
           <p className="text-[13px] text-slate-900 mt-0.5">{t('communications.subtitle')}</p>
         </div>
         <div className="flex items-center gap-1.5">
-         <IconBtn
+          <IconBtn
             onClick={() => {
-             if (messageType === 'scorecards') {
+              if (messageType === 'scorecards') {
                 if (printHoles.length === 0) { toast.error('Aucun parcours lié'); return }
                 const printableMembers = selectedMembers.filter(m => printPhcpMap[m.id])
                 if (printableMembers.length === 0) {
@@ -510,22 +508,22 @@ function handleFilterEventChange(eventId: string) {
                   printClubName,
                   printCourseName,
                 )
-               const blob = new Blob([html], { type: 'text/html' })
+                const blob = new Blob([html], { type: 'text/html' })
                 const url  = URL.createObjectURL(blob)
                 const win  = window.open(url, '_blank')
                 if (!win) {
                   toast.error('Pop-up bloquée — autorisez les pop-ups pour imprimer')
                   URL.revokeObjectURL(url)
                 } else {
-                  // libérer l'URL après chargement pour éviter les fuites mémoire
                   setTimeout(() => URL.revokeObjectURL(url), 10000)
-}
-               } else if (messageType !== 'teesheet') {
+                }
+              } else if (messageType !== 'teesheet') {
                 window.print()
               }
             }}
+            disabled={messageType === 'teesheet'}
             title="Imprimer">🖨
-          </IconBtn>
+          </IconBtn>        
 
           <IconBtn onClick={() => setShowPreview(true)} disabled={!hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
           <IconBtn href={hasMsg ? buildWhatsAppComm() : undefined} disabled={!hasMsg} title="WhatsApp">💬</IconBtn>
