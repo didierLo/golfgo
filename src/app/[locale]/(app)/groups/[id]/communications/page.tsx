@@ -520,7 +520,7 @@ function handleFilterEventChange(eventId: string) {
                   // libérer l'URL après chargement pour éviter les fuites mémoire
                   setTimeout(() => URL.revokeObjectURL(url), 10000)
 }
-              } else {
+               } else if (messageType !== 'teesheet') {
                 window.print()
               }
             }}
