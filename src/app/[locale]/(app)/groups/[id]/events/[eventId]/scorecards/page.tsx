@@ -365,72 +365,38 @@ export default function ScorecardsPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6 print:hidden"
-        style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">{t('scorecards.clubCourse')}</p>
-        <div className="mb-4">
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('scorecards.club')}</label>
-          <div className="flex gap-2">
-           <select value={selectedClubId} onChange={e => { setSelectedClubId(e.target.value); setSelectedCourseId('') }} className={selectClass} disabled={!isOwner || isValidated}>
-                <option value="">{t('scorecards.chooseClub')}</option>
-                {Object.entries(
-                  clubs.reduce((acc, c) => {
-                    const country = c.country || 'OTHER'
-                    if (!acc[country]) acc[country] = []
-                    acc[country].push(c)
-                    return acc
-                  }, {} as Record<string, typeof clubs>)
-                ).sort(([a], [b]) => a.localeCompare(b))
-                 .map(([country, countryClubs]) => (
-                  <optgroup key={country} label={country}>
-                    {countryClubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </optgroup>
-                ))}
-            </select>
-            {isOwner && !isValidated && (
-              <button type="button" onClick={() => setShowNewClub(v => !v)} className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
-                {showNewClub ? t('scorecards.cancel') : t('scorecards.newClub')}
-              </button>
+     {(clubName || courseName) && (
+        <div className="rounded-xl border border-white/60 shadow-sm px-4 py-3 mb-6 print:hidden flex items-center gap-3"
+          style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+          <span className="text-[16px]">⛳</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-bold text-slate-800 truncate">{clubName}{courseName ? ` · ${courseName}` : ''}</p>
+            {isOwner && (
+              <a href={`/${params.locale ?? 'fr'}/admin/clubs`}
+                className="text-[11px] text-[#185FA5] hover:underline">
+                {t('scorecards.manageCourses')}
+              </a>
             )}
           </div>
-          {isOwner && !isValidated && showNewClub && (
-            <div className="flex gap-2 mt-2">
-              <input value={newClubName} onChange={e => setNewClubName(e.target.value)} placeholder={t('scorecards.clubName')} className={selectClass}
-                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleCreateClub())} />
-              <button type="button" onClick={handleCreateClub} disabled={creating || !newClubName.trim()}
-                className="bg-[#185FA5] text-white text-[12px] font-semibold px-4 py-2 rounded-xl disabled:opacity-50 whitespace-nowrap hover:bg-[#0C447C] transition-colors">
-                {creating ? t('scorecards.creating') : t('scorecards.create')}
-              </button>
-            </div>
-          )}
         </div>
-        {selectedClubId && (
-          <div>
-            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('scorecards.course')}</label>
-            <div className="flex gap-2">
-              <select value={selectedCourseId} onChange={e => setSelectedCourseId(e.target.value)} className={selectClass} disabled={!isOwner || isValidated}>
-                <option value="">{t('scorecards.chooseCourse')}</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
-              </select>
-              {isOwner && !isValidated && (
-                <button type="button" onClick={() => setShowNewCourse(v => !v)} className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">
-                  {showNewCourse ? t('scorecards.cancel') : t('scorecards.newCourse')}
-                </button>
-              )}
-            </div>
-            {isOwner && !isValidated && showNewCourse && (
-              <div className="flex gap-2 mt-2">
-                <input value={newCourseName} onChange={e => setNewCourseName(e.target.value)} placeholder={t('scorecards.courseName')} className={selectClass}
-                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleCreateCourse())} />
-                <button type="button" onClick={handleCreateCourse} disabled={creating || !newCourseName.trim()}
-                  className="bg-[#185FA5] text-white text-[12px] font-semibold px-4 py-2 rounded-xl disabled:opacity-50 whitespace-nowrap hover:bg-[#0C447C] transition-colors">
-                  {creating ? t('scorecards.creating') : t('scorecards.create')}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      )}
+
+      {!clubName && !courseName && isOwner && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-6 print:hidden">
+          <p className="text-[12px] text-amber-700 font-medium">
+            Aucun parcours configuré pour cet événement —{' '}
+            <a href={`/${params.locale ?? 'fr'}/events/${params.eventId}/edit`}
+              className="underline font-semibold">
+              modifier l'événement
+            </a>
+            {' '}ou{' '}
+            <a href={`/${params.locale ?? 'fr'}/admin/clubs`}
+              className="underline font-semibold">
+              gérer les clubs
+            </a>
+          </p>
+        </div>
+      )}
 
       {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium print:hidden">{error}</div>}
       {scorecardLoading && <div className="space-y-3 print:hidden">{[1,2,3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />)}</div>}
