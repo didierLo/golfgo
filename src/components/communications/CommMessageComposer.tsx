@@ -60,6 +60,46 @@ export default function CommMessageComposer({
 
   const hasMsg = !!commSubject && !!commBody
 
+if (messageType === 'scorecards') {
+    return (
+      <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <p className="text-[13px] font-bold text-slate-800 mb-3">{t('communications.message.title')}</p>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {messageTypes.map(type => (
+            <button key={type.id} onClick={() => setMessageType(type.id)}
+              className={`text-[11px] font-semibold px-3 py-1.5 rounded-xl border transition-colors ${messageType === type.id ? 'bg-[#185FA5] border-[#185FA5] text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+              {type.label}
+            </button>
+          ))}
+        </div>
+        <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <p className="text-[13px] font-semibold text-slate-700 mb-1">🖨 Impression des scorecards</p>
+          <p className="text-[12px] text-slate-500">Sélectionnez les joueurs inscrits à l'événement dans le panneau Destinataires, puis cliquez sur 🖨 pour générer les cartes en PDF.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (messageType === 'teesheet') {
+    return (
+      <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <p className="text-[13px] font-bold text-slate-800 mb-3">{t('communications.message.title')}</p>
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {messageTypes.map(type => (
+            <button key={type.id} onClick={() => setMessageType(type.id)}
+              className={`text-[11px] font-semibold px-3 py-1.5 rounded-xl border transition-colors ${messageType === type.id ? 'bg-[#185FA5] border-[#185FA5] text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+              {type.label}
+            </button>
+          ))}
+        </div>
+        <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <p className="text-[13px] font-semibold text-slate-700 mb-1">📋 Envoi du Tee Sheet</p>
+          <p className="text-[12px] text-slate-500">Le tee sheet de l'événement sera envoyé à chaque joueur sélectionné avec son flight mis en évidence. Sélectionnez les destinataires puis cliquez sur 📤.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100">

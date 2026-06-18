@@ -394,7 +394,7 @@ export default function CommunicationsPage() {
 
         res = await fetch('/api/send-teesheet', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ eventId, flights }),
+          body: JSON.stringify({ eventId, flights, playerIds: [...selectedIds] }),
         })
       } else {
         res = await fetch('/api/send-communication', {

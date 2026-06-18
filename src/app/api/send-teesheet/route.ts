@@ -165,7 +165,11 @@ export async function POST(req: Request) {
     const cronSecret = req.headers.get('x-cron-secret')
     const isCron     = cronSecret === process.env.CRON_SECRET
 
-    const { eventId, flights } = await req.json() as { eventId: string; flights: Flight[] }
+    const { eventId, flights, playerIds } = await req.json() as { 
+      eventId: string
+      flights: Flight[]
+      playerIds?: string[]
+    }
 
     if (!eventId || !flights?.length) {
       return Response.json({ success: false, error: 'eventId et flights requis' }, { status: 400 })
@@ -182,13 +186,19 @@ export async function POST(req: Request) {
       supabase = await createServerClient()
     }
 
+   let participantsQuery = supabase.from('event_participants')
+      .select('player_id, players(id, first_name, surname, email)')
+      .eq('event_id', eventId).eq('status', 'GOING')
+
+    if (playerIds?.length) {
+      participantsQuery = participantsQuery.in('player_id', playerIds)
+    }
+
     const [{ data: event }, { data: participants }] = await Promise.all([
       supabase.from('events')
         .select('title, starts_at, location, group_id')
         .eq('id', eventId).single(),
-      supabase.from('event_participants')
-        .select('player_id, players(id, first_name, surname, email)')
-        .eq('event_id', eventId).eq('status', 'GOING')
+      participantsQuery,
     ])
 
     if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
