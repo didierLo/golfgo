@@ -384,9 +384,15 @@ export default function ResultsPage() {
                 {activePlayer && (
                   <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
                     style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-                    <ScorecardTable
+                 <ScorecardTable
                       holes={holes} player={activePlayer} scores={scores}
-                      setScores={() => {}} eventFormat={eventFormat} readOnly={true}
+                      setScores={isOwner ? (newScores) => {
+                        const updated = typeof newScores === 'function' ? newScores(scores) : newScores
+                        setScores(updated)
+                        scoresRef.current = updated
+                      } : () => {}}
+                      eventFormat={eventFormat}
+                      readOnly={!isOwner}
                     />
                   </div>
                 )}
