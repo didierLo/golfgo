@@ -21,14 +21,13 @@ type Props = {
   filterStatus: ParticipantStatus
   setFilterStatus: (status: ParticipantStatus) => void
   events: EventRow[]
-  applyEventFilter: () => void
   setSelectedIds: (ids: Set<string>) => void
 }
 
 export default function CommRecipientsPanel({
   membersWithEmail, selectedIds, toggleMember, selectAll, selectNone,
   filterMode, setFilterMode, filterEventId, onFilterEventChange,
-  filterStatus, setFilterStatus, events, applyEventFilter, setSelectedIds,
+ filterStatus, setFilterStatus, events, setSelectedIds,
 }: Props) {
   const t = useTranslations()
 
@@ -68,10 +67,7 @@ export default function CommRecipientsPanel({
             <option value="DECLINED">{t('communications.status.DECLINED')}</option>
             <option value="WAITLIST">{t('communications.status.WAITLIST')}</option>
           </select>
-          <button onClick={applyEventFilter} disabled={!filterEventId}
-            className="text-[12px] font-semibold px-3 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-            {t('communications.recipients.apply')}
-          </button>
+          
         </>)}
         {filterMode === 'role' && (
           <div className="flex gap-2">

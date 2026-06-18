@@ -226,6 +226,10 @@ export default function CommunicationsPage() {
   if (messageType === 'scorecards' && filterEventId) loadPrintHoles(filterEventId)
   }, [messageType, filterEventId])
 
+   useEffect(() => {
+  if (filterMode === 'event' && filterEventId) applyEventFilter()
+  }, [filterMode, filterEventId, filterStatus])
+
   async function handleSaveTemplate() {
     setSaving(true)
     const { error } = await supabase.from('groups').update(groupTemplate).eq('id', groupId)
@@ -584,7 +588,6 @@ function handleFilterEventChange(eventId: string) {
           filterStatus={filterStatus}
           setFilterStatus={setFilterStatus}
           events={events}
-          applyEventFilter={applyEventFilter}
           setSelectedIds={setSelectedIds}
         />
 
