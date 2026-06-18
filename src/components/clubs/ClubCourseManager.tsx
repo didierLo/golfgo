@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
-type Club   = { id: string; name: string }
+type Club   = { id: string; name: string; country: string }
 type Course = { id: string; course_name: string; club_id: string }
 type Tee    = { id: string; course_id: string; tee_name: string; par_total: number; distance_total: number; course_rating: number; slope: number }
 type Hole   = { id?: string; course_id: string; hole_number: number; par: number; stroke_index: number; hole_distance: number }
@@ -24,7 +24,9 @@ export default function ClubCourseManager() {
   const [clubId, setClubId]     = useState<string | null>(null)
   const [courseId, setCourseId] = useState<string | null>(null)
 
-  const [newClub, setNewClub]   = useState('')
+ 
+  const [newClub, setNewClub]         = useState('')
+  const [newClubCountry, setNewClubCountry] = useState('BE')
   const [newCourse, setNewCourse] = useState('')
   const [newTee, setNewTee]     = useState('')
   const [newTeeData, setNewTeeData] = useState({ par_total: 72, distance_total: 0, course_rating: 72.0, slope: 120 })
@@ -91,8 +93,11 @@ export default function ClubCourseManager() {
 
   async function handleCreateClub() {
     if (!newClub.trim()) return
-    const { data } = await supabase.from('clubs').insert({ name: newClub.trim() }).select().single()
+    const { data } = await supabase.from('clubs').select('*').order('country, name')
+      .insert({ name: newClub.trim(), country: newClubCountry })
+      .select().single()
     setNewClub('')
+    setNewClubCountry('BE')
     if (data) setClubId(data.id)
     await loadClubs()
   }
@@ -168,14 +173,43 @@ export default function ClubCourseManager() {
         <select value={clubId || ''} onChange={e => { setClubId(e.target.value || null); setCourseId(null) }}
           className={selectClass}>
           <option value="">{t('clubs.chooseClub')}</option>
-          {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {Object.entries(
+            clubs.reduce((acc, c) => {
+              const country = c.country || 'OTHER'
+              if (!acc[country]) acc[country] = []
+              acc[country].push(c)
+              return acc
+            }, {} as Record<string, Club[]>)
+          ).sort(([a], [b]) => a.localeCompare(b))
+           .map(([country, countryClubs]) => (
+            <optgroup key={country} label={country}>
+              {countryClubs.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </optgroup>
+          ))}
         </select>
-        <div className="flex gap-2 mt-2">
+
+      <div className="flex gap-2 mt-2">
+          <select value={newClubCountry} onChange={e => setNewClubCountry(e.target.value)}
+            className="border border-gray-200 rounded-md px-2 py-2 text-[12px] bg-white focus:outline-none focus:border-blue-300 w-20 flex-shrink-0">
+            <option value="BE">🇧🇪 BE</option>
+            <option value="FR">🇫🇷 FR</option>
+            <option value="NL">🇳🇱 NL</option>
+            <option value="LU">🇱🇺 LU</option>
+            <option value="DE">🇩🇪 DE</option>
+            <option value="GB">🇬🇧 GB</option>
+            <option value="ES">🇪🇸 ES</option>
+            <option value="PT">🇵🇹 PT</option>
+            <option value="IT">🇮🇹 IT</option>
+            <option value="CH">🇨🇭 CH</option>
+            <option value="OTHER">🌍</option>
+          </select>
           <input value={newClub} onChange={e => setNewClub(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleCreateClub()}
             placeholder={t('clubs.newClub')} className={selectClass} />
           <button onClick={handleCreateClub}
-            className="bg-[#185FA5] text-white text-[12px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors">
+            className="bg-[#185FA5] text-white text-[12px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors flex-shrink-0">
             +
           </button>
         </div>

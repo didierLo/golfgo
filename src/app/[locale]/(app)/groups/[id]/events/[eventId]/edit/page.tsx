@@ -137,7 +137,7 @@ export default function EditEventPage() {
   const [emailMessage, setEmailMessage]                 = useState('')
   const [maxParticipants, setMaxParticipants]           = useState('')
 
-  const [clubs, setClubs]     = useState<{ id: string; name: string }[]>([])
+  const [clubs, setClubs]     = useState<{ id: string; name: string; country: string }[]>([])
   const [courses, setCourses] = useState<{ id: string; course_name: string }[]>([])
   const [formats, setFormats] = useState<{ id: string; name: string }[]>([])
 
@@ -171,7 +171,7 @@ export default function EditEventPage() {
     setMaxParticipants(event.max_participants ? String(event.max_participants) : '')
 
   const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
-  supabase.from('clubs').select('id, name').order('name'),
+  supabase.from('clubs').select('id, name, country').order('country, name'),
   supabase.from('competition_formats').select('id, name').order('name'),
 ])
 setClubs(clubsData || [])
@@ -276,7 +276,19 @@ if (event.course_id) {
               <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editEvent.club')}</label>
               <select value={selectedClubId} onChange={e => setSelectedClubId(e.target.value)} className={inputClass}>
                 <option value="">{t('editEvent.chooseClub')}</option>
-                {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {Object.entries(
+                  clubs.reduce((acc, c) => {
+                    const country = c.country || 'OTHER'
+                    if (!acc[country]) acc[country] = []
+                    acc[country].push(c)
+                    return acc
+                  }, {} as Record<string, typeof clubs>)
+                ).sort(([a], [b]) => a.localeCompare(b))
+                 .map(([country, countryClubs]) => (
+                  <optgroup key={country} label={country}>
+                    {countryClubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </optgroup>
+                ))}
               </select>
             </div>
             {selectedClubId && (

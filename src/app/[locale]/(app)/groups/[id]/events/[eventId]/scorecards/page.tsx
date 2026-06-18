@@ -112,7 +112,7 @@ export default function ScorecardsPage() {
 
   const [allEvents, setAllEvents]               = useState<EventItem[]>([])
   const [eventsLoading, setEventsLoading]       = useState(true)
-  const [clubs, setClubs]                       = useState<{ id: string; name: string }[]>([])
+  const [clubs, setClubs]                       = useState<{ id: string; name: string; country: string }[]>([])
   const [selectedClubId, setSelectedClubId]     = useState('')
   const [courses, setCourses]                   = useState<{ id: string; course_name: string }[]>([])
   const [selectedCourseId, setSelectedCourseId] = useState('')
@@ -164,7 +164,7 @@ export default function ScorecardsPage() {
 
   async function loadInit() {
     setLoading(true); setValidatedAt(null); setPlayers([]); setScores({}); setScorecardId(null)
-    const { data: clubsData } = await supabase.from('clubs').select('id, name').order('name')
+   const { data: clubsData } = await supabase.from('clubs').select('id, name, country').order('country, name')
     setClubs(clubsData || [])
     const { data: event } = await supabase.from('events')
       .select('course_id, competition_format:competition_format_id(scoring_type)').eq('id', activeEventId).single()
@@ -295,7 +295,7 @@ export default function ScorecardsPage() {
 
   async function handleCreateClub() {
     if (!newClubName.trim() || !isOwner) return; setCreating(true)
-    const { data, error } = await supabase.from('clubs').insert({ name: newClubName.trim() }).select('id, name').single()
+    const { data, error } = await supabase.from('clubs').insert({ name: newClubName.trim(), country: 'BE' }).select('id, name').single()
     if (error) { alert(error.message); setCreating(false); return }
     setClubs(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
     setSelectedClubId(data.id); setNewClubName(''); setShowNewClub(false); setCreating(false)
@@ -371,9 +371,21 @@ export default function ScorecardsPage() {
         <div className="mb-4">
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('scorecards.club')}</label>
           <div className="flex gap-2">
-            <select value={selectedClubId} onChange={e => { setSelectedClubId(e.target.value); setSelectedCourseId('') }} className={selectClass} disabled={!isOwner || isValidated}>
-              <option value="">{t('scorecards.chooseClub')}</option>
-              {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+           <select value={selectedClubId} onChange={e => { setSelectedClubId(e.target.value); setSelectedCourseId('') }} className={selectClass} disabled={!isOwner || isValidated}>
+                <option value="">{t('scorecards.chooseClub')}</option>
+                {Object.entries(
+                  clubs.reduce((acc, c) => {
+                    const country = c.country || 'OTHER'
+                    if (!acc[country]) acc[country] = []
+                    acc[country].push(c)
+                    return acc
+                  }, {} as Record<string, typeof clubs>)
+                ).sort(([a], [b]) => a.localeCompare(b))
+                 .map(([country, countryClubs]) => (
+                  <optgroup key={country} label={country}>
+                    {countryClubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </optgroup>
+                ))}
             </select>
             {isOwner && !isValidated && (
               <button type="button" onClick={() => setShowNewClub(v => !v)} className="text-[12px] font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition-colors">

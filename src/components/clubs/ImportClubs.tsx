@@ -10,6 +10,7 @@ const supabase = createClient()
 type RawRow = {
   club: string; course: string; tee: string; par: number
   length_m: number | null; cr: number | null; slope: number
+  country: string
 }
 
 type ImportResult = {
@@ -17,12 +18,12 @@ type ImportResult = {
 }
 
 function downloadTemplate() {
-  const ws = XLSX.utils.aoa_to_sheet([
-    ['CLUB', 'COURSE', 'TEE', 'PAR', 'LENGTH', 'CR', 'SLOPE'],
-    ['Royal Golf Club', 'Parcours Principal', 'Jaune', 72, 5800, 71.2, 128],
-    ['Royal Golf Club', 'Parcours Principal', 'Rouge', 72, 5200, 69.4, 122],
+const ws = XLSX.utils.aoa_to_sheet([
+    ['COUNTRY', 'CLUB', 'COURSE', 'TEE', 'PAR', 'LENGTH', 'CR', 'SLOPE'],
+    ['BE', 'Royal Golf Club', 'Parcours Principal', 'Jaune', 72, 5800, 71.2, 128],
+    ['BE', 'Royal Golf Club', 'Parcours Principal', 'Rouge', 72, 5200, 69.4, 122],
   ])
-  ws['!cols'] = [{ wch: 30 }, { wch: 25 }, { wch: 15 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 8 }]
+  ws['!cols'] = [{ wch: 10 }, { wch: 30 }, { wch: 25 }, { wch: 15 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 8 }]
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Clubs')
   XLSX.writeFile(wb, 'template_clubs_golfgo.xlsx')
@@ -51,13 +52,14 @@ function parseXLS(file: File): Promise<RawRow[]> {
 
         const headers = raw[headerRow].map((c: any) => String(c).trim().toUpperCase())
         const idx = {
-          club:   headers.findIndex(h => h === 'CLUB'),
-          course: headers.findIndex(h => h === 'COURSE'),
-          tee:    headers.findIndex(h => h === 'TEE'),
-          par:    headers.findIndex(h => h === 'PAR'),
-          length: headers.findIndex(h => h.includes('LENGTH') || h === 'M'),
-          cr:     headers.findIndex(h => h === 'CR'),
-          slope:  headers.findIndex(h => h === 'SLOPE'),
+          country: headers.findIndex(h => h === 'COUNTRY'),
+          club:    headers.findIndex(h => h === 'CLUB'),
+          course:  headers.findIndex(h => h === 'COURSE'),
+          tee:     headers.findIndex(h => h === 'TEE'),
+          par:     headers.findIndex(h => h === 'PAR'),
+          length:  headers.findIndex(h => h.includes('LENGTH') || h === 'M'),
+          cr:      headers.findIndex(h => h === 'CR'),
+          slope:   headers.findIndex(h => h === 'SLOPE'),
         }
 
         const rows: RawRow[] = []
@@ -67,8 +69,9 @@ function parseXLS(file: File): Promise<RawRow[]> {
           const row = raw[i]
           if (!row || row.every((c: any) => !c)) continue
 
-          const club   = String(row[idx.club]   ?? '').trim() || lastClub
-          const course = String(row[idx.course] ?? '').trim() || lastCourse
+          const country = idx.country >= 0 ? String(row[idx.country] ?? '').trim() || 'BE' : 'BE'
+          const club    = String(row[idx.club]   ?? '').trim() || lastClub
+          const course  = String(row[idx.course] ?? '').trim() || lastCourse
           const tee    = String(row[idx.tee]    ?? '').trim()
           const par    = Number(row[idx.par])
           const slope  = Number(row[idx.slope])
@@ -78,7 +81,8 @@ function parseXLS(file: File): Promise<RawRow[]> {
           if (!tee || !slope || isNaN(slope)) continue
           if (par && par <= 30) continue
 
-          rows.push({
+       rows.push({
+            country,
             club: lastClub, course: lastCourse, tee,
             par: isNaN(par) ? 72 : par,
             length_m: idx.length >= 0 ? Number(row[idx.length]) || null : null,
@@ -112,7 +116,9 @@ async function importToSupabase(rows: RawRow[]): Promise<ImportResult> {
     const { data: existingClub } = await supabase.from('clubs').select('id').ilike('name', clubName).maybeSingle()
     if (existingClub) { clubId = existingClub.id; result.skipped++ }
     else {
-      const { data: newClub, error } = await supabase.from('clubs').insert({ name: clubName }).select('id').single()
+     const firstRow = [...courseMap.values()][0]?.[0]
+      const country = firstRow?.country ?? 'BE'
+      const { data: newClub, error } = await supabase.from('clubs').insert({ name: clubName, country }).select('id').single()
       if (error || !newClub) { result.errors.push(`Club "${clubName}": ${error?.message}`); continue }
       clubId = newClub.id; result.clubs++
     }
@@ -224,7 +230,8 @@ export default function ImportClubs() {
             <table className="w-full text-[11px]" style={{ tableLayout: 'fixed' }}>
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[25%]">Club</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[10%]">Country</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[22%]">Club</th>
                   <th className="px-3 py-2 text-left text-gray-400 font-medium w-[20%]">Course</th>
                   <th className="px-3 py-2 text-left text-gray-400 font-medium w-[25%]">Tee</th>
                   <th className="px-3 py-2 text-center text-gray-400 font-medium w-[10%]">Par</th>
@@ -235,6 +242,7 @@ export default function ImportClubs() {
               <tbody>
                 {preview.map((row, i) => (
                   <tr key={i} className={`border-b border-gray-100 ${i % 2 ? 'bg-gray-50/50' : ''}`}>
+                    <td className="px-3 py-1.5 text-gray-500 font-mono">{row.country}</td>
                     <td className="px-3 py-1.5 text-gray-700 truncate">{row.club}</td>
                     <td className="px-3 py-1.5 text-gray-600 truncate">{row.course}</td>
                     <td className="px-3 py-1.5 text-gray-600 truncate">{row.tee}</td>
