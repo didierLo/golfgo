@@ -140,7 +140,7 @@ export default function ClubCourseManager() {
     distance_total: tee.distance_total, course_rating: tee.course_rating, slope: tee.slope,
   }).eq('id', tee.id)
 ))
-      await supabase.from('course_holes').upsert(
+      const { error: holesError } = await supabase.from('course_holes').upsert(
         holes.map(h => ({
           ...(h.id ? { id: h.id } : {}),
           course_id: courseId, hole_number: h.hole_number,
@@ -148,10 +148,16 @@ export default function ClubCourseManager() {
         })),
         { onConflict: 'course_id,hole_number' }
       )
-      setSaveMsg('✓ Sauvegardé')
+      if (holesError) {
+        console.error('[handleSave] course_holes upsert error:', holesError)
+        setSaveMsg('Erreur trous: ' + holesError.message)
+      } else {
+        setSaveMsg('✓ Sauvegardé')
+      }
       await loadHoles(courseId)
-    } catch {
-      setSaveMsg('Erreur')
+    } catch (e: any) {
+      console.error('[handleSave] catch:', e)
+      setSaveMsg('Erreur: ' + (e.message ?? 'inconnue'))
     } finally {
       setSaving(false)
       setTimeout(() => setSaveMsg(''), 3000)
