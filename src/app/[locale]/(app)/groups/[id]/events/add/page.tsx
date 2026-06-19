@@ -12,7 +12,6 @@ export default function AddEventPage() {
   const params  = useParams()
   const groupId = params.id as string
   const t       = useTranslations()
-
   const [title, setTitle]               = useState('')
   const [location, setLocation]         = useState('')
   const [start, setStart]               = useState('')
@@ -22,8 +21,8 @@ export default function AddEventPage() {
   const [emailMessage, setEmailMessage] = useState('')
   const [saving, setSaving]             = useState(false)
   const [error, setError]               = useState('')
-
-  const [clubs, setClubs] = useState<{ id: string; name: string; country: string }[]>([])
+  const [clubs, setClubs]               = useState<{ id: string; name: string; country: string }[]>([])
+  const [selectedCountry, setSelectedCountry]         = useState('')
   const [courses, setCourses]                         = useState<{ id: string; course_name: string }[]>([])
   const [formats, setFormats]                         = useState<{ id: string; name: string }[]>([])
   const [selectedClubId, setSelectedClubId]           = useState('')
@@ -138,22 +137,20 @@ export default function AddEventPage() {
 
             <div>
               <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('addEvent.club')}</label>
-              <select value={selectedClubId} onChange={e => setSelectedClubId(e.target.value)} className={inputClass}>
-                <option value="">{t('addEvent.chooseClub')}</option>
-                {Object.entries(
-                  clubs.reduce((acc, c) => {
-                    const country = c.country || 'OTHER'
-                    if (!acc[country]) acc[country] = []
-                    acc[country].push(c)
-                    return acc
-                  }, {} as Record<string, typeof clubs>)
-                ).sort(([a], [b]) => a.localeCompare(b))
-                 .map(([country, countryClubs]) => (
-                  <optgroup key={country} label={country}>
-                    {countryClubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </optgroup>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select value={selectedCountry} onChange={e => { setSelectedCountry(e.target.value); setSelectedClubId('') }} className={inputClass}>
+                  <option value="">🌍 Pays</option>
+                  {[...new Set(clubs.map(c => c.country || 'OTHER'))].sort().map(country => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+                <select value={selectedClubId} onChange={e => setSelectedClubId(e.target.value)} className={inputClass} disabled={!selectedCountry}>
+                  <option value="">{t('addEvent.chooseClub')}</option>
+                  {clubs.filter(c => (c.country || 'OTHER') === selectedCountry).map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {selectedClubId && (

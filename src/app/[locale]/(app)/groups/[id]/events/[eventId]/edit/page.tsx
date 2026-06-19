@@ -124,7 +124,6 @@ export default function EditEventPage() {
   const groupId = params.id as string
   const eventId = params.eventId as string
   const t = useTranslations()
-
   const [title, setTitle]                               = useState('')
   const [location, setLocation]                         = useState('')
   const [start, setStart]                               = useState('')
@@ -132,15 +131,14 @@ export default function EditEventPage() {
   const [courseId, setCourseId]                         = useState('')
   const [competitionFormatId, setCompetitionFormatId]   = useState('')
   const [selectedClubId, setSelectedClubId]             = useState('')
+  const [selectedCountry, setSelectedCountry]           = useState('')
   const [isGolf, setIsGolf]                             = useState(true)
   const [fee, setFee]                                   = useState('')
   const [emailMessage, setEmailMessage]                 = useState('')
   const [maxParticipants, setMaxParticipants]           = useState('')
-
   const [clubs, setClubs]     = useState<{ id: string; name: string; country: string }[]>([])
   const [courses, setCourses] = useState<{ id: string; course_name: string }[]>([])
   const [formats, setFormats] = useState<{ id: string; name: string }[]>([])
-
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
@@ -182,6 +180,8 @@ if (event.course_id) {
     .from('courses').select('id, course_name, club_id').eq('id', event.course_id).single()
   if (courseData) {
     setSelectedClubId(courseData.club_id)
+    const matchedClub = (clubsData || []).find(c => c.id === courseData.club_id)
+    if (matchedClub) setSelectedCountry(matchedClub.country || 'OTHER')
     const { data: coursesData } = await supabase
       .from('courses').select('id, course_name').eq('club_id', courseData.club_id).order('course_name')
     setCourses(coursesData || [])
@@ -271,25 +271,22 @@ if (event.course_id) {
 
         {isGolf && (
           <>
-            <div className="h-px bg-slate-100" />
-            <div>
+           <div>
               <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editEvent.club')}</label>
-              <select value={selectedClubId} onChange={e => setSelectedClubId(e.target.value)} className={inputClass}>
-                <option value="">{t('editEvent.chooseClub')}</option>
-                {Object.entries(
-                  clubs.reduce((acc, c) => {
-                    const country = c.country || 'OTHER'
-                    if (!acc[country]) acc[country] = []
-                    acc[country].push(c)
-                    return acc
-                  }, {} as Record<string, typeof clubs>)
-                ).sort(([a], [b]) => a.localeCompare(b))
-                 .map(([country, countryClubs]) => (
-                  <optgroup key={country} label={country}>
-                    {countryClubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </optgroup>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select value={selectedCountry} onChange={e => { setSelectedCountry(e.target.value); setSelectedClubId('') }} className={inputClass}>
+                  <option value="">🌍 Pays</option>
+                  {[...new Set(clubs.map(c => c.country || 'OTHER'))].sort().map(country => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+                <select value={selectedClubId} onChange={e => setSelectedClubId(e.target.value)} className={inputClass} disabled={!selectedCountry}>
+                  <option value="">{t('editEvent.chooseClub')}</option>
+                  {clubs.filter(c => (c.country || 'OTHER') === selectedCountry).map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             {selectedClubId && (
               <div>

@@ -112,15 +112,7 @@ export default function ScorecardsPage() {
 
   const [allEvents, setAllEvents]               = useState<EventItem[]>([])
   const [eventsLoading, setEventsLoading]       = useState(true)
-  const [clubs, setClubs]                       = useState<{ id: string; name: string; country: string }[]>([])
-  const [selectedClubId, setSelectedClubId]     = useState('')
-  const [courses, setCourses]                   = useState<{ id: string; course_name: string }[]>([])
   const [selectedCourseId, setSelectedCourseId] = useState('')
-  const [newClubName, setNewClubName]           = useState('')
-  const [showNewClub, setShowNewClub]           = useState(false)
-  const [newCourseName, setNewCourseName]       = useState('')
-  const [showNewCourse, setShowNewCourse]       = useState(false)
-  const [creating, setCreating]                 = useState(false)
   const [loading, setLoading]                   = useState(true)
   const [scorecardLoading, setScorecardLoading] = useState(false)
   const [error, setError]                       = useState<string | null>(null)
@@ -156,45 +148,39 @@ export default function ScorecardsPage() {
   }
 
   useEffect(() => { loadInit() }, [activeEventId])
-  useEffect(() => {
-    if (selectedClubId) loadCourses(selectedClubId)
-    else { setCourses([]); setSelectedCourseId('') }
-  }, [selectedClubId])
   useEffect(() => { if (selectedCourseId) loadScorecard(selectedCourseId) }, [selectedCourseId])
 
-  async function loadInit() {
-    setLoading(true); setValidatedAt(null); setPlayers([]); setScores({}); setScorecardId(null)
-   const { data: clubsData } = await supabase.from('clubs').select('id, name, country').order('country, name')
-    setClubs(clubsData || [])
-    const { data: event } = await supabase.from('events')
-      .select('course_id, competition_format:competition_format_id(scoring_type)').eq('id', activeEventId).single()
-    if (event) {
-      setEventFormat((event.competition_format as any)?.scoring_type ?? 'stableford')
-      if (event.course_id) {
-        const { data: course } = await supabase.from('courses').select('id, course_name, club_id').eq('id', event.course_id).single()
-        if (course) {
-          setSelectedClubId(course.club_id)
-          setSelectedCourseId(event.course_id)
-          setCourseName(course.course_name ?? '')
-          const clubFound = clubsData?.find((c: any) => c.id === course.club_id)
-          setClubName(clubFound?.name ?? '')
-          const { data: coursesData } = await supabase.from('courses').select('id, course_name').eq('club_id', course.club_id).order('course_name')
-          setCourses(coursesData || [])
-        }
-      } else { setSelectedClubId(''); setSelectedCourseId(''); setClubName(''); setCourseName('') }
+
+async function loadInit() {
+  setLoading(true); setValidatedAt(null); setPlayers([]); setScores({}); setScorecardId(null)
+
+  const { data: event } = await supabase.from('events')
+    .select('course_id, competition_format:competition_format_id(scoring_type)')
+    .eq('id', activeEventId).single()
+
+  if (event) {
+    setEventFormat((event.competition_format as any)?.scoring_type ?? 'stableford')
+    if (event.course_id) {
+      const { data: course } = await supabase.from('courses')
+        .select('id, course_name, clubs(name)')
+        .eq('id', event.course_id).single()
+      if (course) {
+        setSelectedCourseId(event.course_id)
+        setCourseName(course.course_name ?? '')
+        setClubName((course as any).clubs?.name ?? '')
+      }
+    } else {
+      setSelectedCourseId(''); setClubName(''); setCourseName('')
     }
-    setLoading(false)
   }
+  setLoading(false)
+}
 
-  async function loadCourses(clubId: string) {
-    const { data } = await supabase.from('courses').select('id, course_name').eq('club_id', clubId).order('course_name')
-    setCourses(data || [])
-  }
+  
 
-  async function loadScorecard(courseId: string) {
+async function loadScorecard(courseId: string) {
     setScorecardLoading(true); setError(null)
     try {
-      if (isOwner) await supabase.from('events').update({ course_id: courseId }).eq('id', activeEventId)
       const { data: holesData } = await supabase.from('course_holes').select('hole_number, par, stroke_index').eq('course_id', courseId).order('hole_number')
       setHoles(holesData?.length ? holesData : fallbackHoles())
       const { data: teesData } = await supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope').eq('course_id', courseId).order('tee_name')
@@ -293,27 +279,7 @@ export default function ScorecardsPage() {
     return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`
   }
 
-  async function handleCreateClub() {
-    if (!newClubName.trim() || !isOwner) return; setCreating(true)
-    const { data, error } = await supabase.from('clubs').insert({ name: newClubName.trim(), country: 'BE' }).select('id, name').single()
-    if (error) { alert(error.message); setCreating(false); return }
-    setClubs(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
-    setSelectedClubId(data.id); setNewClubName(''); setShowNewClub(false); setCreating(false)
-  }
 
-  async function handleCreateCourse() {
-    if (!newCourseName.trim() || !selectedClubId || !isOwner) return; setCreating(true)
-    const { data, error } = await supabase.from('courses').insert({ club_id: selectedClubId, course_name: newCourseName.trim() }).select('id, course_name').single()
-    if (error) { alert(error.message); setCreating(false); return }
-    setCourses(prev => [...prev, data].sort((a, b) => a.course_name.localeCompare(b.course_name)))
-    setSelectedCourseId(data.id); setNewCourseName(''); setShowNewCourse(false); setCreating(false)
-  }
-
-  if (loading || roleLoading) return (
-    <div className="p-6 space-y-3 max-w-2xl">
-      {[1,2].map(i => <div key={i} className="h-12 bg-slate-100 rounded-xl animate-pulse" />)}
-    </div>
-  )
 
   const activePlayer   = players.find(p => p.id === activePlayerId) ?? null
   const upcomingEvents = allEvents.filter(e => !e.isPast)
@@ -365,14 +331,14 @@ export default function ScorecardsPage() {
         </div>
       )}
 
-     {(clubName || courseName) && (
+    {(clubName || courseName) && (
         <div className="rounded-xl border border-white/60 shadow-sm px-4 py-3 mb-6 print:hidden flex items-center gap-3"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <span className="text-[16px]">⛳</span>
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-bold text-slate-800 truncate">{clubName}{courseName ? ` · ${courseName}` : ''}</p>
             {isOwner && (
-              <a href={`/${params.locale ?? 'fr'}/admin/clubs`}
+              <a href={`/${params.locale}/admin/clubs`}
                 className="text-[11px] text-[#185FA5] hover:underline">
                 {t('scorecards.manageCourses')}
               </a>
@@ -381,16 +347,16 @@ export default function ScorecardsPage() {
         </div>
       )}
 
-      {!clubName && !courseName && isOwner && (
+      {!clubName && !courseName && isOwner && !scorecardLoading && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-6 print:hidden">
           <p className="text-[12px] text-amber-700 font-medium">
             Aucun parcours configuré pour cet événement —{' '}
-            <a href={`/${params.locale ?? 'fr'}/events/${params.eventId}/edit`}
+            <a href={`/${params.locale}/groups/${groupId}/events/${activeEventId}/edit`}
               className="underline font-semibold">
               modifier l'événement
             </a>
             {' '}ou{' '}
-            <a href={`/${params.locale ?? 'fr'}/admin/clubs`}
+            <a href={`/${params.locale}/admin/clubs`}
               className="underline font-semibold">
               gérer les clubs
             </a>
