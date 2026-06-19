@@ -275,14 +275,7 @@ export default function MyScorecardPage() {
   const activePlayer = flightPlayers.find(p => p.id === activePlayerId) ?? null
 
   return (
-    <div className="p-5 sm:p-6 max-w-2xl">
-      <button onClick={() => router.back()}
-        className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-4">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {t('common.back')}
-      </button>
+   <div className="p-5 sm:p-6 max-w-2xl">
       <h1 className="text-[22px] font-black text-slate-900 tracking-tight mb-4">{t('scorecard.title')}</h1>
 
       {allEvents.length > 0 && (
