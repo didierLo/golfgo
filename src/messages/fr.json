@@ -353,7 +353,8 @@
     "photosLabel": "Photos",
     "photosOptional": "optionnel",
     "photosAdd": "Ajouter des photos",
-    "photosUploading": "Chargement en cours…"
+    "photosUploading": "Chargement en cours…",
+    "clubCourseRequired": "Le club et le parcours sont obligatoires"
       },
   "editGroup": {
     "title": "Modifier le groupe",
@@ -589,8 +590,9 @@
     "validateConfirm": "Validation confirmée",
     "noParticipants": "Aucun joueur n'est confirmé pour cet événement",
     "noCourse": "Sélectionnez un club et un parcours pour accéder aux cartes de score",
-    "noCourseReadOnly": "Aucun parcours n'a été configuré pour cet événement",
-    "whatsapp": "WhatsApp"
+   "noCourseReadOnly": "Aucun parcours n'a été configuré pour cet événement",
+    "whatsapp": "WhatsApp",
+    "manageCourses": "Gérer les clubs et parcours"
   },
   "eventOverview": {
     "notFound": "Événement introuvable",
@@ -919,7 +921,8 @@
     "saving": "Enregistrement en cours...",
     "cancel": "Annuler",
     "errorUnexpected": "Erreur inattendue",
-    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
+    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité",
+    "clubCourseRequired": "Le club et le parcours sont obligatoires"
   },
   "events": {
     "title": "Événements",

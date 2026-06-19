@@ -347,9 +347,10 @@
     "cancel": "Cancel",
     "notFound": "Event not found",
     "photosLabel": "Photos",
-    "photosOptional": "optionnel",
-    "photosAdd": "Ajouter des photos",
-    "photosUploading": "Upload en cours…"
+    "photosOptional": "optional",
+    "photosAdd": "Add photos",
+    "photosUploading": "Upload en cours…",
+    "clubCourseRequired": "Club and course are required"
   },
   "editGroup": {
     "title": "Edit group",
@@ -584,9 +585,9 @@
     "error": "Error",
     "validateConfirm": "Confirm validation",
     "noParticipants": "No players confirmed for this event",
-    "noCourse": "Select a club and course to access scorecards",
     "noCourseReadOnly": "No course has been set for this event",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "manageCourses": "Manage clubs and courses"
   },
   "eventOverview": {
     "notFound": "Event not found",
@@ -913,7 +914,8 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "errorUnexpected": "Unexpected error",
-    "adminOnly": "You must be an admin to use this feature"
+    "adminOnly": "You must be an admin to use this feature",
+    "clubCourseRequired": "Club and course are required"
   },
   "events": {
     "title": "Events",

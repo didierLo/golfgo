@@ -348,7 +348,8 @@
     "photosLabel": "Fotos",
     "photosOptional": "opcional",
     "photosAdd": "Añadir fotos",
-    "photosUploading": "Subiendo…"
+    "photosUploading": "Subiendo…",
+    "clubCourseRequired": "El club y el campo son obligatorios"
   },
   "editGroup": {
     "title": "Editar grupo",
@@ -583,7 +584,8 @@
     "noParticipants": "Sin jugadores confirmados para este evento",
     "noCourse": "Selecciona un club y campo para acceder a las tarjetas",
     "noCourseReadOnly": "No se ha configurado ningún campo para este evento",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "manageCourses": "Gestionar clubes y campos"
   },
   "eventOverview": {
     "notFound": "Evento no encontrado",
@@ -910,7 +912,8 @@
     "saving": "Guardando...",
     "cancel": "Cancelar",
     "errorUnexpected": "Error inesperado",
-    "adminOnly": "Debes ser administrador para usar esta función"
+    "adminOnly": "Debes ser administrador para usar esta función",
+    "clubCourseRequired": "El club y el campo son obligatorios"
   },
   "events": {
     "title": "Eventos",

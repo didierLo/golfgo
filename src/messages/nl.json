@@ -349,7 +349,8 @@
     "photosLabel": "Foto's",
     "photosOptional": "optioneel",
     "photosAdd": "Foto's toevoegen",
-    "photosUploading": "Uploaden…"
+    "photosUploading": "Uploaden…",
+    "clubCourseRequired": "Club en parcours zijn verplicht"
   },
   "editGroup": {
     "title": "Groep bewerken",
@@ -586,7 +587,8 @@
     "noParticipants": "Geen spelers bevestigd voor dit evenement",
     "noCourse": "Selecteer een club en parcours om scorekaarten te openen",
     "noCourseReadOnly": "Geen parcours ingesteld voor dit evenement",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "manageCourses": "Clubs en parcoursen beheren"
   },
   "eventOverview": {
     "notFound": "Evenement niet gevonden",
@@ -913,7 +915,8 @@
     "saving": "Opslaan...",
     "cancel": "Annuleren",
     "errorUnexpected": "Onverwachte fout",
-    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken"
+    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
+    "clubCourseRequired": "Club en parcours zijn verplicht"
   },
   "events": {
     "title": "Evenementen",

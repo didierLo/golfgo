@@ -129,6 +129,7 @@ export default function EditEventPage() {
   const [start, setStart]                               = useState('')
   const [end, setEnd]                                   = useState('')
   const [courseId, setCourseId]                         = useState('')
+  const isInitialClubLoad = useRef(true)
   const [competitionFormatId, setCompetitionFormatId]   = useState('')
   const [selectedClubId, setSelectedClubId]             = useState('')
   const [selectedCountry, setSelectedCountry]           = useState('')
@@ -190,16 +191,28 @@ if (event.course_id) {
     setLoading(false)
   }
 
-  async function loadCourses(clubId: string) {
+async function loadCourses(clubId: string) {
     const { data } = await supabase.from('courses').select('id, course_name').eq('club_id', clubId).order('course_name')
     setCourses(data || [])
-    if (!data?.find((c: { id: string }) => c.id === courseId)) setCourseId('')
+    if (isInitialClubLoad.current) {
+      isInitialClubLoad.current = false
+      return
+    }
+    if (!data?.find((c: { id: string }) => c.id === courseId)) {
+      setCourseId(data?.length === 1 ? data[0].id : '')
+    }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (saving) return
     setError('')
+
+    if (isGolf && (!selectedClubId || !courseId)) {
+      setError(t('editEvent.clubCourseRequired'))
+      return
+    }
+
     setSaving(true)
     const { error: updateError } = await supabase.from('events').update({
       title:                 title.trim(),

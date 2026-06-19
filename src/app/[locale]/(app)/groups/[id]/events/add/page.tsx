@@ -52,10 +52,17 @@ export default function AddEventPage() {
     else setCourseId('')
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+ async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (saving) return
-    setError(''); setSaving(true)
+    setError('')
+
+    if (isGolf && (!selectedClubId || !courseId)) {
+      setError(t('addEvent.clubCourseRequired'))
+      return
+    }
+
+    setSaving(true)
     try {
       const { error: insertError } = await supabase.from('events').insert({
         group_id:              groupId,

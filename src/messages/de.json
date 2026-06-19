@@ -348,7 +348,8 @@
     "photosLabel": "Fotos",
     "photosOptional": "optional",
     "photosAdd": "Fotos hinzufügen",
-    "photosUploading": "Hochladen…"
+    "photosUploading": "Hochladen…",
+    "clubCourseRequired": "Club und Platz sind erforderlich"
   },
   "editGroup": {
     "title": "Gruppe bearbeiten",
@@ -585,7 +586,8 @@
     "noParticipants": "Keine bestätigten Spieler für diese Veranstaltung",
     "noCourse": "Club und Platz auswählen, um Scorekarten aufzurufen",
     "noCourseReadOnly": "Kein Platz für diese Veranstaltung konfiguriert",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "manageCourses": "Clubs und Plätze verwalten"
   },
   "eventOverview": {
     "notFound": "Veranstaltung nicht gefunden",
@@ -912,7 +914,8 @@
     "saving": "Speichern...",
     "cancel": "Abbrechen",
     "errorUnexpected": "Unerwarteter Fehler",
-    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen"
+    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen",
+    "clubCourseRequired": "Club und Platz sind erforderlich"
   },
   "events": {
     "title": "Veranstaltungen",
