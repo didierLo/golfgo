@@ -109,7 +109,7 @@ export default function PrivacyPage() {
 
       <div className="mt-6 text-center">
         <Link
-          href={`/${locale}//cgu`}
+          href={`/${locale}//legal/cgu`}
           className="text-[12px] text-slate-400 hover:text-slate-600 transition-colors underline underline-offset-2"
         >
           {t('linkToCgu')} →
