@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 
 export default function PrivacyPage() {
-  const t = useTranslations('privacy')
+  const t = useTranslations('legal.privacy')
   const locale = useLocale()
 
   const today = new Date().toLocaleDateString(locale, {
