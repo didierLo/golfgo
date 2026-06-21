@@ -1,6 +1,7 @@
 {
   "name": "GolfGo",
   "short_name": "GolfGo",
+  "id": "/",
   "description": "Organisez et jouez vos tournois de golf en groupe",
   "start_url": "/",
   "display": "standalone",
