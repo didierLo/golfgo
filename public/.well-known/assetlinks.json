@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "be.golfgo.twa",
+    "sha256_cert_fingerprints": ["56:10:EF:AB:52:8A:7D:50:A4:85:EE:47:16:62:6D:C9:46:79:9C:2E:43:9D:78:96:81:3B:A7:1C:6B:47:F3:32"]
+  }
+}]
