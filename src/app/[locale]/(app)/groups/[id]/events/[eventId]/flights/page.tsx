@@ -96,6 +96,7 @@ export default function FlightsPage() {
   const [dragOverPlayer, setDragOverPlayer] = useState<string | null>(null)
   const [manualEdits,    setManualEdits]    = useState(false)
   const [adminToast,     setAdminToast]     = useState<string | null>(null)
+  const [touchPos,       setTouchPos]       = useState<{ x: number; y: number } | null>(null)
 
   function showAdminToast() {
     setAdminToast(t('flights.adminOnly'))
@@ -203,6 +204,51 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
     })
     onDragEnd()
   }
+
+  function onTouchStart(e: React.TouchEvent, player: any, fromFlightNo: number) {
+  const touch = e.touches[0]
+  setDragState({ playerId: player.id, playerName: `${player.first_name} ${player.surname}`, fromFlightNo })
+  setTouchPos({ x: touch.clientX, y: touch.clientY })
+}
+
+function onTouchMove(e: React.TouchEvent) {
+  const touch = e.touches[0]
+  setTouchPos({ x: touch.clientX, y: touch.clientY })
+  const el = document.elementFromPoint(touch.clientX, touch.clientY)
+  const flightEl = el?.closest('[data-flight-no]')
+  if (flightEl) {
+    const flightNo = parseInt(flightEl.getAttribute('data-flight-no') ?? '0')
+    setDragOverFlight(flightNo)
+  } else {
+    setDragOverFlight(null)
+  }
+}
+
+function onTouchEnd(e: React.TouchEvent) {
+  const touch = e.changedTouches[0]
+  const el = document.elementFromPoint(touch.clientX, touch.clientY)
+  const flightEl = el?.closest('[data-flight-no]')
+  if (flightEl && dragState) {
+    const toFlightNo = parseInt(flightEl.getAttribute('data-flight-no') ?? '0')
+    if (toFlightNo && toFlightNo !== dragState.fromFlightNo) {
+      setFlights((prev: any[]) => {
+        const next = prev.map((f: any) => {
+          const fps = Array.isArray(f.players) ? f.players : []
+          if (f.flight_no === dragState.fromFlightNo) return { ...f, players: fps.filter((p: any) => p.id !== dragState.playerId) }
+          if (f.flight_no === toFlightNo) {
+            const moved = prev.find((ff: any) => ff.flight_no === dragState.fromFlightNo)?.players?.find((p: any) => p.id === dragState.playerId)
+            return moved ? { ...f, players: [...fps, moved] } : f
+          }
+          return f
+        })
+        setManualEdits(true)
+        return next
+      })
+    }
+  }
+  setTouchPos(null)
+  onDragEnd()
+}
 
 const sortedFlights = useMemo(() => 
   [...flights].sort((a: any, b: any) => a.flight_no - b.flight_no)
@@ -478,8 +524,9 @@ const flightGroups = useMemo(() =>
                         const isDragTarget  = dragOverFlight === flight.flight_no && dragState?.fromFlightNo !== flight.flight_no
 
                         return (
-                          <div key={flight.flight_no}
-                            className={`bg-white border rounded-xl overflow-hidden transition-all ${
+                         <div key={flight.flight_no}
+                          data-flight-no={flight.flight_no}
+                          className={`bg-white border rounded-xl overflow-hidden transition-all ${    
                               isDragTarget ? 'border-[#185FA5] shadow-[0_0_0_2px_rgba(24,95,165,0.15)] scale-[1.01]' : 'border-slate-200'}`}
                             onDragOver={e => onDragOverFlight(e, flight.flight_no)}
                             onDrop={e => isOwner ? onDropOnFlight(e, flight.flight_no) : undefined}
@@ -507,12 +554,16 @@ const flightGroups = useMemo(() =>
                                 const isDragging   = dragState?.playerId === p.id
                                 const isDropTarget = dragOverPlayer === p.id && dragState?.fromFlightNo !== flight.flight_no
                                 return (
-                                  <div key={p.id}
-                                    draggable={isOwner}
-                                    onDragStart={e => onDragStart(e, p, flight.flight_no)}
-                                    onDragEnd={onDragEnd}
-                                    onDragOver={e => onDragOverPlayer(e, flight.flight_no, p.id)}
-                                    className={`flex items-center justify-between rounded-lg px-2 py-1.5 transition-all ${
+                       <div key={p.id}
+                          draggable={isOwner}
+                          onDragStart={e => onDragStart(e, p, flight.flight_no)}
+                          onDragEnd={onDragEnd}
+                          onDragOver={e => onDragOverPlayer(e, flight.flight_no, p.id)}
+                          onTouchStart={e => isOwner ? onTouchStart(e, p, flight.flight_no) : undefined}
+                          onTouchMove={e => isOwner ? onTouchMove(e) : undefined}
+                          onTouchEnd={e => isOwner ? onTouchEnd(e) : undefined}
+                          style={isOwner ? { touchAction: 'none' } : undefined}
+                          className={`flex items-center justify-between rounded-lg px-2 py-1.5 transition-all ${
                                       isDragging     ? 'opacity-40 bg-slate-100'
                                       : isDropTarget ? 'bg-[#EBF3FC] border border-[#B5D4F4]'
                                       : 'hover:bg-slate-50'
