@@ -27,8 +27,15 @@
     "payments": "Paiements",
     "support": "Support",
     "cgu": "CGU",
-    "privacy": "Confidentialité"
-    
+    "privacy": "Confidentialité",
+    "deleteAccount": "Supprimer mon compte",
+    "deleteAccountTitle": "Supprimer votre compte",
+    "deleteAccountDesc": "Cette action enverra une demande de suppression à notre équipe. Vos données seront supprimées dans un délai de 30 jours.",
+    "deleteRequestSent": "Demande envoyée",
+    "deleteRequestDesc": "Nous avons bien reçu votre demande et traiterons la suppression de vos données dans les 30 jours.",
+    "confirmDelete": "Confirmer",
+    "cancel": "Annuler",
+    "close": "Fermer"
   },
 
   "myEvents": {

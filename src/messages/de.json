@@ -27,7 +27,15 @@
     "payments": "Zahlungen",
     "support": "Support",
     "cgu": "AGB",
-    "privacy": "Datenschutz"
+    "privacy": "Datenschutz",
+    "deleteAccount": "Mein Konto löschen",
+    "deleteAccountTitle": "Ihr Konto löschen",
+    "deleteAccountDesc": "Dies sendet eine Löschanfrage an unser Team. Ihre Daten werden innerhalb von 30 Tagen gelöscht.",
+    "deleteRequestSent": "Anfrage gesendet",
+    "deleteRequestDesc": "Wir haben Ihre Anfrage erhalten und werden Ihre Daten innerhalb von 30 Tagen löschen.",
+    "confirmDelete": "Bestätigen",
+    "cancel": "Abbrechen",
+    "close": "Schließen"
   },
   "myEvents": {
     "title": "Meine Veranstaltungen",

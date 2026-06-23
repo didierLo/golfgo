@@ -27,7 +27,15 @@
     "payments": "Payments",
     "support": "Support",
     "cgu": "Terms",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "deleteAccount": "Delete my account",
+    "deleteAccountTitle": "Delete your account",
+    "deleteAccountDesc": "This will send a deletion request to our team. Your data will be deleted within 30 days.",
+    "deleteRequestSent": "Request sent",
+    "deleteRequestDesc": "We have received your request and will process the deletion of your data within 30 days.",
+    "confirmDelete": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "myEvents": {
     "title": "My events",

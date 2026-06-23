@@ -27,7 +27,15 @@
     "payments": "Betalingen",
     "support": "Ondersteuning",
     "cgu": "Voorwaarden",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "deleteAccount": "Mijn account verwijderen",
+    "deleteAccountTitle": "Uw account verwijderen",
+    "deleteAccountDesc": "Dit stuurt een verwijderingsverzoek naar ons team. Uw gegevens worden binnen 30 dagen verwijderd.",
+    "deleteRequestSent": "Verzoek verzonden",
+    "deleteRequestDesc": "We hebben uw verzoek ontvangen en zullen uw gegevens binnen 30 dagen verwijderen.",
+    "confirmDelete": "Bevestigen",
+    "cancel": "Annuleren",
+    "close": "Sluiten"
   },
   "myEvents": {
     "title": "Mijn evenementen",

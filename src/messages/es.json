@@ -27,7 +27,15 @@
     "payments": "Pagos",
     "support": "Soporte",
     "cgu": "Condiciones",
-    "privacy": "Privacidad"
+    "privacy": "Privacidad",
+    "deleteAccount": "Eliminar mi cuenta",
+    "deleteAccountTitle": "Eliminar su cuenta",
+    "deleteAccountDesc": "Esto enviará una solicitud de eliminación a nuestro equipo. Sus datos serán eliminados en un plazo de 30 días.",
+    "deleteRequestSent": "Solicitud enviada",
+    "deleteRequestDesc": "Hemos recibido su solicitud y procesaremos la eliminación de sus datos en un plazo de 30 días.",
+    "confirmDelete": "Confirmar",
+    "cancel": "Cancelar",
+    "close": "Cerrar"
   },
   "myEvents": {
     "title": "Mis eventos",

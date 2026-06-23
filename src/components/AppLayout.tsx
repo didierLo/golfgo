@@ -87,12 +87,10 @@ const ORGANISER_SEGMENTS = [
 ]
 const supabase = createClient()
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const router   = useRouter()
- 
-  const t        = useTranslations()
-  const locale   = useLocale()
-
+  const pathname                                  = usePathname()
+  const router                                    = useRouter()
+  const t                                         = useTranslations()
+  const locale                                    = useLocale()
   const [groups,            setGroups]            = useState<Group[]>([])
   const [activeGroup,       setActiveGroup]       = useState<Group | null>(null)
   const [currentUser,       setCurrentUser]       = useState<CurrentUser | null>(null)
@@ -102,8 +100,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [avatarMenuOpen,    setAvatarMenuOpen]    = useState(false)
   const [nearestEventId,    setNearestEventId]    = useState<string | null>(null)
   const [pillMenuOpen,      setPillMenuOpen]      = useState(false)
-
-  const pillRef = useRef<HTMLDivElement>(null)
+  const [deleteModalOpen, setDeleteModalOpen]     = useState(false)
+  const [deleteLoading,   setDeleteLoading]       = useState(false)
+  const [deleteConfirmed, setDeleteConfirmed]     = useState(false)
+  const pillRef                                   = useRef<HTMLDivElement>(null)
   const avatarRef                                 = useRef<HTMLDivElement>(null)
 
   const showBack = ORGANISER_SEGMENTS.some(s => pathname.includes(s))
@@ -381,7 +381,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         ))}
                       </div>
                     </div>
-
+                      <button
+                        onClick={() => { setAvatarMenuOpen(false); setDeleteModalOpen(true) }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors">
+                        <span className="text-red-300">
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </span>
+                        <span className="text-[13px] text-red-400 font-medium">{t('nav.deleteAccount')}</span>
+                      </button>
                    <a href="mailto:info@golfgo.be"
                     onClick={() => setAvatarMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
@@ -549,6 +558,65 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           )
         })}
       </nav>
+      {deleteModalOpen && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+    style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+    <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+      {deleteConfirmed ? (
+        <>
+          <div className="text-center mb-4">
+            <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M5 13l4 4L19 7" stroke="#3B6D11" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <p className="text-[15px] font-bold text-slate-800">{t('nav.deleteRequestSent')}</p>
+            <p className="text-[13px] text-slate-500 mt-1">{t('nav.deleteRequestDesc')}</p>
+          </div>
+          <button onClick={() => { setDeleteModalOpen(false); setDeleteConfirmed(false) }}
+            className="w-full py-2.5 rounded-xl bg-slate-100 text-[13px] font-semibold text-slate-700 hover:bg-slate-200 transition-colors">
+            {t('nav.close')}
+          </button>
+        </>
+      ) : (
+        <>
+          <div className="text-center mb-5">
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
+              <svg width="24" height="24" viewBox="0 0 16 16" fill="none">
+                <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9" stroke="#ef4444" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <p className="text-[15px] font-bold text-slate-800">{t('nav.deleteAccountTitle')}</p>
+            <p className="text-[13px] text-slate-500 mt-1">{t('nav.deleteAccountDesc')}</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setDeleteModalOpen(false)}
+              className="flex-1 py-2.5 rounded-xl bg-slate-100 text-[13px] font-semibold text-slate-700 hover:bg-slate-200 transition-colors">
+              {t('nav.cancel')}
+            </button>
+            <button
+              disabled={deleteLoading}
+              onClick={async () => {
+                setDeleteLoading(true)
+                try {
+                  await fetch('/api/delete-account-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: currentUser?.name, email: (await supabase.auth.getUser()).data.user?.email }),
+                  })
+                  setDeleteConfirmed(true)
+                } catch (e) { console.error(e) }
+                finally { setDeleteLoading(false) }
+              }}
+              className="flex-1 py-2.5 rounded-xl bg-red-500 text-[13px] font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-60">
+              {deleteLoading ? '...' : t('nav.confirmDelete')}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
     </div>
   )
 }
