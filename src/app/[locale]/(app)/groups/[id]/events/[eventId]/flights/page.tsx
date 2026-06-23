@@ -206,12 +206,14 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
   }
 
   function onTouchStart(e: React.TouchEvent, player: any, fromFlightNo: number) {
-  const touch = e.touches[0]
+  e.preventDefault()
+    const touch = e.touches[0]
   setDragState({ playerId: player.id, playerName: `${player.first_name} ${player.surname}`, fromFlightNo })
   setTouchPos({ x: touch.clientX, y: touch.clientY })
 }
 
 function onTouchMove(e: React.TouchEvent) {
+  e.preventDefault()
   const touch = e.touches[0]
   setTouchPos({ x: touch.clientX, y: touch.clientY })
   const el = document.elementFromPoint(touch.clientX, touch.clientY)
@@ -526,6 +528,7 @@ const flightGroups = useMemo(() =>
                         return (
                          <div key={flight.flight_no}
                           data-flight-no={flight.flight_no}
+                          style={{ userSelect: 'none', WebkitUserSelect: 'none' } as React.CSSProperties}
                           className={`bg-white border rounded-xl overflow-hidden transition-all ${    
                               isDragTarget ? 'border-[#185FA5] shadow-[0_0_0_2px_rgba(24,95,165,0.15)] scale-[1.01]' : 'border-slate-200'}`}
                             onDragOver={e => onDragOverFlight(e, flight.flight_no)}
@@ -562,7 +565,7 @@ const flightGroups = useMemo(() =>
                           onTouchStart={e => isOwner ? onTouchStart(e, p, flight.flight_no) : undefined}
                           onTouchMove={e => isOwner ? onTouchMove(e) : undefined}
                           onTouchEnd={e => isOwner ? onTouchEnd(e) : undefined}
-                          style={isOwner ? { touchAction: 'none' } : undefined}
+                          style={isOwner ? { touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' } : undefined}
                           className={`flex items-center justify-between rounded-lg px-2 py-1.5 transition-all ${
                                       isDragging     ? 'opacity-40 bg-slate-100'
                                       : isDropTarget ? 'bg-[#EBF3FC] border border-[#B5D4F4]'
