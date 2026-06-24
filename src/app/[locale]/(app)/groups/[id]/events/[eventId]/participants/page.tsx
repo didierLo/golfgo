@@ -48,8 +48,8 @@ function Badge({ status }: { status: string }) {
 }
 
 function HolesBadge({ holes, section }: { holes: number | null; section: HolesSection }) {
-  if (!holes || holes === 18) return null
-  const label = section === 'out' ? '9F' : section === 'in' ? '9B' : '9H'
+  if (!holes || holes === 18 || !section) return null   // ← ajout de !section
+  const label = section === 'out' ? '9F' : '9B'
   return (
     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 flex-shrink-0">
       {label}
@@ -61,7 +61,7 @@ function holesLabel(holes: number | null, section: HolesSection): string {
   if (!holes || holes === 18) return '18T'
   if (section === 'out') return '9F'
   if (section === 'in') return '9B'
-  return '9T'
+  return '18T'   // ← fallback sécurisé si section null
 }
 
 // ─── Modal message ──────────────────────────────────────────────────────────
@@ -568,10 +568,11 @@ export default function ParticipantsPage() {
                               ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100'
                               : 'bg-white/60 border-slate-200 text-slate-400 hover:border-amber-300 hover:text-amber-600'
                           }`}>
-                          {holesLabel(p.holes_played, p.holes_section)}
-                        </button>
-                      ) : (
+                                                {holesLabel(p.holes_played, p.holes_section)}</button>
+                      ) : p.status === 'GOING' ? (                              // ← ajout filtre statut
                         <HolesBadge holes={p.holes_played} section={p.holes_section} />
+                      ) : (
+                        <span />                                                // ← rien pour DECLINED/INVITED
                       )}
                     </div>
 
