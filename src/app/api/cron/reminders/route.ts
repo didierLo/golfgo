@@ -317,7 +317,7 @@ export async function GET(req: Request) {
  const { data: events, error: eventsError } = await supabase
   .from('events')
   .select(`
-    id, title, starts_at, location, group_id, tee_interval, is_golf,
+    id, title, starts_at, location, group_id, tee_interval, is_golf, max_players,
     groups!events_group_id_fkey(
       id, name, auto_reminders, auto_teesheet, auto_invitation,
       template_reminder_subject, template_reminder_body,
@@ -368,6 +368,16 @@ if (days === 3 && group?.auto_reminders) {
 
         if (!EMAIL_ENABLED) { results.reminders.sent++; continue }
 
+        // Calculer les places restantes pour cet événement
+        const { count: goingCount } = await supabase
+          .from('event_participants')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('status', 'GOING')
+
+        const placesRestantes = Math.max(0, (event.max_players ?? 99) - (goingCount ?? 0))
+
+
         const vars = {
           first_name:  player.first_name,
           surname:     player.surname,
@@ -377,6 +387,8 @@ if (days === 3 && group?.auto_reminders) {
           event_title: event.title,
           event_date:  formatDate(event.starts_at),
           event_time:  formatTime(event.starts_at),
+          places_restantes: String(placesRestantes),  // ← ajout
+          yes_button:       '',     
         }
 
         const subject = applyTemplateVars(reminderSubjectTpl, vars)
