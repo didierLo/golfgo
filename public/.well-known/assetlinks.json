@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "be.golfgo.twa",
-    "sha256_cert_fingerprints": ["56:10:EF:AB:52:8A:7D:50:A4:85:EE:47:16:62:6D:C9:46:79:9C:2E:43:9D:78:96:81:3B:A7:1C:6B:47:F3:32"]
+    "sha256_cert_fingerprints": [
+      "56:10:EF:AB:52:8A:7D:50:A4:85:EE:47:16:62:6D:C9:46:79:9C:2E:43:9D:78:96:81:3B:A7:1C:6B:47:F3:32",
+      "A2:99:EB:8E:C0:22:86:BB:0E:C5:5B:A0:00:1B:BD:B5:D4:3F:52:BC:19:02:27:B4:68:35:7B:F1:66:78:76:0B"
+    ]
   }
 }]
