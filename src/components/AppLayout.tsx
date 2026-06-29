@@ -487,6 +487,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem href={groupsHref}                    icon={Icons.groups}         iconColor="#7F77DD" label={t('nav.groups')}         active={isGroupsActive} />
             <NavIconItem href={eventsHref}                    icon={Icons.events}         iconColor="#185FA5" label={t('nav.events')}         active={eventsListActive} />
             <NavIconItem href={invitationsHref ?? '/groups'}  icon={Icons.invitations}    iconColor="#0C447C" label={t('nav.invitations')}    active={!!invitationsHref && isActive(invitationsHref)} />
+            <NavIconItem href={paymentsHref ?? '/groups'}     icon={Icons.payments}       iconColor="#3B6D11" label={t('nav.payments')}       active={!!paymentsHref && isActive(paymentsHref ?? '')} />
             <NavIconItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
             <NavIconItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
             <NavIconItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
