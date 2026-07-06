@@ -317,7 +317,7 @@ export async function GET(req: Request) {
  const { data: events, error: eventsError } = await supabase
   .from('events')
   .select(`
-    id, title, starts_at, location, group_id, tee_interval, is_golf, max_players,
+    id, title, starts_at, location, group_id, tee_interval, is_golf, max_participants,
     groups!events_group_id_fkey(
       id, name, auto_reminders, auto_teesheet, auto_invitation,
       template_reminder_subject, template_reminder_body,
@@ -375,7 +375,7 @@ if (days === 3 && group?.auto_reminders) {
           .eq('event_id', event.id)
           .eq('status', 'GOING')
 
-        const placesRestantes = Math.max(0, (event.max_players ?? 99) - (goingCount ?? 0))
+        const placesRestantes = Math.max(0, (event.max_participants ?? 99) - (goingCount ?? 0))
 
 
         const vars = {
