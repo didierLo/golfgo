@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations, useLocale } from 'next-intl'
+import Image from 'next/image'
 
 interface Group       { id: string; name: string; color: string; role: 'owner' | 'member' }
 interface CurrentUser { initials: string; name: string }
@@ -221,7 +222,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
-      <div className="fixed inset-0 -z-10" style={{ backgroundImage: 'url(/golf-bg.jpg)', backgroundSize: 'cover', backgroundPosition: '50% center', backgroundAttachment: 'fixed' }} />
+     <div className="fixed inset-0 -z-10 overflow-hidden">
+  <Image
+    src="/golf-bg.jpg"
+    alt=""
+    fill
+    priority
+    quality={75}
+    sizes="100vw"
+    style={{ objectFit: 'cover', objectPosition: '50% center' }}
+  />
+</div>
 
       {/* TOPBAR */}
       <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20 overflow-visible"
