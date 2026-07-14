@@ -42,11 +42,36 @@ export default function AddParticipantsPage() {
     setSelected(selected.length === players.length ? [] : players.map(p => p.id))
   }
 
-  async function handleAddParticipants() {
+async function handleAddParticipants() {
     if (sending) return
     setSending(true)
-    const rows = selected.map(playerId => ({ event_id: eventId, player_id: playerId, status: 'INVITED' }))
-    const { error } = await supabase.from('event_participants').upsert(rows, { onConflict: 'event_id,player_id' })
+
+    // Ne pas toucher aux participants déjà présents (GOING/DECLINED/INVITED existant)
+    const { data: existing, error: existingErr } = await supabase
+      .from('event_participants')
+      .select('player_id')
+      .eq('event_id', eventId)
+      .in('player_id', selected)
+
+    if (existingErr) { setSending(false); alert(existingErr.message); return }
+
+    const existingIds = new Set((existing || []).map(p => p.player_id))
+    const newPlayerIds = selected.filter(id => !existingIds.has(id))
+
+    if (newPlayerIds.length === 0) {
+      setSending(false)
+      router.back()
+      return
+    }
+
+    const rows = newPlayerIds.map(playerId => ({
+      event_id: eventId,
+      player_id: playerId,
+      status: 'INVITED',
+      invite_token: crypto.randomUUID(),
+    }))
+
+    const { error } = await supabase.from('event_participants').insert(rows)
     setSending(false)
     if (error) { alert(error.message); return }
     router.back()

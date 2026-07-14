@@ -228,7 +228,20 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
     for (const p of participants || []) {
       const player = p.players as any
       if (!player?.email) { skipped++; continue }
-      const token = p.invite_token
+
+      let token = p.invite_token
+      if (!token) {
+        // Participant déjà présent (ex: ajouté manuellement sans email) mais sans token
+        // → on lui en génère un pour pouvoir lui envoyer cette invitation, sans toucher son statut
+        const { data: updated } = await supabase
+          .from('event_participants')
+          .update({ invite_token: crypto.randomUUID() })
+          .eq('event_id', eventId)
+          .eq('player_id', p.player_id)
+          .select('invite_token')
+          .single()
+        token = updated?.invite_token
+      }
       if (!token) { skipped++; continue }
 
       const yes18Link    = `${appUrl}/invite/yes?token=${token}&holes=18`

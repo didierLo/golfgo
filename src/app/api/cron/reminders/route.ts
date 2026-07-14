@@ -450,6 +450,17 @@ if (days === 3 && group?.auto_reminders) {
             .select('invite_token')
             .single()
           token = inserted?.invite_token
+        } else if (!token) {
+          // Participant déjà présent (ex: ajouté manuellement sans email) mais sans token
+          // → on lui en génère un pour pouvoir lui envoyer ce rappel J-14, sans toucher son statut
+          const { data: updated } = await supabase
+            .from('event_participants')
+            .update({ invite_token: crypto.randomUUID() })
+            .eq('event_id', event.id)
+            .eq('player_id', member.player_id)
+            .select('invite_token')
+            .single()
+          token = updated?.invite_token
         }
 
         if (!token) { results.invitations.skipped++; continue }

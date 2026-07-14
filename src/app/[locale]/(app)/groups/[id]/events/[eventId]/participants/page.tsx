@@ -500,20 +500,22 @@ export default function ParticipantsPage() {
           ) : (
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+              <div className="overflow-x-auto">
+              <div className={isOwner ? 'min-w-[860px]' : 'min-w-[640px]'}>
               {/* Header */}
               <div className={`grid gap-3 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
-                  ? 'grid-cols-[minmax(140px,1fr)_20px_70px_55px_55px] sm:grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                  : 'grid-cols-[1fr_20px_70px_55px_70px] sm:grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
+                  ? 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
+                  : 'grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
               }`}>
                 <SortBtn field="name"   label={t('participants.player')} />
                 <span />
                 <SortBtn field="holes"  label={t('participants.holes')} />
                 <SortBtn field="whs"    label={t('participants.whs')} />
-                <span className="text-[12px] font-semibold text-slate-400 hidden sm:block">{t('participants.respondedOn')}</span>
+                <span className="text-[12px] font-semibold text-slate-400">{t('participants.respondedOn')}</span>
                 <SortBtn field="status" label={t('participants.status')} />
                 {isOwner && (
-                  <span className="text-[12px] font-semibold text-slate-400 hidden sm:flex justify-center items-center">
+                  <span className="text-[12px] font-semibold text-slate-400 flex justify-center items-center">
                     {t('participants.actions')}
                   </span>
                 )}
@@ -528,8 +530,8 @@ export default function ParticipantsPage() {
                   <div key={p.player_id}
                     className={`grid gap-3 px-4 py-3 items-center ${
                       isOwner
-                        ? 'grid-cols-[minmax(140px,1fr)_20px_70px_55px_55px] sm:grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                        : 'grid-cols-[1fr_20px_70px_55px_70px] sm:grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
+                        ? 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
+                        : 'grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
                     {/* Nom — FIX L532 */}
@@ -576,18 +578,18 @@ export default function ParticipantsPage() {
                       )}
                     </div>
 
-                    {/* WHS — FIX L574 */}
+                   {/* WHS — FIX L574 */}
                     <div className="text-[13px] text-slate-600 text-center">{p.players?.whs ?? '—'}</div>
 
                     {/* Responded at */}
-                    <div className="text-[11px] text-slate-600 hidden sm:block">{formatResponded(p.responded_at)}</div>
+                    <div className="text-[11px] text-slate-600">{formatResponded(p.responded_at)}</div>
 
                     {/* Status */}
                     <div><Badge status={p.status} /></div>
 
                     {/* Actions owner */}
                     {isOwner && (
-                      <div className="hidden sm:flex justify-center items-center gap-1">
+                      <div className="flex justify-center items-center gap-1">
                         {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
                           <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
                             className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
@@ -609,6 +611,8 @@ export default function ParticipantsPage() {
                   </div>
                 ))
               )}
+              </div>
+              </div>
             </div>
           )}
         </>
