@@ -213,6 +213,15 @@ const [{ data: groupData }, { data: participants, error: pErr }] = await Promise
 
 if (pErr) return Response.json({ success: false, error: pErr.message }, { status: 500 })
 
+    // ── Opt-out : charger qui a désactivé les emails pour ce groupe ─────────
+    const { data: optOuts } = await supabase
+      .from('groups_players')
+      .select('player_id, email_opt_out')
+      .eq('group_id', event.group_id)
+      .in('player_id', playerIds)
+
+    const optOutSet = new Set((optOuts || []).filter(o => o.email_opt_out).map(o => o.player_id))
+
     const ownerPlayer = (groupData?.owner as any)?.[0]?.players
     const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
@@ -225,9 +234,10 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
     let sent = 0, skipped = 0
     const errors: string[] = []
 
-    for (const p of participants || []) {
+   for (const p of participants || []) {
       const player = p.players as any
       if (!player?.email) { skipped++; continue }
+      if (optOutSet.has(p.player_id)) { skipped++; continue }
 
       let token = p.invite_token
       if (!token) {
@@ -273,8 +283,14 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
         yes18Link, yes9frontLink, yes9backLink, noLink, eventLink,
       })
 
+     const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${p.player_id}&gid=${event.group_id}`
+
       const { error: emailErr } = await resend.emails.send({
         from: 'GolfGo <info@golfgo.be>', to: player.email, subject, html,
+        headers: {
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       })
 
       if (emailErr) { errors.push(`${playerName}: ${emailErr.message}`) }

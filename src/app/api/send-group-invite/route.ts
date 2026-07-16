@@ -200,11 +200,14 @@ export async function POST(req: Request) {
       const batch = uniqueEmails.slice(i, i + BATCH_SIZE)
 
       for (const email of batch) {
-        const { error: emailErr } = await resend.emails.send({
+       const { error: emailErr } = await resend.emails.send({
           from: 'GolfGo <info@golfgo.be>',
           to: email,
           subject,
           html,
+          headers: {
+            'List-Unsubscribe': '<mailto:info@golfgo.be?subject=Désinscription>',
+          },
         })
         if (emailErr) { errors.push(`${email}: ${emailErr.message}`); skipped++ }
         else { sent++ }

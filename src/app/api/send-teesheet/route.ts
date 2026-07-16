@@ -203,6 +203,16 @@ export async function POST(req: Request) {
 
     if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
 
+    // ── Opt-out : charger qui a désactivé les emails pour ce groupe ─────────
+    const participantIds = (participants || []).map((p: any) => p.player_id)
+    const { data: optOuts } = await supabase
+      .from('groups_players')
+      .select('player_id, email_opt_out')
+      .eq('group_id', event.group_id)
+      .in('player_id', participantIds)
+
+    const optOutSet = new Set((optOuts || []).filter(o => o.email_opt_out).map(o => o.player_id))
+
     const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     })
@@ -213,6 +223,7 @@ export async function POST(req: Request) {
     for (const ep of participants || []) {
       const player = ep.players as any
       if (!player?.email) { skipped++; continue }
+      if (optOutSet.has(ep.player_id)) { skipped++; continue }
 
       const playerName   = `${player.first_name} ${player.surname}`
       const playerFlight = flights.find(f => f.players.some(p => p.id === player.id))
@@ -232,11 +243,18 @@ export async function POST(req: Request) {
         flights,
       })
 
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+      const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${ep.player_id}&gid=${event.group_id}`
+
       const { error: emailErr } = await resend.emails.send({
         from:    'GolfGo <info@golfgo.be>',
         to:      player.email,
         subject: `Tee Sheet — ${event.title}`,
         html,
+        headers: {
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       })
 
       if (emailErr) errors.push(`${playerName}: ${emailErr.message}`)

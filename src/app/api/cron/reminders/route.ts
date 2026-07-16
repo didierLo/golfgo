@@ -422,17 +422,18 @@ if (days === 3 && group?.auto_reminders) {
       // Récupérer tous les membres du groupe
       const { data: members } = await supabase
         .from('groups_players')
-        .select('player_id, players(id, first_name, surname, email)')
+        .select('player_id, email_opt_out, players(id, first_name, surname, email)')
         .eq('group_id', event.group_id)
 
       const invitationSubjectTpl = group?.template_invitation_subject ?? 'Invitation : {{event_title}}'
       const invitationBodyTpl    = group?.template_invitation_body
         ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
 
-      for (const member of members || []) {
+     for (const member of members || []) {
 
         const player = member.players as any
         if (!player?.email) { results.invitations.skipped++; continue }
+        if ((member as any).email_opt_out) { results.invitations.skipped++; continue }
 
         // Upsert dans event_participants si absent
         const { data: existing } = await supabase
@@ -465,6 +466,7 @@ if (days === 3 && group?.auto_reminders) {
 
         if (!token) { results.invitations.skipped++; continue }
 
+        const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${member.player_id}&gid=${event.group_id}`
         const yes18Link     = `${appUrl}/invite/yes?token=${token}&holes=18`
         const yes9frontLink = `${appUrl}/invite/yes?token=${token}&holes=9&section=out`
         const yes9backLink  = `${appUrl}/invite/yes?token=${token}&holes=9&section=in`
@@ -500,11 +502,15 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           yes18Link, yes9frontLink, yes9backLink, noLink,
         })
 
-     const { error } = await resend.emails.send({
+        const { error } = await resend.emails.send({
           from:    'GolfGo <info@golfgo.be>',
           to:      player.email,
           subject,
           html,
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
         })
 
         if (error) results.invitations.errors.push(`${player.first_name} ${player.surname}: ${error.message}`)

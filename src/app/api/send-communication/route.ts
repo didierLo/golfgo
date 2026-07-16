@@ -202,6 +202,17 @@ const groupName   = (groupData as any)?.name ?? ''
       ? `${appUrl}/groups/${event.group_id}/events/${event.id}`
       : `${appUrl}/groups`
 
+    // ── Opt-out : charger qui a désactivé les emails pour ce groupe ─────────
+    const { data: optOuts } = await supabase
+      .from('groups_players')
+      .select('player_id, email_opt_out')
+      .eq('group_id', groupId)
+      .in('player_id', playerIds)
+
+    const optOutSet = new Set((optOuts || []).filter(o => o.email_opt_out).map(o => o.player_id))
+
+
+
    // Compter les places restantes et liste inscrits en parallèle
 const [countResult, goingResult] = await Promise.all([
   event?.max_participants && eventId
@@ -287,6 +298,7 @@ if (eventId) {
 
     for (const player of playersData || []) {
       if (!player.email) { skipped++; continue }
+      if (optOutSet.has(player.id)) { skipped++; continue }
 
       const token         = participantTokens[player.id]
       const yes18Link     = token ? `${appUrl}/invite/yes?token=${token}&holes=18` : eventLink
@@ -334,11 +346,17 @@ if (eventId) {
         hasButtons:    hasYesButton && !!token,  // ← FIX : conditionné au token aussi
       })
 
+     const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${player.id}&gid=${groupId}`
+
       const { error: emailErr } = await resend.emails.send({
         from:    'GolfGo <info@golfgo.be>',
         to:      player.email,
         subject: resolvedSubject,
         html,
+        headers: {
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       })
 
       if (emailErr) { errors.push(`${player.first_name} ${player.surname}: ${emailErr.message}`) }
