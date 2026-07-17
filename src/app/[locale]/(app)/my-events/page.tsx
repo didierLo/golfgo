@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
+import { generateICS } from '@/lib/ics' 
 
 const supabase = createClient()
 
@@ -16,6 +17,7 @@ type MyEvent = {
   goingCount?: number
   photoCount?: number 
   events: {
+    id: string
     title: string
     starts_at: string
     location: string | null
@@ -84,25 +86,16 @@ function todayKey(): string {
   return `${y}-${m}-${day}`
 }
 
-function generateICS(title: string, starts_at: string, location: string | null): string {
-  const start = new Date(starts_at)
-  const end   = new Date(start.getTime() + 4 * 60 * 60 * 1000)
-  const fmt = (d: Date) => {
-    const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00`
-  }
-  return [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
-    `DTSTART;TZID=Europe/Brussels:${fmt(start)}`,
-    `DTEND;TZID=Europe/Brussels:${fmt(end)}`,
-    `SUMMARY:${title}`,
-    location ? `LOCATION:${location}` : '',
-    'END:VEVENT', 'END:VCALENDAR',
-  ].filter(Boolean).join('\r\n')
-}
+
+
 
 function downloadICS(e: MyEvent) {
-  const blob = new Blob([generateICS(e.events.title, e.events.starts_at, e.events.location)], { type: 'text/calendar' })
+  const blob = new Blob([generateICS({
+    eventId:  e.events.id,
+    title:    e.events.title,
+    startsAt: e.events.starts_at,
+    location: e.events.location,
+  })], { type: 'text/calendar' })
   const url  = URL.createObjectURL(blob)
   const a    = document.createElement('a')
   a.href     = url
@@ -397,7 +390,7 @@ async function loadData() {
     supabase
       .from('event_participants')
       .select(`event_id, status, payment_status,
-        events(title, starts_at, location, group_id,
+        events(id, title, starts_at, location, group_id,
                max_participants, fee_per_person,
                groups!events_group_id_fkey(name, color))`)
       .eq('player_id', player.id)
