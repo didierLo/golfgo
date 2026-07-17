@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { createClient } from '@supabase/supabase-js'
+import { generateICS } from '@/lib/ics'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -404,11 +405,29 @@ if (days === 3 && group?.auto_reminders) {
           yes18Link, yes9frontLink, yes9backLink, noLink,
         })
 
+      const icsContent = generateICS({
+          eventId:       event.id,
+          title:         event.title,
+          startsAt:      event.starts_at,
+          location:      event.location,
+          method:        'REQUEST',
+          sequence:      1, // rappel J-3 = mise à jour de l'invitation J-14 (sequence 0)
+          attendeeEmail: player.email,
+          attendeeName:  `${player.first_name} ${player.surname}`,
+        })
+
         const { error } = await resend.emails.send({
           from:    'GolfGo <info@golfgo.be>',
           to:      player.email,
           subject,
           html,
+          attachments: [
+            {
+              filename:    `${event.title.replace(/\s+/g, '_')}.ics`,
+              content:     Buffer.from(icsContent).toString('base64'),
+              contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+            },
+          ],
         })
 
         if (error) results.reminders.errors.push(`${player.first_name} ${player.surname}: ${error.message}`)
