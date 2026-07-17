@@ -521,6 +521,17 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           yes18Link, yes9frontLink, yes9backLink, noLink,
         })
 
+       const icsContent = generateICS({
+          eventId:       event.id,
+          title:         event.title,
+          startsAt:      event.starts_at,
+          location:      event.location,
+          method:        'REQUEST',
+          sequence:      0, // invitation initiale
+          attendeeEmail: player.email,
+          attendeeName:  `${player.first_name} ${player.surname}`,
+        })
+
         const { error } = await resend.emails.send({
           from:    'GolfGo <info@golfgo.be>',
           to:      player.email,
@@ -530,6 +541,13 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
             'List-Unsubscribe': `<${unsubscribeUrl}>`,
             'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
           },
+          attachments: [
+            {
+              filename:    `${event.title.replace(/\s+/g, '_')}.ics`,
+              content:     Buffer.from(icsContent).toString('base64'),
+              contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+            },
+          ],
         })
 
         if (error) results.invitations.errors.push(`${player.first_name} ${player.surname}: ${error.message}`)
@@ -537,6 +555,8 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         await sleep(EMAIL_SEND_DELAY_MS)
       }
     }
+
+    // ── J-1 : Teesheet auto ou avertissement owner ───────────────────────────
 
     // ── J-1 : Teesheet auto ou avertissement owner ───────────────────────────
      if (days === 1 && event.is_golf && group?.auto_teesheet) {
