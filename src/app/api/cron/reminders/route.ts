@@ -556,7 +556,6 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
       }
     }
 
-    // ── J-1 : Teesheet auto ou avertissement owner ───────────────────────────
 
     // ── J-1 : Teesheet auto ou avertissement owner ───────────────────────────
      if (days === 1 && event.is_golf && group?.auto_teesheet) {
