@@ -43,12 +43,18 @@ export function generateICS(opts: GenerateICSOptions): string {
   const start = new Date(startsAt)
   const end   = new Date(start.getTime() + 4 * 60 * 60 * 1000)
 
-  const fmt = (d: Date) => {
+  // Heure "flottante" pour DTSTART/DTEND : pas de Z, pas de TZID.
+  // starts_at est stocké avec les chiffres de l'heure locale (Europe/Brussels)
+  // même si le champ porte un offset +00 — donc aucune conversion ne doit être faite.
+  const fmtLocal = (d: Date) => {
     const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`
+    return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00`
   }
 
-  const dtstamp = fmt(new Date())
+  // Vrai timestamp UTC pour DTSTAMP (heure de génération du fichier, pas de l'event)
+  const fmtUTC = (d: Date) => `${fmtLocal(d)}Z`
+
+  const dtstamp = fmtUTC(new Date())
 
   const lines = [
     'BEGIN:VCALENDAR',
@@ -59,8 +65,8 @@ export function generateICS(opts: GenerateICSOptions): string {
     'BEGIN:VEVENT',
     `UID:${eventId}@golfgo.be`,
     `DTSTAMP:${dtstamp}`,
-    `DTSTART:${fmt(start)}`,
-    `DTEND:${fmt(end)}`,
+    `DTSTART:${fmtLocal(start)}`,
+    `DTEND:${fmtLocal(end)}`,
     `SEQUENCE:${sequence}`,
     `SUMMARY:${escapeICSText(title)}`,
     location ? `LOCATION:${escapeICSText(location)}` : '',
