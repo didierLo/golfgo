@@ -501,12 +501,12 @@ export default function ParticipantsPage() {
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
               <div className="overflow-x-auto">
-              <div className={isOwner ? 'min-w-[860px]' : 'min-w-[640px]'}>
+              <div className={isOwner ? 'min-w-[860px]' : 'min-w-[720px]'}>
               {/* Header */}
               <div className={`grid gap-3 px-4 py-3 bg-white/30 border-b border-white/40 ${
                 isOwner
                   ? 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                  : 'grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
+                  : 'grid-cols-[minmax(200px,1fr)_20px_70px_60px_80px_150px_130px]'
               }`}>
                 <SortBtn field="name"   label={t('participants.player')} />
                 <span />
@@ -531,7 +531,7 @@ export default function ParticipantsPage() {
                     className={`grid gap-3 px-4 py-3 items-center ${
                       isOwner
                         ? 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                        : 'grid-cols-[1fr_20px_70px_60px_80px_150px_130px]'
+                        : 'grid-cols-[minmax(200px,1fr)_20px_70px_60px_80px_150px_130px]'
                     } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
                     {/* Nom — FIX L532 */}
