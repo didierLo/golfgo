@@ -57,7 +57,7 @@ function buildReminderHtml({
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
+            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
             <span style="font-size:20px;font-weight:700;color:#ffffff;vertical-align:middle;">Golf</span>
             <span style="font-size:20px;font-weight:700;color:#97C459;vertical-align:middle;">Go</span>
           </td>
@@ -151,7 +151,7 @@ function buildNoTeesheetHtml({
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
+            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
             <span style="font-size:20px;font-weight:700;color:#ffffff;vertical-align:middle;">Golf</span>
             <span style="font-size:20px;font-weight:700;color:#97C459;vertical-align:middle;">Go</span>
           </td>
@@ -208,7 +208,7 @@ function buildInvitationHtml({
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://zykywwjmaqcjhciffsbi.supabase.co/storage/v1/object/public/apple-touch-icon/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
+            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
             <span style="font-size:20px;font-weight:700;color:#ffffff;vertical-align:middle;">Golf</span>
             <span style="font-size:20px;font-weight:700;color:#97C459;vertical-align:middle;">Go</span>
           </td>
