@@ -80,7 +80,8 @@ if (messageType === 'scorecards') {
     )
   }
 
-  if (messageType === 'teesheet') {
+ if (messageType === 'teesheet') {
+    const activeEvent = events.find(e => e.id === selectedEventId)
     return (
       <div className="bg-white border border-slate-200 rounded-xl p-5">
         <p className="text-[13px] font-bold text-slate-800 mb-3">{t('communications.message.title')}</p>
@@ -92,9 +93,23 @@ if (messageType === 'scorecards') {
             </button>
           ))}
         </div>
+
+        <div className="mb-3">
+          <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">{t('communications.message.event')}</label>
+          <select value={selectedEventId} onChange={e => onSelectedEventChange(e.target.value)} className={`${selectClass} w-full`}>
+            {events.map(e => <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at, locale)}</option>)}
+          </select>
+        </div>
+
+        <div className="px-4 py-3 bg-[#EBF3FC] border border-[#B5D4F4] rounded-xl mb-3">
+          <p className="text-[12px] font-semibold text-[#0C447C]">
+            📅 Tee sheet pour : {activeEvent ? `${activeEvent.title} — ${formatDate(activeEvent.starts_at, locale)}` : '—'}
+          </p>
+        </div>
+
         <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
           <p className="text-[13px] font-semibold text-slate-700 mb-1">📋 Envoi du Tee Sheet</p>
-          <p className="text-[12px] text-slate-500">Le tee sheet de l'événement sera envoyé à chaque joueur sélectionné avec son flight mis en évidence. Sélectionnez les destinataires puis cliquez sur 📤.</p>
+          <p className="text-[12px] text-slate-500">Le tee sheet de l'événement ci-dessus sera envoyé à chaque joueur sélectionné avec son flight mis en évidence. Sélectionnez les destinataires puis cliquez sur 📤.</p>
         </div>
       </div>
     )

@@ -357,7 +357,8 @@ export default function CommunicationsPage() {
     try {
     let res: Response
       if (messageType === 'teesheet') {
-        const eventId = filterEventId || selectedEventId || ''
+        const eventId = selectedEventId || ''
+        if (!eventId) { toast.error('Sélectionnez un événement pour le tee sheet'); setSending(false); return }
         const activeEvent = events.find(e => e.id === eventId)
 
         const { data: flightsData } = await supabase
