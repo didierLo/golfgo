@@ -330,7 +330,7 @@ export async function GET(req: Request) {
   `)
 
   .gte('starts_at', new Date().toISOString())
-  .lte('starts_at', new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString())
+  .lte('starts_at', new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString())
 
 console.log('events count:', events?.length ?? 0)
 console.log('events error:', JSON.stringify(eventsError))
