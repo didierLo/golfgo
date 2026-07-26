@@ -14,7 +14,7 @@ type RawRow = {
 }
 
 type ImportResult = {
-  clubs: number; courses: number; tees: number; skipped: number; errors: string[]
+  clubs: number; courses: number; tees: number; updated: number; skipped: number; errors: string[]
 }
 
 function downloadTemplate() {
@@ -86,7 +86,13 @@ function parseXLS(file: File): Promise<RawRow[]> {
             club: lastClub, course: lastCourse, tee,
             par: isNaN(par) ? 72 : par,
             length_m: idx.length >= 0 ? Number(row[idx.length]) || null : null,
-            cr:       idx.cr >= 0 ? Number(row[idx.cr]) || null : null,
+            cr: idx.cr >= 0
+              ? (() => {
+                  const raw = String(row[idx.cr] ?? '').trim().replace(',', '.')
+                  const n = Number(raw)
+                  return isNaN(n) ? null : n
+                })()
+              : null,
             slope,
           })
         }
@@ -101,8 +107,7 @@ function parseXLS(file: File): Promise<RawRow[]> {
 }
 
 async function importToSupabase(rows: RawRow[]): Promise<ImportResult> {
-  const result: ImportResult = { clubs: 0, courses: 0, tees: 0, skipped: 0, errors: [] }
-
+  const result: ImportResult = { clubs: 0, courses: 0, tees: 0, updated: 0, skipped: 0, errors: [] }
   const clubMap = new Map<string, Map<string, RawRow[]>>()
   for (const row of rows) {
     if (!clubMap.has(row.club)) clubMap.set(row.club, new Map())
@@ -133,16 +138,29 @@ async function importToSupabase(rows: RawRow[]): Promise<ImportResult> {
         courseId = newCourse.id; result.courses++
       }
 
-      for (const row of teeRows) {
-        const { data: existingTee } = await supabase.from('course_tees').select('id').eq('course_id', courseId).ilike('tee_name', row.tee).maybeSingle()
-        if (existingTee) { result.skipped++; continue }
-        const { error } = await supabase.from('course_tees').insert({
-          course_id: courseId, tee_name: row.tee, par_total: row.par,
-          course_rating: row.cr, slope: row.slope, distance_total: row.length_m,
-        })
-        if (error) { result.errors.push(`Tee "${row.tee}" (${courseName}): ${error.message}`); continue }
-        result.tees++
-      }
+     for (const row of teeRows) {
+  const { data: existingTee } = await supabase
+    .from('course_tees').select('id').eq('course_id', courseId).ilike('tee_name', row.tee).maybeSingle()
+
+  if (existingTee) {
+    const { error } = await supabase.from('course_tees').update({
+      par_total: row.par,
+      course_rating: row.cr,
+      slope: row.slope,
+      distance_total: row.length_m,
+    }).eq('id', existingTee.id)
+    if (error) { result.errors.push(`Tee "${row.tee}" (${courseName}): ${error.message}`); continue }
+    result.updated++
+    continue
+  }
+
+  const { error } = await supabase.from('course_tees').insert({
+    course_id: courseId, tee_name: row.tee, par_total: row.par,
+    course_rating: row.cr, slope: row.slope, distance_total: row.length_m,
+  })
+  if (error) { result.errors.push(`Tee "${row.tee}" (${courseName}): ${error.message}`); continue }
+  result.tees++
+}
     }
   }
   return result
@@ -271,6 +289,7 @@ export default function ImportClubs() {
               { n: result.clubs,   label: t('importClubs.clubsCreated') },
               { n: result.courses, label: t('importClubs.coursesCreated') },
               { n: result.tees,    label: t('importClubs.teesCreated') },
+              { n: result.updated, label: t('importClubs.teesUpdated') },
             ].map(({ n, label }) => (
               <div key={label} className="bg-white border border-green-100 rounded-md p-2 text-center">
                 <div className="text-[20px] font-medium text-green-700">{n}</div>
