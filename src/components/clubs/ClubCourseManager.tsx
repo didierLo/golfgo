@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
+import * as Sentry from '@sentry/nextjs'
+import toast from 'react-hot-toast'
 
 const supabase = createClient()
 
@@ -91,16 +93,24 @@ export default function ClubCourseManager() {
     }
   }
 
-  async function handleCreateClub() {
-    if (!newClub.trim()) return
-    const { data } = await supabase.from('clubs').select('*').order('country, name')
+ async function handleCreateClub() {
+  if (!newClub.trim()) return
+  try {
+    const { data, error } = await supabase.from('clubs')
       .insert({ name: newClub.trim(), country: newClubCountry })
       .select().single()
+
+    if (error) throw error
+
     setNewClub('')
     setNewClubCountry('BE')
     if (data) setClubId(data.id)
     await loadClubs()
+  } catch (err) {
+    Sentry.captureException(err, { tags: { feature: 'clubs', action: 'create_club' } })
+    toast.error(t('errors.generic') ?? 'Une erreur est survenue')
   }
+}
 
   async function handleCreateCourse() {
     if (!clubId || !newCourse.trim()) return
