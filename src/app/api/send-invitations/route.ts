@@ -286,7 +286,7 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
      const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${p.player_id}&gid=${event.group_id}`
 
       const { error: emailErr } = await resend.emails.send({
-        from: 'GolfGo <info@golfgo.be>', to: player.email, subject, html,
+        from: 'GolfGo <noreply@golfgo.be>', replyTo: 'info@golfgo.be', to: player.email, subject, html,
         headers: {
           'List-Unsubscribe': `<${unsubscribeUrl}>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',

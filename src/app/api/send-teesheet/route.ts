@@ -247,7 +247,8 @@ export async function POST(req: Request) {
       const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${ep.player_id}&gid=${event.group_id}`
 
       const { error: emailErr } = await resend.emails.send({
-        from:    'GolfGo <info@golfgo.be>',
+        from:    'GolfGo <noreply@golfgo.be>',
+        replyTo: 'info@golfgo.be',
         to:      player.email,
         subject: `Tee Sheet — ${event.title}`,
         html,

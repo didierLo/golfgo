@@ -417,7 +417,8 @@ if (days === 3 && group?.auto_reminders) {
         })
 
         const { error } = await resend.emails.send({
-          from:    'GolfGo <info@golfgo.be>',
+            from:    'GolfGo <noreply@golfgo.be>',
+          replyTo: 'info@golfgo.be',
           to:      player.email,
           subject,
           html,
@@ -533,7 +534,8 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         })
 
         const { error } = await resend.emails.send({
-          from:    'GolfGo <info@golfgo.be>',
+          from:    'GolfGo <noreply@golfgo.be>',
+          replyTo: 'info@golfgo.be',
           to:      player.email,
           subject,
           html,
