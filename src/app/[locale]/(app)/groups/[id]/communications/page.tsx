@@ -13,7 +13,7 @@ import { computePhcp } from '@/components/scorecards/scorecard-types'
 import CommSettingsPanel from '@/components/communications/CommSettingsPanel'
 import CommMessageComposer from '@/components/communications/CommMessageComposer'
 import CommRecipientsPanel from '@/components/communications/CommRecipientsPanel'
-
+import PushSubscribeButton from '@/components/notifications/PushSubscribeButton'
 
 const supabase = createClient()
 
@@ -486,6 +486,7 @@ function handleFilterEventChange(eventId: string) {
           <p className="text-[13px] text-slate-900 mt-0.5">{t('communications.subtitle')}</p>
         </div>
         <div className="flex items-center gap-1.5">
+          {isOwner && <PushSubscribeButton />}
           <IconBtn
             onClick={() => {
               if (messageType === 'scorecards') {
