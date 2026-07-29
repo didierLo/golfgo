@@ -429,29 +429,6 @@ export default function MyScorecardPage() {
         </div>
       )}
 
-      {/* ── Bloc perso : Ma carte de score ── */}
-      <p className="text-[14px] font-black text-slate-900 mb-3">{t('scorecard.myScorecard')}</p>
-
-      <div className="flex items-center justify-end gap-2 mb-5">
-        {isValidated ? (
-          <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
-            <span className="text-[13px]">🏆</span>
-            <span className="text-[11px] font-bold text-amber-700">{t('scorecard.closed')}</span>
-          </div>
-        ) : (
-          <>
-            <SaveFeedback status={saveStatus} />
-            {isPastEvent && (
-              <span className="text-[10px] text-slate-400 font-medium">{t('scorecard.readOnly')}</span>
-            )}
-            <button onClick={handleSignScorecard} disabled={saving}
-              className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
-              {saving ? '⏳' : '✅'} {saving ? 'Envoi…' : 'Signer la carte et terminer la partie'}
-            </button>
-          </>
-        )}
-      </div>
-
       {error && selectedEventId && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600">{error}</div>
       )}
@@ -507,6 +484,34 @@ export default function MyScorecardPage() {
             <span className="text-[12px] text-slate-500">WHS <span className="font-bold text-slate-800 ml-0.5">{activePlayer.whs}</span></span>
             <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{activePlayer.phcp}</span></span>
           </div>
+        </div>
+      )}
+
+      {!scorecardLoading && activePlayer && (
+        <div className="flex items-center justify-end gap-2 mb-5">
+          {isValidated ? (
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+              <span className="text-[13px]">🏆</span>
+              <span className="text-[11px] font-bold text-amber-700">{t('scorecard.closed')}</span>
+            </div>
+          ) : (
+            <>
+              <SaveFeedback status={saveStatus} />
+              {isPastEvent && (
+                <span className="text-[10px] text-slate-400 font-medium">{t('scorecard.readOnly')}</span>
+              )}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">
+                  Cliquez ici en fin de partie
+                </span>
+                <span className="text-[18px] animate-bounce" style={{ animationDuration: '1.4s' }}>👉</span>
+                <button onClick={handleSignScorecard} disabled={saving}
+                  className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
+                  {saving ? '⏳' : '✅'} {saving ? 'Envoi…' : 'Signer la carte et terminer la partie'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
