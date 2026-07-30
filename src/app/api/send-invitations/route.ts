@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
+import { buildEmailLogoHeader } from '@/lib/email/logo'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -24,12 +25,12 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
 
 function buildEmailHtml({
   eventTitle, eventDate, eventTime, eventLocation, eventMessage,
-  yes18Link, yes9frontLink, yes9backLink, noLink, eventLink,
+  yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl,
 }: {
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null
   yes18Link: string; yes9frontLink: string; yes9backLink: string
-  noLink: string; eventLink: string
+  noLink: string; eventLink: string; logoUrl: string | null
 }) {
   return `
 <!DOCTYPE html>
@@ -47,9 +48,7 @@ function buildEmailHtml({
         <!-- Header -->
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
-            <span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
-            <span style="font-size:20px;font-weight:700;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
+            ${buildEmailLogoHeader(logoUrl)}
           </td>
         </tr>
 
@@ -204,7 +203,7 @@ if (evErr || !event) {
 
 const [{ data: groupData }, { data: participants, error: pErr }] = await Promise.all([
   supabase.from('groups')
-    .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
+    .select('template_invitation_subject, template_invitation_body, template_logo_url, owner:groups_players(players(first_name, surname))')
     .eq('id', event.group_id).eq('groups_players.role', 'owner').single(),
   supabase.from('event_participants')
     .select('player_id, invite_token, players(first_name, surname, email)')
@@ -230,6 +229,7 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
     const eventTime = formatTime(event.starts_at)
     const subjectTemplate = groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}'
     const bodyTemplate    = groupData?.template_invitation_body    ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
+    const logoUrl = groupData?.template_logo_url ?? null
 
     let sent = 0, skipped = 0
     const errors: string[] = []
@@ -280,7 +280,7 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
       const html = buildEmailHtml({
         eventTitle: event.title, eventDate, eventTime,
         eventLocation: event.location, eventMessage: resolvedMessage,
-        yes18Link, yes9frontLink, yes9backLink, noLink, eventLink,
+        yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl,
       })
 
      const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${p.player_id}&gid=${event.group_id}`

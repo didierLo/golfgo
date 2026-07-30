@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { createClient } from '@supabase/supabase-js'
 import { generateICS } from '@/lib/ics'
+import { buildEmailLogoHeader } from '@/lib/email/logo'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -40,11 +41,11 @@ function applyTemplateVars(text: string, vars: Record<string, string>): string {
 
 function buildReminderHtml({
   firstName, eventTitle, eventDate, eventTime, eventLocation, bodyText,
-  yes18Link, yes9frontLink, yes9backLink, noLink,
+  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl,
 }: {
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; bodyText: string; yes18Link: string; yes9frontLink: string
-  yes9backLink: string; noLink: string
+  yes9backLink: string; noLink: string; logoUrl: string | null
 }) {
   return `
 <!DOCTYPE html>
@@ -57,9 +58,7 @@ function buildReminderHtml({
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
-            <span style="font-size:20px;font-weight:700;color:#ffffff;vertical-align:middle;">Golf</span>
-            <span style="font-size:20px;font-weight:700;color:#97C459;vertical-align:middle;">Go</span>
+            ${buildEmailLogoHeader(logoUrl)}
           </td>
         </tr>
         <tr>
@@ -137,9 +136,9 @@ function buildReminderHtml({
 // ── Email avertissement owner (pas de teesheet) ───────────────────────────────
 
 function buildNoTeesheetHtml({
-  ownerFirstName, eventTitle, eventDate, eventUrl,
+  ownerFirstName, eventTitle, eventDate, eventUrl, logoUrl,
 }: {
-  ownerFirstName: string; eventTitle: string; eventDate: string; eventUrl: string
+  ownerFirstName: string; eventTitle: string; eventDate: string; eventUrl: string; logoUrl: string | null
 }) {
   return `
 <!DOCTYPE html>
@@ -151,9 +150,7 @@ function buildNoTeesheetHtml({
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
-            <span style="font-size:20px;font-weight:700;color:#ffffff;vertical-align:middle;">Golf</span>
-            <span style="font-size:20px;font-weight:700;color:#97C459;vertical-align:middle;">Go</span>
+            ${buildEmailLogoHeader(logoUrl)}
           </td>
         </tr>
         <tr>
@@ -190,11 +187,11 @@ function buildNoTeesheetHtml({
 }
 function buildInvitationHtml({
   firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName, bodyText,
-  yes18Link, yes9frontLink, yes9backLink, noLink,
+  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl,
 }: {
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; ownerName: string; bodyText: string
-  yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string
+  yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string; logoUrl: string | null
 }) {
 
   return `
@@ -208,9 +205,7 @@ function buildInvitationHtml({
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;"/>
-            <span style="font-size:20px;font-weight:700;color:#ffffff;vertical-align:middle;">Golf</span>
-            <span style="font-size:20px;font-weight:700;color:#97C459;vertical-align:middle;">Go</span>
+            ${buildEmailLogoHeader(logoUrl)}
           </td>
         </tr>
         <tr>
@@ -320,7 +315,7 @@ export async function GET(req: Request) {
   .select(`
     id, title, starts_at, location, group_id, tee_interval, is_golf, max_participants,
     groups!events_group_id_fkey(
-      id, name, auto_reminders, auto_teesheet, auto_invitation,
+      id, name, auto_reminders, auto_teesheet, auto_invitation, template_logo_url,
       template_reminder_subject, template_reminder_body,
       template_invitation_subject, template_invitation_body,
       owner:groups_players(
@@ -340,6 +335,7 @@ for (const event of (events || []) as any[]) {
   const days        = daysDiff(event.starts_at)
   const group       = event.groups as any
   const ownerPlayer = group?.owner?.find((o: any) => o.role === 'owner')?.player
+  const logoUrl     = group?.template_logo_url ?? null
 
 
     // ── J-3 : Rappel à tous les participants ─────────────────────────────────
@@ -403,6 +399,7 @@ if (days === 3 && group?.auto_reminders) {
           eventLocation: event.location,
           bodyText,
           yes18Link, yes9frontLink, yes9backLink, noLink,
+          logoUrl,
         })
 
       const icsContent = generateICS({
@@ -520,6 +517,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           ownerName,
           bodyText,
           yes18Link, yes9frontLink, yes9backLink, noLink,
+          logoUrl,
         })
 
        const icsContent = generateICS({
@@ -586,6 +584,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           eventTitle:     event.title,
           eventDate:      formatDate(event.starts_at),
           eventUrl,
+          logoUrl,
         })
 
         const { error } = await resend.emails.send({

@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
+import { buildEmailLogoHeader } from '@/lib/email/logo'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -30,6 +31,7 @@ function buildTeesheetEmail({
   eventDate,
   eventLocation,
   flights,
+  logoUrl,
 }: {
   playerName: string
   playerFlightNumber: number
@@ -37,6 +39,7 @@ function buildTeesheetEmail({
   eventDate: string
   eventLocation: string | null
   flights: Flight[]
+  logoUrl: string | null
 }) {
   const flightsHtml = flights.map(flight => {
     const isMyFlight  = flight.flight_number === playerFlightNumber
@@ -102,9 +105,7 @@ function buildTeesheetEmail({
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="vertical-align:middle;">
-                    <img src="https://www.golfgo.be/apple-touch-icon.png" width="36" height="36" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
-                    <span style="font-size:22px;font-weight:600;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
-                    <span style="font-size:22px;font-weight:600;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
+                    ${buildEmailLogoHeader(logoUrl)}
                   </td>
                   <td style="text-align:right;">
                     <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;">Tee Sheet</span>
@@ -203,6 +204,14 @@ export async function POST(req: Request) {
 
     if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
 
+    // ── Logo du groupe ────────────────────────────────────────────────────
+    const { data: groupData } = await supabase
+      .from('groups')
+      .select('template_logo_url')
+      .eq('id', event.group_id)
+      .single()
+    const logoUrl = groupData?.template_logo_url ?? null
+
     // ── Opt-out : charger qui a désactivé les emails pour ce groupe ─────────
     const participantIds = (participants || []).map((p: any) => p.player_id)
     const { data: optOuts } = await supabase
@@ -241,6 +250,7 @@ export async function POST(req: Request) {
         eventDate,
         eventLocation: event.location,
         flights,
+        logoUrl,
       })
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'

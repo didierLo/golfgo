@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { randomUUID } from 'crypto'
+import { buildEmailLogoHeader } from '@/lib/email/logo'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -82,12 +83,12 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 
 function buildEmailHtml({
   eventTitle, eventDate, eventTime, eventLocation, eventMessage, eventLink,
-  yes18Link, yes9frontLink, yes9backLink, noLink, hasButtons,
+  yes18Link, yes9frontLink, yes9backLink, noLink, hasButtons, logoUrl,
 }: {
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null; eventLink: string
   yes18Link: string; yes9frontLink: string; yes9backLink: string
-  noLink: string; hasButtons: boolean
+  noLink: string; hasButtons: boolean; logoUrl: string | null
 }) {
   return `
 <!DOCTYPE html>
@@ -104,9 +105,7 @@ function buildEmailHtml({
 
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
-            <span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
-            <span style="font-size:20px;font-weight:700;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
+            ${buildEmailLogoHeader(logoUrl)}
           </td>
         </tr>
 
@@ -179,7 +178,7 @@ export async function POST(req: Request) {
     // Charger le groupe + owner
 const [{ data: groupData }, eventResult] = await Promise.all([
   supabase.from('groups')
-    .select('name, owner:groups_players(players(first_name, surname))')
+    .select('name, template_logo_url, owner:groups_players(players(first_name, surname))')
     .eq('id', groupId)
     .eq('groups_players.role', 'owner')
     .single(),
@@ -194,6 +193,7 @@ const event       = eventResult.data ?? undefined
 const ownerPlayer = (groupData?.owner as any)?.[0]?.players
 const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
 const groupName   = (groupData as any)?.name ?? ''
+const logoUrl     = (groupData as any)?.template_logo_url ?? null
 
     const eventDate = event ? formatDate(event.starts_at) : ''
     const eventTime = event ? formatTime(event.starts_at) : ''
@@ -344,6 +344,7 @@ if (eventId) {
         eventLink,
         yes18Link, yes9frontLink, yes9backLink, noLink,
         hasButtons:    hasYesButton && !!token,  // ← FIX : conditionné au token aussi
+        logoUrl,
       })
 
      const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${player.id}&gid=${groupId}`

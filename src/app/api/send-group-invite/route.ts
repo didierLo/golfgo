@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
+import { buildEmailLogoHeader } from '@/lib/email/logo'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -12,11 +13,13 @@ function buildGroupInviteHtml({
   inviteUrl,
   qrUrl,
   senderName,
+  logoUrl,
 }: {
   groupName: string
   inviteUrl: string
   qrUrl: string
   senderName: string
+  logoUrl: string | null
 }) {
   return `
 <!DOCTYPE html>
@@ -34,9 +37,7 @@ function buildGroupInviteHtml({
         <!-- Header -->
         <tr>
           <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            <img src="https://www.golfgo.be/apple-touch-icon.png" width="32" height="32" alt="GolfGo" style="vertical-align:middle;border-radius:6px;margin-right:8px;" />
-            <span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;vertical-align:middle;">Golf</span>
-            <span style="font-size:20px;font-weight:700;color:#97C459;letter-spacing:-0.5px;vertical-align:middle;">Go</span>
+            ${buildEmailLogoHeader(logoUrl)}
           </td>
         </tr>
 
@@ -135,7 +136,7 @@ export async function POST(req: Request) {
     // Récupérer le groupe et l'owner
     const { data: group } = await supabase
       .from('groups')
-      .select('name, owner:groups_players(players(first_name, surname))')
+      .select('name, template_logo_url, owner:groups_players(players(first_name, surname))')
       .eq('id', groupId)
       .eq('groups_players.role', 'owner')
       .single()
@@ -177,9 +178,10 @@ export async function POST(req: Request) {
     const ownerPlayer   = (group.owner as any)?.[0]?.players
     const senderName    = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : 'L\'organisateur'
     const groupName     = group.name
+    const logoUrl       = (group as any).template_logo_url ?? null
     const subject       = `Invitation à rejoindre ${groupName} sur GolfGo`
 
-    const html = buildGroupInviteHtml({ groupName, inviteUrl, qrUrl, senderName })
+    const html = buildGroupInviteHtml({ groupName, inviteUrl, qrUrl, senderName, logoUrl })
 
     let sent = 0, skipped = 0
     const errors: string[] = []

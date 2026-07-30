@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const clubName   = (event as any).courses?.clubs?.name ?? ''
     const courseName = (event as any).courses?.course_name ?? ''
 
-    const [{ data: holesData }, { data: teesData }, { data: participants }] = await Promise.all([
+    const [{ data: holesData }, { data: teesData }, { data: participants }, { data: groupData }] = await Promise.all([
       supabase.from('course_holes').select('hole_number, par, stroke_index')
         .eq('course_id', event.course_id).order('hole_number'),
       supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
@@ -38,9 +38,11 @@ export async function POST(req: Request) {
       supabase.from('event_participants')
         .select('player_id, tee_id, players(id, first_name, surname, whs, email)')
         .eq('event_id', eventId).eq('status', 'GOING'),
+      supabase.from('groups').select('template_logo_url').eq('id', event.group_id).single(),
     ])
 
     const holes = holesData || []
+    const logoUrl = groupData?.template_logo_url ?? null
 
     const participantIds = (participants || []).map((p: any) => p.player_id)
     const { data: optOuts } = await supabase
@@ -74,7 +76,7 @@ export async function POST(req: Request) {
 
       if (!EMAIL_ENABLED) { sent++; continue }
 
-      const html = buildScorecardHtml([printPlayer], holes, event.title, eventDate, clubName, courseName)
+      const html = buildScorecardHtml([printPlayer], holes, event.title, eventDate, clubName, courseName, logoUrl)
 
       const { error: emailErr } = await resend.emails.send({
         from:    'GolfGo <noreply@golfgo.be>',

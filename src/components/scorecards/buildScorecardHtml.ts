@@ -1,6 +1,6 @@
 import type { Hole, TeeInfo } from './scorecard-types'
 
-const LOGO_URL = 'https://golfgo.be/logo/GG_Logo_avec_nom_bandeau.jpeg'
+const DEFAULT_LOGO_URL = 'https://golfgo.be/logo/GG_Logo_avec_nom_bandeau.jpeg'
 
 export type PrintPlayer = {
   id: string
@@ -24,7 +24,9 @@ export function buildScorecardHtml(
   eventDate: string,
   clubName: string,
   courseName: string,
+  logoUrl: string | null = null,
 ): string {
+  const resolvedLogoUrl = logoUrl || DEFAULT_LOGO_URL
   const eventLocation = [clubName, courseName].filter(Boolean).join(' · ')
 
   const front9   = holes.filter(h => h.hole_number <= 9)
@@ -128,7 +130,7 @@ export function buildScorecardHtml(
 <div class="card">
   <div class="header">
     <div class="logo">
-      <img src="${LOGO_URL}" alt="GolfGo" class="logo-img"/>
+      <img src="${resolvedLogoUrl}" alt="GolfGo" class="logo-img"/>
     </div>
     <div class="event-info">
       <div class="event-title">${eventTitle}</div>
