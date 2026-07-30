@@ -1,4 +1,5 @@
 import { createServerClient } from '@/lib/supabase/server'
+import { buildEmailLogoHeader } from '@/lib/email/logo'
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-BE', {
@@ -65,11 +66,11 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 </td></tr></table>`
 }
 
-function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, eventMessage, yes18Link, yes9frontLink, yes9backLink, noLink, eventLink }: {
+function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, eventMessage, yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl }: {
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null
   yes18Link: string; yes9frontLink: string; yes9backLink: string
-  noLink: string; eventLink: string
+  noLink: string; eventLink: string; logoUrl: string | null
 }) {
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Invitation — ${eventTitle}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -77,8 +78,7 @@ function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, 
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 <tr><td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;">
-  <span style="font-size:20px;font-weight:700;color:#ffffff;">Golf</span>
-  <span style="font-size:20px;font-weight:700;color:#97C459;">Go</span>
+  ${buildEmailLogoHeader(logoUrl)}
 </td></tr>
 <tr><td style="background:#ffffff;padding:36px 32px;">
   <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;">Invitation</h1>
@@ -108,10 +108,11 @@ function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, 
 </body></html>`
 }
 
-function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights }: {
+function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights, logoUrl }: {
   playerName: string; playerFlightNumber: number; eventTitle: string
   eventDate: string; eventLocation: string | null
   flights: { flight_number: number; start_time: string; players: { first_name: string; surname: string; whs: number | null }[] }[]
+  logoUrl: string | null
 }) {
   const flightsHtml = flights.map(flight => {
     const isMyFlight  = flight.flight_number === playerFlightNumber
@@ -149,9 +150,12 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 <tr><td style="background:#185FA5;border-radius:12px 12px 0 0;padding:24px 32px;">
-  <span style="font-size:22px;font-weight:600;color:#ffffff;">Golf</span>
-  <span style="font-size:22px;font-weight:600;color:#97C459;">Go</span>
-  <span style="float:right;font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;line-height:2.2;">Tee Sheet</span>
+  <table width="100%" cellpadding="0" cellspacing="0"><tr>
+    <td style="vertical-align:middle;">${buildEmailLogoHeader(logoUrl)}</td>
+    <td style="text-align:right;vertical-align:middle;">
+      <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;">Tee Sheet</span>
+    </td>
+  </tr></table>
 </td></tr>
 <tr><td style="background:#ffffff;padding:32px;">
   <h1 style="margin:0 0 20px;font-size:20px;font-weight:600;color:#111827;">${eventTitle}</h1>
@@ -175,9 +179,10 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
 </body></html>`
 }
 
-function buildCommHtml({ subject, body, eventTitle, hasButtons, yes18Link, yes9frontLink, yes9backLink, noLink }: {
+function buildCommHtml({ subject, body, eventTitle, hasButtons, yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl }: {
   subject: string; body: string; eventTitle?: string
   hasButtons: boolean; yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string
+  logoUrl: string | null
 }) {
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>${subject}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -185,8 +190,7 @@ function buildCommHtml({ subject, body, eventTitle, hasButtons, yes18Link, yes9f
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
 <tr><td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;">
-  <span style="font-size:20px;font-weight:700;color:#ffffff;">Golf</span>
-  <span style="font-size:20px;font-weight:700;color:#97C459;">Go</span>
+  ${buildEmailLogoHeader(logoUrl)}
 </td></tr>
 <tr><td style="background:#ffffff;padding:36px 32px;">
   ${eventTitle ? `<p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#185FA5;">${eventTitle}</p>` : ''}
@@ -218,7 +222,7 @@ export async function POST(req: Request) {
       if (!event) return Response.json({ error: 'Event introuvable' }, { status: 404 })
 
       const { data: groupData } = await supabase.from('groups')
-        .select('template_invitation_subject, template_invitation_body, owner:groups_players(players(first_name, surname))')
+        .select('template_invitation_subject, template_invitation_body, template_logo_url, owner:groups_players(players(first_name, surname))')
         .eq('id', event.group_id).eq('groups_players.role', 'owner').single()
 
       const ownerPlayer = (groupData?.owner as any)?.[0]?.players
@@ -226,6 +230,7 @@ export async function POST(req: Request) {
       const eventDate   = formatDate(event.starts_at)
       const eventTime   = formatTime(event.starts_at)
       const bodyTemplate = groupData?.template_invitation_body ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\n\nAu plaisir de te revoir,\n{{owner_name}}"
+      const logoUrl = groupData?.template_logo_url ?? null
 
       const vars: Record<string, string> = {
         first_name: 'Prénom', player_name: 'Prénom Nom', player_surname: 'Nom',
@@ -241,6 +246,7 @@ export async function POST(req: Request) {
         yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,
         noLink:        `${appUrl}/invite/no?token=PREVIEW`,
         eventLink:     `${appUrl}/groups/${event.group_id}/events/${eventId}`,
+        logoUrl,
       })
       return Response.json({ html, subject: applyVars(groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}', vars) })
     }
@@ -249,8 +255,12 @@ export async function POST(req: Request) {
     if (type === 'teesheet') {
       const { eventId, flights } = body
       const { data: event } = await supabase.from('events')
-        .select('title, starts_at, location').eq('id', eventId).single()
+        .select('title, starts_at, location, group_id').eq('id', eventId).single()
       if (!event) return Response.json({ error: 'Event introuvable' }, { status: 404 })
+
+      const { data: groupData } = await supabase.from('groups')
+        .select('template_logo_url').eq('id', event.group_id).single()
+      const logoUrl = groupData?.template_logo_url ?? null
 
       const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
@@ -262,6 +272,7 @@ export async function POST(req: Request) {
       const html = buildTeesheetHtml({
         playerName, playerFlightNumber: firstFlight?.flight_number ?? 1,
         eventTitle: event.title, eventDate, eventLocation: event.location, flights,
+        logoUrl,
       })
       return Response.json({ html, subject: `Tee Sheet — ${event.title}` })
     }
@@ -270,7 +281,7 @@ export async function POST(req: Request) {
     if (type === 'communication') {
       const { subject, body: commBody, groupId, eventId } = body
      const [{ data: group }, eventResult] = await Promise.all([
-  supabase.from('groups').select('name').eq('id', groupId).single(),
+  supabase.from('groups').select('name, template_logo_url').eq('id', groupId).single(),
   eventId
     ? supabase.from('events').select('title, starts_at').eq('id', eventId).single()
     : Promise.resolve({ data: null }),
@@ -279,6 +290,7 @@ export async function POST(req: Request) {
 const eventTitle = eventResult.data?.title
 const eventDate  = eventResult.data ? formatDate(eventResult.data.starts_at) : ''
 const eventTime  = eventResult.data ? formatTime(eventResult.data.starts_at) : ''
+const logoUrl    = (group as any)?.template_logo_url ?? null
 
 
       const hasButtons = commBody.includes('{{yes_button}}')
@@ -301,6 +313,7 @@ const eventTime  = eventResult.data ? formatTime(eventResult.data.starts_at) : '
         yes9frontLink: `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=out`,
         yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,
         noLink:        `${appUrl}/invite/no?token=PREVIEW`,
+        logoUrl,
       })
       return Response.json({ html, subject: resolvedSubject })
     }

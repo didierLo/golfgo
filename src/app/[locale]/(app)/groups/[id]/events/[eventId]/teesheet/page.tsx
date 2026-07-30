@@ -73,6 +73,17 @@ export default function TeeSheetPage() {
   const [sending,      setSending]      = useState(false)
 
   const [showPreview,  setShowPreview]  = useState(false)
+  const [logoUrl,      setLogoUrl]      = useState<string | null>(null)
+
+    useEffect(() => {
+      if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
+    }, [nearestEventId, nearestLoading, eventIdFromRoute])
+
+    useEffect(() => {
+      if (!groupId) return
+      supabase.from('groups').select('template_logo_url').eq('id', groupId).single()
+        .then(({ data }) => setLogoUrl(data?.template_logo_url ?? null))
+    }, [groupId])
 
   useEffect(() => {
     if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
@@ -181,8 +192,12 @@ useEffect(() => {
       {/* Print header/footer */}
       <div className="print-header">
         <div className="print-logo">
-          <span className="print-logo-golf">Golf</span>
-          <span className="print-logo-go">Go</span>
+          {logoUrl
+            ? <img src={logoUrl} alt="Logo" className="print-logo-img" />
+            : <>
+                <span className="print-logo-golf">Golf</span>
+                <span className="print-logo-go">Go</span>
+              </>}
         </div>
         <div className="print-event-info">
           <div className="print-event-title">{eventTitle}</div>
@@ -306,8 +321,12 @@ useEffect(() => {
           .divide-y > div:nth-child(even) { background: #F8FAFF !important; }
           .font-mono { background: #E6F1FB !important; color: #185FA5 !important; font-weight: 600 !important; padding: 2px 6px !important; border-radius: 4px !important; }
           .print-footer { display: flex !important; justify-content: space-between; margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E7EB; font-size: 10px; color: #9CA3AF; }
+          
         }
-        .print-header, .print-logo, .print-footer { display: none; }
+          .print-header, .print-logo, .print-footer { display: none; }
+          .print-logo-golf { font-size: 22px; font-weight: 900; color: #185FA5; letter-spacing: -0.5px; }
+          .print-logo-go   { font-size: 22px; font-weight: 900; color: #4CAF1A; letter-spacing: -0.5px; }
+          .print-logo-img  { height: 32px; object-fit: contain; }
       `}</style>
     </div>
   )
