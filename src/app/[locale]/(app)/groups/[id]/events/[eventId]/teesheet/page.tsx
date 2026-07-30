@@ -8,6 +8,8 @@ import EventPillSelector, { useNearestEvent } from '@/components/events/EventPil
 import toast from 'react-hot-toast'
 import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 import { useTranslations, useLocale } from 'next-intl'
+import { buildTeesheetHtml } from '@/lib/email/buildTeesheetHtml'
+
 
 const supabase = createClient()
 
@@ -75,19 +77,15 @@ export default function TeeSheetPage() {
   const [showPreview,  setShowPreview]  = useState(false)
   const [logoUrl,      setLogoUrl]      = useState<string | null>(null)
 
-    useEffect(() => {
-      if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
-    }, [nearestEventId, nearestLoading, eventIdFromRoute])
-
-    useEffect(() => {
-      if (!groupId) return
-      supabase.from('groups').select('template_logo_url').eq('id', groupId).single()
-        .then(({ data }) => setLogoUrl(data?.template_logo_url ?? null))
-    }, [groupId])
-
   useEffect(() => {
     if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
   }, [nearestEventId, nearestLoading, eventIdFromRoute])
+
+  useEffect(() => {
+    if (!groupId) return
+    supabase.from('groups').select('template_logo_url').eq('id', groupId).single()
+      .then(({ data }) => setLogoUrl(data?.template_logo_url ?? null))
+  }, [groupId])
 
   useEffect(() => { if (selectedEventId) loadData(selectedEventId) }, [selectedEventId])
 
@@ -180,6 +178,27 @@ useEffect(() => {
     } finally { setSending(false) }
   }
 
+  function openTeesheetPrintWindow() {
+    if (flights.length === 0) return
+    const teesheetFlights = flights.map((f, index) => ({
+      flight_number: f.flight_number, start_time: flightTimes[index], players: f.players,
+    }))
+    const html = buildTeesheetHtml({
+      playerName: null, playerFlightNumber: null,
+      eventTitle, eventDate, eventLocation: null,
+      flights: teesheetFlights, logoUrl, autoPrint: true,
+    })
+    const blob = new Blob([html], { type: 'text/html' })
+    const url  = URL.createObjectURL(blob)
+    const win  = window.open(url, '_blank')
+    if (!win) {
+      toast.error('Pop-up bloquée — autorisez les pop-ups pour continuer')
+      URL.revokeObjectURL(url)
+    } else {
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+    }
+  }
+
   if (nearestLoading || roleLoading) return (
     <div className="p-6 space-y-3 max-w-2xl">
       {[1,2,3].map(i => <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />)}
@@ -189,26 +208,6 @@ useEffect(() => {
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
 
-      {/* Print header/footer */}
-      <div className="print-header">
-        <div className="print-logo">
-          {logoUrl
-            ? <img src={logoUrl} alt="Logo" className="print-logo-img" />
-            : <>
-                <span className="print-logo-golf">Golf</span>
-                <span className="print-logo-go">Go</span>
-              </>}
-        </div>
-        <div className="print-event-info">
-          <div className="print-event-title">{eventTitle}</div>
-          <div className="print-event-date">{eventDate}</div>
-        </div>
-      </div>
-      <div className="print-footer">
-        <span>{t('teesheet.printFooter.siteUrl')}</span>
-        <span>{t('teesheet.printFooter.printedOn', { date: new Date().toLocaleDateString(locale) })}</span>
-      </div>
-
       {/* ── Header ── */}
   
       <div className="print:hidden mb-4">
@@ -216,7 +215,7 @@ useEffect(() => {
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('teesheet.title')}</h1>
           <div className="flex items-center gap-1.5">
          
-            <IconBtn onClick={() => window.print()} title={t('teesheet.print')}>🖨</IconBtn>
+            <IconBtn onClick={openTeesheetPrintWindow} disabled={flights.length === 0} title={t('teesheet.print')}>🖨</IconBtn>
             {isOwner && flights.length > 0 && <>
           
               <IconBtn onClick={() => setShowPreview(true)} disabled={!isOwner || flights.length === 0} title={t('teesheet.email.preview')}>👁</IconBtn>
@@ -304,13 +303,6 @@ useEffect(() => {
         @media print {
           nav, header, aside, .print\\:hidden { display: none !important; }
           body { background: white; margin: 0; }
-          .print-header { display: flex !important; align-items: center; justify-content: space-between; padding: 16px 0 12px; border-bottom: 3px solid #185FA5; margin-bottom: 20px; }
-          .print-logo { display: flex !important; align-items: baseline; }
-          .print-logo-golf { font-size: 22px; font-weight: 900; color: #185FA5; letter-spacing: -0.5px; }
-          .print-logo-go   { font-size: 22px; font-weight: 900; color: #4CAF1A; letter-spacing: -0.5px; }
-          .print-event-info { text-align: right; }
-          .print-event-title { font-size: 15px; font-weight: 700; color: #1a1a1a; }
-          .print-event-date  { font-size: 12px; color: #6B7280; margin-top: 2px; }
           .p-5 { padding: 24px 32px; }
           .flex.flex-col.gap-3 { gap: 12px; }
           .bg-white.border { border: 1px solid #E5E7EB !important; border-radius: 8px !important; overflow: hidden; break-inside: avoid; }
@@ -320,13 +312,7 @@ useEffect(() => {
           .divide-y > div { padding: 7px 16px !important; }
           .divide-y > div:nth-child(even) { background: #F8FAFF !important; }
           .font-mono { background: #E6F1FB !important; color: #185FA5 !important; font-weight: 600 !important; padding: 2px 6px !important; border-radius: 4px !important; }
-          .print-footer { display: flex !important; justify-content: space-between; margin-top: 24px; padding-top: 12px; border-top: 1px solid #E5E7EB; font-size: 10px; color: #9CA3AF; }
-          
         }
-          .print-header, .print-logo, .print-footer { display: none; }
-          .print-logo-golf { font-size: 22px; font-weight: 900; color: #185FA5; letter-spacing: -0.5px; }
-          .print-logo-go   { font-size: 22px; font-weight: 900; color: #4CAF1A; letter-spacing: -0.5px; }
-          .print-logo-img  { height: 32px; object-fit: contain; }
       `}</style>
     </div>
   )

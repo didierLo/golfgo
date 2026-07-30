@@ -11,6 +11,7 @@ import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/bu
 
 const supabase = createClient()
 
+
 type TeeInfo  = { id: string; tee_name: string; par_total: number; course_rating: number; slope: number }
 type Hole     = { hole_number: number; par: number; stroke_index: number }
 type Player   = { id: string; first_name: string; surname: string; whs: number; tee_id: string | null; tee?: TeeInfo; phcp: number }
@@ -82,8 +83,15 @@ export default function MyScorecardPage() {
   const [isPastEvent, setIsPastEvent]           = useState(false)
   const [isValidated, setIsValidated]           = useState(false)
 
-  const [allParticipants, setAllParticipants]   = useState<PrintPlayer[]>([])
-  const [bulkSending, setBulkSending]           = useState(false)
+const [allParticipants, setAllParticipants]   = useState<PrintPlayer[]>([])
+const [bulkSending, setBulkSending]           = useState(false)
+const [logoUrl, setLogoUrl]                   = useState<string | null>(null)
+
+useEffect(() => {
+  if (!groupId) return
+  supabase.from('groups').select('template_logo_url').eq('id', groupId).single()
+    .then(({ data }) => setLogoUrl(data?.template_logo_url ?? null))
+}, [groupId])
 
   const scoresRef    = useRef<ScoreMap>({})
   const scorecardRef = useRef<string | null>(null)
@@ -318,7 +326,7 @@ export default function MyScorecardPage() {
       ? new Date(eventStartsAt).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
       : ''
 
-    const html = buildScorecardHtml(allParticipants, holes, eventTitle, eventDate, clubName, courseName)
+   const html = buildScorecardHtml(allParticipants, holes, eventTitle, eventDate, clubName, courseName, logoUrl)
     const blob = new Blob([html], { type: 'text/html' })
     const url  = URL.createObjectURL(blob)
     const win  = window.open(url, '_blank')
