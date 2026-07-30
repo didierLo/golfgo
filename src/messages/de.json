@@ -433,7 +433,10 @@
     "noFlights": "Keine Flights generiert",
     "generateHint": "Parameter konfigurieren und auf Generieren klicken",
     "dragHint": "Spieler in einen anderen Flight ziehen, um ihn zu verschieben",
-    "unsaved": "Geändert — vergessen Sie nicht zu speichern",
+
+    "unassignedSuffix": "nicht zugewiesen",
+    "allAssigned": "Alle Spieler sind einem Flight zugewiesen.",
+    "unassignedDragHint": "Ziehen Sie einen nicht zugewiesenen Spieler auf einen Flight, um ihn hinzuzufügen",    "unsaved": "Geändert — vergessen Sie nicht zu speichern",
     "dropHere": "Hier ablegen",
     "emptyFlight": "Leerer Flight",
     "avgWHS": "Ø",

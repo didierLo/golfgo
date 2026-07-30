@@ -13,7 +13,7 @@ import Challenge4BBBTab from '@/components/flights/Challenge4BBBTab'
 const supabase = createClient()
 
 type HolesSection = 'out' | 'in' | null
-type DragState = { playerId: string; playerName: string; fromFlightNo: number }
+type DragState = { player: any; fromFlightNo: number | null }
 type EventRow = { id: string; title: string; starts_at: string }
 
 function formatEventDate(dateStr: string, locale: string) {
@@ -175,9 +175,9 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
     try { await save() } finally { setSaving(false) }
   }
 
-  function onDragStart(e: React.DragEvent, player: any, fromFlightNo: number) {
+  function onDragStart(e: React.DragEvent, player: any, fromFlightNo: number | null) {
     e.dataTransfer.effectAllowed = 'move'
-    setDragState({ playerId: player.id, playerName: `${player.first_name} ${player.surname}`, fromFlightNo })
+    setDragState({ player, fromFlightNo })
   }
   function onDragEnd() { setDragState(null); setDragOverFlight(null); setDragOverPlayer(null) }
   function onDragOverFlight(e: React.DragEvent, flightNo: number) {
@@ -189,14 +189,12 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
   function onDropOnFlight(e: React.DragEvent, toFlightNo: number) {
     e.preventDefault()
     if (!dragState || dragState.fromFlightNo === toFlightNo) { onDragEnd(); return }
+    const playerId = dragState.player.id
     setFlights((prev: any[]) => {
       const next = prev.map((f: any) => {
         const fps = Array.isArray(f.players) ? f.players : []
-        if (f.flight_no === dragState.fromFlightNo) return { ...f, players: fps.filter((p: any) => p.id !== dragState.playerId) }
-        if (f.flight_no === toFlightNo) {
-          const moved = prev.find((ff: any) => ff.flight_no === dragState.fromFlightNo)?.players?.find((p: any) => p.id === dragState.playerId)
-          return moved ? { ...f, players: [...fps, moved] } : f
-        }
+        if (f.flight_no === dragState.fromFlightNo) return { ...f, players: fps.filter((p: any) => p.id !== playerId) }
+        if (f.flight_no === toFlightNo) return { ...f, players: [...fps.filter((p: any) => p.id !== playerId), dragState.player] }
         return f
       })
       setManualEdits(true)
@@ -204,11 +202,26 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
     })
     onDragEnd()
   }
+  function onDropOnUnassigned(e: React.DragEvent) {
+    e.preventDefault()
+    if (!dragState || dragState.fromFlightNo === null) { onDragEnd(); return }
+    const playerId = dragState.player.id
+    setFlights((prev: any[]) => {
+      const next = prev.map((f: any) => {
+        if (f.flight_no !== dragState.fromFlightNo) return f
+        const fps = Array.isArray(f.players) ? f.players : []
+        return { ...f, players: fps.filter((p: any) => p.id !== playerId) }
+      })
+      setManualEdits(true)
+      return next
+    })
+    onDragEnd()
+  }
 
-  function onTouchStart(e: React.TouchEvent, player: any, fromFlightNo: number) {
+  function onTouchStart(e: React.TouchEvent, player: any, fromFlightNo: number | null) {
   e.preventDefault()
     const touch = e.touches[0]
-  setDragState({ playerId: player.id, playerName: `${player.first_name} ${player.surname}`, fromFlightNo })
+  setDragState({ player, fromFlightNo })
   setTouchPos({ x: touch.clientX, y: touch.clientY })
 }
 
@@ -218,9 +231,12 @@ function onTouchMove(e: React.TouchEvent) {
   setTouchPos({ x: touch.clientX, y: touch.clientY })
   const el = document.elementFromPoint(touch.clientX, touch.clientY)
   const flightEl = el?.closest('[data-flight-no]')
+  const unassignedEl = el?.closest('[data-unassigned-zone]')
   if (flightEl) {
     const flightNo = parseInt(flightEl.getAttribute('data-flight-no') ?? '0')
     setDragOverFlight(flightNo)
+  } else if (unassignedEl) {
+    setDragOverFlight(null)
   } else {
     setDragOverFlight(null)
   }
@@ -230,18 +246,29 @@ function onTouchEnd(e: React.TouchEvent) {
   const touch = e.changedTouches[0]
   const el = document.elementFromPoint(touch.clientX, touch.clientY)
   const flightEl = el?.closest('[data-flight-no]')
-  if (flightEl && dragState) {
-    const toFlightNo = parseInt(flightEl.getAttribute('data-flight-no') ?? '0')
-    if (toFlightNo && toFlightNo !== dragState.fromFlightNo) {
+  const unassignedEl = el?.closest('[data-unassigned-zone]')
+  if (dragState) {
+    const playerId = dragState.player.id
+    if (flightEl) {
+      const toFlightNo = parseInt(flightEl.getAttribute('data-flight-no') ?? '0')
+      if (toFlightNo && toFlightNo !== dragState.fromFlightNo) {
+        setFlights((prev: any[]) => {
+          const next = prev.map((f: any) => {
+            const fps = Array.isArray(f.players) ? f.players : []
+            if (f.flight_no === dragState.fromFlightNo) return { ...f, players: fps.filter((p: any) => p.id !== playerId) }
+            if (f.flight_no === toFlightNo) return { ...f, players: [...fps.filter((p: any) => p.id !== playerId), dragState.player] }
+            return f
+          })
+          setManualEdits(true)
+          return next
+        })
+      }
+    } else if (unassignedEl && dragState.fromFlightNo !== null) {
       setFlights((prev: any[]) => {
         const next = prev.map((f: any) => {
+          if (f.flight_no !== dragState.fromFlightNo) return f
           const fps = Array.isArray(f.players) ? f.players : []
-          if (f.flight_no === dragState.fromFlightNo) return { ...f, players: fps.filter((p: any) => p.id !== dragState.playerId) }
-          if (f.flight_no === toFlightNo) {
-            const moved = prev.find((ff: any) => ff.flight_no === dragState.fromFlightNo)?.players?.find((p: any) => p.id === dragState.playerId)
-            return moved ? { ...f, players: [...fps, moved] } : f
-          }
-          return f
+          return { ...f, players: fps.filter((p: any) => p.id !== playerId) }
         })
         setManualEdits(true)
         return next
@@ -255,6 +282,14 @@ function onTouchEnd(e: React.TouchEvent) {
 const sortedFlights = useMemo(() => 
   [...flights].sort((a: any, b: any) => a.flight_no - b.flight_no)
 , [flights])
+
+const assignedPlayerIds = useMemo(() =>
+  new Set(flights.flatMap((f: any) => (Array.isArray(f.players) ? f.players : []).map((p: any) => p.id)))
+, [flights])
+
+const unassignedPlayers = useMemo(() =>
+  players.filter((p: any) => !assignedPlayerIds.has(p.id))
+, [players, assignedPlayerIds])
 
 const flightGroups = useMemo(() => 
   holesMode === 'separated' && has9holers
@@ -455,19 +490,75 @@ const flightGroups = useMemo(() =>
               {t('flights.confirmedPlayers', { count: players.length })}
               {players9front.length > 0 && <span className="ml-2 text-amber-700 normal-case font-semibold text-[10px]">· {players9front.length} 9F</span>}
               {players9back.length > 0  && <span className="ml-1 text-orange-700 normal-case font-semibold text-[10px]">· {players9back.length} 9B</span>}
+              {flights.length > 0 && unassignedPlayers.length > 0 && (
+                <span className="ml-2 text-[#185FA5] normal-case font-semibold text-[10px]">
+                  · {unassignedPlayers.length} {t('flights.unassignedSuffix')}
+                </span>
+              )}
             </p>
-            <div className="flex flex-wrap gap-2">
-              {players.length === 0 && <p className="text-[13px] text-slate-500">{t('flights.noConfirmed')}</p>}
-              {players.map((p: any) => (
-                <div key={p.id} className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5">
-                  <span className="text-[13px] font-medium text-slate-800">{p.first_name} {p.surname}</span>
-                  {p.whs !== null && (
-                    <span className="text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-lg">{p.whs}</span>
-                  )}
-                  {holesBadge(p)}
-                </div>
-              ))}
-            </div>
+            {flights.length === 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {players.length === 0 && <p className="text-[13px] text-slate-500">{t('flights.noConfirmed')}</p>}
+                {players.map((p: any) => (
+                  <div key={p.id} className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5">
+                    <span className="text-[13px] font-medium text-slate-800">{p.first_name} {p.surname}</span>
+                    {p.whs !== null && (
+                      <span className="text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-lg">{p.whs}</span>
+                    )}
+                    {holesBadge(p)}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div data-unassigned-zone="true"
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => isOwner ? onDropOnUnassigned(e) : undefined}
+                className={`flex flex-wrap gap-2 min-h-[44px] rounded-xl p-2 -m-2 transition-colors ${
+                  dragState && dragState.fromFlightNo !== null ? 'bg-[#EBF3FC]/60 ring-2 ring-dashed ring-[#185FA5]/30' : ''
+                }`}>
+                {unassignedPlayers.length === 0 && (
+                  <p className="text-[12px] text-slate-400 py-2">{t('flights.allAssigned')}</p>
+                )}
+                {unassignedPlayers.map((p: any) => {
+                  const isDragging = dragState?.player.id === p.id
+                  return (
+                    <div key={p.id}
+                      draggable={isOwner}
+                      onDragStart={e => onDragStart(e, p, null)}
+                      onDragEnd={onDragEnd}
+                      onTouchStart={e => isOwner ? onTouchStart(e, p, null) : undefined}
+                      onTouchMove={e => isOwner ? onTouchMove(e) : undefined}
+                      onTouchEnd={e => isOwner ? onTouchEnd(e) : undefined}
+                      style={isOwner ? { touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' } as React.CSSProperties : undefined}
+                      className={`flex items-center gap-2 bg-white border rounded-xl px-3 py-1.5 transition-all ${
+                        isDragging ? 'opacity-40 border-slate-200' : 'border-[#185FA5]/30'
+                      } ${isOwner ? 'cursor-grab active:cursor-grabbing' : ''}`}>
+                      {isOwner && (
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 flex-shrink-0">
+                          <circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/>
+                          <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
+                          <circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>
+                        </svg>
+                      )}
+                      <span className="text-[13px] font-medium text-slate-800">{p.first_name} {p.surname}</span>
+                      {p.whs !== null && (
+                        <span className="text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-lg">{p.whs}</span>
+                      )}
+                      {holesBadge(p)}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {isOwner && flights.length > 0 && unassignedPlayers.length > 0 && (
+              <p className="text-[11px] text-[#185FA5] mt-2 flex items-center gap-1.5">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="5 9 2 12 5 15"/><polyline points="19 9 22 12 19 15"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                </svg>
+                {t('flights.unassignedDragHint')}
+              </p>
+            )}
           </div>
 
           {/* Flights */}
@@ -554,7 +645,7 @@ const flightGroups = useMemo(() =>
 
                             <div className="p-3 space-y-1">
                               {flightPlayers.map((p: any, i: number) => {
-                                const isDragging   = dragState?.playerId === p.id
+                                const isDragging   = dragState?.player.id === p.id
                                 const isDropTarget = dragOverPlayer === p.id && dragState?.fromFlightNo !== flight.flight_no
                                 return (
                        <div key={p.id}
@@ -612,8 +703,10 @@ const flightGroups = useMemo(() =>
                   <polyline points="5 9 2 12 5 15"/><polyline points="19 9 22 12 19 15"/>
                   <line x1="2" y1="12" x2="22" y2="12"/>
                 </svg>
-                {dragState.playerName}
-                <span className="text-white/50 text-[11px]">Flight {dragState.fromFlightNo} →</span>
+                {dragState.player.first_name} {dragState.player.surname}
+                {dragState.fromFlightNo !== null && (
+                  <span className="text-white/50 text-[11px]">Flight {dragState.fromFlightNo} →</span>
+                )}
               </div>
             </div>
           )}

@@ -434,7 +434,10 @@
     "noFlights": "Geen flights gegenereerd",
     "generateHint": "Stel de parameters in en klik op Genereren",
     "dragHint": "Sleep een speler naar een andere flight om hem te verplaatsen",
-    "unsaved": "Gewijzigd — vergeet niet op te slaan",
+
+    "unassignedSuffix": "niet toegewezen",
+    "allAssigned": "Alle spelers zijn toegewezen aan een flight.",
+    "unassignedDragHint": "Sleep een niet-toegewezen speler naar een flight om hem toe te voegen",    "unsaved": "Gewijzigd — vergeet niet op te slaan",
     "dropHere": "Hier neerzetten",
     "emptyFlight": "Lege flight",
     "avgWHS": "gem.",

@@ -438,7 +438,10 @@
     "noFlights": "Aucun flight généré",
     "generateHint": "Configurez les paramètres, puis cliquez sur Générer ",
     "dragHint": "Faites glisser un joueur vers un autre flight pour le déplacer",
-    "unsaved": "Modifié — n'oubliez pas d'enregistrer",
+
+    "unassignedSuffix": "non assigné(s)",
+    "allAssigned": "Tous les joueurs sont assignés à un flight.",
+    "unassignedDragHint": "Glissez un joueur non assigné vers un flight pour l'ajouter",    "unsaved": "Modifié — n'oubliez pas d'enregistrer",
     "dropHere": "Déposez ici",
     "emptyFlight": "Flight vide",
     "avgWHS": "moyenne",
