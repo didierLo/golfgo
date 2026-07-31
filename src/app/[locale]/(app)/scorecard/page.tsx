@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
+import type { TeamFormat } from '@/lib/golf/scorecards/composeCards'
 
 const supabase = createClient()
 
@@ -83,7 +84,9 @@ export default function MyScorecardPage() {
   const [isPastEvent, setIsPastEvent]           = useState(false)
   const [isValidated, setIsValidated]           = useState(false)
 
-const [allParticipants, setAllParticipants]   = useState<PrintPlayer[]>([])
+const [allFlights, setAllFlights]             = useState<PrintPlayer[][]>([])
+const [teamFormat, setTeamFormat]             = useState<TeamFormat>('individual')
+const [hcpPercentage, setHcpPercentage]       = useState<number>(100)
 const [bulkSending, setBulkSending]           = useState(false)
 const [logoUrl, setLogoUrl]                   = useState<string | null>(null)
 
@@ -196,7 +199,7 @@ useEffect(() => {
 
   async function loadEvent(evId: string, pId: string) {
     setScorecardLoading(true); setError(null); setSaveStatus('idle')
-    setFlightPlayers([]); setActivePlayerId(null); setHoles([]); setScores({}); setAllParticipants([])
+    setFlightPlayers([]); setActivePlayerId(null); setHoles([]); setScores({}); setAllFlights([])
     const now = new Date() 
     try {
       const [{ data: participations }, { data: events }] = await Promise.all([
@@ -204,7 +207,7 @@ useEffect(() => {
     .select('event_id, tee_id')
     .eq('player_id', pId).eq('status', 'GOING'),
   supabase.from('events')
-    .select('id, title, starts_at, course_id, competition_formats(scoring_type), courses(course_name, clubs(name))')
+    .select('id, title, starts_at, course_id, competition_formats(scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name))')
     .eq('id', evId).limit(1),
 ])
       const event = events?.[0] as any
@@ -215,6 +218,8 @@ useEffect(() => {
       setEventTitle(event.title)
       setEventStartsAt(event.starts_at)
       setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
+      setTeamFormat((event.competition_formats as any)?.team_format ?? 'individual')
+      setHcpPercentage((event.competition_formats as any)?.hcp_percentage ?? 100)
       setClubName((event.courses as any)?.clubs?.name ?? '')
       setCourseName((event.courses as any)?.course_name ?? '')
       eventRef.current = event.id
@@ -228,25 +233,30 @@ useEffect(() => {
   }
 
   // Charge TOUS les participants GOING de l'événement (pas seulement mon flight), pour le bloc "Toutes les cartes"
-  async function loadAllParticipants(evId: string, courseId: string) {
-    const [{ data: teesData }, { data: participants }] = await Promise.all([
-      supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
-        .eq('course_id', courseId),
-      supabase.from('event_participants')
-        .select('player_id, tee_id, players(id, first_name, surname, whs)')
-        .eq('event_id', evId).eq('status', 'GOING'),
-    ])
+    async function loadAllParticipants(evId: string, courseId: string) {
+      const [{ data: teesData }, { data: flightsData }] = await Promise.all([
+        supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
+          .eq('course_id', courseId),
+        supabase.from('flights')
+          .select('flight_number, flight_players(position, tee_id, players(id, first_name, surname, whs))')
+          .eq('event_id', evId).order('flight_number'),
+      ])
 
-    const built: PrintPlayer[] = (participants || []).map((ep: any) => {
-      const pl = ep.players
-      const tee = (teesData || []).find((t: any) => t.id === ep.tee_id)
-      return {
-        id: pl.id, first_name: pl.first_name, surname: pl.surname,
-        whs: pl.whs ?? 0, phcp: computePhcp(pl.whs ?? 0, tee), tee,
-      }
-    })
-    setAllParticipants(built)
-  }
+      const grouped: PrintPlayer[][] = (flightsData || [])
+        .sort((a: any, b: any) => a.flight_number - b.flight_number)
+        .map((f: any) => (f.flight_players || [])
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((fp: any) => {
+            const pl = fp.players
+            const tee = (teesData || []).find((t: any) => t.id === fp.tee_id)
+            return {
+              id: pl.id, first_name: pl.first_name, surname: pl.surname,
+              whs: pl.whs ?? 0, phcp: computePhcp(pl.whs ?? 0, tee), tee,
+            }
+          }))
+
+      setAllFlights(grouped)
+    }
 
   async function loadScorecardData(evId: string, courseId: string, pId: string, myTeeId: string | null) {
     const [{ data: holesData }, { data: teesData }, { data: myFlight }] = await Promise.all([supabase.from('course_holes')
@@ -319,14 +329,20 @@ useEffect(() => {
 
   function openAllScorecardsWindow() {
     if (!requireOwner()) return
-    if (allParticipants.length === 0) { toast.error('Aucun participant confirmé (GOING) pour cet événement'); return }
+    if (allFlights.length === 0) { toast.error('Aucun flight pour cet événement'); return }
     if (holes.length === 0) { toast.error(t('scorecard.noCourse')); return }
 
     const eventDate = eventStartsAt
       ? new Date(eventStartsAt).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
       : ''
 
-   const html = buildScorecardHtml(allParticipants, holes, eventTitle, eventDate, clubName, courseName, logoUrl)
+   const htmlBody = allFlights
+  .map(flightPlayers => buildScorecardHtml(
+    flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage
+  ).replace(/^[\s\S]*<body>|<script>[\s\S]*<\/body>[\s\S]*$/g, ''))
+  .join('')
+
+const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Scorecards — ${eventTitle}</title></head><body>${htmlBody}<script>window.onload = () => window.print()</script></body></html>`
     const blob = new Blob([html], { type: 'text/html' })
     const url  = URL.createObjectURL(blob)
     const win  = window.open(url, '_blank')
@@ -341,7 +357,7 @@ useEffect(() => {
   async function handleSendAllScorecards() {
     if (!requireOwner()) return
     if (!selectedEventId) return
-    if (allParticipants.length === 0) { toast.error('Aucun participant confirmé (GOING) pour cet événement'); return }
+    if (allFlights.length === 0) { toast.error('Aucun flight pour cet événement'); return }
 
     setBulkSending(true)
     try {
@@ -421,8 +437,8 @@ useEffect(() => {
             <div>
               <p className="text-[14px] font-black text-slate-900">Toutes les cartes de score</p>
               <p className="text-[11px] text-slate-500 mt-0.5">
-                {allParticipants.length} participant{allParticipants.length > 1 ? 's' : ''} confirmé{allParticipants.length > 1 ? 's' : ''}
-              </p>
+              {allFlights.flat().length} participant{allFlights.flat().length > 1 ? 's' : ''} confirmé{allFlights.flat().length > 1 ? 's' : ''}
+            </p>
             </div>
             <div className="flex items-center gap-1.5">
               <IconBtn onClick={openAllScorecardsWindow} locked={!isOwner} title="Imprimer">🖨</IconBtn>
