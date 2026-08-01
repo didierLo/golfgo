@@ -7,7 +7,8 @@ import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import toast from 'react-hot-toast'
 import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 import { useTranslations, useLocale } from 'next-intl'
-import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
+import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
+import type { TeamFormat } from '@/lib/golf/scorecards/composeCards'
 import type { Hole, TeeInfo } from '@/components/scorecards/scorecard-types'
 import { computePhcp } from '@/components/scorecards/scorecard-types'
 import CommSettingsPanel from '@/components/communications/CommSettingsPanel'
@@ -123,8 +124,9 @@ export default function CommunicationsPage() {
   const [showSettings,    setShowSettings]    = useState(false)
   
   const [printPhcpMap, setPrintPhcpMap] = useState<Record<string, { phcp: number; whs: number; tee?: TeeInfo }>>({})
-  const [printClubName,   setPrintClubName]   = useState('')
-  const [printCourseName, setPrintCourseName] = useState('')
+  const [printFlights, setPrintFlights]         = useState<PrintPlayer[][]>([])
+  const [printTeamFormat, setPrintTeamFormat]   = useState<TeamFormat>('individual')
+  const [printHcpPercentage, setPrintHcpPercentage] = useState<number>(100)
 
   const [selectedIds,   setSelectedIds]   = useState<Set<string>>(new Set())
   const [filterMode,    setFilterMode]    = useState<'all' | 'event' | 'role'>('all')
@@ -432,19 +434,24 @@ export default function CommunicationsPage() {
   )
 async function loadPrintHoles(eventId: string) {
   const { data: event } = await supabase.from('events')
-    .select('course_id, courses(course_name, clubs(name))')
+    .select('course_id, competition_formats(team_format, hcp_percentage), courses(course_name, clubs(name))')
     .eq('id', eventId).single()
 
   setPrintClubName((event as any)?.courses?.clubs?.name ?? '')
   setPrintCourseName((event as any)?.courses?.course_name ?? '')
+  setPrintTeamFormat((event as any)?.competition_formats?.team_format ?? 'individual')
+  setPrintHcpPercentage((event as any)?.competition_formats?.hcp_percentage ?? 100)
 
-  if (!(event as any)?.course_id) { setPrintHoles([]); setPrintPhcpMap({}); return }
+  if (!(event as any)?.course_id) { setPrintHoles([]); setPrintFlights([]); return }
 
-  const [{ data: holesData }, { data: teesData }, { data: participants }] = await Promise.all([
+  const [{ data: holesData }, { data: teesData }, { data: flightsData }, { data: participants }] = await Promise.all([
     supabase.from('course_holes').select('hole_number, par, stroke_index')
       .eq('course_id', (event as any).course_id).order('hole_number'),
     supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
       .eq('course_id', (event as any).course_id),
+    supabase.from('flights')
+      .select('flight_number, flight_players(position, player_id)')
+      .eq('event_id', eventId).order('flight_number'),
     supabase.from('event_participants')
       .select('player_id, tee_id, players(id, first_name, surname, whs)')
       .eq('event_id', eventId).eq('status', 'GOING'),
@@ -452,13 +459,23 @@ async function loadPrintHoles(eventId: string) {
 
   setPrintHoles(holesData || [])
 
-  const phcpMap: Record<string, { phcp: number; whs: number; tee?: TeeInfo }> = {}
-  for (const ep of participants || []) {
-    const p = (ep as any).players
-    const tee = (teesData || []).find((t: any) => t.id === (ep as any).tee_id)
-    phcpMap[p.id] = { phcp: computePhcp(p.whs ?? 0, tee), whs: p.whs ?? 0, tee }
-  }
-  setPrintPhcpMap(phcpMap)
+  const byPlayerId = new Map<string, any>((participants || []).map((p: any) => [p.player_id, p]))
+
+  const grouped: PrintPlayer[][] = (flightsData || [])
+    .sort((a: any, b: any) => a.flight_number - b.flight_number)
+    .map((f: any) => (f.flight_players || [])
+      .sort((a: any, b: any) => a.position - b.position)
+      .map((fp: any) => {
+        const ep = byPlayerId.get(fp.player_id)
+        const pl = ep?.players
+        const tee = (teesData || []).find((t: any) => t.id === ep?.tee_id)
+        return {
+          id: fp.player_id, first_name: pl?.first_name ?? '', surname: pl?.surname ?? '',
+          whs: pl?.whs ?? 0, phcp: computePhcp(pl?.whs ?? 0, tee), tee,
+        }
+      }))
+
+  setPrintFlights(grouped)
 }
 
 function handleFilterEventChange(eventId: string) {
@@ -489,49 +506,48 @@ function handleFilterEventChange(eventId: string) {
         <div className="flex items-center gap-1.5">
           {isOwner && <PushSubscribeButton />}
           <IconBtn
-            onClick={() => {
-              if (messageType === 'scorecards') {
-                if (printHoles.length === 0) { toast.error('Aucun parcours lié'); return }
-                const printableMembers = selectedMembers.filter(m => printPhcpMap[m.id])
-                if (printableMembers.length === 0) {
-                  toast.error('Aucun joueur sélectionné n\'est inscrit (GOING) à cet événement')
-                  return
-                }
-                if (printableMembers.length < selectedMembers.length) {
-                  toast.error(`${selectedMembers.length - printableMembers.length} joueur(s) ignoré(s) (non inscrits)`)
-                }
-                const activeEvent = events.find(e => e.id === filterEventId)
-                const html = buildScorecardHtml(
-                  printableMembers.map((m): PrintPlayer => ({
-                    id: m.id,
-                    first_name: m.first_name,
-                    surname: m.surname,
-                    whs: printPhcpMap[m.id].whs,
-                    phcp: printPhcpMap[m.id].phcp,
-                    tee: printPhcpMap[m.id].tee,
-                  })),
-                  printHoles,
-                  activeEvent?.title ?? '',
-                  activeEvent ? new Date(activeEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' }) : '',
-                  printClubName,
-                  printCourseName,
-                )
-                const blob = new Blob([html], { type: 'text/html' })
-                const url  = URL.createObjectURL(blob)
-                const win  = window.open(url, '_blank')
-                if (!win) {
-                  toast.error('Pop-up bloquée — autorisez les pop-ups pour imprimer')
-                  URL.revokeObjectURL(url)
-                } else {
-                  setTimeout(() => URL.revokeObjectURL(url), 10000)
-                }
-              } else if (messageType !== 'teesheet') {
-                window.print()
-              }
-            }}
-            disabled={messageType === 'teesheet'}
-            title="Imprimer">🖨
-          </IconBtn>        
+  onClick={() => {
+    if (messageType === 'scorecards') {
+      if (printHoles.length === 0) { toast.error('Aucun parcours lié'); return }
+      if (printFlights.length === 0) { toast.error('Aucun flight pour cet événement'); return }
+      const activeEvent = events.find(e => e.id === filterEventId)
+      const eventDate = activeEvent ? new Date(activeEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+
+      const htmlBody = printFlights
+        .map(flightPlayers => buildScorecardCardsHtml(
+          flightPlayers, printHoles, activeEvent?.title ?? '', eventDate,
+          printClubName, printCourseName, groupTemplate.template_logo_url, printTeamFormat, printHcpPercentage
+        ))
+        .join('')
+
+      const html = `<!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="UTF-8"/>
+        <title>Scorecards — ${activeEvent?.title ?? ''}</title>
+        <style>${SCORECARD_PRINT_STYLES}</style>
+        </head>
+        <body>
+        ${htmlBody}
+        <script>window.onload = () => window.print()</script>
+        </body>
+        </html>`
+      const blob = new Blob([html], { type: 'text/html' })
+      const url  = URL.createObjectURL(blob)
+      const win  = window.open(url, '_blank')
+      if (!win) {
+        toast.error('Pop-up bloquée — autorisez les pop-ups pour imprimer')
+        URL.revokeObjectURL(url)
+      } else {
+        setTimeout(() => URL.revokeObjectURL(url), 300000)
+      }
+    } else if (messageType !== 'teesheet') {
+      window.print()
+    }
+  }}
+  disabled={messageType === 'teesheet'}
+  title="Imprimer">🖨
+</IconBtn>     
 
          <IconBtn onClick={() => setShowPreview(true)} disabled={isTeesheet || !hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>
           <IconBtn href={!isTeesheet && hasMsg ? buildWhatsAppComm() : undefined} disabled={isTeesheet || !hasMsg} title="WhatsApp">💬</IconBtn>
