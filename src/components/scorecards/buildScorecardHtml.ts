@@ -95,7 +95,7 @@ export function buildScorecardCardsHtml(
         <td class="label-col hcp-label">HCP</td>
         ${hcpRowFor(row.playingHcp)}
       </tr>
-     <tr class="score-row">
+      <tr class="score-row${row.names.length > 2 ? ' score-row-tall' : ''}">
         <td class="label-col player-label">${row.names.map(n => `<div>${n}</div>`).join('')}</td>
         ${blankRow('score-cell')}
       </tr>
@@ -106,7 +106,7 @@ export function buildScorecardCardsHtml(
 
     const refRowsHtml = card.refRows.map(row => `
       <tr class="score-row">
-        <td class="label-col player-label">${row.label}</td>
+       <td class="label-col player-label">${row.label.split(' & ').map(n => `<div>${n}</div>`).join('')}</td>
         ${blankRow('score-cell')}
       </tr>
       <tr class="net-row">
@@ -228,6 +228,7 @@ export const SCORECARD_PRINT_STYLES = `
   .hole-cell { text-align: center; border: 1px solid #CBD5E1; }
   .hole-row th, .hole-row td.label-col, .par-row td, .si-row td, .hcp-row td { height: 8mm; }
   .score-row td, .net-row td { height: 10mm; }
+  .score-row-tall td { height: 18mm; }
   .hole-row th { background: #3B6D11; color: #FFFFFF; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,255,255,0.3); }
   .hole-row .label-col { background: #3B6D11; color: #FFFFFF; font-size: 12px; }
   .hole-row th.sub { background: #2A5009; }

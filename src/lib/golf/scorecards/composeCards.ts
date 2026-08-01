@@ -54,19 +54,19 @@ function compose4BBB(players: PrintPlayer[], pct: number): ComposedCard[] {
 
 function composeTeam2(players: PrintPlayer[], pct: number): ComposedCard[] {
   const teams = [[0, 1], [2, 3]].filter(t => t.every(i => players[i]))
+  const teamLabels = teams.map(([a, b]) => [players[a], players[b]].map(shortName).join(' & '))
   return teams.map(([a, b], idx) => {
     const members = [players[a], players[b]]
     return {
-      headerLabel: `Équipe ${idx + 1}`,
+      headerLabel: teamLabels[idx],
       mainRows: [{ names: members.map(shortName), playingHcp: teamPhcp(members, pct) }],
-      refRows: [{ label: `Équipe ${idx === 0 ? 2 : 1}` }],
+      refRows: [{ label: teamLabels[1 - idx] ?? '' }],
     }
   })
 }
-
 function composeTeam34(players: PrintPlayer[], pct: number): ComposedCard[] {
   return [{
-    headerLabel: 'Équipe',
+    headerLabel: players.map(shortName).join(' & '),
     mainRows: [{ names: players.map(shortName), playingHcp: teamPhcp(players, pct) }],
     refRows: [],
   }]
