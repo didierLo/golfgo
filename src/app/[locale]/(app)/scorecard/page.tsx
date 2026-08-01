@@ -223,7 +223,12 @@ useEffect(() => {
       setClubName((event.courses as any)?.clubs?.name ?? '')
       setCourseName((event.courses as any)?.course_name ?? '')
       eventRef.current = event.id
-      if (event.group_id) setGroupId(event.group_id)  
+      if (event.group_id) {
+      setGroupId(event.group_id)
+      const { data: groupData } = await supabase.from('groups')
+        .select('template_logo_url').eq('id', event.group_id).single()
+      setLogoUrl(groupData?.template_logo_url ?? null)
+    }
       if (!event.course_id) { setError(t('scorecard.noCourse')); return }
       await Promise.all([
         loadScorecardData(event.id, event.course_id, pId, myTeeId),
@@ -350,7 +355,7 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Scorecard
       toast.error('Pop-up bloquée — autorisez les pop-ups pour continuer')
       URL.revokeObjectURL(url)
     } else {
-      setTimeout(() => URL.revokeObjectURL(url), 10000)
+      setTimeout(() => URL.revokeObjectURL(url), 300000)
     }
   }
 
