@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
-import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
+import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
 import type { TeamFormat } from '@/lib/golf/scorecards/composeCards'
 
 const supabase = createClient()
