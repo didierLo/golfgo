@@ -185,7 +185,7 @@ ${cards}
 </html>`
 }
 
-export function buildScorecardcardHtml(
+export function buildScorecardHtml(
   players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
   clubName: string, courseName: string, logoUrl: string | null = null,
   teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
