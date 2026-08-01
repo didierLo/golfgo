@@ -239,29 +239,35 @@ useEffect(() => {
 
   // Charge TOUS les participants GOING de l'événement (pas seulement mon flight), pour le bloc "Toutes les cartes"
     async function loadAllParticipants(evId: string, courseId: string) {
-      const [{ data: teesData }, { data: flightsData }] = await Promise.all([
+      const [{ data: teesData }, { data: flightsData }, { data: participants }] = await Promise.all([
         supabase.from('course_tees').select('id, tee_name, par_total, course_rating, slope')
           .eq('course_id', courseId),
         supabase.from('flights')
-          .select('flight_number, flight_players(position, tee_id, players(id, first_name, surname, whs))')
+          .select('flight_number, flight_players(position, player_id)')
           .eq('event_id', evId).order('flight_number'),
+        supabase.from('event_participants')
+          .select('player_id, tee_id, players(id, first_name, surname, whs)')
+          .eq('event_id', evId).eq('status', 'GOING'),
       ])
+
+      const byPlayerId = new Map<string, any>((participants || []).map((p: any) => [p.player_id, p]))
 
       const grouped: PrintPlayer[][] = (flightsData || [])
         .sort((a: any, b: any) => a.flight_number - b.flight_number)
         .map((f: any) => (f.flight_players || [])
           .sort((a: any, b: any) => a.position - b.position)
           .map((fp: any) => {
-            const pl = fp.players
-            const tee = (teesData || []).find((t: any) => t.id === fp.tee_id)
+            const ep = byPlayerId.get(fp.player_id)
+            const pl = ep?.players
+            const tee = (teesData || []).find((t: any) => t.id === ep?.tee_id)
             return {
-              id: pl.id, first_name: pl.first_name, surname: pl.surname,
-              whs: pl.whs ?? 0, phcp: computePhcp(pl.whs ?? 0, tee), tee,
+              id: fp.player_id, first_name: pl?.first_name ?? '', surname: pl?.surname ?? '',
+              whs: pl?.whs ?? 0, phcp: computePhcp(pl?.whs ?? 0, tee), tee,
             }
           }))
 
-      setAllFlights(grouped)
-    }
+  setAllFlights(grouped)
+}
 
   async function loadScorecardData(evId: string, courseId: string, pId: string, myTeeId: string | null) {
     const [{ data: holesData }, { data: teesData }, { data: myFlight }] = await Promise.all([supabase.from('course_holes')
