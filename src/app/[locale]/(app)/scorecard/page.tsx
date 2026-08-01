@@ -347,13 +347,27 @@ useEffect(() => {
       ? new Date(eventStartsAt).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
       : ''
 
-   const htmlBody = allFlights
-  .map(flightPlayers => buildScorecardHtml(
-    flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage
-  ).replace(/^[\s\S]*<body>|<script>[\s\S]*<\/body>[\s\S]*$/g, ''))
-  .join('')
+  
 
-const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Scorecards — ${eventTitle}</title></head><body>${htmlBody}<script>window.onload = () => window.print()</script></body></html>`
+    const htmlBody = allFlights
+      .map(flightPlayers => buildScorecardCardsHtml(
+        flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage
+      ))
+      .join('')
+
+    const html = `<!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8"/>
+    <title>Scorecards — ${eventTitle}</title>
+    <style>${SCORECARD_PRINT_STYLES}</style>
+    </head>
+    <body>
+    ${htmlBody}
+    <script>window.onload = () => window.print()</script>
+    </body>
+    </html>`
+
     const blob = new Blob([html], { type: 'text/html' })
     const url  = URL.createObjectURL(blob)
     const win  = window.open(url, '_blank')
