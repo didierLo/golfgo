@@ -129,6 +129,8 @@ const [printCourseName, setPrintCourseName] = useState('')
 const [printFlights, setPrintFlights]         = useState<PrintPlayer[][]>([])
 const [printTeamFormat, setPrintTeamFormat]   = useState<TeamFormat>('individual')
 const [printHcpPercentage, setPrintHcpPercentage] = useState<number>(100)
+const [printFormatName, setPrintFormatName]     = useState('')
+const [printScorecardNotes, setPrintScorecardNotes] = useState('')
 
   const [selectedIds,   setSelectedIds]   = useState<Set<string>>(new Set())
   const [filterMode,    setFilterMode]    = useState<'all' | 'event' | 'role'>('all')
@@ -436,13 +438,15 @@ const [printHcpPercentage, setPrintHcpPercentage] = useState<number>(100)
   )
 async function loadPrintHoles(eventId: string) {
   const { data: event } = await supabase.from('events')
-    .select('course_id, competition_formats(team_format, hcp_percentage), courses(course_name, clubs(name))')
+    .select('course_id, scorecard_notes, competition_formats(name, team_format, hcp_percentage), courses(course_name, clubs(name))')
     .eq('id', eventId).single()
 
   setPrintClubName((event as any)?.courses?.clubs?.name ?? '')
   setPrintCourseName((event as any)?.courses?.course_name ?? '')
   setPrintTeamFormat((event as any)?.competition_formats?.team_format ?? 'individual')
   setPrintHcpPercentage((event as any)?.competition_formats?.hcp_percentage ?? 100)
+  setPrintFormatName((event as any)?.competition_formats?.name ?? '')
+  setPrintScorecardNotes((event as any)?.scorecard_notes ?? '')
 
   if (!(event as any)?.course_id) { setPrintHoles([]); setPrintFlights([]); return }
 
@@ -518,7 +522,8 @@ function handleFilterEventChange(eventId: string) {
       const htmlBody = printFlights
         .map(flightPlayers => buildScorecardCardsHtml(
           flightPlayers, printHoles, activeEvent?.title ?? '', eventDate,
-          printClubName, printCourseName, groupTemplate.template_logo_url, printTeamFormat, printHcpPercentage
+          printClubName, printCourseName, groupTemplate.template_logo_url, printTeamFormat, printHcpPercentage,
+printFormatName, printScorecardNotes
         ))
         .join('')
 

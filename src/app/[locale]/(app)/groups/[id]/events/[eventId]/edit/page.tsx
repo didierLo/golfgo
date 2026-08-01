@@ -136,6 +136,7 @@ export default function EditEventPage() {
   const [isGolf, setIsGolf]                             = useState(true)
   const [fee, setFee]                                   = useState('')
   const [emailMessage, setEmailMessage]                 = useState('')
+  const [scorecardNotes, setScorecardNotes] = useState('')
   const [maxParticipants, setMaxParticipants]           = useState('')
   const [clubs, setClubs]     = useState<{ id: string; name: string; country: string }[]>([])
   const [courses, setCourses] = useState<{ id: string; course_name: string }[]>([])
@@ -154,7 +155,7 @@ export default function EditEventPage() {
     setLoading(true)
     const { data: event, error: evErr } = await supabase
       .from('events')
-      .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants')
+     .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants, scorecard_notes')
       .eq('id', eventId).single()
     if (evErr || !event) { alert(t('editEvent.notFound')); window.location.href = `/groups/${groupId}/events`; return }
 
@@ -167,6 +168,7 @@ export default function EditEventPage() {
     setIsGolf(event.is_golf ?? true)
     setFee(event.fee_per_person ? String(event.fee_per_person) : '')
     setEmailMessage(event.email_message || '')
+    setScorecardNotes(event.scorecard_notes || '')
     setMaxParticipants(event.max_participants ? String(event.max_participants) : '')
 
   const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
@@ -225,6 +227,7 @@ async function handleSubmit(e: React.FormEvent) {
       fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
       email_message:         emailMessage || null,
       max_participants:      maxParticipants ? parseInt(maxParticipants) : null,
+      scorecard_notes:       scorecardNotes || null,
       updated_at:            new Date().toISOString(),
     }).eq('id', eventId)
     if (updateError) { setError(updateError.message); setSaving(false); return }
@@ -353,6 +356,16 @@ async function handleSubmit(e: React.FormEvent) {
             placeholder={t('editEvent.emailPlaceholder')}
             rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
           <p className="text-[11px] text-slate-500 mt-1">{t('editEvent.emailHint')}</p>
+        </div>
+        
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+            Notes sur la carte de score <span className="text-slate-400 font-normal">— optionnel</span>
+          </label>
+          <textarea value={scorecardNotes} onChange={e => setScorecardNotes(e.target.value)}
+            placeholder="Règles spécifiques, infos locales, consignes..."
+            rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
+          <p className="text-[11px] text-slate-500 mt-1">S'imprime sous chaque carte de score.</p>
         </div>
 
         {/* ── Photos ── */}

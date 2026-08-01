@@ -23,6 +23,7 @@ export function buildScorecardCardsHtml(
   players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
   clubName: string, courseName: string, logoUrl: string | null = null,
   teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
+  formatName: string = '', scorecardNotes: string = '',
 ): string {
   const resolvedLogoUrl = logoUrl || DEFAULT_LOGO_URL
   const eventLocation = [clubName, courseName].filter(Boolean).join(' · ')
@@ -124,7 +125,7 @@ export function buildScorecardCardsHtml(
     <div class="logo"><img src="${resolvedLogoUrl}" alt="GolfGo" class="logo-img"/></div>
     <div class="event-info">
       <div class="event-title">${eventTitle}</div>
-      <div class="event-sub">${eventDate}${eventLocation ? ' · ' + eventLocation : ''}</div>
+     <div class="event-sub">${eventDate}${eventLocation ? ' · ' + eventLocation : ''}${formatName ? ' · ' + formatName : ''}</div>
     </div>
     <div class="player-info">
       <div class="player-line"><strong>${card.headerLabel}</strong></div>
@@ -151,6 +152,9 @@ export function buildScorecardCardsHtml(
       ${refRowsHtml}
     </tbody>
   </table>
+
+  ${scorecardNotes ? `<div class="notes-box"><div class="notes-label">Infos</div><div class="notes-text">${scorecardNotes.replace(/\n/g, '<br/>')}</div></div>` : ''}
+
 
   <div class="footer">
     <div class="footer-cell">
@@ -181,10 +185,11 @@ ${cards}
 </html>`
 }
 
-export function buildScorecardHtml(
+export function buildScorecardcardsHtml(
   players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
   clubName: string, courseName: string, logoUrl: string | null = null,
   teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
+  formatName: string = '', scorecardNotes: string = '',
 ): string {
   const cards = buildScorecardCardsHtml(players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage)
   return `<!DOCTYPE html>
@@ -254,4 +259,7 @@ export const SCORECARD_PRINT_STYLES = `
   .footer-score { background: #F8FAFC; }
   .footer-label { font-size: 9px; color: #94A3B8; margin-bottom: 10px; }
   .footer-name { font-size: 12px; font-weight: 700; color: #0F172A; }
+  .notes-box { border: 1px solid #CBD5E1; border-radius: 4px; padding: 6px 10px; width: 260mm; font-size: 10px; color: #334155; }
+  .notes-label { font-size: 9px; font-weight: 700; color: #94A3B8; margin-bottom: 3px; text-transform: uppercase; }
+  .notes-text { line-height: 1.4; }
 `

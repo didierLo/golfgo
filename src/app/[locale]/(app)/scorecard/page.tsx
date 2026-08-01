@@ -87,6 +87,8 @@ export default function MyScorecardPage() {
 const [allFlights, setAllFlights]             = useState<PrintPlayer[][]>([])
 const [teamFormat, setTeamFormat]             = useState<TeamFormat>('individual')
 const [hcpPercentage, setHcpPercentage]       = useState<number>(100)
+const [formatName, setFormatName]             = useState('')
+const [scorecardNotes, setScorecardNotes]     = useState('')
 const [bulkSending, setBulkSending]           = useState(false)
 const [logoUrl, setLogoUrl]                   = useState<string | null>(null)
 
@@ -207,7 +209,7 @@ useEffect(() => {
     .select('event_id, tee_id')
     .eq('player_id', pId).eq('status', 'GOING'),
   supabase.from('events')
-    .select('id, title, starts_at, course_id, group_id, competition_formats(scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name))')
+    .select('id, title, starts_at, course_id, group_id, scorecard_notes, competition_formats(name, scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name))')
     .eq('id', evId).limit(1),
 ])
       const event = events?.[0] as any
@@ -220,6 +222,8 @@ useEffect(() => {
       setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
       setTeamFormat((event.competition_formats as any)?.team_format ?? 'individual')
       setHcpPercentage((event.competition_formats as any)?.hcp_percentage ?? 100)
+      setFormatName((event.competition_formats as any)?.name ?? '')
+      setScorecardNotes(event.scorecard_notes ?? '')
       setClubName((event.courses as any)?.clubs?.name ?? '')
       setCourseName((event.courses as any)?.course_name ?? '')
       eventRef.current = event.id
@@ -351,7 +355,7 @@ useEffect(() => {
 
     const htmlBody = allFlights
       .map(flightPlayers => buildScorecardCardsHtml(
-        flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage
+       flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage, formatName, scorecardNotes
       ))
       .join('')
 

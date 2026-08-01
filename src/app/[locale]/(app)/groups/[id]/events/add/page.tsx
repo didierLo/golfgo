@@ -19,6 +19,7 @@ export default function AddEventPage() {
   const [isGolf, setIsGolf]             = useState(true)
   const [fee, setFee]                   = useState('')
   const [emailMessage, setEmailMessage] = useState('')
+  const [scorecardNotes, setScorecardNotes] = useState('')
   const [saving, setSaving]             = useState(false)
   const [error, setError]               = useState('')
   const [clubs, setClubs]               = useState<{ id: string; name: string; country: string }[]>([])
@@ -75,6 +76,7 @@ export default function AddEventPage() {
         competition_format_id: competitionFormatId || null,
         fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
         email_message:         emailMessage || null,
+        scorecard_notes:       scorecardNotes || null,
         max_participants:      maxParticipants ? parseInt(maxParticipants) : null,
       })
       if (insertError) { setError(insertError.message); setSaving(false); return }
@@ -213,6 +215,16 @@ export default function AddEventPage() {
             className={`${inputClass} resize-none`} />
           <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.emailHint')}</p>
         </div>
+
+        <div>
+        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+          Notes sur la carte de score <span className="text-slate-400 font-normal">— optionnel</span>
+        </label>
+        <textarea value={scorecardNotes} onChange={e => setScorecardNotes(e.target.value)}
+          placeholder="Règles spécifiques, infos locales, consignes..."
+          rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
+        <p className="text-[11px] text-slate-500 mt-1">S'imprime sous chaque carte de score.</p>
+      </div>
 
         {error && <div className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</div>}
 
