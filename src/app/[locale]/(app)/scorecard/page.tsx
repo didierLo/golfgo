@@ -207,7 +207,7 @@ useEffect(() => {
     .select('event_id, tee_id')
     .eq('player_id', pId).eq('status', 'GOING'),
   supabase.from('events')
-    .select('id, title, starts_at, course_id, competition_formats(scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name))')
+    .select('id, title, starts_at, course_id, group_id, competition_formats(scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name))')
     .eq('id', evId).limit(1),
 ])
       const event = events?.[0] as any
@@ -223,7 +223,7 @@ useEffect(() => {
       setClubName((event.courses as any)?.clubs?.name ?? '')
       setCourseName((event.courses as any)?.course_name ?? '')
       eventRef.current = event.id
-
+      if (event.group_id) setGroupId(event.group_id)  
       if (!event.course_id) { setError(t('scorecard.noCourse')); return }
       await Promise.all([
         loadScorecardData(event.id, event.course_id, pId, myTeeId),
