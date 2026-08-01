@@ -19,16 +19,10 @@ function strokesReceived(playingHcp: number, strokeIndex: number): number {
   return full + (strokeIndex <= remainder ? 1 : 0)
 }
 
-export function buildScorecardHtml(
-  players: PrintPlayer[],
-  holes: Hole[],
-  eventTitle: string,
-  eventDate: string,
-  clubName: string,
-  courseName: string,
-  logoUrl: string | null = null,
-  teamFormat: TeamFormat = 'individual',
-  hcpPercentage: number = 100,
+export function buildScorecardCardsHtml(
+  players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
+  clubName: string, courseName: string, logoUrl: string | null = null,
+  teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
 ): string {
   const resolvedLogoUrl = logoUrl || DEFAULT_LOGO_URL
   const eventLocation = [clubName, courseName].filter(Boolean).join(' · ')
@@ -101,8 +95,8 @@ export function buildScorecardHtml(
         <td class="label-col hcp-label">HCP</td>
         ${hcpRowFor(row.playingHcp)}
       </tr>
-      <tr class="score-row">
-        <td class="label-col player-label">${row.label}</td>
+     <tr class="score-row">
+        <td class="label-col player-label">${row.names.map(n => `<div>${n}</div>`).join('')}</td>
         ${blankRow('score-cell')}
       </tr>
       <tr class="net-row">
@@ -112,7 +106,7 @@ export function buildScorecardHtml(
 
     const refRowsHtml = card.refRows.map(row => `
       <tr class="score-row">
-        <td class="label-col player-label">${row.label}</td>
+        <td class="label-col player-label">${row.names.map(n => `<div>${n}</div>`).join('')}</td>
         ${blankRow('score-cell')}
       </tr>
       <tr class="net-row">
@@ -121,6 +115,8 @@ export function buildScorecardHtml(
       </tr>`).join('')
 
     const signerName = card.refRows[0]?.label ?? ''
+
+
 
     return `
 <div class="card">
@@ -185,7 +181,27 @@ ${cards}
 </html>`
 }
 
-const SCORECARD_PRINT_STYLES = `
+export function buildScorecardHtml(
+  players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
+  clubName: string, courseName: string, logoUrl: string | null = null,
+  teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
+): string {
+  const cards = buildScorecardCardsHtml(players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage)
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Scorecards — ${eventTitle}</title>
+<style>${SCORECARD_PRINT_STYLES}</style>
+</head>
+<body>
+${cards}
+<script>window.onload = () => window.print()</script>
+</body>
+</html>`
+}
+
+export const SCORECARD_PRINT_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
   body { font-family: Arial, sans-serif; background: white; }
   @page { size: A4 landscape; margin: 8mm; }
@@ -227,7 +243,7 @@ const SCORECARD_PRINT_STYLES = `
   .tot-val { background: #DBEAFE !important; border-left: 1px solid #185FA5; font-weight: 900; }
   .hcp-row .sub-val, .hcp-row .hcp-sub { background: #D7EAC3 !important; font-weight: 700; }
   .hcp-row .tot-val, .hcp-row .hcp-tot { background: #BFDBFE !important; font-weight: 900; color: #1E40AF; }
-  .score-row .label-col.player-label { font-size: 10px; font-weight: 700; color: #0F172A; padding: 0 6px; }
+  .score-row .label-col.player-label { font-size: 10px; font-weight: 700; color: #0F172A; padding: 2px 6px; display: flex; flex-direction: column; justify-content: center; gap: 1px; line-height: 1.1; }
   .score-row .score-cell { background: white; }
   .net-row .net-label { font-size: 10px; font-style: italic; color: #64748B; padding: 0 6px; }
   .net-row .net-cell { background: #F8FAFC; }

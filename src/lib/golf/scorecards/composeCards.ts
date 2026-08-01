@@ -2,7 +2,7 @@ import type { PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
 
 export type TeamFormat = 'individual' | '4bbb' | 'team2' | 'team3_4'
 
-export type CardRow    = { label: string; playingHcp: number }
+export type CardRow    = { names: string[]; playingHcp: number }
 export type CardRefRow = { label: string }
 export type ComposedCard = {
   headerLabel: string
@@ -11,6 +11,10 @@ export type ComposedCard = {
 }
 
 function fullName(p: PrintPlayer) { return `${p.first_name} ${p.surname}` }
+function shortName(p: PrintPlayer) {
+  const initial = p.first_name?.trim()?.[0]?.toUpperCase() ?? ''
+  return `${initial}. ${p.surname}`
+}
 function playingHcp(phcp: number, pct: number) { return Math.round(phcp * (pct / 100)) }
 function teamPhcp(members: PrintPlayer[], pct: number) {
   return Math.round(members.reduce((s, p) => s + p.phcp, 0) * (pct / 100))
@@ -25,51 +29,40 @@ function composeIndividual(players: PrintPlayer[], pct: number): ComposedCard[] 
   if (players.length !== 4) {
     // fallback flights ≠ 4 joueurs : chacun a pour référence le suivant (comportement précédent)
     return players.map((p, i) => ({
-      headerLabel: fullName(p),
-      mainRows: [{ label: fullName(p), playingHcp: playingHcp(p.phcp, pct) }],
-      refRows: players.length > 1 ? [{ label: fullName(players[(i + 1) % players.length]) }] : [],
-    }))
-  }
-  return players.map((p, i) => ({
-    headerLabel: fullName(p),
-    mainRows: [{ label: fullName(p), playingHcp: playingHcp(p.phcp, pct) }],
-    refRows: [{ label: fullName(players[INDIVIDUAL_PARTNER[i]]) }],
+    headerLabel: fullName(p),                                    // header = nom complet, garde fullName
+    mainRows: [{ names: [shortName(p)], playingHcp: playingHcp(p.phcp, pct) }],
+    refRows: [{ label: shortName(players[INDIVIDUAL_PARTNER[i]]) }],
   }))
 }
 
-// 2) 4BBB — team A = positions [0,1], team B = [2,3]
 function compose4BBB(players: PrintPlayer[], pct: number): ComposedCard[] {
   const teams = [[0, 1], [2, 3]].filter(t => t.every(i => players[i]))
   return teams.map(([a, b], idx) => {
     const other = teams[1 - idx] ?? []
     return {
       headerLabel: `Équipe ${idx + 1}`,
-      mainRows: [a, b].map(i => ({ label: fullName(players[i]), playingHcp: playingHcp(players[i].phcp, pct) })),
-      refRows: other.map(i => ({ label: fullName(players[i]) })),
+      mainRows: [a, b].map(i => ({ names: [shortName(players[i])], playingHcp: playingHcp(players[i].phcp, pct) })),
+      refRows: other.map(i => ({ label: shortName(players[i]) })),
     }
   })
 }
 
-// 3) Foursome / Greensome / Scramble à 2 — team = [0,1] et [2,3], une seule balle
 function composeTeam2(players: PrintPlayer[], pct: number): ComposedCard[] {
   const teams = [[0, 1], [2, 3]].filter(t => t.every(i => players[i]))
   return teams.map(([a, b], idx) => {
     const members = [players[a], players[b]]
     return {
       headerLabel: `Équipe ${idx + 1}`,
-      mainRows: [{ label: members.map(fullName).join(' & '), playingHcp: teamPhcp(members, pct) }],
+      mainRows: [{ names: members.map(shortName), playingHcp: teamPhcp(members, pct) }],  // 2 noms empilés
       refRows: [{ label: `Équipe ${idx === 0 ? 2 : 1}` }],
     }
   })
 }
 
-// 4) Scramble à 3 ou 4 — une seule équipe, une seule carte
-// NB: ta spec n'indique pas explicitement de ligne "Net" ici — j'en ajoute une par cohérence
-// avec les 3 autres formules ; dis-moi si tu veux plutôt une carte sans ligne Net.
 function composeTeam34(players: PrintPlayer[], pct: number): ComposedCard[] {
   return [{
     headerLabel: 'Équipe',
-    mainRows: [{ label: players.map(fullName).join(' & '), playingHcp: teamPhcp(players, pct) }],
+    mainRows: [{ names: players.map(shortName), playingHcp: teamPhcp(players, pct) }],  // 3-4 noms empilés
     refRows: [],
   }]
 }
@@ -81,4 +74,4 @@ export function composeCards(players: PrintPlayer[], teamFormat: TeamFormat, hcp
     case 'team3_4':  return composeTeam34(players, hcpPercentage)
     default:         return composeIndividual(players, hcpPercentage)
   }
-}
+}}
