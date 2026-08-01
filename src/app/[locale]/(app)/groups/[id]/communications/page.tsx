@@ -123,10 +123,12 @@ export default function CommunicationsPage() {
   const [uploading,       setUploading]       = useState(false)
   const [showSettings,    setShowSettings]    = useState(false)
   
-  const [printPhcpMap, setPrintPhcpMap] = useState<Record<string, { phcp: number; whs: number; tee?: TeeInfo }>>({})
-  const [printFlights, setPrintFlights]         = useState<PrintPlayer[][]>([])
-  const [printTeamFormat, setPrintTeamFormat]   = useState<TeamFormat>('individual')
-  const [printHcpPercentage, setPrintHcpPercentage] = useState<number>(100)
+ const [printPhcpMap, setPrintPhcpMap] = useState<Record<string, { phcp: number; whs: number; tee?: TeeInfo }>>({})
+const [printClubName,   setPrintClubName]   = useState('')
+const [printCourseName, setPrintCourseName] = useState('')
+const [printFlights, setPrintFlights]         = useState<PrintPlayer[][]>([])
+const [printTeamFormat, setPrintTeamFormat]   = useState<TeamFormat>('individual')
+const [printHcpPercentage, setPrintHcpPercentage] = useState<number>(100)
 
   const [selectedIds,   setSelectedIds]   = useState<Set<string>>(new Set())
   const [filterMode,    setFilterMode]    = useState<'all' | 'event' | 'role'>('all')
