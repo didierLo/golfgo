@@ -27,9 +27,14 @@ const INDIVIDUAL_PARTNER = [2, 3, 1, 0]
 
 function composeIndividual(players: PrintPlayer[], pct: number): ComposedCard[] {
   if (players.length !== 4) {
-    // fallback flights ≠ 4 joueurs : chacun a pour référence le suivant (comportement précédent)
     return players.map((p, i) => ({
-    headerLabel: fullName(p),                                    // header = nom complet, garde fullName
+      headerLabel: fullName(p),
+      mainRows: [{ names: [shortName(p)], playingHcp: playingHcp(p.phcp, pct) }],
+      refRows: players.length > 1 ? [{ label: shortName(players[(i + 1) % players.length]) }] : [],
+    }))
+  }
+  return players.map((p, i) => ({
+    headerLabel: fullName(p),
     mainRows: [{ names: [shortName(p)], playingHcp: playingHcp(p.phcp, pct) }],
     refRows: [{ label: shortName(players[INDIVIDUAL_PARTNER[i]]) }],
   }))
@@ -53,7 +58,7 @@ function composeTeam2(players: PrintPlayer[], pct: number): ComposedCard[] {
     const members = [players[a], players[b]]
     return {
       headerLabel: `Équipe ${idx + 1}`,
-      mainRows: [{ names: members.map(shortName), playingHcp: teamPhcp(members, pct) }],  // 2 noms empilés
+      mainRows: [{ names: members.map(shortName), playingHcp: teamPhcp(members, pct) }],
       refRows: [{ label: `Équipe ${idx === 0 ? 2 : 1}` }],
     }
   })
@@ -62,7 +67,7 @@ function composeTeam2(players: PrintPlayer[], pct: number): ComposedCard[] {
 function composeTeam34(players: PrintPlayer[], pct: number): ComposedCard[] {
   return [{
     headerLabel: 'Équipe',
-    mainRows: [{ names: players.map(shortName), playingHcp: teamPhcp(players, pct) }],  // 3-4 noms empilés
+    mainRows: [{ names: players.map(shortName), playingHcp: teamPhcp(players, pct) }],
     refRows: [],
   }]
 }
@@ -74,4 +79,4 @@ export function composeCards(players: PrintPlayer[], teamFormat: TeamFormat, hcp
     case 'team3_4':  return composeTeam34(players, hcpPercentage)
     default:         return composeIndividual(players, hcpPercentage)
   }
-}}
+}
