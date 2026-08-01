@@ -27,6 +27,7 @@ const INDIVIDUAL_PARTNER = [2, 3, 1, 0]
 
 function composeIndividual(players: PrintPlayer[], pct: number): ComposedCard[] {
   if (players.length !== 4) {
+    // fallback flights ≠ 4 joueurs : chacun a pour référence le suivant (comportement précédent)
     return players.map((p, i) => ({
       headerLabel: fullName(p),
       mainRows: [{ names: [shortName(p)], playingHcp: playingHcp(p.phcp, pct) }],
