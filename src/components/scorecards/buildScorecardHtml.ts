@@ -106,7 +106,7 @@ export function buildScorecardCardsHtml(
 
     const refRowsHtml = card.refRows.map(row => `
       <tr class="score-row">
-        <td class="label-col player-label">${row.names.map(n => `<div>${n}</div>`).join('')}</td>
+        <td class="label-col player-label">${row.label}</td>
         ${blankRow('score-cell')}
       </tr>
       <tr class="net-row">
