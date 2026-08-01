@@ -259,20 +259,21 @@ export default function CommunicationsPage() {
     const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
     if (error) { toast.error(error.message); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
-    setGroupTemplate(prev => ({ ...prev, template_logo_url: publicUrl }))
+    const bustedUrl = `${publicUrl}?v=${Date.now()}`
+    setGroupTemplate(prev => ({ ...prev, template_logo_url: bustedUrl }))
     toast.success(t('communications.toasts.logoUploaded')); setUploading(false)
   }
-
   async function handleBgUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file) return; setUploading(true)
     const path = `${groupId}/bg.${file.name.split('.').pop()}`
     const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
     if (error) { toast.error(error.message); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
-    setGroupTemplate(prev => ({ ...prev, template_bg_image_url: publicUrl }))
-    await supabase.from('groups').update({ template_bg_image_url: publicUrl }).eq('id', groupId)
+    const bustedUrl = `${publicUrl}?v=${Date.now()}`
+    setGroupTemplate(prev => ({ ...prev, template_bg_image_url: bustedUrl }))
+    await supabase.from('groups').update({ template_bg_image_url: bustedUrl }).eq('id', groupId)
     toast.success(t('communications.toasts.bgUploaded')); setUploading(false)
-  }
+}
 
   async function handleBgDelete() {
     setGroupTemplate(prev => ({ ...prev, template_bg_image_url: null }))
