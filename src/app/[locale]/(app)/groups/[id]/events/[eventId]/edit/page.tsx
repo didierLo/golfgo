@@ -141,7 +141,7 @@ export default function EditEventPage() {
   const [maxParticipants, setMaxParticipants]           = useState('')
   const [clubs, setClubs]     = useState<{ id: string; name: string; country: string }[]>([])
   const [courses, setCourses] = useState<{ id: string; course_name: string }[]>([])
-  const [formats, setFormats] = useState<{ id: string; name: string }[]>([])
+  const [formats, setFormats] = useState<{ id: string; name: string; team_format: string; hcp_percentage: number }[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
