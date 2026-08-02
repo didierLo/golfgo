@@ -131,6 +131,7 @@ export default function EditEventPage() {
   const [courseId, setCourseId]                         = useState('')
   const isInitialClubLoad = useRef(true)
   const [competitionFormatId, setCompetitionFormatId]   = useState('')
+  const [hcpOverride, setHcpOverride] = useState('')
   const [selectedClubId, setSelectedClubId]             = useState('')
   const [selectedCountry, setSelectedCountry]           = useState('')
   const [isGolf, setIsGolf]                             = useState(true)
@@ -155,7 +156,7 @@ export default function EditEventPage() {
     setLoading(true)
     const { data: event, error: evErr } = await supabase
       .from('events')
-     .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants, scorecard_notes')
+     .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants, scorecard_notes, hcp_percentage_override')
       .eq('id', eventId).single()
     if (evErr || !event) { alert(t('editEvent.notFound')); window.location.href = `/groups/${groupId}/events`; return }
 
@@ -165,6 +166,7 @@ export default function EditEventPage() {
     setEnd(event.ends_at ? event.ends_at.slice(0, 16) : '')
     setCourseId(event.course_id || '')
     setCompetitionFormatId(event.competition_format_id || '')
+    setHcpOverride(event.hcp_percentage_override != null ? String(event.hcp_percentage_override) : '')
     setIsGolf(event.is_golf ?? true)
     setFee(event.fee_per_person ? String(event.fee_per_person) : '')
     setEmailMessage(event.email_message || '')
@@ -173,7 +175,7 @@ export default function EditEventPage() {
 
   const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
   supabase.from('clubs').select('id, name, country').order('country, name'),
-  supabase.from('competition_formats').select('id, name').order('name'),
+  supabase.from('competition_formats').select('id, name, team_format, hcp_percentage').order('name'),
 ])
 setClubs(clubsData || [])
 setFormats(formatsData || [])
@@ -223,6 +225,7 @@ async function handleSubmit(e: React.FormEvent) {
       ends_at:               end || null,
       course_id:             courseId || null,
       competition_format_id: competitionFormatId || null,
+      hcp_percentage_override: hcpOverride ? parseFloat(hcpOverride) : null,
       is_golf:               isGolf,
       fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
       email_message:         emailMessage || null,
@@ -324,6 +327,21 @@ async function handleSubmit(e: React.FormEvent) {
                 <option value="">{t('editEvent.chooseFormat')}</option>
                 {formats.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
+              {(() => {
+              const selected = formats.find(f => f.id === competitionFormatId)
+              if (!selected || selected.team_format === 'individual') return null
+              return (
+                <div className="mt-3">
+                  <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+                    % HCP appliqué à l'équipe <span className="text-slate-400 font-normal">— défaut {selected.hcp_percentage}%</span>
+                  </label>
+                  <input type="number" min={0} max={100} step={5}
+                    value={hcpOverride} onChange={e => setHcpOverride(e.target.value)}
+                    placeholder={String(selected.hcp_percentage)}
+                    className={inputClass} />
+    </div>
+  )
+})()}
             </div>
           </>
         )}

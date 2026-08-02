@@ -444,7 +444,7 @@ async function loadPrintHoles(eventId: string) {
   setPrintClubName((event as any)?.courses?.clubs?.name ?? '')
   setPrintCourseName((event as any)?.courses?.course_name ?? '')
   setPrintTeamFormat((event as any)?.competition_formats?.team_format ?? 'individual')
-  setPrintHcpPercentage((event as any)?.competition_formats?.hcp_percentage ?? 100)
+  setPrintHcpPercentage((event as any)?.hcp_percentage_override ?? (event as any)?.competition_formats?.hcp_percentage ?? 100)
   setPrintFormatName((event as any)?.competition_formats?.name ?? '')
   setPrintScorecardNotes((event as any)?.scorecard_notes ?? '')
 

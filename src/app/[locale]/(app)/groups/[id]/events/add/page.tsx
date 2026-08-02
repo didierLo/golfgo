@@ -25,11 +25,12 @@ export default function AddEventPage() {
   const [clubs, setClubs]               = useState<{ id: string; name: string; country: string }[]>([])
   const [selectedCountry, setSelectedCountry]         = useState('')
   const [courses, setCourses]                         = useState<{ id: string; course_name: string }[]>([])
-  const [formats, setFormats]                         = useState<{ id: string; name: string }[]>([])
+  const [formats, setFormats] = useState<{ id: string; name: string; team_format: string; hcp_percentage: number }[]>([])
   const [selectedClubId, setSelectedClubId]           = useState('')
   const [courseId, setCourseId]                       = useState('')
   const [competitionFormatId, setCompetitionFormatId] = useState('')
   const [maxParticipants, setMaxParticipants]         = useState('')
+  const [hcpOverride, setHcpOverride] = useState('')
 
   useEffect(() => { loadRefs() }, [])
   useEffect(() => {
@@ -40,7 +41,8 @@ export default function AddEventPage() {
   async function loadRefs() {
     const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
       supabase.from('clubs').select('id, name, country').order('country, name'),
-      supabase.from('competition_formats').select('id, name').order('name'),
+    supabase.from('competition_formats').select('id, name, team_format, hcp_percentage').order('name'),
+      
     ])
     setClubs(clubsData || [])
     setFormats(formatsData || [])
@@ -74,6 +76,7 @@ export default function AddEventPage() {
         is_golf:               isGolf,
         course_id:             courseId || null,
         competition_format_id: competitionFormatId || null,
+        hcp_percentage_override: hcpOverride ? parseFloat(hcpOverride) : null,
         fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
         email_message:         emailMessage || null,
         scorecard_notes:       scorecardNotes || null,
@@ -183,6 +186,21 @@ export default function AddEventPage() {
                 <option value="">{t('addEvent.chooseFormat')}</option>
                 {formats.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
+              {(() => {
+                const selected = formats.find(f => f.id === competitionFormatId)
+                if (!selected || selected.team_format === 'individual') return null
+                return (
+                  <div className="mt-3">
+                    <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+                      % HCP appliqué à l'équipe <span className="text-slate-400 font-normal">— défaut {selected.hcp_percentage}%</span>
+                    </label>
+                    <input type="number" min={0} max={100} step={5}
+                      value={hcpOverride} onChange={e => setHcpOverride(e.target.value)}
+                      placeholder={String(selected.hcp_percentage)}
+                      className={inputClass} />
+                  </div>
+                )
+              })()}
             </div>
           </>
         )}

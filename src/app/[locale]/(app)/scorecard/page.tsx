@@ -209,7 +209,7 @@ useEffect(() => {
     .select('event_id, tee_id')
     .eq('player_id', pId).eq('status', 'GOING'),
   supabase.from('events')
-    .select('id, title, starts_at, course_id, group_id, scorecard_notes, competition_formats(name, scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name))')
+    .select('id, title, starts_at, course_id, group_id, scorecard_notes, competition_formats(name, scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name)), hcp_percentage_override')
     .eq('id', evId).limit(1),
 ])
       const event = events?.[0] as any
@@ -221,7 +221,7 @@ useEffect(() => {
       setEventStartsAt(event.starts_at)
       setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
       setTeamFormat((event.competition_formats as any)?.team_format ?? 'individual')
-      setHcpPercentage((event.competition_formats as any)?.hcp_percentage ?? 100)
+      setHcpPercentage(event.hcp_percentage_override ?? (event.competition_formats as any)?.hcp_percentage ?? 100)
       setFormatName((event.competition_formats as any)?.name ?? '')
       setScorecardNotes(event.scorecard_notes ?? '')
       setClubName((event.courses as any)?.clubs?.name ?? '')
