@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import ScorecardTable from '@/components/scorecards/ScorecardTable'
+import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import { useEventScoring } from '@/lib/hooks/useEventScoring'
+import { getTeamGroups, playingHcp, teamPhcp } from '@/lib/golf/scorecards/composeCards'
 import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
 import { computePhcp } from '@/components/scorecards/scorecard-types'
 import { useTranslations, useLocale } from 'next-intl'
@@ -110,10 +113,15 @@ export default function ScorecardsPage() {
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
 
+  // Formule/équipe/% HCP/club/parcours centralisés ici — se rafraîchit automatiquement
+  // au retour de focus sur l'onglet (corrige le cas où la formule change pendant que
+  // cette page reste ouverte en arrière-plan).
+  const eventScoring = useEventScoring(activeEventId)
+  const { eventFormat, teamFormat, hcpPercentage, clubName, courseName, courseId } = eventScoring
+
   const [allEvents, setAllEvents]               = useState<EventItem[]>([])
   const [eventsLoading, setEventsLoading]       = useState(true)
   const [selectedCourseId, setSelectedCourseId] = useState('')
-  const [loading, setLoading]                   = useState(true)
   const [scorecardLoading, setScorecardLoading] = useState(false)
   const [error, setError]                       = useState<string | null>(null)
   const [saving, setSaving]                     = useState(false)
@@ -122,14 +130,12 @@ export default function ScorecardsPage() {
   const [holes, setHoles]                       = useState<Hole[]>([])
   const [tees, setTees]                         = useState<TeeInfo[]>([])
   const [players, setPlayers]                   = useState<Player[]>([])
+  const [flights, setFlights]                   = useState<Player[][]>([])
   const [scores, setScores]                     = useState<ScoreMap>({})
   const [scorecardId, setScorecardId]           = useState<string | null>(null)
-  const [eventFormat, setEventFormat]           = useState<'stroke' | 'stableford'>('stableford')
   const [activePlayerId, setActivePlayerId]     = useState<string | null>(null)
   const [validatedAt, setValidatedAt]           = useState<string | null>(null)
   const [playersWithPush, setPlayersWithPush]   = useState<Set<string>>(new Set())
-  const [clubName, setClubName]                 = useState('')
-  const [courseName, setCourseName]             = useState('')
 
   const isValidated = !!validatedAt
 
@@ -147,38 +153,20 @@ export default function ScorecardsPage() {
     setEventsLoading(false)
   }
 
-  useEffect(() => { loadInit() }, [activeEventId])
+  // Réinitialise l'état de la carte quand on change d'événement
+  useEffect(() => {
+    setValidatedAt(null); setPlayers([]); setFlights([]); setScores({}); setScorecardId(null)
+  }, [activeEventId])
+
+  // Synchronise selectedCourseId depuis le hook une fois qu'il a fini de charger
+  useEffect(() => {
+    if (eventScoring.loading) return
+    setSelectedCourseId(courseId ?? '')
+  }, [eventScoring.loading, courseId])
+
   useEffect(() => { if (selectedCourseId) loadScorecard(selectedCourseId) }, [selectedCourseId])
 
-
-async function loadInit() {
-  setLoading(true); setValidatedAt(null); setPlayers([]); setScores({}); setScorecardId(null)
-
-  const { data: event } = await supabase.from('events')
-    .select('course_id, competition_format:competition_format_id(scoring_type)')
-    .eq('id', activeEventId).single()
-
-  if (event) {
-    setEventFormat((event.competition_format as any)?.scoring_type ?? 'stableford')
-    if (event.course_id) {
-      const { data: course } = await supabase.from('courses')
-        .select('id, course_name, clubs(name)')
-        .eq('id', event.course_id).single()
-      if (course) {
-        setSelectedCourseId(event.course_id)
-        setCourseName(course.course_name ?? '')
-        setClubName((course as any).clubs?.name ?? '')
-      }
-    } else {
-      setSelectedCourseId(''); setClubName(''); setCourseName('')
-    }
-  }
-  setLoading(false)
-}
-
-  
-
-async function loadScorecard(courseId: string) {
+  async function loadScorecard(courseId: string) {
     setScorecardLoading(true); setError(null)
     try {
       const { data: holesData } = await supabase.from('course_holes').select('hole_number, par, stroke_index').eq('course_id', courseId).order('hole_number')
@@ -193,9 +181,14 @@ async function loadScorecard(courseId: string) {
         scId = created?.id ?? null; setValidatedAt(null)
       }
       setScorecardId(scId)
-      const { data: participants } = await supabase.from('event_participants')
-        .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
-        .eq('event_id', activeEventId).order('created_at')
+      const [{ data: participants }, { data: flightsData }] = await Promise.all([
+        supabase.from('event_participants')
+          .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
+          .eq('event_id', activeEventId).order('created_at'),
+        supabase.from('flights')
+          .select('flight_number, flight_players(position, player_id)')
+          .eq('event_id', activeEventId).order('flight_number'),
+      ])
       const teeUpdates: { player_id: string; tee_id: string }[] = []
       const built: Player[] = (participants || []).map((ep: any) => {
         const p = ep.players; let teeId = ep.tee_id ?? null
@@ -206,7 +199,20 @@ async function loadScorecard(courseId: string) {
         }
         return { id: p.id, first_name: p.first_name, surname: p.surname, whs: p.whs ?? 0, tee_id: teeId, tee, phcp: computePhcp(p.whs ?? 0, tee) }
       })
-      setPlayers(built); if (built.length > 0) setActivePlayerId(built[0].id)
+      setPlayers(built); if (built.length > 0 && !activePlayerId) setActivePlayerId(built[0].id)
+
+      // Flights position-ordonnés — nécessaire pour le regroupement par équipe, cohérent avec l'impression
+      const byId = new Map(built.map(p => [p.id, p]))
+      const flightGroups: Player[][] = (flightsData || [])
+        .slice()
+        .sort((a: any, b: any) => a.flight_number - b.flight_number)
+        .map((f: any) => (f.flight_players || [])
+          .slice()
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((fp: any) => byId.get(fp.player_id))
+          .filter(Boolean) as Player[])
+      setFlights(flightGroups)
+
       if (isOwner) for (const u of teeUpdates) await supabase.from('event_participants').update({ tee_id: u.tee_id }).eq('event_id', activeEventId).eq('player_id', u.player_id)
       if (scId && built.length > 0) {
         if (isOwner) {
@@ -279,12 +285,42 @@ async function loadScorecard(courseId: string) {
     return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`
   }
 
-
-
   const activePlayer   = players.find(p => p.id === activePlayerId) ?? null
   const upcomingEvents = allEvents.filter(e => !e.isPast)
   const pastEvents     = allEvents.filter(e => e.isPast)
   const activeEvent    = allEvents.find(e => e.id === activeEventId)
+
+  // ── Regroupement équipe/flight pour les avatars et la carte affichée ──────────
+  // Chaque flight est découpé en équipes selon la formule (même logique que l'impression).
+  // Les joueurs sans flight assigné apparaissent seuls, en individuel.
+  const assignedIds = new Set(flights.flat().map(p => p.id))
+  const unassigned  = players.filter(p => !assignedIds.has(p.id))
+  const flightSections: { label: string; groups: Player[][] }[] = [
+    ...flights.map((fl, i) => ({
+      label: flights.length > 1 ? `Flight ${i + 1}` : '',
+      groups: getTeamGroups(fl, teamFormat),
+    })),
+    ...(unassigned.length ? [{ label: flights.length > 0 ? 'Sans flight' : '', groups: unassigned.map(p => [p]) }] : []),
+  ]
+
+  const activeFlight = flights.find(fl => fl.some(p => p.id === activePlayerId))
+    ?? (activePlayer ? [activePlayer] : [])
+  const activeTeamGroups = getTeamGroups(activeFlight, teamFormat)
+  const activeGroup = activeTeamGroups.find(g => g.some(p => p.id === activePlayerId)) ?? []
+
+  // Construit le tableau players[] pour ScorecardTable selon la formule, en appliquant le % HCP
+  // de l'événement (event override > format > 100) — jusqu'ici jamais appliqué à cette page.
+  function buildCardPlayers(group: Player[]): ScoreEntrant[] {
+    if (teamFormat === '4bbb') {
+      return group.map(p => ({ id: p.id, phcp: playingHcp(p.phcp, hcpPercentage) }))
+    }
+    if (teamFormat === 'team2' || teamFormat === 'team3_4') {
+      if (!group.length) return []
+      return [{ id: group[0].id, phcp: teamPhcp(group, hcpPercentage) }]
+    }
+    const solo = group.find(p => p.id === activePlayerId) ?? group[0]
+    return solo ? [{ id: solo.id, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
+  }
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
@@ -331,12 +367,14 @@ async function loadScorecard(courseId: string) {
         </div>
       )}
 
-    {(clubName || courseName) && (
+    {(clubName || courseName || eventScoring.formatName) && (
         <div className="rounded-xl border border-white/60 shadow-sm px-4 py-3 mb-6 print:hidden flex items-center gap-3"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <span className="text-[16px]">⛳</span>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold text-slate-800 truncate">{clubName}{courseName ? ` · ${courseName}` : ''}</p>
+            <p className="text-[13px] font-bold text-slate-800 truncate">
+              {clubName}{courseName ? ` · ${courseName}` : ''}{eventScoring.formatName ? ` · ${eventScoring.formatName}` : ''}
+            </p>
             {isOwner && (
               <a href={`/${params.locale}/admin/clubs`}
                 className="text-[11px] text-[#185FA5] hover:underline">
@@ -369,22 +407,43 @@ async function loadScorecard(courseId: string) {
 
       {!scorecardLoading && selectedCourseId && (
         <>
-          {/* ── Avatars joueurs ── */}
-          <div className="flex gap-2 items-center mb-5 flex-wrap print:hidden">
-            {players.map(p => {
-              const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
-              const isActive = p.id === activePlayerId; const hasPush = playersWithPush.has(p.id)
-              return (
-                <div key={p.id} className="relative">
-                  <button onClick={() => setActivePlayerId(p.id)} title={`${p.first_name} ${p.surname}`}
-                    className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all flex-shrink-0 ${
-                      isActive ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'}`}>
-                    {initials}
-                  </button>
-                  {hasPush && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#3B6D11] rounded-full border-2 border-white" title={t('scorecards.pushScores')} />}
+          {/* ── Avatars joueurs, regroupés par flight puis par équipe ── */}
+          <div className="flex flex-col gap-3 mb-5 print:hidden">
+            {flightSections.map((section, si) => (
+              <div key={si}>
+                {section.label && (
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{section.label}</p>
+                )}
+                <div className="flex gap-3 flex-wrap items-center">
+                  {section.groups.map((group, gi) => {
+                    const isTeamCard = teamFormat === 'team2' || teamFormat === 'team3_4'
+                    const isTeamGroup = isTeamCard || teamFormat === '4bbb'
+                    const groupIsActive = group.some(p => p.id === activePlayerId)
+                    return (
+                      <div key={gi} className={`flex gap-1.5 ${isTeamGroup ? 'p-1.5 rounded-2xl' : ''} ${
+                        isTeamGroup && groupIsActive ? 'bg-[#185FA5]/10 border border-[#185FA5]/30' : isTeamGroup ? 'border border-transparent' : ''
+                      }`}>
+                        {group.map(p => {
+                          const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
+                          const isActive = isTeamCard ? groupIsActive : p.id === activePlayerId
+                          const hasPush = playersWithPush.has(p.id)
+                          return (
+                            <div key={p.id} className="relative">
+                              <button onClick={() => setActivePlayerId(p.id)} title={`${p.first_name} ${p.surname}`}
+                                className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all flex-shrink-0 ${
+                                  isActive ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'}`}>
+                                {initials}
+                              </button>
+                              {hasPush && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#3B6D11] rounded-full border-2 border-white" title={t('scorecards.pushScores')} />}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
                 </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
 
           {/* ── Info joueur actif ── */}
@@ -460,7 +519,9 @@ async function loadScorecard(courseId: string) {
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden print:hidden"
               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <ScorecardTable
-                holes={holes} players={[activePlayer]} scores={scores}
+                holes={holes}
+                players={buildCardPlayers(activeGroup.length ? activeGroup : [activePlayer])}
+                scores={scores}
                 setScores={isOwner && !isValidated ? setScores : () => {}}
                 eventFormat={eventFormat} readOnly={!isOwner || isValidated}
               />
@@ -498,6 +559,9 @@ async function loadScorecard(courseId: string) {
 }
 
 // ── PrintScorecards ───────────────────────────────────────────────────────────
+// Note : ce bloc d'impression reste en individuel simple, pas encore aligné sur
+// buildScorecardCardsHtml/composeCards (Phase 1). À harmoniser dans un futur chantier
+// si l'impression "rapide" (bouton 🖨 ci-dessus) doit aussi refléter les formules/équipes.
 
 function PrintScorecards({
   players, holes, eventTitle, clubName, courseName, eventDate,

@@ -4,8 +4,11 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import ScorecardTable from '@/components/scorecards/ScorecardTable'
+import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
 import Leaderboard from '@/components/scorecards/Leaderboard'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import { useEventScoring } from '@/lib/hooks/useEventScoring'
+import { getTeamGroups, playingHcp, teamPhcp } from '@/lib/golf/scorecards/composeCards'
 import { computePhcp } from '@/components/scorecards/scorecard-types'
 import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
 import { useTranslations, useLocale } from 'next-intl'
@@ -128,13 +131,17 @@ export default function ResultsPage() {
   const [loading,        setLoading]        = useState(true)
   const [holes,          setHoles]          = useState<Hole[]>([])
   const [players,        setPlayers]        = useState<Player[]>([])
+  const [flights,        setFlights]        = useState<Player[][]>([])
   const [scores,         setScores]         = useState<ScoreMap>({})
   const [scorecardId,    setScorecardId]    = useState<string | null>(null)
-  const [eventFormat,    setEventFormat]    = useState<'stroke' | 'stableford'>('stableford')
   const [activePlayerId, setActivePlayerId] = useState<string | null>(null)
   const [savingSc,       setSavingSc]       = useState(false)
   const [saveMsgSc,      setSaveMsgSc]      = useState('')
   const [lastRefresh,    setLastRefresh]    = useState<Date | null>(null)
+
+  // Formule/équipe/%HCP centralisés — se rafraîchit automatiquement au retour de focus sur l'onglet
+  const eventScoring = useEventScoring(selectedId)
+  const { eventFormat, teamFormat, hcpPercentage } = eventScoring
 
   const scIdRef     = useRef<string | null>(null)
   const playersRef  = useRef<Player[]>([])
@@ -150,13 +157,19 @@ export default function ResultsPage() {
       .then(({ data }) => setEvents(data ?? []))
   }, [groupId])
 
+  // Le polling des scores (30s) ne dépend que de l'événement sélectionné
   useEffect(() => {
     if (!selectedId) return
-    loadScorecard(selectedId)
     if (pollTimer.current) clearInterval(pollTimer.current)
     pollTimer.current = setInterval(() => refreshScores(), POLL_INTERVAL_MS)
     return () => { if (pollTimer.current) clearInterval(pollTimer.current) }
   }, [selectedId])
+
+  // Le chargement des données attend que useEventScoring ait résolu le course_id
+  useEffect(() => {
+    if (!selectedId || eventScoring.loading) return
+    loadScorecard(selectedId, eventScoring.courseId)
+  }, [selectedId, eventScoring.loading, eventScoring.courseId])
 
   async function refreshScores() {
     const scId    = scIdRef.current
@@ -173,35 +186,36 @@ export default function ResultsPage() {
     setScores(map); scoresRef.current = map; setLastRefresh(new Date())
   }
 
-  async function loadScorecard(evtId: string) {
+  async function loadScorecard(evtId: string, courseId: string | null) {
     setLoading(true)
     try {
-      const { data: event } = await supabase.from('events')
-        .select('course_id, competition_format:competition_format_id(scoring_type)').eq('id', evtId).single()
-      setEventFormat((event?.competition_format as any)?.scoring_type ?? 'stableford')
-
       let holesData: Hole[] = fallbackHoles()
       let teesData: TeeInfo[] = []
 
-   if (event?.course_id) {
-  const [{ data: h }, { data: tData }] = await Promise.all([
-    supabase.from('course_holes')
-      .select('hole_number, par, stroke_index').eq('course_id', event.course_id).order('hole_number'),
-    supabase.from('course_tees')
-      .select('id, tee_name, par_total, course_rating, slope').eq('course_id', event.course_id).order('tee_name'),
-  ])
-  if (h?.length) holesData = h
-  teesData = tData ?? []
-}
+      if (courseId) {
+        const [{ data: h }, { data: tData }] = await Promise.all([
+          supabase.from('course_holes')
+            .select('hole_number, par, stroke_index').eq('course_id', courseId).order('hole_number'),
+          supabase.from('course_tees')
+            .select('id, tee_name, par_total, course_rating, slope').eq('course_id', courseId).order('tee_name'),
+        ])
+        if (h?.length) holesData = h
+        teesData = tData ?? []
+      }
       setHoles(holesData)
 
       const { data: existing } = await supabase.from('scorecards').select('id').eq('event_id', evtId).maybeSingle()
       const scId = existing?.id ?? null
       setScorecardId(scId); scIdRef.current = scId
 
-      const { data: participants } = await supabase.from('event_participants')
-        .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
-        .eq('event_id', evtId).order('created_at')
+      const [{ data: participants }, { data: flightsData }] = await Promise.all([
+        supabase.from('event_participants')
+          .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
+          .eq('event_id', evtId).order('created_at'),
+        supabase.from('flights')
+          .select('flight_number, flight_players(position, player_id)')
+          .eq('event_id', evtId).order('flight_number'),
+      ])
 
       const built: Player[] = (participants || []).map((ep: any) => {
         const p = ep.players
@@ -215,6 +229,18 @@ export default function ResultsPage() {
       })
       setPlayers(built); playersRef.current = built
       if (built.length > 0) setActivePlayerId(built[0].id)
+
+      // Flights position-ordonnés — nécessaire pour le regroupement par équipe, cohérent avec l'impression
+      const byId = new Map(built.map(p => [p.id, p]))
+      const flightGroups: Player[][] = (flightsData || [])
+        .slice()
+        .sort((a: any, b: any) => a.flight_number - b.flight_number)
+        .map((f: any) => (f.flight_players || [])
+          .slice()
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((fp: any) => byId.get(fp.player_id))
+          .filter(Boolean) as Player[])
+      setFlights(flightGroups)
 
       if (scId && built.length > 0) {
         const { data: scoresData } = await supabase.from('scores').select('player_id, hole, strokes')
@@ -260,6 +286,34 @@ export default function ResultsPage() {
 
   const activePlayer  = players.find(p => p.id === activePlayerId) ?? null
   const selectedEvent = events.find(e => e.id === selectedId)
+
+  // ── Regroupement équipe/flight, même logique que ScorecardsPage/MyScorecardPage ──
+  const assignedIds = new Set(flights.flat().map(p => p.id))
+  const unassigned  = players.filter(p => !assignedIds.has(p.id))
+  const flightSections: { label: string; groups: Player[][] }[] = [
+    ...flights.map((fl, i) => ({
+      label: flights.length > 1 ? `Flight ${i + 1}` : '',
+      groups: getTeamGroups(fl, teamFormat),
+    })),
+    ...(unassigned.length ? [{ label: flights.length > 0 ? 'Sans flight' : '', groups: unassigned.map(p => [p]) }] : []),
+  ]
+
+  const activeFlight = flights.find(fl => fl.some(p => p.id === activePlayerId))
+    ?? (activePlayer ? [activePlayer] : [])
+  const activeTeamGroups = getTeamGroups(activeFlight, teamFormat)
+  const activeGroup = activeTeamGroups.find(g => g.some(p => p.id === activePlayerId)) ?? []
+
+  function buildCardPlayers(group: Player[]): ScoreEntrant[] {
+    if (teamFormat === '4bbb') {
+      return group.map(p => ({ id: p.id, phcp: playingHcp(p.phcp, hcpPercentage) }))
+    }
+    if (teamFormat === 'team2' || teamFormat === 'team3_4') {
+      if (!group.length) return []
+      return [{ id: group[0].id, phcp: teamPhcp(group, hcpPercentage) }]
+    }
+    const solo = group.find(p => p.id === activePlayerId) ?? group[0]
+    return solo ? [{ id: solo.id, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
+  }
 
   if (roleLoading) return (
     <div className="p-6 space-y-3 max-w-2xl">
@@ -353,20 +407,41 @@ export default function ResultsPage() {
                   </p>
                 )}
 
-                <div className="flex gap-2 items-center mb-5 flex-wrap">
-                  {players.map(p => {
-                    const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
-                    const isActive = p.id === activePlayerId
-                    return (
-                      <button key={p.id} onClick={() => setActivePlayerId(p.id)}
-                        title={`${p.first_name} ${p.surname}`}
-                        className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all flex-shrink-0 ${
-                          isActive ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
-                        }`}>
-                        {initials}
-                      </button>
-                    )
-                  })}
+                {/* ── Avatars, regroupés par flight puis par équipe ── */}
+                <div className="flex flex-col gap-3 mb-5">
+                  {flightSections.map((section, si) => (
+                    <div key={si}>
+                      {section.label && (
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{section.label}</p>
+                      )}
+                      <div className="flex gap-3 flex-wrap items-center">
+                        {section.groups.map((group, gi) => {
+                          const isTeamCard = teamFormat === 'team2' || teamFormat === 'team3_4'
+                          const isTeamGroup = isTeamCard || teamFormat === '4bbb'
+                          const groupIsActive = group.some(p => p.id === activePlayerId)
+                          return (
+                            <div key={gi} className={`flex gap-1.5 ${isTeamGroup ? 'p-1.5 rounded-2xl' : ''} ${
+                              isTeamGroup && groupIsActive ? 'bg-[#185FA5]/10 border border-[#185FA5]/30' : isTeamGroup ? 'border border-transparent' : ''
+                            }`}>
+                              {group.map(p => {
+                                const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
+                                const isActive = isTeamCard ? groupIsActive : p.id === activePlayerId
+                                return (
+                                  <button key={p.id} onClick={() => setActivePlayerId(p.id)}
+                                    title={`${p.first_name} ${p.surname}`}
+                                    className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all flex-shrink-0 ${
+                                      isActive ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
+                                    }`}>
+                                    {initials}
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {activePlayer && (
@@ -385,7 +460,9 @@ export default function ResultsPage() {
                   <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
                     style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
                 <ScorecardTable
-                  holes={holes} players={[activePlayer]} scores={scores}
+                  holes={holes}
+                  players={buildCardPlayers(activeGroup.length ? activeGroup : [activePlayer])}
+                  scores={scores}
                   setScores={isOwner ? (newScores) => {
                     const updated = typeof newScores === 'function' ? newScores(scores) : newScores
                     setScores(updated)
