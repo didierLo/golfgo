@@ -572,7 +572,7 @@ useEffect(() => {
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <ScorecardTable
-            holes={holes} player={activePlayer} scores={scores}
+            holes={holes} players={[activePlayer]} scores={scores}
             setScores={handleSetScores} eventFormat={eventFormat} readOnly={isReadOnly}
           />
         </div>
