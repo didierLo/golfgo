@@ -488,9 +488,9 @@ useEffect(() => {
               </option>
             ))}
           </select>
-          {(clubName || courseName) && (
+        {(clubName || courseName || formatName) && (
             <p className="text-[12px] text-slate-500 mt-2.5 font-medium">
-              {clubName}{courseName && ` · ${courseName}`}
+              {clubName}{courseName && ` · ${courseName}`}{formatName && ` · ${formatName}`}
             </p>
           )}
         </div>
