@@ -15,9 +15,20 @@ function shortName(p: PrintPlayer) {
   const initial = p.first_name?.trim()?.[0]?.toUpperCase() ?? ''
   return `${initial}. ${p.surname}`
 }
-function playingHcp(phcp: number, pct: number) { return Math.round(phcp * (pct / 100)) }
-function teamPhcp(members: PrintPlayer[], pct: number) {
+export function playingHcp(phcp: number, pct: number) { return Math.round(phcp * (pct / 100)) }
+export function teamPhcp(members: PrintPlayer[], pct: number) {
   return Math.round(members.reduce((s, p) => s + p.phcp, 0) * (pct / 100))
+}
+
+// Regroupement "qui partage une carte/équipe" — même logique de position que composeCards,
+// réutilisée par la saisie digitale pour rester cohérente avec l'impression
+export function getTeamGroups<T extends { id: string }>(players: T[], teamFormat: TeamFormat): T[][] {
+  if (teamFormat === '4bbb' || teamFormat === 'team2') {
+    const pairs = [[0, 1], [2, 3]].filter(t => t.every(i => players[i]))
+    return pairs.map(([a, b]) => [players[a], players[b]])
+  }
+  if (teamFormat === 'team3_4') return players.length ? [players] : []
+  return players.map(p => [p]) // individuel : chacun seul
 }
 
 // Ordre attendu : players triés par flight_players.position (P1..P4)

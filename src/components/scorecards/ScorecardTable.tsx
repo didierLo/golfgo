@@ -1,14 +1,18 @@
 'use client'
 import { useMemo } from 'react'
 import { ScorecardCell } from './ScorecardCell'
-import type { Hole, Player, ScoreMap } from './scorecard-types'
+import type { Hole, ScoreMap } from './scorecard-types'
+
+// ScorecardTable n'a besoin que de id + phcp — reste volontairement minimal pour accepter
+// aussi bien un Player réel qu'une "carte d'équipe virtuelle" (team2/team3_4) ou un PrintPlayer.
+export type ScoreEntrant = { id: string; phcp: number }
 
 type Props = {
   holes: Hole[]
   // 1 joueur = saisie individuelle OU carte d'équipe partagée (team2/team3_4 : passer un "joueur virtuel"
   //   dont l'id = joueur ancre et le phcp = phcp d'équipe — cf. composeCards)
   // 2 joueurs = 4BBB : chacun sa balle, vue groupée avec meilleure balle surlignée
-  players: Player[]
+  players: ScoreEntrant[]
   scores: ScoreMap
   setScores: React.Dispatch<React.SetStateAction<ScoreMap>>
   eventFormat: 'stroke' | 'stableford'
@@ -27,7 +31,7 @@ function stablefordPoints(brut: number, par: number, recv: number): number {
   return Math.max(0, par - (brut - recv) + 2)
 }
 
-function holeValues(player: Player, hole: Hole, scores: ScoreMap) {
+function holeValues(player: ScoreEntrant, hole: Hole, scores: ScoreMap) {
   const brut = scores[player.id]?.[hole.hole_number] ?? null
   if (brut == null) return { brut: null as number | null, net: null as number | null, pts: null as number | null }
   const recv = strokesReceived(player.phcp, hole.stroke_index)
@@ -36,7 +40,7 @@ function holeValues(player: Player, hole: Hole, scores: ScoreMap) {
   return { brut, net, pts }
 }
 
-function subtotals(holesList: Hole[], player: Player, scores: ScoreMap) {
+function subtotals(holesList: Hole[], player: ScoreEntrant, scores: ScoreMap) {
   let parSum = 0, brutSum = 0, netSum = 0, ptsSum = 0, count = 0
   holesList.forEach(h => {
     parSum += h.par
@@ -48,7 +52,7 @@ function subtotals(holesList: Hole[], player: Player, scores: ScoreMap) {
 
 // Sous-total "meilleure balle" (4BBB) : le meilleur des 2 scores du trou
 // (Stb le plus haut en stableford, Net le plus bas en stroke-play)
-function bestBallSubtotal(holesList: Hole[], players: Player[], scores: ScoreMap, isStableford: boolean) {
+function bestBallSubtotal(holesList: Hole[], players: ScoreEntrant[], scores: ScoreMap, isStableford: boolean) {
   let parSum = 0, sum = 0, count = 0
   holesList.forEach(h => {
     parSum += h.par
@@ -125,7 +129,7 @@ export default function ScorecardTable({ holes, players, scores, setScores, even
 
 type HoleBlockProps = {
   h: Hole
-  players: Player[]
+  players: ScoreEntrant[]
   scores: ScoreMap
   onUpdate: (pid: string, hole: number, delta: number, par: number) => void
   isStableford: boolean
@@ -183,7 +187,7 @@ function HoleBlock({ h, players, scores, onUpdate, isStableford, readOnly }: Hol
 
 function SubtotalBlock({ label, players, subs, bestSub, isStableford, count, isTot = false }: {
   label: string
-  players: Player[]
+  players: ScoreEntrant[]
   subs: { parSum: number; brutSum: number | null; netSum: number | null; ptsSum: number | null }[]
   bestSub?: { parSum: number; sum: number | null } | null
   isStableford: boolean

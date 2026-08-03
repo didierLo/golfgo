@@ -8,7 +8,8 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
-import type { TeamFormat } from '@/lib/golf/scorecards/composeCards'
+import { getTeamGroups, playingHcp, teamPhcp, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
+import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
 
 const supabase = createClient()
 
@@ -197,6 +198,23 @@ useEffect(() => {
   useEffect(() => {
     if (!selectedEventId || !playerId) return
     loadEvent(selectedEventId, playerId)
+  }, [selectedEventId, playerId])
+
+  // Re-fetch la formule/l'événement quand l'onglet redevient visible : corrige le cas où la
+  // formule de jeu a été changée depuis la page "modifier l'événement" pendant que cette page
+  // était restée ouverte en arrière-plan.
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === 'visible' && selectedEventId && playerId) {
+        loadEvent(selectedEventId, playerId)
+      }
+    }
+    window.addEventListener('focus', onVisible)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.removeEventListener('focus', onVisible)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [selectedEventId, playerId])
 
   async function loadEvent(evId: string, pId: string) {
@@ -429,6 +447,26 @@ useEffect(() => {
 
   const activePlayer = flightPlayers.find(p => p.id === activePlayerId) ?? null
 
+  // allFlights est trié par position réelle du flight (contrairement à flightPlayers, réordonné
+  // "moi en premier") — c'est la source fiable pour le regroupement par équipe, cohérente avec l'impression.
+  const orderedFlight: PrintPlayer[] = allFlights.find(fl => fl.some(p => p.id === playerId)) ?? flightPlayers
+  const teamGroups = getTeamGroups(orderedFlight, teamFormat)
+  const activeGroup = teamGroups.find(g => g.some(p => p.id === activePlayerId)) ?? []
+
+  // Construit le tableau players[] pour ScorecardTable selon la formule, en appliquant le % HCP
+  // de l'événement (event override > format > 100) — jusqu'ici jamais appliqué à la carte digitale.
+  function buildCardPlayers(group: PrintPlayer[]): ScoreEntrant[] {
+    if (teamFormat === '4bbb') {
+      return group.map(p => ({ id: p.id, phcp: playingHcp(p.phcp, hcpPercentage) }))
+    }
+    if (teamFormat === 'team2' || teamFormat === 'team3_4') {
+      if (!group.length) return []
+      return [{ id: group[0].id, phcp: teamPhcp(group, hcpPercentage) }]
+    }
+    const solo = group.find(p => p.id === activePlayerId) ?? group[0]
+    return solo ? [{ id: solo.id, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
+  }
+
   return (
    <div className="p-5 sm:p-6 max-w-2xl">
       <h1 className="text-[22px] font-black text-slate-900 tracking-tight mb-4">{t('scorecard.title')}</h1>
@@ -496,24 +534,35 @@ useEffect(() => {
         <div className="mb-5 rounded-xl border border-white/60 shadow-sm p-4"
           style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">{t('scorecard.myFlight')}</p>
-          <div className="flex gap-2 flex-wrap">
-            {flightPlayers.map(p => {
-              const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
-              const isActive = p.id === activePlayerId
-              const isMe     = p.id === playerId
+          <div className="flex gap-3 flex-wrap">
+            {teamGroups.map((group, gi) => {
+              const isTeamCard = teamFormat === 'team2' || teamFormat === 'team3_4'
+              const isTeamGroup = isTeamCard || teamFormat === '4bbb'
+              const groupIsActive = group.some(p => p.id === activePlayerId)
               return (
-                <button key={p.id} onClick={() => setActivePlayerId(p.id)}
-                  title={`${p.first_name} ${p.surname}`}
-                  className="flex flex-col items-center gap-1 transition-all">
-                  <div className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 flex items-center justify-center transition-all ${
-                    isActive ? 'bg-[#185FA5] text-white border-[#185FA5]' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
-                  }`}>
-                    {initials}
-                  </div>
-                  <span className={`text-[10px] font-semibold ${isActive ? 'text-[#185FA5]' : 'text-slate-400'}`}>
-                    {isMe ? t('scorecard.me') : p.first_name}
-                  </span>
-                </button>
+                <div key={gi} className={`flex gap-1.5 ${isTeamGroup ? 'p-1.5 rounded-2xl' : ''} ${
+                  isTeamGroup && groupIsActive ? 'bg-[#185FA5]/10 border border-[#185FA5]/30' : isTeamGroup ? 'border border-transparent' : ''
+                }`}>
+                  {group.map(p => {
+                    const initials = `${p.first_name?.[0] ?? ''}${p.surname?.[0] ?? ''}`.toUpperCase()
+                    const isActive = isTeamCard ? groupIsActive : p.id === activePlayerId
+                    const isMe     = p.id === playerId
+                    return (
+                      <button key={p.id} onClick={() => setActivePlayerId(p.id)}
+                        title={`${p.first_name} ${p.surname}`}
+                        className="flex flex-col items-center gap-1 transition-all">
+                        <div className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 flex items-center justify-center transition-all ${
+                          isActive ? 'bg-[#185FA5] text-white border-[#185FA5]' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
+                        }`}>
+                          {initials}
+                        </div>
+                        <span className={`text-[10px] font-semibold ${isActive ? 'text-[#185FA5]' : 'text-slate-400'}`}>
+                          {isMe ? t('scorecard.me') : p.first_name}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
               )
             })}
           </div>
@@ -572,7 +621,9 @@ useEffect(() => {
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <ScorecardTable
-            holes={holes} players={[activePlayer]} scores={scores}
+            holes={holes}
+            players={buildCardPlayers(activeGroup.length ? activeGroup : (activePlayer ? [activePlayer] : []))}
+            scores={scores}
             setScores={handleSetScores} eventFormat={eventFormat} readOnly={isReadOnly}
           />
         </div>
