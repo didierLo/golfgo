@@ -40,10 +40,19 @@ export default function SignupPage() {
       setLoading(false); return
     }
 
-  if (data.user) {
-  const next = searchParams.get('next')
-  router.push(next ? `${next}?joined=1` : '/welcome')
-}
+    if (data.user) {
+      // Relie players.user_id dès la création du compte (confirmation email
+      // désactivée ⇒ signUp() renvoie déjà une session, sans jamais passer
+      // par /api/auth/callback qui faisait ce lien jusqu'ici).
+      try {
+        await fetch('/api/auth/link-player', { method: 'POST' })
+      } catch (linkError) {
+        console.error('[signup] link-player call failed:', linkError)
+      }
+
+      const next = searchParams.get('next')
+      router.push(next ? `${next}?joined=1` : '/welcome')
+    }
 
     setLoading(false)
   }

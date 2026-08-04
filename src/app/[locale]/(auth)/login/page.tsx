@@ -32,10 +32,20 @@ function LoginContent() {
       setErrorMsg(error.message || t('common.error'))
       setLoading(false)
     } else {
-  const next = searchParams.get('next')
-  router.push(next ?? '/welcome')
-  router.refresh()
-}
+      // Filet de sécurité : relie players.user_id si ce n'est pas déjà fait
+      // (comptes créés avant ce fix, ou tout cas où le lien a été raté).
+      // On n'attend pas d'erreur bloquante ici : si ça échoue, on laisse
+      // quand même l'utilisateur entrer, il verra juste un profil incomplet.
+      try {
+        await fetch('/api/auth/link-player', { method: 'POST' })
+      } catch (linkError) {
+        console.error('[login] link-player call failed:', linkError)
+      }
+
+      const next = searchParams.get('next')
+      router.push(next ?? '/welcome')
+      router.refresh()
+    }
   }
 
   return (
