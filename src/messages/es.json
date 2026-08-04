@@ -822,6 +822,13 @@
     "comingSoon": "Próximamente"
   },
   "auth": {
+    "error": {
+      "title": "Enlace no válido",
+      "expiredOrInvalid": "Este enlace ha caducado o ya se ha utilizado. Vuelve a intentarlo.",
+      "generic": "Ha ocurrido un error. Vuelve a intentarlo.",
+      "backToLogin": "← Volver al inicio de sesión"
+    },
+    
     "forgotPassword": {
       "title": "Contraseña olvidada",
       "subtitle": "Recibe un enlace de restablecimiento por correo",

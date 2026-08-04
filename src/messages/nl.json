@@ -825,6 +825,13 @@
     "comingSoon": "Binnenkort"
   },
   "auth": {
+    "error": {
+      "title": "Ongeldige link",
+      "expiredOrInvalid": "Deze link is verlopen of al gebruikt. Probeer het opnieuw.",
+      "generic": "Er is iets misgegaan. Probeer het opnieuw.",
+      "backToLogin": "← Terug naar inloggen"
+    },
+    
     "forgotPassword": {
       "title": "Wachtwoord vergeten",
       "subtitle": "Ontvang een resetlink per e-mail",

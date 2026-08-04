@@ -824,6 +824,13 @@
     "comingSoon": "Coming soon"
   },
   "auth": {
+    "error": {
+      "title": "Invalid link",
+      "expiredOrInvalid": "This link has expired or has already been used. Please try again.",
+      "generic": "Something went wrong. Please try again.",
+      "backToLogin": "← Back to login"
+    },
+    
     "forgotPassword": {
       "title": "Forgot password",
       "subtitle": "Receive a reset link by email",

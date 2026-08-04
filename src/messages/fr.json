@@ -830,6 +830,13 @@
     "comingSoon": "À venir"
   },
   "auth": {
+    "error": {
+      "title": "Lien invalide",
+      "expiredOrInvalid": "Ce lien a expiré ou a déjà été utilisé. Merci de refaire la demande.",
+      "generic": "Une erreur est survenue. Merci de réessayer.",
+      "backToLogin": "← Retour à la page de connexion"
+    },
+   
     "forgotPassword": {
       "title": "Mot de passe oublié",
       "subtitle": "Recevez un lien de réinitialisation par email",

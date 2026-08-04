@@ -824,6 +824,13 @@
     "comingSoon": "Bald verfügbar"
   },
   "auth": {
+    "error": {
+      "title": "Ungültiger Link",
+      "expiredOrInvalid": "Dieser Link ist abgelaufen oder wurde bereits verwendet. Bitte versuchen Sie es erneut.",
+      "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+      "backToLogin": "← Zurück zur Anmeldung"
+    },
+    
     "forgotPassword": {
       "title": "Passwort vergessen",
       "subtitle": "Erhalten Sie einen Reset-Link per E-Mail",
