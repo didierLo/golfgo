@@ -836,6 +836,8 @@
       "title": "Nueva contraseña",
       "subtitle": "Elige una nueva contraseña para tu cuenta",
       "back": "← Volver al inicio de sesión",
+      "checking": "Verificando el enlace...", 
+      "invalidLink": "Este enlace no es válido o ha caducado. Solicita uno nuevo desde este dispositivo.",
       "email": "Dirección de correo",
       "newPassword": "Nueva contraseña",
       "confirmPassword": "Confirmar contraseña",

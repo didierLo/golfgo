@@ -838,6 +838,8 @@
       "title": "Neues Passwort",
       "subtitle": "Wählen Sie ein neues Passwort für Ihr Konto",
       "back": "← Zurück zur Anmeldung",
+      "checking": "Link wird überprüft...", 
+      "invalidLink": "Dieser Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen Link auf diesem Gerät an.",
       "email": "E-Mail-Adresse",
       "newPassword": "Neues Passwort",
       "confirmPassword": "Passwort bestätigen",

@@ -6,7 +6,6 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
-  const locale = request.nextUrl.pathname.split('/')[1] ?? 'fr'
 
   if (!code) {
     console.error('[auth/callback] No code in URL')
@@ -25,9 +24,15 @@ export async function GET(request: NextRequest) {
   const authUser = sessionData.user
   const userEmail = authUser.email?.toLowerCase()
 
+  // Redirection finale : pas de préfixe de locale ici — le middleware
+  // next-intl (src/proxy.ts) l'ajoute automatiquement en détectant la
+  // langue du navigateur, exactement comme pour reset-password.
+  const buildRedirect = () =>
+    next.startsWith('/join/') ? `${origin}${next}` : `${origin}/welcome`
+
   if (!userEmail) {
     console.error('[auth/callback] No email on auth user:', authUser.id)
-    return NextResponse.redirect(`${origin}${next}`)
+    return NextResponse.redirect(buildRedirect())
   }
 
   // 2. Chercher la fiche player par email (insensible à la casse)
@@ -39,27 +44,18 @@ export async function GET(request: NextRequest) {
 
   if (playerError) {
     console.error('[auth/callback] players lookup error:', playerError)
-   const redirectTo = next.startsWith('/join/') 
-  ? `${origin}/${locale}${next}` 
-  : `${origin}/${locale}/welcome`
-return NextResponse.redirect(redirectTo)
+    return NextResponse.redirect(buildRedirect())
   }
 
   if (!player) {
     // Pas de fiche préexistante — premier signup sans invitation
     console.log('[auth/callback] No player found for email:', userEmail)
-   const redirectTo = next.startsWith('/join/') 
-  ? `${origin}/${locale}${next}` 
-  : `${origin}/${locale}/welcome`
-return NextResponse.redirect(redirectTo)
+    return NextResponse.redirect(buildRedirect())
   }
 
   // 3. Si user_id déjà renseigné et identique → rien à faire
   if (player.user_id === authUser.id) {
-   const redirectTo = next.startsWith('/join/') 
-  ? `${origin}/${locale}${next}` 
-  : `${origin}/${locale}/welcome`
-return NextResponse.redirect(redirectTo)
+    return NextResponse.redirect(buildRedirect())
   }
 
   // 4. Écrire le user_id dans players
@@ -70,22 +66,18 @@ return NextResponse.redirect(redirectTo)
     { auth: { persistSession: false } }
   )
 
- const [{ error: updateError }, { error: roleError }] = await Promise.all([
-  adminClient.from('players')
-    .update({ user_id: authUser.id })
-    .eq('id', player.id),
-  adminClient.from('groups_players')
-    .update({ role: 'member' })
-    .eq('player_id', player.id)
-    .is('role', null)
-])
+  const [{ error: updateError }, { error: roleError }] = await Promise.all([
+    adminClient.from('players')
+      .update({ user_id: authUser.id })
+      .eq('id', player.id),
+    adminClient.from('groups_players')
+      .update({ role: 'member' })
+      .eq('player_id', player.id)
+      .is('role', null)
+  ])
 
-if (updateError) console.error('[auth/callback] Failed to link user_id to player:', updateError)
-if (roleError)   console.error('[auth/callback] Failed to set default role in groups_players:', roleError)
+  if (updateError) console.error('[auth/callback] Failed to link user_id to player:', updateError)
+  if (roleError)   console.error('[auth/callback] Failed to set default role in groups_players:', roleError)
 
-
-    const redirectTo = next.startsWith('/join/') 
-  ? `${origin}/${locale}${next}` 
-  : `${origin}/${locale}/welcome`
-return NextResponse.redirect(redirectTo)
+  return NextResponse.redirect(buildRedirect())
 }

@@ -839,6 +839,8 @@
       "title": "Nieuw wachtwoord",
       "subtitle": "Kies een nieuw wachtwoord voor uw account",
       "back": "← Terug naar aanmelden",
+      "checking": "Link wordt gecontroleerd...",
+      "invalidLink": "Deze link is ongeldig of verlopen. Vraag een nieuwe link aan vanaf dit apparaat.",
       "email": "E-mailadres",
       "newPassword": "Nieuw wachtwoord",
       "confirmPassword": "Wachtwoord bevestigen",

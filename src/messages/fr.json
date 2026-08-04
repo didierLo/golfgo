@@ -844,6 +844,8 @@
       "title": "Nouveau mot de passe",
       "subtitle": "Choisissez un nouveau mot de passe pour votre compte",
       "back": "← Retour à la page de connexion",
+      "checking": "Vérification du lien...",
+      "invalidLink": "Ce lien est invalide ou a expiré. Redemandez un nouveau lien depuis cet appareil.",
       "email": "Adresse email",
       "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmez le mot de passe",
