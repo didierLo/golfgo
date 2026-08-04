@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { AuthCard, AuthInput, AuthButton, AuthError, AuthSuccess, EyeButton } from '@/components/auth/AuthCard'
@@ -11,7 +11,6 @@ const supabase = createClient()
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const t = useTranslations()
 
   const [newPassword, setNewPassword]         = useState('')
@@ -24,34 +23,41 @@ export default function ResetPasswordPage() {
   const [checkingLink, setCheckingLink] = useState(true)
   const [sessionReady, setSessionReady] = useState(false)
 
-  // Le lien reçu par email contient un `code` PKCE : il faut l'échanger
-  // explicitement contre une session avant de pouvoir changer le mot de
-  // passe. Sans cet échange, updateUser() échoue systématiquement.
+  // Le client Supabase (`detectSessionInUrl`, actif par défaut) traite déjà
+  // tout seul le `code` PKCE présent dans l'URL au chargement de la page.
+  // On ne le refait PAS nous-mêmes ici : appeler exchangeCodeForSession en
+  // plus ferait une 2e tentative sur le même code à usage unique, et l'une
+  // des deux échouerait avec "invalid grant" — d'où le bug "1er clic
+  // invalide, 2e clic OK" observé. On se contente d'écouter le résultat.
   useEffect(() => {
-    const code = searchParams.get('code')
+    let active = true
 
-    if (!code) {
-      // Pas de code dans l'URL : soit le lien est invalide, soit une
-      // session existe déjà (cas rare). On vérifie avant de conclure.
-      supabase.auth.getSession().then(({ data }) => {
-        setSessionReady(!!data.session)
-        if (!data.session) setError(t('auth.resetPassword.invalidLink'))
-        setCheckingLink(false)
-      })
-      return
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active || !session) return
+      setSessionReady(true)
+      setCheckingLink(false)
+    })
 
-    supabase.auth.exchangeCodeForSession(code).then(({ error: exchangeError }) => {
-      if (exchangeError) {
-        console.error('[reset-password] exchangeCodeForSession error:', exchangeError)
+    // Filet de sécurité : si après un court délai aucune session n'est
+    // apparue, le lien est vraiment invalide/expiré/déjà utilisé.
+    const timeout = setTimeout(async () => {
+      if (!active) return
+      const { data } = await supabase.auth.getSession()
+      if (!data.session) {
         setError(t('auth.resetPassword.invalidLink'))
         setSessionReady(false)
       } else {
         setSessionReady(true)
       }
       setCheckingLink(false)
-    })
-  }, [searchParams, t])
+    }, 3000)
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
+  }, [t])
 
   async function handleReset(e: React.FormEvent) {
     e.preventDefault()
@@ -62,8 +68,8 @@ export default function ResetPasswordPage() {
       setLoading(false); return
     }
 
-    // Ne jamais repasser `email` ici : la session issue de l'échange du
-    // code suffit à identifier l'utilisateur, et transmettre l'email
+    // Ne jamais repasser `email` ici : la session issue du lien de reset
+    // suffit à identifier l'utilisateur, et transmettre l'email
     // déclenche par erreur un changement d'adresse (avec reconfirmation).
     const { error: resetError } = await supabase.auth.updateUser({ password: newPassword })
 
