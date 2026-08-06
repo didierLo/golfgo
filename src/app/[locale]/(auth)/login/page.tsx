@@ -42,9 +42,17 @@ function LoginContent() {
         console.error('[login] link-player call failed:', linkError)
       }
 
+      // Rechargement complet (pas router.push + router.refresh) : on force
+      // une nouvelle requête réseau qui repart du cookie de session déjà
+      // committé par le navigateur, au lieu de compter sur le timing d'une
+      // transition côté client. proxy.ts (garde-fou ajouté le 04/08) relit
+      // la session à chaque requête ; une navigation soft juste après le
+      // login pouvait dans de rares cas arriver avant que le cookie soit
+      // pleinement propagé, provoquant un rebond vers /login malgré une
+      // connexion réussie (boucle de reconnexion observée par des testeurs
+      // Android le 06/08).
       const next = searchParams.get('next')
-      router.push(next ?? '/welcome')
-      router.refresh()
+      window.location.href = next ?? '/welcome'
     }
   }
 

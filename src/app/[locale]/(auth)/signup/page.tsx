@@ -25,8 +25,10 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true); setError(null)
 
+    const trimmedEmail = email.trim()
+
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: trimmedEmail,
       password,
       options: { data: { full_name: fullName.trim() } },
     })
@@ -41,9 +43,10 @@ export default function SignupPage() {
     }
 
     if (data.user) {
-      // Relie players.user_id dès la création du compte (confirmation email
-      // désactivée ⇒ signUp() renvoie déjà une session, sans jamais passer
-      // par /api/auth/callback qui faisait ce lien jusqu'ici).
+      // Filet de sécurité pour les comptes créés AVANT la mise en place du
+      // trigger handle_new_user (qui, lui, lie déjà players.user_id tout
+      // seul à l'INSERT sur auth.users). Sans objet pour un signup normal
+      // aujourd'hui, mais inoffensif si déjà lié.
       try {
         await fetch('/api/auth/link-player', { method: 'POST' })
       } catch (linkError) {
