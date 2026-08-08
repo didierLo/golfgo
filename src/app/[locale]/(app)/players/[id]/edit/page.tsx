@@ -76,7 +76,7 @@ setLoading(false)
     if (!form.surname.trim() || !form.first_name.trim()) { setError(t('editPlayer.nameRequired')); return }
     setSaving(true); setError('')
 
-    const { error: pErr } = await supabase.from('players').update({
+    const { data: updatedRows, error: pErr } = await supabase.from('players').update({
       first_name:        form.first_name.trim(),
       surname:           form.surname.trim(),
       federal_no:        form.federal_no.trim() || null,
@@ -85,9 +85,18 @@ setLoading(false)
       phone:             form.phone.trim() || null,
       gender:            form.gender,
       default_tee_color: form.default_tee_color,
-    }).eq('id', playerId)
+    }).eq('id', playerId).select('id')
 
     if (pErr) { setError(pErr.message); setSaving(false); return }
+
+    // RLS peut bloquer l'update sans renvoyer d'erreur (0 ligne affectée) —
+    // sans .select() ci-dessus, ce cas passait inaperçu et le formulaire
+    // redirigeait comme si tout avait été sauvegardé.
+    if (!updatedRows || updatedRows.length === 0) {
+      setError(t('editPlayer.updateBlocked') ?? "La mise à jour n'a pas été appliquée (droits insuffisants ?)")
+      setSaving(false)
+      return
+    }
 
     if (groupId) {
       const { error: gpErr } = await supabase.from('groups_players')
