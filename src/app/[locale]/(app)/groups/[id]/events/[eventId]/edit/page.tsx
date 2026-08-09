@@ -138,6 +138,7 @@ export default function EditEventPage() {
   const [fee, setFee]                                   = useState('')
   const [emailMessage, setEmailMessage]                 = useState('')
   const [scorecardNotes, setScorecardNotes] = useState('')
+  const [extraActivityLabel, setExtraActivityLabel]     = useState('')
   const [maxParticipants, setMaxParticipants]           = useState('')
   const [clubs, setClubs]     = useState<{ id: string; name: string; country: string }[]>([])
   const [courses, setCourses] = useState<{ id: string; course_name: string }[]>([])
@@ -156,7 +157,7 @@ export default function EditEventPage() {
     setLoading(true)
     const { data: event, error: evErr } = await supabase
       .from('events')
-     .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants, scorecard_notes, hcp_percentage_override')
+     .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants, scorecard_notes, hcp_percentage_override, extra_activity_label')
       .eq('id', eventId).single()
     if (evErr || !event) { alert(t('editEvent.notFound')); window.location.href = `/groups/${groupId}/events`; return }
 
@@ -171,6 +172,7 @@ export default function EditEventPage() {
     setFee(event.fee_per_person ? String(event.fee_per_person) : '')
     setEmailMessage(event.email_message || '')
     setScorecardNotes(event.scorecard_notes || '')
+    setExtraActivityLabel(event.extra_activity_label || '')
     setMaxParticipants(event.max_participants ? String(event.max_participants) : '')
 
   const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
@@ -231,6 +233,7 @@ async function handleSubmit(e: React.FormEvent) {
       email_message:         emailMessage || null,
       max_participants:      maxParticipants ? parseInt(maxParticipants) : null,
       scorecard_notes:       scorecardNotes || null,
+      extra_activity_label:  extraActivityLabel.trim() || null,
       updated_at:            new Date().toISOString(),
     }).eq('id', eventId)
     if (updateError) { setError(updateError.message); setSaving(false); return }
@@ -374,6 +377,17 @@ async function handleSubmit(e: React.FormEvent) {
             placeholder={t('editEvent.emailPlaceholder')}
             rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
           <p className="text-[11px] text-slate-500 mt-1">{t('editEvent.emailHint')}</p>
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+            Activité annexe <span className="text-slate-400 font-normal">— optionnel</span>
+          </label>
+          <input value={extraActivityLabel} onChange={e => setExtraActivityLabel(e.target.value)}
+            placeholder="Ex: Repas au clubhouse — 19h" className={inputClass} />
+          <p className="text-[11px] text-slate-500 mt-1">
+            Si rempli, chaque participant pourra dire oui/non à cette activité en plus de sa réponse golf. Laisser vide pour désactiver.
+          </p>
         </div>
         
         <div>

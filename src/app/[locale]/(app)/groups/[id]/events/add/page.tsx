@@ -20,6 +20,7 @@ export default function AddEventPage() {
   const [fee, setFee]                   = useState('')
   const [emailMessage, setEmailMessage] = useState('')
   const [scorecardNotes, setScorecardNotes] = useState('')
+  const [extraActivityLabel, setExtraActivityLabel] = useState('')
   const [saving, setSaving]             = useState(false)
   const [error, setError]               = useState('')
   const [clubs, setClubs]               = useState<{ id: string; name: string; country: string }[]>([])
@@ -80,6 +81,7 @@ export default function AddEventPage() {
         fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
         email_message:         emailMessage || null,
         scorecard_notes:       scorecardNotes || null,
+        extra_activity_label:  extraActivityLabel.trim() || null,
         max_participants:      maxParticipants ? parseInt(maxParticipants) : null,
       })
       if (insertError) { setError(insertError.message); setSaving(false); return }
@@ -232,6 +234,17 @@ export default function AddEventPage() {
             placeholder={t('addEvent.emailPlaceholder')} rows={3}
             className={`${inputClass} resize-none`} />
           <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.emailHint')}</p>
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
+            Activité annexe <span className="text-slate-400 font-normal">— optionnel</span>
+          </label>
+          <input value={extraActivityLabel} onChange={e => setExtraActivityLabel(e.target.value)}
+            placeholder="Ex: Repas au clubhouse — 19h" className={inputClass} />
+          <p className="text-[11px] text-slate-500 mt-1">
+            Si rempli, chaque participant pourra dire oui/non à cette activité en plus de sa réponse golf.
+          </p>
         </div>
 
         <div>

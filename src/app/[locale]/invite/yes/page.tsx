@@ -23,6 +23,11 @@ function InviteYesContent() {
   const [msgSaving,   setMsgSaving]   = useState(false)
   const [msgSaved,    setMsgSaved]    = useState(false)
 
+  // Activité annexe optionnelle
+  const [extraActivityLabel, setExtraActivityLabel]       = useState<string | null>(null)
+  const [extraActivityResponse, setExtraActivityResponse] = useState<boolean | null>(null)
+  const [extraSaving, setExtraSaving] = useState(false)
+
   const token        = searchParams.get('token')
   const holesParam   = searchParams.get('holes')
   const sectionParam = searchParams.get('section')
@@ -46,7 +51,7 @@ function InviteYesContent() {
 
    const [{ data: participant }, { error }] = await Promise.all([
   supabase.from('event_participants')
-    .select('event_id, events(group_id)')
+    .select('event_id, extra_activity_response, events(group_id, extra_activity_label)')
     .eq('invite_token', tok).maybeSingle(),
   supabase.from('event_participants')
     .update({
@@ -63,6 +68,8 @@ function InviteYesContent() {
     if (participant?.event_id && (participant?.events as any)?.group_id) {
       setAppLink(`/groups/${(participant.events as any).group_id}/events/${participant.event_id}`)
     }
+    setExtraActivityLabel((participant?.events as any)?.extra_activity_label ?? null)
+    setExtraActivityResponse(participant?.extra_activity_response ?? null)
 
     setHolesPlayed(holes)
     setHolesSection(section)
@@ -84,6 +91,16 @@ function InviteYesContent() {
     })
     setMsgSaved(true)
     setMsgSaving(false)
+  }
+
+  async function handleExtraActivity(response: boolean) {
+    if (!token) return
+    setExtraSaving(true)
+    await supabase.from('event_participants')
+      .update({ extra_activity_response: response })
+      .eq('invite_token', token)
+    setExtraActivityResponse(response)
+    setExtraSaving(false)
   }
 
   function holesDisplayLabel() {
@@ -156,6 +173,33 @@ function InviteYesContent() {
             <p className="text-[13px] text-slate-600 mb-6">
               {t('inviteYes.successDesc', { holes: holesDisplayLabel() })}
             </p>
+
+            {/* ── Bloc activité annexe ── */}
+            {extraActivityLabel && (
+              <div className="border-t border-slate-100 pt-5 mb-5 text-left">
+                <p className="text-[13px] font-semibold text-slate-700 mb-3">
+                  🍽️ Participes-tu aussi à : {extraActivityLabel} ?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleExtraActivity(true)}
+                    disabled={extraSaving}
+                    className={`flex-1 py-2.5 rounded-xl border-2 font-semibold text-[13px] transition-all disabled:opacity-50 ${
+                      extraActivityResponse === true ? 'border-[#3B6D11] bg-[#EAF3DE] text-[#3B6D11]' : 'border-slate-200 text-slate-400 hover:border-slate-300'
+                    }`}>
+                    Oui
+                  </button>
+                  <button
+                    onClick={() => handleExtraActivity(false)}
+                    disabled={extraSaving}
+                    className={`flex-1 py-2.5 rounded-xl border-2 font-semibold text-[13px] transition-all disabled:opacity-50 ${
+                      extraActivityResponse === false ? 'border-[#A32D2D] bg-[#FCEBEB] text-[#A32D2D]' : 'border-slate-200 text-slate-400 hover:border-slate-300'
+                    }`}>
+                    Non
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* ── Bloc message ── */}
             <div className="border-t border-slate-100 pt-5 mb-5 text-left">

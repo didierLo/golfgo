@@ -13,18 +13,42 @@ function InviteNoContent() {
   const t            = useTranslations()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
 
+  // Activité annexe optionnelle
+  const [extraActivityLabel, setExtraActivityLabel]       = useState<string | null>(null)
+  const [extraActivityResponse, setExtraActivityResponse] = useState<boolean | null>(null)
+  const [extraSaving, setExtraSaving] = useState(false)
+  const [token, setToken] = useState<string | null>(null)
+
   useEffect(() => { handleDecline() }, [])
 
   async function handleDecline() {
-    const token = searchParams.get('token')
-    if (!token) { setStatus('error'); return }
+    const tok = searchParams.get('token')
+    if (!tok) { setStatus('error'); return }
+    setToken(tok)
 
-    const { error } = await supabase
-      .from('event_participants')
-      .update({ status: 'DECLINED', responded_at: new Date().toISOString() })
-      .eq('invite_token', token)
+    const [{ data: participant }, { error }] = await Promise.all([
+      supabase.from('event_participants')
+        .select('extra_activity_response, events(extra_activity_label)')
+        .eq('invite_token', tok).maybeSingle(),
+      supabase.from('event_participants')
+        .update({ status: 'DECLINED', responded_at: new Date().toISOString() })
+        .eq('invite_token', tok),
+    ])
+
+    setExtraActivityLabel((participant?.events as any)?.extra_activity_label ?? null)
+    setExtraActivityResponse(participant?.extra_activity_response ?? null)
 
     setStatus(error ? 'error' : 'success')
+  }
+
+  async function handleExtraActivity(response: boolean) {
+    if (!token) return
+    setExtraSaving(true)
+    await supabase.from('event_participants')
+      .update({ extra_activity_response: response })
+      .eq('invite_token', token)
+    setExtraActivityResponse(response)
+    setExtraSaving(false)
   }
 
   return (
@@ -52,6 +76,33 @@ function InviteNoContent() {
             </div>
             <h1 className="text-[18px] font-black text-slate-900 mb-2">{t('inviteNo.successTitle')}</h1>
             <p className="text-[13px] text-slate-600">{t('inviteNo.successDesc')}</p>
+
+            {/* ── Bloc activité annexe — même en cas de forfait golf ── */}
+            {extraActivityLabel && (
+              <div className="border-t border-slate-100 pt-5 mt-5 text-left">
+                <p className="text-[13px] font-semibold text-slate-700 mb-3">
+                  🍽️ Participes-tu quand même à : {extraActivityLabel} ?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleExtraActivity(true)}
+                    disabled={extraSaving}
+                    className={`flex-1 py-2.5 rounded-xl border-2 font-semibold text-[13px] transition-all disabled:opacity-50 ${
+                      extraActivityResponse === true ? 'border-[#3B6D11] bg-[#EAF3DE] text-[#3B6D11]' : 'border-slate-200 text-slate-400 hover:border-slate-300'
+                    }`}>
+                    Oui
+                  </button>
+                  <button
+                    onClick={() => handleExtraActivity(false)}
+                    disabled={extraSaving}
+                    className={`flex-1 py-2.5 rounded-xl border-2 font-semibold text-[13px] transition-all disabled:opacity-50 ${
+                      extraActivityResponse === false ? 'border-[#A32D2D] bg-[#FCEBEB] text-[#A32D2D]' : 'border-slate-200 text-slate-400 hover:border-slate-300'
+                    }`}>
+                    Non
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
 
