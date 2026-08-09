@@ -12,7 +12,22 @@ export async function POST() {
 
   const userEmail = user.email.toLowerCase()
 
-  const { data: player, error: playerError } = await supabase
+  // Client admin (service role) : nécessaire dès la LECTURE, pas seulement
+  // l'écriture. Avant d'être lié, `players.user_id` n'est pas encore égal
+  // à auth.uid() — si la policy RLS de lecture sur `players` exige
+  // `user_id = auth.uid()`, le client normal ne verra JAMAIS la ligne à
+  // lier (RLS la filtre silencieusement, aucune erreur), donc `player`
+  // reste toujours null et le rattachement échoue en boucle à chaque
+  // login, sans jamais rien logger. On a déjà vérifié l'identité de
+  // l'utilisateur via getUser() juste au-dessus, donc bypasser RLS ici
+  // pour cette lecture précise est sûr.
+  const adminClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  )
+
+  const { data: player, error: playerError } = await adminClient
     .from('players')
     .select('id, user_id')
     .ilike('email', userEmail)
@@ -31,14 +46,6 @@ export async function POST() {
   if (player.user_id === user.id) {
     return NextResponse.json({ linked: true, reason: 'already_linked' })
   }
-
-  // Service role nécessaire : un utilisateur ne peut pas modifier sa propre
-  // fiche players (registre fédéral) via ses propres droits RLS.
-  const adminClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  )
 
   const [{ error: updateError }, { error: roleError }] = await Promise.all([
     adminClient.from('players').update({ user_id: user.id }).eq('id', player.id),
