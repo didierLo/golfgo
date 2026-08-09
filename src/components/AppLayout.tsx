@@ -124,7 +124,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession()
         const user = session?.user
         if (!user) { setLoading(false); return }
-        const { data: playerData, error: playerError } = await supabase.from('players').select('id, first_name, surname').eq('user_id', user.id).single()
+
+        let { data: playerData, error: playerError } = await supabase.from('players').select('id, first_name, surname').eq('user_id', user.id).single()
+
+          if ((playerError || !playerData)) {
+            // Filet de sécurité général : peu importe comment la session a été
+            // créée (login classique, reset password, session déjà existante
+            // au chargement), on tente ici le rattachement players.user_id
+            // s'il n'a pas encore eu lieu, puis on retente une seule fois.
+            try {
+              const res = await fetch('/api/auth/link-player', { method: 'POST' })
+              const result = await res.json().catch(() => null)
+              if (result?.linked) {
+                const retry = await supabase.from('players').select('id, first_name, surname').eq('user_id', user.id).single()
+                playerData  = retry.data
+                playerError = retry.error
+              }
+            } catch (linkError) {
+              console.error('[AppLayout] link-player retry failed:', linkError)
+            }
+          }
+
         if (playerError || !playerData) { setLoading(false); return }
         const initials = ((playerData.first_name?.[0] ?? '') + (playerData.surname?.[0] ?? '')).toUpperCase()
         setCurrentUser({ initials, name: `${playerData.first_name} ${playerData.surname}` })
