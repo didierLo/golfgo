@@ -37,7 +37,7 @@ function LoginContent() {
       // On n'attend pas d'erreur bloquante ici : si ça échoue, on laisse
       // quand même l'utilisateur entrer, il verra juste un profil incomplet.
       try {
-        await fetch('/api/auth/link-player', { method: 'POST' })
+        await fetch('/api/link-player', { method: 'POST' })
       } catch (linkError) {
         console.error('[login] link-player call failed:', linkError)
       }

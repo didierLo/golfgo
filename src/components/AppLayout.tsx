@@ -133,7 +133,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             // au chargement), on tente ici le rattachement players.user_id
             // s'il n'a pas encore eu lieu, puis on retente une seule fois.
             try {
-              const res = await fetch('/api/auth/link-player', { method: 'POST' })
+              const res = await fetch('/api/link-player', { method: 'POST' })
               const result = await res.json().catch(() => null)
               if (result?.linked) {
                 const retry = await supabase.from('players').select('id, first_name, surname').eq('user_id', user.id).single()

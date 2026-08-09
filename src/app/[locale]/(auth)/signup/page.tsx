@@ -48,7 +48,7 @@ export default function SignupPage() {
       // seul à l'INSERT sur auth.users). Sans objet pour un signup normal
       // aujourd'hui, mais inoffensif si déjà lié.
       try {
-        await fetch('/api/auth/link-player', { method: 'POST' })
+        await fetch('/api/link-player', { method: 'POST' })
       } catch (linkError) {
         console.error('[signup] link-player call failed:', linkError)
       }
