@@ -17,6 +17,7 @@ type Participant = {
   holes_played: number | null
   holes_section: HolesSection
   response_message: string | null
+  extra_activity_response: boolean | null
   players: { first_name: string; surname: string; whs: number | null } | null  // ← nullable
 }
 type Event     = { id: string; title: string; starts_at: string }
@@ -62,6 +63,39 @@ function holesLabel(holes: number | null, section: HolesSection): string {
   if (section === 'out') return '9F'
   if (section === 'in') return '9B'
   return '18T'   // ← fallback sécurisé si section null
+}
+
+// ─── Badge / toggle activité annexe ────────────────────────────────────────
+function ExtraActivityCell({
+  response,
+  isOwner,
+  onToggle,
+}: {
+  response: boolean | null
+  isOwner: boolean
+  onToggle?: () => void
+}) {
+  if (isOwner) {
+    return (
+      <button type="button" onClick={onToggle}
+        title="Cliquer pour changer la réponse"
+        className={`text-[13px] font-bold w-7 h-7 rounded-lg border flex items-center justify-center transition-colors ${
+          response === true
+            ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11] hover:bg-[#DCEFC4]'
+            : response === false
+            ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D] hover:bg-[#F9DCDC]'
+            : 'bg-white/60 border-slate-200 text-slate-300 hover:border-slate-300'
+        }`}>
+        {response === true ? '✓' : response === false ? '✗' : '—'}
+      </button>
+    )
+  }
+  if (response === null) return <span className="text-slate-200 text-[13px]">—</span>
+  return (
+    <span className={`text-[13px] font-bold ${response ? 'text-[#3B6D11]' : 'text-[#A32D2D]'}`}>
+      {response ? '✓' : '✗'}
+    </span>
+  )
 }
 
 // ─── Modal message ──────────────────────────────────────────────────────────
@@ -213,6 +247,8 @@ export default function ParticipantsPage() {
   const [statusMatrix,    setStatusMatrix]    = useState<Record<string, Record<string, string>>>({})
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [msgModal,        setMsgModal]        = useState<Participant | null>(null)
+  const [extraActivityLabel, setExtraActivityLabel] = useState<string | null>(null)
+  const [listCopied,      setListCopied]      = useState(false)
 
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
   useEffect(() => {
@@ -255,10 +291,13 @@ export default function ParticipantsPage() {
   const { data: me } = await supabase.rpc('auth_player_id')
   console.log('auth_player_id =', me)
 
-  const { data, error } = await supabase
-    .from('event_participants')
-    .select(`player_id, status, responded_at, holes_played, holes_section, response_message, players(first_name, surname, whs)`)
-    .eq('event_id', evId)
+  const [{ data, error }, { data: evData }] = await Promise.all([
+    supabase
+      .from('event_participants')
+      .select(`player_id, status, responded_at, holes_played, holes_section, response_message, extra_activity_response, players(first_name, surname, whs)`)
+      .eq('event_id', evId),
+    supabase.from('events').select('extra_activity_label').eq('id', evId).single(),
+  ])
 
   console.log('participants data=', data, 'error=', error)
     
@@ -266,6 +305,7 @@ export default function ParticipantsPage() {
     // FIX — filtre les lignes orphelines (players null = joueur supprimé ou RLS)
     const clean = (data || []).filter((p: any) => p.players != null)
     setParticipants(clean as any)
+    setExtraActivityLabel(evData?.extra_activity_label ?? null)
     setLoading(false)
   }
 
@@ -336,6 +376,25 @@ export default function ParticipantsPage() {
     loadParticipants(selectedEventId)
   }
 
+  async function toggleExtraActivity(playerId: string, current: boolean | null) {
+    const next = current === null ? true : current === true ? false : null
+    await supabase.from('event_participants')
+      .update({ extra_activity_response: next })
+      .eq('event_id', selectedEventId).eq('player_id', playerId)
+    setParticipants(prev => prev.map(p =>
+      p.player_id === playerId ? { ...p, extra_activity_response: next } : p
+    ))
+  }
+
+  function copyExtraActivityList() {
+    const names = participants
+      .filter(p => p.extra_activity_response === true)
+      .map(p => `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim())
+    navigator.clipboard.writeText(names.length ? names.join('\n') : 'Aucun participant pour le moment')
+    setListCopied(true)
+    setTimeout(() => setListCopied(false), 1500)
+  }
+
   function changeSort(field: SortField) {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortField(field); setSortDir('asc') }
@@ -349,7 +408,7 @@ export default function ParticipantsPage() {
 
   const statusOrder = { GOING: 0, INVITED: 1, WAITLIST: 2, DECLINED: 3 }
 
-  const { going, going18, going9front, going9back, going9, invited, declined, has9holers } = useMemo(() => {
+  const { going, going18, going9front, going9back, going9, invited, declined, has9holers, extraActivityCount } = useMemo(() => {
     const going  = participants.filter(p => p.status === 'GOING')
     const going9 = going.filter(p => p.holes_played === 9)
     return {
@@ -361,6 +420,7 @@ export default function ParticipantsPage() {
       invited:     participants.filter(p => p.status === 'INVITED').length,
       declined:    participants.filter(p => p.status === 'DECLINED').length,
       has9holers:  going9.length > 0,
+      extraActivityCount: participants.filter(p => p.extra_activity_response === true).length,
     }
   }, [participants])
 
@@ -404,6 +464,17 @@ export default function ParticipantsPage() {
     return isOwner || p.player_id === myPlayerId
   }
 
+  const gridCols = isOwner
+    ? (extraActivityLabel
+        ? 'grid-cols-[minmax(160px,1fr)_20px_70px_36px_60px_80px_150px_130px_minmax(160px,190px)]'
+        : 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]')
+    : (extraActivityLabel
+        ? 'grid-cols-[minmax(200px,1fr)_20px_70px_36px_60px_80px_150px_130px]'
+        : 'grid-cols-[minmax(200px,1fr)_20px_70px_60px_80px_150px_130px]')
+  const tableMinWidth = isOwner
+    ? (extraActivityLabel ? 'min-w-[900px]' : 'min-w-[860px]')
+    : (extraActivityLabel ? 'min-w-[760px]' : 'min-w-[720px]')
+
   return (
     <div className="p-5 sm:p-6 max-w-5xl">
       {msgModal && (
@@ -432,10 +503,18 @@ export default function ParticipantsPage() {
           )}
         </div>
         {viewMode === 'list' && (
-          <a href={`/groups/${groupId}/invitations`}
-            className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] transition-colors whitespace-nowrap ml-auto">
-            ✉️ {t('participants.invitations')}
-          </a>
+          <div className="flex items-center gap-2 ml-auto">
+            {isOwner && extraActivityLabel && (
+              <button type="button" onClick={copyExtraActivityList}
+                className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition-colors whitespace-nowrap">
+                {listCopied ? '✓ Copié' : '📋 Copier la liste'}
+              </button>
+            )}
+            <a href={`/groups/${groupId}/invitations`}
+              className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] transition-colors whitespace-nowrap">
+              ✉️ {t('participants.invitations')}
+            </a>
+          </div>
         )}
       </div>
 
@@ -491,6 +570,14 @@ export default function ParticipantsPage() {
               <span className="text-[20px] font-black text-slate-700">{participants.length}</span>
               <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{t('participants.total')}</span>
             </div>
+            {extraActivityLabel && (
+              <div className="border border-purple-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px] max-w-[140px]" style={{ background: '#F5F0FF' }}>
+                <span className="text-[20px] font-black text-[#7C3AED]">{extraActivityCount}</span>
+                <span className="text-[10px] font-semibold text-[#7C3AED] uppercase tracking-wide truncate w-full text-center">
+                  🍽️ {extraActivityLabel}
+                </span>
+              </div>
+            )}
           </div>
 
           {loading ? (
@@ -501,16 +588,13 @@ export default function ParticipantsPage() {
             <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
               style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
               <div className="overflow-x-auto">
-              <div className={isOwner ? 'min-w-[860px]' : 'min-w-[720px]'}>
+              <div className={tableMinWidth}>
               {/* Header */}
-              <div className={`grid gap-3 px-4 py-3 bg-white/30 border-b border-white/40 ${
-                isOwner
-                  ? 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                  : 'grid-cols-[minmax(200px,1fr)_20px_70px_60px_80px_150px_130px]'
-              }`}>
+              <div className={`grid gap-3 px-4 py-3 bg-white/30 border-b border-white/40 ${gridCols}`}>
                 <SortBtn field="name"   label={t('participants.player')} />
                 <span />
                 <SortBtn field="holes"  label={t('participants.holes')} />
+                {extraActivityLabel && <span className="text-[12px] font-semibold text-slate-400 text-center" title={extraActivityLabel}>🍽️</span>}
                 <SortBtn field="whs"    label={t('participants.whs')} />
                 <span className="text-[12px] font-semibold text-slate-400">{t('participants.respondedOn')}</span>
                 <SortBtn field="status" label={t('participants.status')} />
@@ -528,11 +612,7 @@ export default function ParticipantsPage() {
               ) : (
                 displayed.map((p, i) => (
                   <div key={p.player_id}
-                    className={`grid gap-3 px-4 py-3 items-center ${
-                      isOwner
-                        ? 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]'
-                        : 'grid-cols-[minmax(200px,1fr)_20px_70px_60px_80px_150px_130px]'
-                    } ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
+                    className={`grid gap-3 px-4 py-3 items-center ${gridCols} ${i < displayed.length - 1 ? 'border-b border-white/30' : ''}`}>
 
                     {/* Nom — FIX L532 */}
                     <div className="flex items-center gap-2 min-w-0">
@@ -577,6 +657,17 @@ export default function ParticipantsPage() {
                         <span />                                                // ← rien pour DECLINED/INVITED
                       )}
                     </div>
+
+                    {/* Activité annexe */}
+                    {extraActivityLabel && (
+                      <div className="flex justify-center">
+                        <ExtraActivityCell
+                          response={p.extra_activity_response}
+                          isOwner={isOwner}
+                          onToggle={() => toggleExtraActivity(p.player_id, p.extra_activity_response)}
+                        />
+                      </div>
+                    )}
 
                    {/* WHS — FIX L574 */}
                     <div className="text-[13px] text-slate-600 text-center">{p.players?.whs ?? '—'}</div>

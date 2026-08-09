@@ -892,7 +892,7 @@
     "holes": "trous",
     "confirm": "Confirmer ma participation",
     "saving": "Confirmation...",
-    "successTitle": "Participation confirmée !",
+    "successTitle": "Indisponibilité confirmée",
     "successDesc": "Vous jouez sur le parcours «{holes}» trous. Rendez-vous sur le parcours ⛳",
     "viewEvent": "Voir l'événement",
     "errorTitle": "Lien invalide",
