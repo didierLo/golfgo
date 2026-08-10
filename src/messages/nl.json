@@ -105,7 +105,7 @@
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
     }
   },
-  
+
   "calendar": {
     "months": ["Januari","Februari","Maart","April","Mei","Juni","Juli","Augustus","September","Oktober","November","December"],
     "days": ["Ma","Di","Wo","Do","Vr","Za","Zo"]
@@ -116,6 +116,10 @@
     "error": "Er is een fout opgetreden",
     "noData": "—",
     "back": "Terug"
+  },
+
+  "errors": {
+    "generic": "Er is een fout opgetreden"
   },
 
   "clubs": {
@@ -797,7 +801,8 @@
     "nameRequired": "Voor- en achternaam verplicht",
     "saving": "Opslaan...",
     "save": "Opslaan",
-    "backToMembers": "← Terug naar leden"
+    "backToMembers": "← Terug naar leden",
+    "updateBlocked": "De update is niet toegepast (onvoldoende rechten?)"
   },
   "notOwner": {
     "title": "Functie voorbehouden aan organisatoren",
@@ -978,7 +983,8 @@
     "skipped": "{count} bestaande items overgeslagen",
     "importAnother": "Ander bestand importeren",
     "errorFormat": "Niet-herkend formaat — kolommen CLUB en SLOPE niet gevonden",
-    "errorRead": "Kan bestand niet lezen"
+    "errorRead": "Kan bestand niet lezen",
+    "teesUpdated": "tees bijgewerkt"
   },
 
   "partners": {

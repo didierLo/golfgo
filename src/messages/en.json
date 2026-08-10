@@ -115,6 +115,11 @@
     "noData": "—",
     "back": "Back"
   },
+
+  "errors": {
+    "generic": "An error occurred"
+  },
+  
   "clubs": {
     "title": "Clubs & Courses",
     "subtitle": "Manage available clubs and courses",
@@ -597,6 +602,7 @@
     "error": "Error",
     "validateConfirm": "Confirm validation",
     "noParticipants": "No players confirmed for this event",
+    "noCourse": "Select a club and course to access scorecards",
     "noCourseReadOnly": "No course has been set for this event",
     "whatsapp": "WhatsApp",
     "manageCourses": "Manage clubs and courses"
@@ -793,7 +799,8 @@
     "nameRequired": "First and last name required",
     "saving": "Saving...",
     "save": "Save",
-    "backToMembers": "← Back to members"
+    "backToMembers": "← Back to members",
+    "updateBlocked": "The update wasn't applied (insufficient permissions?)"
   },
   "notOwner": {
     "title": "Feature reserved for organisers",
@@ -974,7 +981,8 @@
     "skipped": "{count} existing entries skipped",
     "importAnother": "Import another file",
     "errorFormat": "Unrecognised format — CLUB and SLOPE columns not found",
-    "errorRead": "Unable to read file"
+    "errorRead": "Unable to read file",
+    "teesUpdated": "tees updated"
   },
 
     "partners": {
@@ -994,7 +1002,7 @@
       "title": "Terms of Use",
       "lastUpdated": "Version of {date}",
       "back": "Back",
-      "linkToCgu": "View terms of use",
+      "linkToPrivacy": "View privacy policy",
       "sections": {
         "presentation": {
           "title": "1. About the application",
@@ -1054,7 +1062,7 @@
       "title": "Privacy Policy",
       "lastUpdated": "Version of {date}",
       "back": "Back",
-      "linkToPrivacy": "View privacy policy",
+       "linkToCgu": "View terms of use",
       "sections": {
         "controller": {
           "title": "1. Data controller",

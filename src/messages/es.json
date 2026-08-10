@@ -115,6 +115,11 @@
     "noData": "—",
     "back": "Volver"
   },
+
+  "errors": {
+    "generic": "Se ha producido un error"
+  },
+
   "clubs": {
     "title": "Clubs y Campos",
     "subtitle": "Gestionar clubs y campos disponibles",
@@ -791,8 +796,10 @@
     "nameRequired": "Nombre y apellido obligatorios",
     "saving": "Guardando...",
     "save": "Guardar",
-    "backToMembers": "← Volver a miembros"
+    "backToMembers": "← Volver a miembros",
+    "updateBlocked": "La actualización no se aplicó (¿permisos insuficientes?)"
   },
+
   "notOwner": {
     "title": "Función reservada a organizadores",
     "desc": "Crea un grupo para organizar tus eventos e invitar jugadores.",
@@ -972,7 +979,8 @@
     "skipped": "{count} entradas existentes omitidas",
     "importAnother": "Importar otro archivo",
     "errorFormat": "Formato no reconocido — columnas CLUB y SLOPE no encontradas",
-    "errorRead": "No se puede leer el archivo"
+    "errorRead": "No se puede leer el archivo",
+    "teesUpdated": "tees actualizados"
   },
 
   "partners": {

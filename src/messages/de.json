@@ -115,7 +115,11 @@
     "noData": "—",
     "back": "Zurück"
   },
-  
+
+   "errors": {
+    "generic": "Ein Fehler ist aufgetreten"
+  },
+
   "clubs": {
     "title": "Clubs & Plätze",
     "subtitle": "Verfügbare Clubs und Plätze verwalten",
@@ -794,8 +798,10 @@
     "nameRequired": "Vor- und Nachname erforderlich",
     "saving": "Speichern...",
     "save": "Speichern",
-    "backToMembers": "← Zurück zu Mitgliedern"
+    "backToMembers": "← Zurück zu Mitgliedern",
+    "updateBlocked": "Die Aktualisierung wurde nicht übernommen (unzureichende Berechtigungen?)"
   },
+
   "notOwner": {
     "title": "Funktion für Organisatoren",
     "desc": "Erstellen Sie eine Gruppe, um Ihre Veranstaltungen zu organisieren und Spieler einzuladen.",
@@ -975,7 +981,8 @@
     "skipped": "{count} bestehende Einträge übersprungen",
     "importAnother": "Andere Datei importieren",
     "errorFormat": "Unbekanntes Format — Spalten CLUB und SLOPE nicht gefunden",
-    "errorRead": "Datei kann nicht gelesen werden"
+    "errorRead": "Datei kann nicht gelesen werden",
+    "teesUpdated": "Tees aktualisiert"
   },
 
     "partners": {

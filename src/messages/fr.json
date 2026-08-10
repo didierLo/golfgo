@@ -107,6 +107,7 @@
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
     }
   },
+
   "calendar": {
     "months": ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
     "days": ["Lu","Ma","Me","Je","Ve","Sa","Di"]
@@ -116,8 +117,12 @@
     "error": "Une erreur est survenue",
     "noData": "—",
     "back": "Retour"
-    
   },
+
+  "errors": {
+    "generic": "Une erreur est survenue"
+  },
+
   "clubs": {
     "title": "Clubs et Parcours",
     "subtitle": "Gérer les clubs et parcours disponibles",
@@ -800,8 +805,10 @@
     "nameRequired": "Nom et prénom obligatoires",
     "saving": "Enregistrement en cours...",
     "save": "Enregistrer",
-    "backToMembers": "← Retour à la liste des membres"
+    "backToMembers": "← Retour à la liste des membres",
+    "updateBlocked": "La mise à jour n'a pas été appliquée (droits insuffisants ?)"
   },
+
   "notOwner": {
     "title": "Fonctionnalité réservée aux organisateurs",
     "desc": "Créez un groupe pour organiser vos événements et inviter des joueurs.",
@@ -981,7 +988,8 @@
     "skipped": "{count} les entrées existantes ont été ignorées",
     "importAnother": "Importer un autre fichier",
     "errorFormat": "Format non reconnu — Colonnes CLUB et SLOPE introuvables",
-    "errorRead": "Impossible de lire le fichier"
+    "errorRead": "Impossible de lire le fichier",
+    "teesUpdated": "tees mis à jour"
   },
 
     "partners": {
