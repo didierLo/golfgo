@@ -112,8 +112,10 @@
   "common": {
     "loading": "Laden…",
     "error": "Ein Fehler ist aufgetreten",
-    "noData": "—"
+    "noData": "—",
+    "back": "Zurück"
   },
+  
   "clubs": {
     "title": "Clubs & Plätze",
     "subtitle": "Verfügbare Clubs und Plätze verwalten",

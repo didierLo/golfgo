@@ -112,7 +112,8 @@
   "common": {
     "loading": "Loading…",
     "error": "An error occurred",
-    "noData": "—"
+    "noData": "—",
+    "back": "Back"
   },
   "clubs": {
     "title": "Clubs & Courses",

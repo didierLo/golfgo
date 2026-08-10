@@ -114,7 +114,9 @@
   "common": {
     "loading": "Chargement…",
     "error": "Une erreur est survenue",
-    "noData": "—"
+    "noData": "—",
+    "back": "Retour"
+    
   },
   "clubs": {
     "title": "Clubs et Parcours",

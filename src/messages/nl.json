@@ -105,15 +105,19 @@
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
     }
   },
+  
   "calendar": {
     "months": ["Januari","Februari","Maart","April","Mei","Juni","Juli","Augustus","September","Oktober","November","December"],
     "days": ["Ma","Di","Wo","Do","Vr","Za","Zo"]
   },
+
   "common": {
     "loading": "Laden…",
     "error": "Er is een fout opgetreden",
-    "noData": "—"
+    "noData": "—",
+    "back": "Terug"
   },
+
   "clubs": {
     "title": "Clubs & Parcours",
     "subtitle": "Beschikbare clubs en parcours beheren",

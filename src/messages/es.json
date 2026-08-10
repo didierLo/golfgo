@@ -112,7 +112,8 @@
   "common": {
     "loading": "Cargando…",
     "error": "Se ha producido un error",
-    "noData": "—"
+    "noData": "—",
+    "back": "Volver"
   },
   "clubs": {
     "title": "Clubs y Campos",
