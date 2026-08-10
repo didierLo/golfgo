@@ -77,21 +77,32 @@ export default function ImportPlayers() {
 
   async function buildPreview(data: any[]) {
     const federals = data.map(r => String(r.federal_no || '').trim().toUpperCase())
-    const { data: existing } = await supabase.from('players').select('federal_no, whs').in('federal_no', federals)
+    const { data: existing } = await supabase.from('players').select('federal_no, whs, first_name, surname, email, phone, home_club').in('federal_no', federals)
     const map = new Map(); existing?.forEach(p => map.set(p.federal_no, p))
     const previewRows: PlayerPreview[] = data.map((r, i) => {
       let federal = String(r.federal_no || '').trim().toUpperCase()
       if (!federal) federal = `AUTO_${Date.now()}_${i}`
-      const whs = cleanWHS(r.whs)
+      const whs        = cleanWHS(r.whs)
+      const first_name = String(r.first_name || '').trim().replace(/\b\w/g, l => l.toUpperCase())
+      const surname     = String(r.surname || '').trim().toUpperCase()
+      const email       = r.email || null
+      const phone       = cleanPhone(r.phone)
+      const home_club   = r.home_club || null
       const existingPlayer = map.get(federal)
       let status: 'NEW' | 'UPDATE' | 'EXISTS' = 'NEW'
-      if (existingPlayer) status = existingPlayer.whs !== whs ? 'UPDATE' : 'EXISTS'
-      return {
-        federal_no: federal,
-        first_name: String(r.first_name || '').trim().replace(/\b\w/g, l => l.toUpperCase()),
-        surname:    String(r.surname || '').trim().toUpperCase(),
-        whs, email: r.email || null, phone: cleanPhone(r.phone), home_club: r.home_club || null, status,
+      if (existingPlayer) {
+        // Un champ ne compte comme "changé" que s'il est réellement renseigné dans le
+        // fichier ET différent de la valeur en base — une cellule vide n'est jamais un changement.
+        const changed =
+          (whs !== null && whs !== existingPlayer.whs) ||
+          (!!first_name && first_name !== existingPlayer.first_name) ||
+          (!!surname && surname !== existingPlayer.surname) ||
+          (!!email && email !== existingPlayer.email) ||
+          (!!phone && phone !== existingPlayer.phone) ||
+          (!!home_club && home_club !== existingPlayer.home_club)
+        status = changed ? 'UPDATE' : 'EXISTS'
       }
+      return { federal_no: federal, first_name, surname, whs, email, phone, home_club, status }
     })
     const map2 = new Map(); previewRows.forEach(p => map2.set(p.federal_no, p))
     setPreview(Array.from(map2.values()))
@@ -102,17 +113,48 @@ export default function ImportPlayers() {
     let toImport = preview
     if (mode === 'insert') toImport = preview.filter(p => p.status === 'NEW')
     if (mode === 'update') toImport = preview.filter(p => p.status !== 'EXISTS')
-    const rows = toImport.map(p => ({ federal_no: p.federal_no, first_name: p.first_name, surname: p.surname, whs: p.whs, email: p.email, phone: p.phone, home_club: p.home_club }))
-    const { data, error } = await supabase.from('players').upsert(rows, { onConflict: 'federal_no' }).select('id')
-    if (error) { alert(error.message); setLoading(false); return }
-    if (groupId && data) {
-      const playerIds = data.map(p => p.id)
-      const { data: existingMembers } = await supabase.from('groups_players').select('player_id, role').eq('group_id', groupId).in('player_id', playerIds)
-      const existingRoleMap: Record<string, string> = {}; existingMembers?.forEach(m => { existingRoleMap[m.player_id] = m.role })
-      const newMembers = data.filter(p => !existingRoleMap[p.id])
-      if (newMembers.length > 0) await supabase.from('groups_players').insert(newMembers.map(p => ({ group_id: groupId, player_id: p.id, role: 'member' })))
+
+    const newRows    = toImport.filter(p => p.status === 'NEW')
+    const updateRows = toImport.filter(p => p.status === 'UPDATE')
+
+    const insertedIds: string[] = []
+    const touchedIds:  string[] = []
+
+    // 1) Nouveaux joueurs : rien à préserver, insert complet comme avant
+    if (newRows.length > 0) {
+      const rows = newRows.map(p => ({ federal_no: p.federal_no, first_name: p.first_name, surname: p.surname, whs: p.whs, email: p.email, phone: p.phone, home_club: p.home_club }))
+      const { data, error } = await supabase.from('players').upsert(rows, { onConflict: 'federal_no' }).select('id')
+      if (error) { alert(error.message); setLoading(false); return }
+      data?.forEach(d => insertedIds.push(d.id))
     }
-    alert(`${rows.length} joueur(s) importé(s)`)
+
+    // 2) Joueurs existants : update champ par champ, un appel par ligne, en n'envoyant
+    //    que les colonnes réellement renseignées dans le fichier — une cellule vide
+    //    (ex. email/téléphone/club non recopiés juste pour changer le handicap)
+    //    ne touche donc jamais la valeur déjà en base.
+    for (const p of updateRows) {
+      const patch: Record<string, any> = {}
+      if (p.first_name)   patch.first_name = p.first_name
+      if (p.surname)      patch.surname    = p.surname
+      if (p.whs !== null) patch.whs        = p.whs
+      if (p.email)        patch.email      = p.email
+      if (p.phone)        patch.phone      = p.phone
+      if (p.home_club)    patch.home_club  = p.home_club
+      if (Object.keys(patch).length === 0) continue
+      const { data, error } = await supabase.from('players').update(patch).eq('federal_no', p.federal_no).select('id')
+      if (error) { alert(error.message); setLoading(false); return }
+      if (data?.[0]?.id) touchedIds.push(data[0].id)
+    }
+
+    const allIds = [...insertedIds, ...touchedIds]
+    if (groupId && allIds.length > 0) {
+      const { data: existingMembers } = await supabase.from('groups_players').select('player_id, role').eq('group_id', groupId).in('player_id', allIds)
+      const existingRoleMap: Record<string, string> = {}; existingMembers?.forEach(m => { existingRoleMap[m.player_id] = m.role })
+      const newMembers = allIds.filter(id => !existingRoleMap[id])
+      if (newMembers.length > 0) await supabase.from('groups_players').insert(newMembers.map(id => ({ group_id: groupId, player_id: id, role: 'member' })))
+    }
+
+    alert(`${newRows.length} nouveau(x), ${updateRows.length} mis à jour`)
     setPreview([]); setLoading(false)
   }
 
