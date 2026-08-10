@@ -892,7 +892,7 @@
     "holes": "trous",
     "confirm": "Confirmer ma participation",
     "saving": "Confirmation...",
-    "successTitle": "Indisponibilité confirmée",
+    "successTitle": "Participation confirmée",
     "successDesc": "Vous jouez sur le parcours «{holes}» trous. Rendez-vous sur le parcours ⛳",
     "viewEvent": "Voir l'événement",
     "errorTitle": "Lien invalide",
@@ -900,7 +900,7 @@
   },
   "inviteNo": {
     "loading": "Traitement en cours...",
-    "successTitle": "La participation a diminué",
+    "successTitle": "Indisponibilité",
     "successDesc": "Votre réponse a été enregistrée. À la prochaine !",
     "errorTitle": "Lien invalide",
     "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
