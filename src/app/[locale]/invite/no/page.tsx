@@ -17,6 +17,7 @@ function InviteNoContent() {
   const [extraActivityLabel, setExtraActivityLabel]       = useState<string | null>(null)
   const [extraActivityResponse, setExtraActivityResponse] = useState<boolean | null>(null)
   const [extraSaving, setExtraSaving] = useState(false)
+  const [extraError,  setExtraError]  = useState(false)
   const [token, setToken] = useState<string | null>(null)
 
   // Message optionnel
@@ -49,9 +50,15 @@ function InviteNoContent() {
   async function handleExtraActivity(response: boolean) {
     if (!token) return
     setExtraSaving(true)
-    await supabase.from('event_participants')
+    setExtraError(false)
+    const { error } = await supabase.from('event_participants')
       .update({ extra_activity_response: response })
       .eq('invite_token', token)
+    if (error) {
+      setExtraError(true)
+      setExtraSaving(false)
+      return
+    }
     setExtraActivityResponse(response)
     setExtraSaving(false)
   }
@@ -117,6 +124,26 @@ function InviteNoContent() {
                     }`}>
                     Non
                   </button>
+                </div>
+
+                {/* ── Retour visuel : évite l'effet "figé" ── */}
+                <div className="h-5 mt-2 flex items-center">
+                  {extraSaving && (
+                    <span className="text-[12px] text-slate-400 flex items-center gap-1.5">
+                      <span className="w-3 h-3 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin inline-block" />
+                      Enregistrement…
+                    </span>
+                  )}
+                  {!extraSaving && extraError && (
+                    <span className="text-[12px] text-[#A32D2D]">
+                      ⚠ Non enregistré, réessaie
+                    </span>
+                  )}
+                  {!extraSaving && !extraError && extraActivityResponse !== null && (
+                    <span className="text-[12px] font-semibold text-[#3B6D11] flex items-center gap-1">
+                      ✓ Réponse enregistrée
+                    </span>
+                  )}
                 </div>
               </div>
             )}

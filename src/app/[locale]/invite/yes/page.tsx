@@ -27,6 +27,7 @@ function InviteYesContent() {
   const [extraActivityLabel, setExtraActivityLabel]       = useState<string | null>(null)
   const [extraActivityResponse, setExtraActivityResponse] = useState<boolean | null>(null)
   const [extraSaving, setExtraSaving] = useState(false)
+  const [extraError,  setExtraError]  = useState(false)
 
   const token        = searchParams.get('token')
   const holesParam   = searchParams.get('holes')
@@ -49,19 +50,19 @@ function InviteYesContent() {
   async function confirmParticipation(tok: string, holes: 9 | 18, section: 'out' | 'in' | null) {
     setStep('saving')
 
-   const [{ data: participant }, { error }] = await Promise.all([
-  supabase.from('event_participants')
-    .select('event_id, extra_activity_response, events(group_id, extra_activity_label)')
-    .eq('invite_token', tok).maybeSingle(),
-  supabase.from('event_participants')
-    .update({
-      status:        'GOING',
-      holes_played:  holes,
-      holes_section: section,
-      responded_at:  new Date().toISOString(),
-    })
-    .eq('invite_token', tok),
-])
+    const [{ data: participant }, { error }] = await Promise.all([
+      supabase.from('event_participants')
+        .select('event_id, extra_activity_response, events(group_id, extra_activity_label)')
+        .eq('invite_token', tok).maybeSingle(),
+      supabase.from('event_participants')
+        .update({
+          status:        'GOING',
+          holes_played:  holes,
+          holes_section: section,
+          responded_at:  new Date().toISOString(),
+        })
+        .eq('invite_token', tok),
+    ])
 
     if (error) { setStep('error'); return }
 
@@ -96,9 +97,15 @@ function InviteYesContent() {
   async function handleExtraActivity(response: boolean) {
     if (!token) return
     setExtraSaving(true)
-    await supabase.from('event_participants')
+    setExtraError(false)
+    const { error } = await supabase.from('event_participants')
       .update({ extra_activity_response: response })
       .eq('invite_token', token)
+    if (error) {
+      setExtraError(true)
+      setExtraSaving(false)
+      return
+    }
     setExtraActivityResponse(response)
     setExtraSaving(false)
   }
@@ -197,6 +204,26 @@ function InviteYesContent() {
                     }`}>
                     Non
                   </button>
+                </div>
+
+                {/* ── Retour visuel : évite l'effet "figé" ── */}
+                <div className="h-5 mt-2 flex items-center">
+                  {extraSaving && (
+                    <span className="text-[12px] text-slate-400 flex items-center gap-1.5">
+                      <span className="w-3 h-3 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin inline-block" />
+                      Enregistrement…
+                    </span>
+                  )}
+                  {!extraSaving && extraError && (
+                    <span className="text-[12px] text-[#A32D2D]">
+                      ⚠ Non enregistré, réessaie
+                    </span>
+                  )}
+                  {!extraSaving && !extraError && extraActivityResponse !== null && (
+                    <span className="text-[12px] font-semibold text-[#3B6D11] flex items-center gap-1">
+                      ✓ Réponse enregistrée
+                    </span>
+                  )}
                 </div>
               </div>
             )}
