@@ -750,7 +750,7 @@
     "backToMembers": "← Back to members",
     "continueToEvents": "Continue to events →",
     "alreadyMember": "This player is already in this group as {role}",
-    "importTitle": "Guest players"
+    "importTitle": "Import players"
   },
   "addGroup": {
     "title": "New group",
@@ -783,6 +783,8 @@
   },
   "editPlayer": {
     "title": "Edit player profile",
+    "importHint": "This file can also update existing players (handicap, club, etc.): only the filled-in cells are changed, nothing else is overwritten.",
+    "bulkEditHint": "Need to change several players at once (handicap, club...)? Use the Excel import from \"Add members\" →",
     "notFound": "Player not found",
     "firstName": "First name *",
     "lastName": "Last name *",
@@ -801,6 +803,7 @@
     "save": "Save",
     "backToMembers": "← Back to members",
     "updateBlocked": "The update wasn't applied (insufficient permissions?)"
+    
   },
   "notOwner": {
     "title": "Feature reserved for organisers",

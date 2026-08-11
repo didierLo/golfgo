@@ -755,7 +755,8 @@
     "backToMembers": "← Retour à la liste des membres",
     "continueToEvents": "Continuer vers les événements →",
     "alreadyMember": "Ce joueur fait déjà partie de ce groupe sous le nom d'{role}",
-    "importTitle": "Joueurs étrangers"
+    "importTitle": "Importer des joueurs",
+    "importHint": "Ce fichier sert aussi à mettre à jour des joueurs existants (handicap, club, etc.) : seules les cellules remplies sont modifiées (N°fédéral obligatoire), le reste n'est jamais écrasé."
   },
   "addGroup": {
     "title": "Nouveau groupe",
@@ -789,6 +790,7 @@
   
   "editPlayer": {
     "title": "Modifier le profil du joueur",
+    "bulkEditHint": "Besoin de modifier plusieurs joueurs à la fois (handicap, club...) ? Utilise l'import Excel depuis « Ajouter des membres » →",
     "notFound": "Joueur introuvable",
     "firstName": "Prénom *",
     "lastName": "Nom de famille *",

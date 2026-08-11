@@ -355,11 +355,18 @@ export default function AddMemberPage() {
       {showImport && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-[500px] space-y-4 border border-white/50">
-            <div className="flex justify-between items-center">
+           <div className="flex justify-between items-center">
               <h2 className="text-[15px] font-black text-slate-900">{t('addMember.importTitle')}</h2>
               <button onClick={() => setShowImport(false)} className="text-slate-400 hover:text-slate-600">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
+            </div>
+            <div className="flex items-start gap-2 rounded-xl bg-[#EBF3FC] border border-[#185FA5]/20 px-3 py-2.5">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5">
+                <circle cx="8" cy="8" r="7" stroke="#185FA5" strokeWidth="1.3"/>
+                <path d="M8 7.2v4M8 5.3v.1" stroke="#185FA5" strokeWidth="1.3" strokeLinecap="round"/>
+              </svg>
+              <p className="text-[11.5px] text-[#0C447C] leading-snug">{t('addMember.importHint')}</p>
             </div>
             <ImportPlayers />
           </div>

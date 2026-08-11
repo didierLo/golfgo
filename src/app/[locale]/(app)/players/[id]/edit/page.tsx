@@ -115,12 +115,23 @@ setLoading(false)
 
   return (
     <div className="p-5 sm:p-6 max-w-xl">
-      <div className="flex items-center justify-between mb-6">
+       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('editPlayer.title')}</h1>
           <p className="text-[13px] text-slate-900 mt-0.5">{form.first_name} {form.surname}</p>
         </div>
       </div>
+
+      {groupId && (
+        <a href={`/groups/${groupId}/members/add`}
+          className="flex items-center gap-2 mb-4 rounded-xl bg-[#EBF3FC] border border-[#185FA5]/20 px-3 py-2.5 text-[11.5px] text-[#0C447C] leading-snug hover:bg-[#DCEAFA] transition-colors">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
+            <circle cx="8" cy="8" r="7" stroke="#185FA5" strokeWidth="1.3"/>
+            <path d="M8 7.2v4M8 5.3v.1" stroke="#185FA5" strokeWidth="1.3" strokeLinecap="round"/>
+          </svg>
+          <span>{t('editPlayer.bulkEditHint')}</span>
+        </a>
+      )}
 
       <form onSubmit={handleSave} className="flex flex-col gap-4">
         <div className="border border-white/60 rounded-xl p-5 bg-white/70 backdrop-blur-sm flex flex-col gap-3">

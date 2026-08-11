@@ -752,7 +752,7 @@
     "backToMembers": "← Terug naar leden",
     "continueToEvents": "Doorgaan naar evenementen →",
     "alreadyMember": "Deze speler maakt al deel uit van deze groep als {role}",
-    "importTitle": "Gastspelers"
+    "importTitle": "Spelers importeren"
   },
   "addGroup": {
     "title": "Nieuwe groep",
@@ -785,6 +785,8 @@
   },
   "editPlayer": {
     "title": "Spelersprofiel bewerken",
+    "importHint": "Dit bestand kan ook bestaande spelers bijwerken (handicap, club, ...): alleen ingevulde cellen worden gewijzigd, de rest wordt nooit overschreven.",
+    "bulkEditHint": "Meerdere spelers tegelijk wijzigen (handicap, club...)? Gebruik de Excel-import via 'Leden toevoegen' →",
     "notFound": "Speler niet gevonden",
     "firstName": "Voornaam *",
     "lastName": "Achternaam *",

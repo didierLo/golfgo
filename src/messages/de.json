@@ -749,7 +749,7 @@
     "backToMembers": "← Zurück zu Mitgliedern",
     "continueToEvents": "Weiter zu Veranstaltungen →",
     "alreadyMember": "Dieser Spieler ist bereits als {role} in dieser Gruppe",
-    "importTitle": "Gastspieler"
+    "importTitle": "Spieler importieren"
   },
   "addGroup": {
     "title": "Neue Gruppe",
@@ -782,6 +782,8 @@
   },
   "editPlayer": {
     "title": "Spielerprofil bearbeiten",
+    "importHint": "Diese Datei kann auch bestehende Spieler aktualisieren (Handicap, Club usw.): Nur ausgefüllte Zellen werden geändert, der Rest wird nie überschrieben.",
+    "bulkEditHint": "Mehrere Spieler auf einmal ändern (Handicap, Club...)? Nutze den Excel-Import unter \"Mitglieder hinzufügen\" →",
     "notFound": "Spieler nicht gefunden",
     "firstName": "Vorname *",
     "lastName": "Nachname *",
