@@ -17,7 +17,31 @@ function applyVars(text: string, vars: Record<string, string>): string {
   )
 }
 
-function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string) {
+function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true) {
+  if (!isGolf) {
+    return `
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
+  <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-size:22px;width:36px;">🙋</td>
+      <td style="padding-left:12px;">
+        <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
+      </td>
+      <td align="right" style="font-size:20px;">→</td>
+    </tr></table>
+  </a>
+</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;"><tr><td>
+  <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-size:22px;width:36px;">😔</td>
+      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+      <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
+    </tr></table>
+  </a>
+</td></tr></table>`
+  }
+
   return `
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
   <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
@@ -66,9 +90,9 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 </td></tr></table>`
 }
 
-function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, eventMessage, yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl }: {
+function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, eventMessage, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl }: {
   eventTitle: string; eventDate: string; eventTime: string
-  eventLocation: string | null; eventMessage: string | null
+  eventLocation: string | null; eventMessage: string | null; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string
   noLink: string; eventLink: string; logoUrl: string | null
 }) {
@@ -96,7 +120,7 @@ function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, 
   ${eventMessage ? `<div style="margin-bottom:28px;"><p style="margin:0;font-size:14px;color:#334155;line-height:1.9;">${eventMessage.replace(/\n/g, '<br/>')}</p></div>` : ''}
   <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
   <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink)}
+  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}
   <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
     Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
   </p>
@@ -179,9 +203,9 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
 </body></html>`
 }
 
-function buildCommHtml({ subject, body, eventTitle, hasButtons, yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl }: {
+function buildCommHtml({ subject, body, eventTitle, hasButtons, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl }: {
   subject: string; body: string; eventTitle?: string
-  hasButtons: boolean; yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string
+  hasButtons: boolean; isGolf: boolean; yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string
   logoUrl: string | null
 }) {
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>${subject}</title></head>
@@ -198,7 +222,7 @@ function buildCommHtml({ subject, body, eventTitle, hasButtons, yes18Link, yes9f
   ${hasButtons ? `
   <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
   <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink)}` : ''}
+  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}` : ''}
 </td></tr>
 <tr><td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
   <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Envoyé via GolfGo · golfgo.be</p>
@@ -218,7 +242,7 @@ export async function POST(req: Request) {
     if (type === 'invitation') {
       const { eventId } = body
       const { data: event } = await supabase.from('events')
-        .select('id, title, location, starts_at, group_id, email_message').eq('id', eventId).single()
+        .select('id, title, location, starts_at, group_id, email_message, is_golf').eq('id', eventId).single()
       if (!event) return Response.json({ error: 'Event introuvable' }, { status: 404 })
 
       const { data: groupData } = await supabase.from('groups')
@@ -241,6 +265,7 @@ export async function POST(req: Request) {
       const html = buildInvitationHtml({
         eventTitle: event.title, eventDate, eventTime,
         eventLocation: event.location, eventMessage: resolvedBody,
+        isGolf: event.is_golf ?? true,
         yes18Link:    `${appUrl}/invite/yes?token=PREVIEW&holes=18`,
         yes9frontLink: `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=out`,
         yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,
@@ -283,13 +308,14 @@ export async function POST(req: Request) {
      const [{ data: group }, eventResult] = await Promise.all([
   supabase.from('groups').select('name, template_logo_url').eq('id', groupId).single(),
   eventId
-    ? supabase.from('events').select('title, starts_at').eq('id', eventId).single()
+    ? supabase.from('events').select('title, starts_at, is_golf').eq('id', eventId).single()
     : Promise.resolve({ data: null }),
 ])
 
 const eventTitle = eventResult.data?.title
 const eventDate  = eventResult.data ? formatDate(eventResult.data.starts_at) : ''
 const eventTime  = eventResult.data ? formatTime(eventResult.data.starts_at) : ''
+const eventIsGolf = (eventResult.data as any)?.is_golf ?? true
 const logoUrl    = (group as any)?.template_logo_url ?? null
 
 
@@ -308,7 +334,7 @@ const logoUrl    = (group as any)?.template_logo_url ?? null
 
       const html = buildCommHtml({
         subject: resolvedSubject, body: resolvedBody, eventTitle,
-        hasButtons,
+        hasButtons, isGolf: eventIsGolf,
         yes18Link:     `${appUrl}/invite/yes?token=PREVIEW&holes=18`,
         yes9frontLink: `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=out`,
         yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,

@@ -37,45 +37,36 @@ function applyTemplateVars(text: string, vars: Record<string, string>): string {
   )
 }
 
-// ── Email rappel J-3 ─────────────────────────────────────────────────────────
+// ── Boutons de réponse (golf vs event non-golf) ────────────────────────────────
 
-function buildReminderHtml({
-  firstName, eventTitle, eventDate, eventTime, eventLocation, bodyText,
-  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl,
-}: {
-  firstName: string; eventTitle: string; eventDate: string; eventTime: string
-  eventLocation: string | null; bodyText: string; yes18Link: string; yes9frontLink: string
-  yes9backLink: string; noLink: string; logoUrl: string | null
-}) {
-  return `
-<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Rappel — ${eventTitle}</title></head>
-<body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-        <tr>
-          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            ${buildEmailLogoHeader(logoUrl)}
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#ffffff;padding:36px 32px;">
-            <div style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.7;white-space:pre-wrap;">${bodyText}</div>
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
-              <tr><td style="padding:16px 20px;">
-                <table cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
-                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
-                  </tr>
-                  ${eventLocation ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td><td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td></tr>` : ''}
-                </table>
+function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string): string {
+  if (!isGolf) {
+    return `
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+              <tr><td>
+                <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                    <td style="font-size:22px;width:36px;">🙋</td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div></td>
+                    <td align="right" style="font-size:20px;">→</td>
+                  </tr></table>
+                </a>
               </td></tr>
             </table>
-            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Confirmez votre présence</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <tr><td>
+                <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                    <td style="font-size:22px;width:36px;">😔</td>
+                    <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+                    <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
+                  </tr></table>
+                </a>
+              </td></tr>
+            </table>`
+  }
+
+  return `
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr><td>
                 <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
@@ -119,7 +110,49 @@ function buildReminderHtml({
                   </tr></table>
                 </a>
               </td></tr>
+            </table>`
+}
+
+// ── Email rappel J-3 ─────────────────────────────────────────────────────────
+
+function buildReminderHtml({
+  firstName, eventTitle, eventDate, eventTime, eventLocation, bodyText, isGolf,
+  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl,
+}: {
+  firstName: string; eventTitle: string; eventDate: string; eventTime: string
+  eventLocation: string | null; bodyText: string; isGolf: boolean; yes18Link: string; yes9frontLink: string
+  yes9backLink: string; noLink: string; logoUrl: string | null
+}) {
+  return `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Rappel — ${eventTitle}</title></head>
+<body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+        <tr>
+          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
+            ${buildEmailLogoHeader(logoUrl)}
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#ffffff;padding:36px 32px;">
+            <div style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.7;white-space:pre-wrap;">${bodyText}</div>
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
+              <tr><td style="padding:16px 20px;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
+                  </tr>
+                  ${eventLocation ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td><td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td></tr>` : ''}
+                </table>
+              </td></tr>
             </table>
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Confirmez votre présence</p>
+            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink)}
           </td>
         </tr>
         <tr>
@@ -186,11 +219,11 @@ function buildNoTeesheetHtml({
 </body></html>`.trim()
 }
 function buildInvitationHtml({
-  firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName, bodyText,
+  firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName, bodyText, isGolf,
   yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl,
 }: {
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
-  eventLocation: string | null; ownerName: string; bodyText: string
+  eventLocation: string | null; ownerName: string; bodyText: string; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string; logoUrl: string | null
 }) {
 
@@ -224,50 +257,7 @@ function buildInvitationHtml({
               </td></tr>
             </table>
             <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-              <tr><td>
-                <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
-                  <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">⛳</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div><div style="font-size:12px;color:#16A34A;margin-top:2px;">18 trous</div></td>
-                    <td align="right" style="font-size:20px;">→</td>
-                  </tr></table>
-                </a>
-              </td></tr>
-            </table>
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-              <tr><td>
-                <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:#FEF9C3;border:2px solid #CA8A04;border-radius:12px;padding:16px 20px;">
-                  <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">🌅</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#92400E;">Je participe</div><div style="font-size:12px;color:#B45309;margin-top:2px;">9 trous Front</div></td>
-                    <td align="right" style="font-size:20px;">→</td>
-                  </tr></table>
-                </a>
-              </td></tr>
-            </table>
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-              <tr><td>
-                <a href="${yes9backLink}" style="display:block;text-decoration:none;background:#FFEDD5;border:2px solid #EA580C;border-radius:12px;padding:16px 20px;">
-                  <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">🌇</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#9A3412;">Je participe</div><div style="font-size:12px;color:#C2410C;margin-top:2px;">9 trous Back</div></td>
-                    <td align="right" style="font-size:20px;">→</td>
-                  </tr></table>
-                </a>
-              </td></tr>
-            </table>
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-              <tr><td>
-                <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
-                  <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">😔</td>
-                    <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
-                    <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
-                  </tr></table>
-                </a>
-              </td></tr>
-            </table>
+            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink)}
             <div style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;">
               <p style="margin:0;font-size:12px;color:#92400E;font-style:italic;">
                 Si tu as déjà répondu via GolfGo, ne tiens pas compte de cet email.
@@ -398,6 +388,7 @@ if (days === 3 && group?.auto_reminders) {
           eventTime:    formatTime(event.starts_at),
           eventLocation: event.location,
           bodyText,
+          isGolf: event.is_golf ?? true,
           yes18Link, yes9frontLink, yes9backLink, noLink,
           logoUrl,
         })
@@ -516,6 +507,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           eventLocation: event.location,
           ownerName,
           bodyText,
+          isGolf: event.is_golf ?? true,
           yes18Link, yes9frontLink, yes9backLink, noLink,
           logoUrl,
         })

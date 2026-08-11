@@ -23,74 +23,43 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
   )
 }
 
-function buildEmailHtml({
-  eventTitle, eventDate, eventTime, eventLocation, eventMessage,
-  yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl,
-}: {
-  eventTitle: string; eventDate: string; eventTime: string
-  eventLocation: string | null; eventMessage: string | null
-  yes18Link: string; yes9frontLink: string; yes9backLink: string
-  noLink: string; eventLink: string; logoUrl: string | null
-}) {
-  return `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invitation — ${eventTitle}</title>
-</head>
-<body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-
-        <!-- Header -->
-        <tr>
-          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            ${buildEmailLogoHeader(logoUrl)}
-          </td>
-        </tr>
-
-        <!-- Body -->
-        <tr>
-          <td style="background:#ffffff;padding:36px 32px;">
-
-            <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;line-height:1.3;">
-              Invitation
-            </h1>
-            <p style="margin:0 0 28px;font-size:16px;font-weight:600;color:#185FA5;">
-              ${eventTitle}
-            </p>
-
-            <!-- Infos event -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
-              <tr><td style="padding:16px 20px;">
-                <table cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
-                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
-                  </tr>
-                  ${eventLocation ? `
-                  <tr>
-                    <td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td>
-                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td>
-                  </tr>` : ''}
-                </table>
+function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string): string {
+  if (!isGolf) {
+    return `
+            <!-- Participation (event non-golf) -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+              <tr><td>
+                <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:22px;width:36px;">🙋</td>
+                      <td style="padding-left:12px;">
+                        <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
+                      </td>
+                      <td align="right" style="font-size:20px;">→</td>
+                    </tr>
+                  </table>
+                </a>
               </td></tr>
             </table>
 
-            ${eventMessage ? `
-            <div style="margin-bottom:28px;">
-              <p style="margin:0;font-size:14px;color:#334155;line-height:1.9;">${eventMessage.replace(/\n/g, '<br/>')}</p>
-            </div>` : ''}
+            <!-- Décliner -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <tr><td>
+                <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="font-size:22px;width:36px;">😔</td>
+                      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+                      <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
+                    </tr>
+                  </table>
+                </a>
+              </td></tr>
+            </table>`
+  }
 
-            <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
-
-            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">
-              Ta réponse
-            </p>
-
+  return `
             <!-- 18 trous -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr><td>
@@ -158,7 +127,78 @@ function buildEmailHtml({
                   </table>
                 </a>
               </td></tr>
+            </table>`
+}
+
+function buildEmailHtml({
+  eventTitle, eventDate, eventTime, eventLocation, eventMessage, isGolf,
+  yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl,
+}: {
+  eventTitle: string; eventDate: string; eventTime: string
+  eventLocation: string | null; eventMessage: string | null; isGolf: boolean
+  yes18Link: string; yes9frontLink: string; yes9backLink: string
+  noLink: string; eventLink: string; logoUrl: string | null
+}) {
+  return `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invitation — ${eventTitle}</title>
+</head>
+<body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
+            ${buildEmailLogoHeader(logoUrl)}
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="background:#ffffff;padding:36px 32px;">
+
+            <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;line-height:1.3;">
+              Invitation
+            </h1>
+            <p style="margin:0 0 28px;font-size:16px;font-weight:600;color:#185FA5;">
+              ${eventTitle}
+            </p>
+
+            <!-- Infos event -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
+              <tr><td style="padding:16px 20px;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
+                  </tr>
+                  ${eventLocation ? `
+                  <tr>
+                    <td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td>
+                  </tr>` : ''}
+                </table>
+              </td></tr>
             </table>
+
+            ${eventMessage ? `
+            <div style="margin-bottom:28px;">
+              <p style="margin:0;font-size:14px;color:#334155;line-height:1.9;">${eventMessage.replace(/\n/g, '<br/>')}</p>
+            </div>` : ''}
+
+            <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
+
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">
+              Ta réponse
+            </p>
+
+            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink)}
 
             <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
               Ou <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
@@ -194,7 +234,7 @@ export async function POST(req: Request) {
 
   const { data: event, error: evErr } = await supabase
   .from('events')
-  .select('id, title, location, starts_at, group_id, email_message')
+  .select('id, title, location, starts_at, group_id, email_message, is_golf')
   .eq('id', eventId).single()
 if (evErr || !event) {
   return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
@@ -280,6 +320,7 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
       const html = buildEmailHtml({
         eventTitle: event.title, eventDate, eventTime,
         eventLocation: event.location, eventMessage: resolvedMessage,
+        isGolf: event.is_golf ?? true,
         yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl,
       })
 

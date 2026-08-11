@@ -24,7 +24,35 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
   )
 }
 
-function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string) {
+function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true) {
+  if (!isGolf) {
+    return `
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+  <tr><td>
+    <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:22px;width:36px;">🙋</td>
+        <td style="padding-left:12px;">
+          <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
+        </td>
+        <td align="right" style="font-size:20px;">→</td>
+      </tr></table>
+    </a>
+  </td></tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+  <tr><td>
+    <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:22px;width:36px;">😔</td>
+        <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+        <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
+      </tr></table>
+    </a>
+  </td></tr>
+</table>`
+  }
+
   return `
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
   <tr><td>
@@ -82,11 +110,11 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 }
 
 function buildEmailHtml({
-  eventTitle, eventDate, eventTime, eventLocation, eventMessage, eventLink,
+  eventTitle, eventDate, eventTime, eventLocation, eventMessage, eventLink, isGolf,
   yes18Link, yes9frontLink, yes9backLink, noLink, hasButtons, logoUrl,
 }: {
   eventTitle: string; eventDate: string; eventTime: string
-  eventLocation: string | null; eventMessage: string | null; eventLink: string
+  eventLocation: string | null; eventMessage: string | null; eventLink: string; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string
   noLink: string; hasButtons: boolean; logoUrl: string | null
 }) {
@@ -139,7 +167,7 @@ function buildEmailHtml({
             ${hasButtons ? `
             <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
             <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-            ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink)}` : ''}
+            ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}` : ''}
 
             <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
                Ou <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
@@ -184,7 +212,7 @@ const [{ data: groupData }, eventResult] = await Promise.all([
     .single(),
   eventId
     ? supabase.from('events')
-        .select('id, title, location, starts_at, group_id, max_participants')
+        .select('id, title, location, starts_at, group_id, max_participants, is_golf')
         .eq('id', eventId).single()
     : Promise.resolve({ data: null }),
 ])
@@ -342,6 +370,7 @@ if (eventId) {
         eventLocation: event?.location ?? null,
         eventMessage:  resolvedBody || null,
         eventLink,
+        isGolf: event?.is_golf ?? true,
         yes18Link, yes9frontLink, yes9backLink, noLink,
         hasButtons:    hasYesButton && !!token,  // ← FIX : conditionné au token aussi
         logoUrl,
