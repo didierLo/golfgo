@@ -10,8 +10,17 @@ Sentry.init({
   // Add optional integrations for additional features
   integrations: [Sentry.replayIntegration()],
 
+  // Bruit connu, sans rapport avec le code de l'app : bots/scanners automatisés
+  // (ex. vérificateurs de liens type Outlook SafeLinks) ou extensions de navigateur
+  // qui manipulent le DOM en décalage avec le cycle de vie React.
+  ignoreErrors: [
+    'Object Not Found Matching Id',
+  ],
+
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
+
+
   // Enable logs to be sent to Sentry
   enableLogs: true,
 
