@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { AuthCard, AuthInput, AuthButton, AuthError, AuthSuccess, EyeButton } from '@/components/auth/AuthCard'
@@ -9,9 +9,10 @@ import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
-export default function ForgotPasswordPage() {
-  const router = useRouter()
-  const t = useTranslations()
+function ForgotPasswordContent() {
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const t            = useTranslations()
 
   // Étape 1 : demande du code. Étape 2 : saisie du code + nouveau mot de passe.
   const [step, setStep] = useState<'request' | 'verify'>('request')
@@ -25,6 +26,13 @@ export default function ForgotPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword]       = useState(false)
   const [message, setMessage]                 = useState<string | null>(null)
+
+  // Pré-remplit l'email si on arrive depuis la page de connexion
+  // (lien "Mot de passe oublié" avec ?email=... déjà saisi par le joueur).
+  useEffect(() => {
+    const prefill = searchParams.get('email')
+    if (prefill) setEmail(prefill)
+  }, [searchParams])
 
   async function handleRequestCode(e: React.FormEvent) {
     e.preventDefault()
@@ -156,5 +164,13 @@ export default function ForgotPasswordPage() {
         <AuthButton loading={loading} label={t('auth.forgotPassword.submit')} loadingLabel={t('auth.forgotPassword.submitting')} />
       </form>
     </AuthCard>
+  )
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ForgotPasswordContent />
+    </Suspense>
   )
 }

@@ -95,7 +95,10 @@ function LoginContent() {
         />
 
         <div className="text-right -mt-2">
-          <Link href="/forgot-password" className="text-[12px] text-gray-400 hover:text-[#185FA5] transition-colors">
+          <Link
+            href={email ? `/forgot-password?email=${encodeURIComponent(email)}` : '/forgot-password'}
+            className="text-[12px] text-gray-400 hover:text-[#185FA5] transition-colors"
+          >
             {t('auth.login.forgotPassword')}
           </Link>
         </div>
