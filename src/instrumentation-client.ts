@@ -15,8 +15,9 @@ Sentry.init({
   // qui manipulent le DOM en décalage avec le cycle de vie React.
   ignoreErrors: [
     'Object Not Found Matching Id',
+      'Non-Error promise rejection captured',
   ],
-
+  
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
 
