@@ -850,13 +850,18 @@
    
     "forgotPassword": {
       "title": "Mot de passe oublié",
-      "subtitle": "Recevez un lien de réinitialisation par email",
+      "subtitle": "Recevez un code de réinitialisation par email",
+      "emailLabel": "Indiquez votre email",
       "back": "← Retour à la page de connexion",
-      "sent": "L'email a été envoyé ! Vérifiez votre boîte de réception (ou spam) et cliquez sur le lien.",
+      "sent": "Un code à 6 chiffres a été envoyé par email. Vérifiez votre boîte de réception (ou spam) et saisissez-le ci-dessous.",
       "resend": "Renvoyer",
       "noEmail": "Vous n'avez rien reçu ?",
-      "submit": "Envoyer le lien",
-      "submitting": "Envoi en cours..."
+      "submit": "Envoyer le code",
+      "submitting": "Envoi en cours...",
+      "otpLabel": "Code reçu par email",
+      "otpPlaceholder": "123456",
+      "invalidOtp": "Code invalide ou expiré. Redemandez un nouveau code.",
+      "changeEmail": "← Utiliser une autre adresse email"
     },
     "resetPassword": {
       "title": "Nouveau mot de passe",

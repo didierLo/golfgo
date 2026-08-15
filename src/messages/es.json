@@ -841,13 +841,18 @@
     
     "forgotPassword": {
       "title": "Contraseña olvidada",
-      "subtitle": "Recibe un enlace de restablecimiento por correo",
+      "subtitle": "Recibe un código de restablecimiento por correo",
+      "emailLabel": "Indica tu correo",
       "back": "← Volver al inicio de sesión",
-      "sent": "¡Correo enviado! Revisa tu bandeja de entrada (o spam) y haz clic en el enlace.",
+      "sent": "Se ha enviado un código de 6 dígitos por correo. Revisa tu bandeja de entrada (o spam) e introdúcelo abajo.",
       "resend": "Reenviar",
       "noEmail": "¿No has recibido nada?",
-      "submit": "Enviar enlace",
-      "submitting": "Enviando..."
+      "submit": "Enviar código",
+      "submitting": "Enviando...",
+      "otpLabel": "Código del correo",
+      "otpPlaceholder": "123456",
+      "invalidOtp": "Código inválido o caducado. Solicita uno nuevo.",
+      "changeEmail": "← Usar otra dirección de correo"
     },
     "resetPassword": {
       "title": "Nueva contraseña",

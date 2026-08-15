@@ -845,13 +845,18 @@
     
     "forgotPassword": {
       "title": "Wachtwoord vergeten",
-      "subtitle": "Ontvang een resetlink per e-mail",
+      "subtitle": "Ontvang een resetcode per e-mail",
+      "emailLabel": "Voer uw e-mail in",
       "back": "← Terug naar aanmelden",
-      "sent": "E-mail verzonden! Controleer uw inbox (of spam) en klik op de link.",
+      "sent": "Er is een 6-cijferige code per e-mail verzonden. Controleer uw inbox (of spam) en voer deze hieronder in.",
       "resend": "Opnieuw verzenden",
       "noEmail": "Niets ontvangen?",
-      "submit": "Link verzenden",
-      "submitting": "Verzenden..."
+      "submit": "Code verzenden",
+      "submitting": "Verzenden...",
+      "otpLabel": "Code uit e-mail",
+      "otpPlaceholder": "123456",
+      "invalidOtp": "Ongeldige of verlopen code. Vraag een nieuwe aan.",
+      "changeEmail": "← Ander e-mailadres gebruiken"
     },
     "resetPassword": {
       "title": "Nieuw wachtwoord",

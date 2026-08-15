@@ -844,13 +844,18 @@
     
     "forgotPassword": {
       "title": "Forgot password",
-      "subtitle": "Receive a reset link by email",
+      "subtitle": "Receive a reset code by email",
+      "emailLabel": "Enter your email",
       "back": "← Back to login",
-      "sent": "Email sent! Check your inbox (or spam) and click the link.",
+      "sent": "A 6-digit code has been sent by email. Check your inbox (or spam) and enter it below.",
       "resend": "Resend",
       "noEmail": "Didn't receive anything?",
-      "submit": "Send link",
-      "submitting": "Sending..."
+      "submit": "Send code",
+      "submitting": "Sending...",
+      "otpLabel": "Code from email",
+      "otpPlaceholder": "123456",
+      "invalidOtp": "Invalid or expired code. Request a new one.",
+      "changeEmail": "← Use a different email address"
     },
     "resetPassword": {
       "title": "New password",

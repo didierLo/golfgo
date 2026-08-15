@@ -843,13 +843,18 @@
     
     "forgotPassword": {
       "title": "Passwort vergessen",
-      "subtitle": "Erhalten Sie einen Reset-Link per E-Mail",
+      "subtitle": "Erhalten Sie einen Reset-Code per E-Mail",
+      "emailLabel": "Geben Sie Ihre E-Mail ein",
       "back": "← Zurück zur Anmeldung",
-      "sent": "E-Mail gesendet! Prüfen Sie Ihren Posteingang (oder Spam) und klicken Sie auf den Link.",
+      "sent": "Ein 6-stelliger Code wurde per E-Mail gesendet. Prüfen Sie Ihren Posteingang (oder Spam) und geben Sie ihn unten ein.",
       "resend": "Erneut senden",
       "noEmail": "Nichts erhalten?",
-      "submit": "Link senden",
-      "submitting": "Senden..."
+      "submit": "Code senden",
+      "submitting": "Senden...",
+      "otpLabel": "Code aus der E-Mail",
+      "otpPlaceholder": "123456",
+      "invalidOtp": "Ungültiger oder abgelaufener Code. Fordern Sie einen neuen an.",
+      "changeEmail": "← Andere E-Mail-Adresse verwenden"
     },
     "resetPassword": {
       "title": "Neues Passwort",
