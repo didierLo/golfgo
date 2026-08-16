@@ -24,8 +24,10 @@ function InviteYesContent() {
   const [msgSaved,    setMsgSaved]    = useState(false)
 
   // Activité annexe optionnelle
-  const [extraActivityLabel, setExtraActivityLabel]       = useState<string | null>(null)
-  const [extraActivityResponse, setExtraActivityResponse] = useState<boolean | null>(null)
+  const [extraActivityLabel, setExtraActivityLabel] = useState<string | null>(null)
+  const [extraActivityCount, setExtraActivityCount] = useState<number | null>(null)
+  const [extraDraft,  setExtraDraft]  = useState(0)     // valeur affichée avant confirmation
+  const [extraEditing, setExtraEditing] = useState(true) // stepper visible tant que non confirmé
   const [extraSaving, setExtraSaving] = useState(false)
   const [extraError,  setExtraError]  = useState(false)
 
@@ -52,7 +54,7 @@ function InviteYesContent() {
 
     const [{ data: participant }, { error }] = await Promise.all([
       supabase.from('event_participants')
-        .select('event_id, extra_activity_response, events(group_id, extra_activity_label)')
+        .select('event_id, extra_activity_count, events(group_id, extra_activity_label)')
         .eq('invite_token', tok).maybeSingle(),
       supabase.from('event_participants')
         .update({
@@ -70,7 +72,9 @@ function InviteYesContent() {
       setAppLink(`/groups/${(participant.events as any).group_id}/events/${participant.event_id}`)
     }
     setExtraActivityLabel((participant?.events as any)?.extra_activity_label ?? null)
-    setExtraActivityResponse(participant?.extra_activity_response ?? null)
+    setExtraActivityCount(participant?.extra_activity_count ?? null)
+    setExtraDraft(participant?.extra_activity_count ?? 1)
+    setExtraEditing(participant?.extra_activity_count == null)
 
     setHolesPlayed(holes)
     setHolesSection(section)
@@ -94,19 +98,20 @@ function InviteYesContent() {
     setMsgSaving(false)
   }
 
-  async function handleExtraActivity(response: boolean) {
+  async function saveExtraActivity(count: number) {
     if (!token) return
     setExtraSaving(true)
     setExtraError(false)
     const { error } = await supabase.from('event_participants')
-      .update({ extra_activity_response: response })
+      .update({ extra_activity_count: count })
       .eq('invite_token', token)
     if (error) {
       setExtraError(true)
       setExtraSaving(false)
       return
     }
-    setExtraActivityResponse(response)
+    setExtraActivityCount(count)
+    setExtraEditing(false)
     setExtraSaving(false)
   }
 
@@ -185,46 +190,56 @@ function InviteYesContent() {
             {extraActivityLabel && (
               <div className="border-t border-slate-100 pt-5 mb-5 text-left">
                 <p className="text-[13px] font-semibold text-slate-700 mb-3">
-                  🍽️ Participes-tu aussi à : {extraActivityLabel} ?
+                  🍽️ Combien serez-vous (toi compris) pour : {extraActivityLabel} ?
                 </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleExtraActivity(true)}
-                    disabled={extraSaving}
-                    className={`flex-1 py-2.5 rounded-xl border-2 font-semibold text-[13px] transition-all disabled:opacity-50 ${
-                      extraActivityResponse === true ? 'border-[#3B6D11] bg-[#EAF3DE] text-[#3B6D11]' : 'border-slate-200 text-slate-400 hover:border-slate-300'
-                    }`}>
-                    Oui
-                  </button>
-                  <button
-                    onClick={() => handleExtraActivity(false)}
-                    disabled={extraSaving}
-                    className={`flex-1 py-2.5 rounded-xl border-2 font-semibold text-[13px] transition-all disabled:opacity-50 ${
-                      extraActivityResponse === false ? 'border-[#A32D2D] bg-[#FCEBEB] text-[#A32D2D]' : 'border-slate-200 text-slate-400 hover:border-slate-300'
-                    }`}>
-                    Non
-                  </button>
-                </div>
 
-                {/* ── Retour visuel : évite l'effet "figé" ── */}
-                <div className="h-5 mt-2 flex items-center">
-                  {extraSaving && (
-                    <span className="text-[12px] text-slate-400 flex items-center gap-1.5">
-                      <span className="w-3 h-3 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin inline-block" />
-                      Enregistrement…
+                {extraEditing ? (
+                  <>
+                    <div className="flex items-center justify-center gap-4 mb-3">
+                      <button
+                        type="button"
+                        onClick={() => setExtraDraft(d => Math.max(0, d - 1))}
+                        disabled={extraSaving}
+                        className="w-10 h-10 rounded-xl border-2 border-slate-200 text-slate-500 text-[18px] font-bold hover:border-slate-300 disabled:opacity-50 transition-colors">
+                        −
+                      </button>
+                      <span className="text-[22px] font-black text-slate-900 w-10 text-center">{extraDraft}</span>
+                      <button
+                        type="button"
+                        onClick={() => setExtraDraft(d => Math.min(20, d + 1))}
+                        disabled={extraSaving}
+                        className="w-10 h-10 rounded-xl border-2 border-slate-200 text-slate-500 text-[18px] font-bold hover:border-slate-300 disabled:opacity-50 transition-colors">
+                        +
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-slate-400 text-center mb-3">
+                      0 = personne, sinon indique le nombre total (toi inclus)
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => saveExtraActivity(extraDraft)}
+                      disabled={extraSaving}
+                      className="w-full bg-[#185FA5] text-white font-semibold text-[13px] py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
+                      {extraSaving ? 'Enregistrement…' : 'Confirmer'}
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-between bg-[#EAF3DE] rounded-xl px-4 py-3">
+                    <span className="text-[13px] font-semibold text-[#3B6D11]">
+                      ✓ {extraActivityCount} personne{(extraActivityCount ?? 0) > 1 ? 's' : ''} inscrite{(extraActivityCount ?? 0) > 1 ? 's' : ''}
                     </span>
-                  )}
-                  {!extraSaving && extraError && (
-                    <span className="text-[12px] text-[#A32D2D]">
-                      ⚠ Non enregistré, réessaie
-                    </span>
-                  )}
-                  {!extraSaving && !extraError && extraActivityResponse !== null && (
-                    <span className="text-[12px] font-semibold text-[#3B6D11] flex items-center gap-1">
-                      ✓ Réponse enregistrée
-                    </span>
-                  )}
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => { setExtraDraft(extraActivityCount ?? 1); setExtraEditing(true) }}
+                      className="text-[12px] font-semibold text-[#3B6D11] underline underline-offset-2">
+                      Modifier
+                    </button>
+                  </div>
+                )}
+
+                {!extraEditing && extraError && (
+                  <p className="text-[12px] text-[#A32D2D] mt-2">⚠ Non enregistré, réessaie</p>
+                )}
               </div>
             )}
 

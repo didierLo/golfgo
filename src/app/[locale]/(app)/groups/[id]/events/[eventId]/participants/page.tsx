@@ -17,7 +17,7 @@ type Participant = {
   holes_played: number | null
   holes_section: HolesSection
   response_message: string | null
-  extra_activity_response: boolean | null
+  extra_activity_count: number | null
   players: { first_name: string; surname: string; whs: number | null } | null  // ← nullable
 }
 type Event     = { id: string; title: string; starts_at: string }
@@ -65,35 +65,47 @@ function holesLabel(holes: number | null, section: HolesSection): string {
   return '18T'   // ← fallback sécurisé si section null
 }
 
-// ─── Badge / toggle activité annexe ────────────────────────────────────────
+// ─── Cellule activité annexe (nombre de personnes) ─────────────────────────
 function ExtraActivityCell({
-  response,
+  count,
   isOwner,
-  onToggle,
+  onChange,
+  onCommit,
 }: {
-  response: boolean | null
+  count: number | null
   isOwner: boolean
-  onToggle?: () => void
+  onChange?: (next: number | null) => void
+  onCommit?: (next: number | null) => void
 }) {
   if (isOwner) {
     return (
-      <button type="button" onClick={onToggle}
-        title="Cliquer pour changer la réponse"
-        className={`text-[13px] font-bold w-7 h-7 rounded-lg border flex items-center justify-center transition-colors ${
-          response === true
-            ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11] hover:bg-[#DCEFC4]'
-            : response === false
-            ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D] hover:bg-[#F9DCDC]'
-            : 'bg-white/60 border-slate-200 text-slate-300 hover:border-slate-300'
-        }`}>
-        {response === true ? '✓' : response === false ? '✗' : '—'}
-      </button>
+      <input
+        type="number"
+        min={0}
+        max={20}
+        value={count ?? ''}
+        placeholder="—"
+        title="Nombre de personnes (toi/le joueur compris) — modifiable"
+        onChange={e => {
+          const raw = e.target.value
+          onChange?.(raw === '' ? null : Math.max(0, parseInt(raw, 10) || 0))
+        }}
+        onBlur={() => onCommit?.(count)}
+        onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+        className={`text-[13px] font-bold w-11 h-7 rounded-lg border text-center focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 ${
+          count !== null && count > 0
+            ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
+            : count === 0
+            ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
+            : 'bg-white/60 border-slate-200 text-slate-400'
+        }`}
+      />
     )
   }
-  if (response === null) return <span className="text-slate-200 text-[13px]">—</span>
+  if (count === null) return <span className="text-slate-200 text-[13px]">—</span>
   return (
-    <span className={`text-[13px] font-bold ${response ? 'text-[#3B6D11]' : 'text-[#A32D2D]'}`}>
-      {response ? '✓' : '✗'}
+    <span className={`text-[13px] font-bold ${count > 0 ? 'text-[#3B6D11]' : 'text-[#A32D2D]'}`}>
+      {count}
     </span>
   )
 }
@@ -294,7 +306,7 @@ export default function ParticipantsPage() {
   const [{ data, error }, { data: evData }] = await Promise.all([
     supabase
       .from('event_participants')
-      .select(`player_id, status, responded_at, holes_played, holes_section, response_message, extra_activity_response, players(first_name, surname, whs)`)
+      .select(`player_id, status, responded_at, holes_played, holes_section, response_message, extra_activity_count, players(first_name, surname, whs)`)
       .eq('event_id', evId),
     supabase.from('events').select('extra_activity_label').eq('id', evId).single(),
   ])
@@ -376,21 +388,23 @@ export default function ParticipantsPage() {
     loadParticipants(selectedEventId)
   }
 
-  async function toggleExtraActivity(playerId: string, current: boolean | null) {
-    const next = current === null ? true : current === true ? false : null
-    await supabase.from('event_participants')
-      .update({ extra_activity_response: next })
-      .eq('event_id', selectedEventId).eq('player_id', playerId)
+  function setExtraActivityLocal(playerId: string, next: number | null) {
     setParticipants(prev => prev.map(p =>
-      p.player_id === playerId ? { ...p, extra_activity_response: next } : p
+      p.player_id === playerId ? { ...p, extra_activity_count: next } : p
     ))
   }
 
+  async function commitExtraActivity(playerId: string, next: number | null) {
+    await supabase.from('event_participants')
+      .update({ extra_activity_count: next })
+      .eq('event_id', selectedEventId).eq('player_id', playerId)
+  }
+
   function copyExtraActivityList() {
-    const names = participants
-      .filter(p => p.extra_activity_response === true)
-      .map(p => `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim())
-    navigator.clipboard.writeText(names.length ? names.join('\n') : 'Aucun participant pour le moment')
+    const lines = participants
+      .filter(p => (p.extra_activity_count ?? 0) > 0)
+      .map(p => `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim() + ` (${p.extra_activity_count})`)
+    navigator.clipboard.writeText(lines.length ? lines.join('\n') : 'Aucun participant pour le moment')
     setListCopied(true)
     setTimeout(() => setListCopied(false), 1500)
   }
@@ -420,7 +434,7 @@ export default function ParticipantsPage() {
       invited:     participants.filter(p => p.status === 'INVITED').length,
       declined:    participants.filter(p => p.status === 'DECLINED').length,
       has9holers:  going9.length > 0,
-      extraActivityCount: participants.filter(p => p.extra_activity_response === true).length,
+      extraActivityCount: participants.reduce((sum, p) => sum + (p.extra_activity_count ?? 0), 0),
     }
   }, [participants])
 
@@ -466,10 +480,10 @@ export default function ParticipantsPage() {
 
   const gridCols = isOwner
     ? (extraActivityLabel
-        ? 'grid-cols-[minmax(160px,1fr)_20px_70px_36px_60px_80px_150px_130px_minmax(160px,190px)]'
+        ? 'grid-cols-[minmax(160px,1fr)_20px_70px_54px_60px_80px_150px_130px_minmax(160px,190px)]'
         : 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]')
     : (extraActivityLabel
-        ? 'grid-cols-[minmax(200px,1fr)_20px_70px_36px_60px_80px_150px_130px]'
+        ? 'grid-cols-[minmax(200px,1fr)_20px_70px_54px_60px_80px_150px_130px]'
         : 'grid-cols-[minmax(200px,1fr)_20px_70px_60px_80px_150px_130px]')
   const tableMinWidth = isOwner
     ? (extraActivityLabel ? 'min-w-[900px]' : 'min-w-[860px]')
@@ -662,9 +676,10 @@ export default function ParticipantsPage() {
                     {extraActivityLabel && (
                       <div className="flex justify-center">
                         <ExtraActivityCell
-                          response={p.extra_activity_response}
+                          count={p.extra_activity_count}
                           isOwner={isOwner}
-                          onToggle={() => toggleExtraActivity(p.player_id, p.extra_activity_response)}
+                          onChange={next => setExtraActivityLocal(p.player_id, next)}
+                          onCommit={next => commitExtraActivity(p.player_id, next)}
                         />
                       </div>
                     )}
