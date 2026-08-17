@@ -17,6 +17,7 @@ type Participant = {
   holes_played: number | null
   holes_section: HolesSection
   response_message: string | null
+  admin_note: string | null
   extra_activity_count: number | null
   players: { first_name: string; surname: string; whs: number | null } | null  // ← nullable
 }
@@ -117,16 +118,22 @@ function MessageModal({
   eventId,
   onClose,
   onSaved,
+  onNoteSaved,
 }: {
   participant: Participant
   isOwner: boolean
   eventId: string
   onClose: () => void
   onSaved: (playerId: string, msg: string) => void
+  onNoteSaved: (playerId: string, note: string) => void
 }) {
   const [text, setText]     = useState(participant.response_message ?? '')
   const [saving, setSaving] = useState(false)
   const [saved,  setSaved]  = useState(false)
+
+  const [noteText,   setNoteText]   = useState(participant.admin_note ?? '')
+  const [noteSaving, setNoteSaving] = useState(false)
+  const [noteSaved,  setNoteSaved]  = useState(false)
 
   // FIX L126 + L130 — optional chaining sur players
   const firstName = participant.players?.first_name ?? '?'
@@ -156,6 +163,30 @@ function MessageModal({
     onClose()
   }
 
+  async function handleSaveNote() {
+    setNoteSaving(true)
+    await supabase
+      .from('event_participants')
+      .update({ admin_note: noteText.trim() ? noteText.slice(0, 300) : null })
+      .eq('event_id', eventId)
+      .eq('player_id', participant.player_id)
+    setNoteSaved(true)
+    setNoteSaving(false)
+    onNoteSaved(participant.player_id, noteText.trim())
+  }
+
+  async function handleDeleteNote() {
+    setNoteSaving(true)
+    setNoteText('')
+    await supabase
+      .from('event_participants')
+      .update({ admin_note: null })
+      .eq('event_id', eventId)
+      .eq('player_id', participant.player_id)
+    onNoteSaved(participant.player_id, '')
+    setNoteSaving(false)
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -177,14 +208,52 @@ function MessageModal({
             <p className="text-[14px] font-bold text-slate-800">
               {firstName} {surname}
             </p>
-            <p className="text-[11px] text-slate-400">Message de réponse</p>
+            <p className="text-[11px] text-slate-400">{isOwner ? 'Message & remarque' : 'Message de réponse'}</p>
           </div>
         </div>
 
         {isOwner ? (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[80px]">
-            {participant.response_message || <span className="text-slate-400 italic">Aucun message</span>}
-          </div>
+          <>
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              Message du joueur
+            </p>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[60px] mb-5">
+              {participant.response_message || <span className="text-slate-400 italic">Aucun message</span>}
+            </div>
+
+            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+              Remarque interne (visible par toi uniquement)
+            </p>
+            <textarea
+              value={noteText}
+              onChange={e => {
+                const lines = e.target.value.split('\n')
+                if (lines.length <= 3) setNoteText(e.target.value)
+              }}
+              maxLength={300}
+              rows={3}
+              placeholder="Ex : m'a confirmé sa venue par téléphone le 12/08…"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4338CA]/30 resize-none"
+            />
+            <div className="flex items-center justify-between mt-1 mb-4">
+              <span className="text-[11px] text-slate-400">{noteText.length}/300 · max 3 lignes</span>
+              {participant.admin_note && (
+                <button onClick={handleDeleteNote} disabled={noteSaving}
+                  className="text-[11px] text-red-400 hover:text-red-600 font-semibold disabled:opacity-40">
+                  Supprimer la remarque
+                </button>
+              )}
+            </div>
+            {noteSaved ? (
+              <p className="text-center text-[13px] text-[#4338CA] font-semibold">✓ Remarque enregistrée</p>
+            ) : (
+              <button onClick={handleSaveNote} disabled={noteSaving}
+                className="w-full text-white text-[13px] font-semibold py-2.5 rounded-xl disabled:opacity-40 transition-colors"
+                style={{ background: '#4338CA' }}>
+                {noteSaving ? 'Enregistrement…' : 'Enregistrer la remarque'}
+              </button>
+            )}
+          </>
         ) : (
           <>
             <textarea
@@ -227,11 +296,25 @@ function MBadge({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      title="Voir le message"
+      title="Voir le message du joueur"
       className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-colors hover:scale-110"
       style={{ background: '#185FA5', color: '#fff' }}
     >
       M
+    </button>
+  )
+}
+
+// ─── Badge "R" (remarque admin) ────────────────────────────────────────────
+function RBadge({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title="Voir la remarque admin"
+      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-colors hover:scale-110"
+      style={{ background: '#4338CA', color: '#fff' }}
+    >
+      R
     </button>
   )
 }
@@ -306,7 +389,7 @@ export default function ParticipantsPage() {
   const [{ data, error }, { data: evData }] = await Promise.all([
     supabase
       .from('event_participants')
-      .select(`player_id, status, responded_at, holes_played, holes_section, response_message, extra_activity_count, players(first_name, surname, whs)`)
+      .select(`player_id, status, responded_at, holes_played, holes_section, response_message, admin_note, extra_activity_count, players(first_name, surname, whs)`)
       .eq('event_id', evId),
     supabase.from('events').select('extra_activity_label').eq('id', evId).single(),
   ])
@@ -420,6 +503,12 @@ export default function ParticipantsPage() {
     ))
   }
 
+  function handleNoteSaved(playerId: string, note: string) {
+    setParticipants(prev => prev.map(p =>
+      p.player_id === playerId ? { ...p, admin_note: note || null } : p
+    ))
+  }
+
   const statusOrder = { GOING: 0, INVITED: 1, WAITLIST: 2, DECLINED: 3 }
 
   const { going, going18, going9front, going9back, going9, invited, declined, has9holers, extraActivityCount } = useMemo(() => {
@@ -480,14 +569,14 @@ export default function ParticipantsPage() {
 
   const gridCols = isOwner
     ? (extraActivityLabel
-        ? 'grid-cols-[minmax(160px,1fr)_20px_70px_54px_60px_80px_150px_130px_minmax(160px,190px)]'
-        : 'grid-cols-[minmax(160px,1fr)_20px_70px_60px_80px_150px_130px_minmax(160px,190px)]')
+        ? 'grid-cols-[minmax(160px,1fr)_40px_70px_54px_60px_80px_150px_130px_minmax(160px,190px)]'
+        : 'grid-cols-[minmax(160px,1fr)_40px_70px_60px_80px_150px_130px_minmax(160px,190px)]')
     : (extraActivityLabel
-        ? 'grid-cols-[minmax(200px,1fr)_20px_70px_54px_60px_80px_150px_130px]'
-        : 'grid-cols-[minmax(200px,1fr)_20px_70px_60px_80px_150px_130px]')
+        ? 'grid-cols-[minmax(200px,1fr)_40px_70px_54px_60px_80px_150px_130px]'
+        : 'grid-cols-[minmax(200px,1fr)_40px_70px_60px_80px_150px_130px]')
   const tableMinWidth = isOwner
-    ? (extraActivityLabel ? 'min-w-[900px]' : 'min-w-[860px]')
-    : (extraActivityLabel ? 'min-w-[760px]' : 'min-w-[720px]')
+    ? (extraActivityLabel ? 'min-w-[920px]' : 'min-w-[880px]')
+    : (extraActivityLabel ? 'min-w-[780px]' : 'min-w-[740px]')
 
   return (
     <div className="p-5 sm:p-6 max-w-5xl">
@@ -498,6 +587,7 @@ export default function ParticipantsPage() {
           eventId={selectedEventId}
           onClose={() => setMsgModal(null)}
           onSaved={(pid, msg) => { handleMessageSaved(pid, msg); setMsgModal(null) }}
+          onNoteSaved={(pid, note) => { handleNoteSaved(pid, note); setMsgModal(null) }}
         />
       )}
 
@@ -635,11 +725,24 @@ export default function ParticipantsPage() {
                       </span>
                     </div>
 
-                    {/* Badge M */}
-                    <div className="flex items-center justify-center">
-                      {canSeeMessage(p) && p.response_message ? (
+                    {/* Badges Message (M) + Remarque admin (R) */}
+                    <div className="flex items-center justify-center gap-1">
+                      {canSeeMessage(p) && p.response_message && (
                         <MBadge onClick={() => setMsgModal(p)} />
-                      ) : canEditMessage(p) ? (
+                      )}
+                      {isOwner && p.admin_note && (
+                        <RBadge onClick={() => setMsgModal(p)} />
+                      )}
+                      {isOwner && !p.response_message && !p.admin_note && (
+                        <button
+                          onClick={() => setMsgModal(p)}
+                          title="Ajouter une remarque"
+                          className="w-5 h-5 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-300 hover:border-[#4338CA] hover:text-[#4338CA] transition-colors"
+                        >
+                          +
+                        </button>
+                      )}
+                      {!isOwner && canEditMessage(p) && !p.response_message && (
                         <button
                           onClick={() => setMsgModal(p)}
                           title="Ajouter un message"
@@ -647,8 +750,6 @@ export default function ParticipantsPage() {
                         >
                           +
                         </button>
-                      ) : (
-                        <span />
                       )}
                     </div>
 
