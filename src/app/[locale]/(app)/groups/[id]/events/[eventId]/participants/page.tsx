@@ -111,17 +111,21 @@ function ExtraActivityCell({
   )
 }
 
-// ─── Modal message ──────────────────────────────────────────────────────────
+// ─── Modal message + remarque ──────────────────────────────────────────────
 function MessageModal({
   participant,
-  isOwner,
+  canSeeMessage,
+  canEditMessage,
+  canEditNote,
   eventId,
   onClose,
   onSaved,
   onNoteSaved,
 }: {
   participant: Participant
-  isOwner: boolean
+  canSeeMessage: boolean
+  canEditMessage: boolean
+  canEditNote: boolean
   eventId: string
   onClose: () => void
   onSaved: (playerId: string, msg: string) => void
@@ -208,22 +212,66 @@ function MessageModal({
             <p className="text-[14px] font-bold text-slate-800">
               {firstName} {surname}
             </p>
-            <p className="text-[11px] text-slate-400">{isOwner ? 'Message & remarque' : 'Message de réponse'}</p>
+            <p className="text-[11px] text-slate-400">Message & remarque</p>
           </div>
         </div>
 
-        {isOwner ? (
+        {/* ── Message du joueur ── */}
+        {canSeeMessage && (
           <>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
-              Message du joueur
-            </p>
-            <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[60px] mb-5">
-              {participant.response_message || <span className="text-slate-400 italic">Aucun message</span>}
-            </div>
+            {canEditMessage ? (
+              <>
+                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+                  Ton message pour l'organisateur
+                </p>
+                <textarea
+                  value={text}
+                  onChange={e => {
+                    const lines = e.target.value.split('\n')
+                    if (lines.length <= 3) setText(e.target.value)
+                  }}
+                  maxLength={300}
+                  rows={3}
+                  placeholder="Votre message pour l'organisateur…"
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 resize-none"
+                />
+                <div className="flex items-center justify-between mt-1 mb-5">
+                  <span className="text-[11px] text-slate-400">{text.length}/300 · max 3 lignes</span>
+                  {participant.response_message && (
+                    <button onClick={handleDelete}
+                      className="text-[11px] text-red-400 hover:text-red-600 font-semibold">
+                      Supprimer le message
+                    </button>
+                  )}
+                </div>
+                {saved ? (
+                  <p className="text-center text-[13px] text-[#3B6D11] font-semibold mb-5">✓ Message enregistré</p>
+                ) : (
+                  <button onClick={handleSave} disabled={!text.trim() || saving}
+                    className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors mb-5">
+                    {saving ? 'Enregistrement…' : 'Enregistrer le message'}
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+                  Message du joueur
+                </p>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[60px] mb-5">
+                  {participant.response_message || <span className="text-slate-400 italic">Aucun message</span>}
+                </div>
+              </>
+            )}
+          </>
+        )}
 
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
-              Remarque interne (visible par toi uniquement)
-            </p>
+        {/* ── Remarque (visible par tous, éditable par le joueur lui-même ou l'admin) ── */}
+        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+          Remarque
+        </p>
+        {canEditNote ? (
+          <>
             <textarea
               value={noteText}
               onChange={e => {
@@ -232,7 +280,7 @@ function MessageModal({
               }}
               maxLength={300}
               rows={3}
-              placeholder="Ex : m'a confirmé sa venue par téléphone le 12/08…"
+              placeholder="Ex : viendra accompagné(e) pour le repas…"
               className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4338CA]/30 resize-none"
             />
             <div className="flex items-center justify-between mt-1 mb-4">
@@ -255,36 +303,9 @@ function MessageModal({
             )}
           </>
         ) : (
-          <>
-            <textarea
-              value={text}
-              onChange={e => {
-                const lines = e.target.value.split('\n')
-                if (lines.length <= 3) setText(e.target.value)
-              }}
-              maxLength={300}
-              rows={3}
-              placeholder="Votre message pour l'organisateur…"
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 resize-none"
-            />
-            <div className="flex items-center justify-between mt-1 mb-4">
-              <span className="text-[11px] text-slate-400">{text.length}/300 · max 3 lignes</span>
-              {participant.response_message && (
-                <button onClick={handleDelete}
-                  className="text-[11px] text-red-400 hover:text-red-600 font-semibold">
-                  Supprimer le message
-                </button>
-              )}
-            </div>
-            {saved ? (
-              <p className="text-center text-[13px] text-[#3B6D11] font-semibold">✓ Message enregistré</p>
-            ) : (
-              <button onClick={handleSave} disabled={!text.trim() || saving}
-                className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-                {saving ? 'Enregistrement…' : 'Enregistrer le message'}
-              </button>
-            )}
-          </>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[60px]">
+            {participant.admin_note || <span className="text-slate-400 italic">Aucune remarque</span>}
+          </div>
         )}
       </div>
     </div>
@@ -483,11 +504,48 @@ export default function ParticipantsPage() {
       .eq('event_id', selectedEventId).eq('player_id', playerId)
   }
 
-  function copyExtraActivityList() {
-    const lines = participants
-      .filter(p => (p.extra_activity_count ?? 0) > 0)
-      .map(p => `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim() + ` (${p.extra_activity_count})`)
-    navigator.clipboard.writeText(lines.length ? lines.join('\n') : 'Aucun participant pour le moment')
+  function copyFullList() {
+    const event = events.find(e => e.id === selectedEventId)
+    const eventLine = event ? `${event.title} - ${formatDate(event.starts_at)}` : ''
+
+    const summaryHeader = extraActivityLabel
+      ? '18H\t9H Front\t9H Back\tEn attente\tDécliné\tTotal\tActivité annexe'
+      : '18H\t9H Front\t9H Back\tEn attente\tDécliné\tTotal'
+    const summaryValues = extraActivityLabel
+      ? `${going18.length}\t${going9front.length}\t${going9back.length}\t${invited}\t${declined}\t${participants.length}\t${extraActivityCount}`
+      : `${going18.length}\t${going9front.length}\t${going9back.length}\t${invited}\t${declined}\t${participants.length}`
+
+    const rowsHeader = extraActivityLabel
+      ? 'Prénom et Nom\tTrous\tActivité annexe\tStatut\tMessage et Remarque'
+      : 'Prénom et Nom\tTrous\tStatut\tMessage et Remarque'
+
+    const statusLabelFr: Record<string, string> = {
+      GOING: 'Confirmé', INVITED: 'Invité', DECLINED: 'Décliné', WAITLIST: 'Attente',
+    }
+
+    function reportHolesLabel(p: Participant): string {
+      if (p.status !== 'GOING') return '—'
+      if (!p.holes_played || p.holes_played === 18) return '18H'
+      if (p.holes_section === 'out') return '9H Front'
+      if (p.holes_section === 'in')  return '9H Back'
+      return '18H'
+    }
+
+    const rows = displayed.map(p => {
+      const name   = `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim()
+      const holes  = reportHolesLabel(p)
+      const status = statusLabelFr[p.status] ?? p.status
+      const msgParts: string[] = []
+      if (p.response_message) msgParts.push(`Msg: ${p.response_message}`)
+      if (p.admin_note)       msgParts.push(`Remarque: ${p.admin_note}`)
+      const msgCol = msgParts.join(' | ')
+      return extraActivityLabel
+        ? `${name}\t${holes}\t${p.extra_activity_count ?? '—'}\t${status}\t${msgCol}`
+        : `${name}\t${holes}\t${status}\t${msgCol}`
+    })
+
+    const text = [eventLine, '', summaryHeader, summaryValues, '', rowsHeader, ...rows].join('\n')
+    navigator.clipboard.writeText(text)
     setListCopied(true)
     setTimeout(() => setListCopied(false), 1500)
   }
@@ -566,6 +624,10 @@ export default function ParticipantsPage() {
   function canSeeMessage(p: Participant): boolean {
     return isOwner || p.player_id === myPlayerId
   }
+  // Remarque : chacun voit les remarques de tous ; chacun peut créer/éditer la sienne, l'admin peut éditer celle de n'importe qui
+  function canEditNote(p: Participant): boolean {
+    return isOwner || p.player_id === myPlayerId
+  }
 
   const gridCols = isOwner
     ? (extraActivityLabel
@@ -583,7 +645,9 @@ export default function ParticipantsPage() {
       {msgModal && (
         <MessageModal
           participant={msgModal}
-          isOwner={isOwner}
+          canSeeMessage={canSeeMessage(msgModal)}
+          canEditMessage={canEditMessage(msgModal)}
+          canEditNote={canEditNote(msgModal)}
           eventId={selectedEventId}
           onClose={() => setMsgModal(null)}
           onSaved={(pid, msg) => { handleMessageSaved(pid, msg); setMsgModal(null) }}
@@ -608,8 +672,8 @@ export default function ParticipantsPage() {
         </div>
         {viewMode === 'list' && (
           <div className="flex items-center gap-2 ml-auto">
-            {isOwner && extraActivityLabel && (
-              <button type="button" onClick={copyExtraActivityList}
+            {isOwner && (
+              <button type="button" onClick={copyFullList}
                 className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition-colors whitespace-nowrap">
                 {listCopied ? '✓ Copié' : '📋 Copier la liste'}
               </button>
@@ -725,15 +789,15 @@ export default function ParticipantsPage() {
                       </span>
                     </div>
 
-                    {/* Badges Message (M) + Remarque admin (R) */}
+                    {/* Badges Message (M) + Remarque (R) */}
                     <div className="flex items-center justify-center gap-1">
                       {canSeeMessage(p) && p.response_message && (
                         <MBadge onClick={() => setMsgModal(p)} />
                       )}
-                      {isOwner && p.admin_note && (
+                      {p.admin_note && (
                         <RBadge onClick={() => setMsgModal(p)} />
                       )}
-                      {isOwner && !p.response_message && !p.admin_note && (
+                      {!p.admin_note && canEditNote(p) && (
                         <button
                           onClick={() => setMsgModal(p)}
                           title="Ajouter une remarque"
@@ -742,7 +806,7 @@ export default function ParticipantsPage() {
                           +
                         </button>
                       )}
-                      {!isOwner && canEditMessage(p) && !p.response_message && (
+                      {!p.response_message && canEditMessage(p) && (
                         <button
                           onClick={() => setMsgModal(p)}
                           title="Ajouter un message"
