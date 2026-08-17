@@ -364,7 +364,7 @@ export default function ParticipantsPage() {
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [msgModal,        setMsgModal]        = useState<Participant | null>(null)
   const [extraActivityLabel, setExtraActivityLabel] = useState<string | null>(null)
-  const [listCopied,      setListCopied]      = useState(false)
+  const [exporting,        setExporting]        = useState(false)
 
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
   useEffect(() => {
@@ -504,50 +504,154 @@ export default function ParticipantsPage() {
       .eq('event_id', selectedEventId).eq('player_id', playerId)
   }
 
-  function copyFullList() {
-    const event = events.find(e => e.id === selectedEventId)
-    const eventLine = event ? `${event.title} - ${formatDate(event.starts_at)}` : ''
+  async function exportToExcel() {
+    setExporting(true)
+    try {
+      const ExcelJS = (await import('exceljs')).default
+      const event = events.find(e => e.id === selectedEventId)
+      const hasExtra = !!extraActivityLabel
 
-    const summaryHeader = extraActivityLabel
-      ? '18H\t9H Front\t9H Back\tEn attente\tDécliné\tTotal\tActivité annexe'
-      : '18H\t9H Front\t9H Back\tEn attente\tDécliné\tTotal'
-    const summaryValues = extraActivityLabel
-      ? `${going18.length}\t${going9front.length}\t${going9back.length}\t${invited}\t${declined}\t${participants.length}\t${extraActivityCount}`
-      : `${going18.length}\t${going9front.length}\t${going9back.length}\t${invited}\t${declined}\t${participants.length}`
+      const statusLabelFr: Record<string, string> = {
+        GOING: 'Confirmé', INVITED: 'Invité', DECLINED: 'Décliné', WAITLIST: 'Attente',
+      }
+      // Couleurs reprises telles quelles de STATUS_STYLE / des boutons golf de l'app
+      const HOLES_COLOR: Record<string, string> = {
+        '18H':      'FF16A34A', // vert — bouton 18 trous
+        '9H Front': 'FFCA8A04', // ambre — bouton 9 trous Front
+        '9H Back':  'FFEA580C', // orange — bouton 9 trous Back
+        '—':        'FF94A3B8',
+      }
+      function reportHolesLabel(p: Participant): string {
+        if (p.status !== 'GOING') return '—'
+        if (!p.holes_played || p.holes_played === 18) return '18H'
+        if (p.holes_section === 'out') return '9H Front'
+        if (p.holes_section === 'in')  return '9H Back'
+        return '18H'
+      }
+      const argb = (hex: string) => 'FF' + hex.replace('#', '').toUpperCase()
 
-    const rowsHeader = extraActivityLabel
-      ? 'Prénom et Nom\tTrous\tActivité annexe\tStatut\tMessage et Remarque'
-      : 'Prénom et Nom\tTrous\tStatut\tMessage et Remarque'
+      const workbook = new ExcelJS.Workbook()
+      workbook.creator = 'GolfGo'
+      workbook.created = new Date()
+      const sheet = workbook.addWorksheet('Participants', {
+        views: [{ showGridLines: false }],
+      })
 
-    const statusLabelFr: Record<string, string> = {
-      GOING: 'Confirmé', INVITED: 'Invité', DECLINED: 'Décliné', WAITLIST: 'Attente',
+      const detailColCount = hasExtra ? 5 : 4
+      const totalColCount  = hasExtra ? 7 : 6
+
+      // Largeurs de colonnes (le tableau détail utilise les 4-5 premières)
+      sheet.columns = hasExtra
+        ? [{ width: 26 }, { width: 12 }, { width: 14 }, { width: 12 }, { width: 46 }, { width: 12 }, { width: 12 }]
+        : [{ width: 26 }, { width: 12 }, { width: 12 }, { width: 46 }, { width: 12 }, { width: 12 }]
+
+      // ── Titre ──
+      sheet.mergeCells(1, 1, 1, totalColCount)
+      const titleCell = sheet.getCell(1, 1)
+      titleCell.value = event ? `${event.title} — ${formatDate(event.starts_at)}` : 'Participants'
+      titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } }
+      titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argb('#185FA5') } }
+      titleCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 }
+      sheet.getRow(1).height = 30
+
+      // ── Ligne de synthèse (ligne 3) ──
+      const summaryLabels = hasExtra
+        ? ['18H', '9H Front', '9H Back', 'En attente', 'Décliné', 'Total', 'Activité annexe']
+        : ['18H', '9H Front', '9H Back', 'En attente', 'Décliné', 'Total']
+      const summaryValues = hasExtra
+        ? [going18.length, going9front.length, going9back.length, invited, declined, participants.length, extraActivityCount]
+        : [going18.length, going9front.length, going9back.length, invited, declined, participants.length]
+      const summaryFill: string[] = [
+        argb('#DCFCE7'), argb('#FEF9C3'), argb('#FFEDD5'), argb('#EBF3FC'), argb('#FCEBEB'), argb('#F1F5F9'), argb('#F5F0FF'),
+      ]
+      const summaryText: string[] = [
+        argb('#15803D'), argb('#92400E'), argb('#9A3412'), argb('#0C447C'), argb('#A32D2D'), argb('#334155'), argb('#7C3AED'),
+      ]
+      summaryLabels.forEach((label, i) => {
+        const labelCell = sheet.getCell(3, i + 1)
+        labelCell.value = label
+        labelCell.font = { name: 'Arial', size: 9, bold: true, color: { argb: summaryText[i] } }
+        labelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: summaryFill[i] } }
+        labelCell.alignment = { vertical: 'middle', horizontal: 'center' }
+        labelCell.border = { top: { style: 'thin', color: { argb: 'FFE2E8F0' } }, left: { style: 'thin', color: { argb: 'FFE2E8F0' } }, right: { style: 'thin', color: { argb: 'FFE2E8F0' } } }
+
+        const valueCell = sheet.getCell(4, i + 1)
+        valueCell.value = summaryValues[i]
+        valueCell.font = { name: 'Arial', size: 13, bold: true, color: { argb: summaryText[i] } }
+        valueCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: summaryFill[i] } }
+        valueCell.alignment = { vertical: 'middle', horizontal: 'center' }
+        valueCell.border = { bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } }, left: { style: 'thin', color: { argb: 'FFE2E8F0' } }, right: { style: 'thin', color: { argb: 'FFE2E8F0' } } }
+      })
+      sheet.getRow(4).height = 22
+
+      // ── En-tête du tableau détail (ligne 6) ──
+      const headerRowIdx = 6
+      const headers = hasExtra
+        ? ['Prénom et Nom', 'Trous', 'Activité annexe', 'Statut', 'Message et Remarque']
+        : ['Prénom et Nom', 'Trous', 'Statut', 'Message et Remarque']
+      headers.forEach((h, i) => {
+        const c = sheet.getCell(headerRowIdx, i + 1)
+        c.value = h
+        c.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } }
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argb('#185FA5') } }
+        c.alignment = { vertical: 'middle', horizontal: i === detailColCount - 1 ? 'left' : 'center' }
+      })
+      sheet.getRow(headerRowIdx).height = 20
+
+      // ── Lignes participants ──
+      displayed.forEach((p, i) => {
+        const rowIdx = headerRowIdx + 1 + i
+        const name   = `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim()
+        const holes  = reportHolesLabel(p)
+        const status = statusLabelFr[p.status] ?? p.status
+        const statusStyle = STATUS_STYLE[p.status] ?? { bg: '#F1F5F9', text: '#64748B' }
+        const msgLines: string[] = []
+        if (p.response_message) msgLines.push(`Msg: ${p.response_message}`)
+        if (p.admin_note)       msgLines.push(`Remarque: ${p.admin_note}`)
+        const stripe = i % 2 === 1 ? argb('#F8FAFC') : 'FFFFFFFF'
+
+        const cols: { value: any; align: 'left' | 'center'; color?: string; fill?: string; bold?: boolean }[] = hasExtra
+          ? [
+              { value: name, align: 'left' },
+              { value: holes, align: 'center', color: HOLES_COLOR[holes], bold: true },
+              { value: p.extra_activity_count ?? '—', align: 'center' },
+              { value: status, align: 'center', color: argb(statusStyle.text), fill: argb(statusStyle.bg), bold: true },
+              { value: msgLines.join('\n'), align: 'left' },
+            ]
+          : [
+              { value: name, align: 'left' },
+              { value: holes, align: 'center', color: HOLES_COLOR[holes], bold: true },
+              { value: status, align: 'center', color: argb(statusStyle.text), fill: argb(statusStyle.bg), bold: true },
+              { value: msgLines.join('\n'), align: 'left' },
+            ]
+
+        cols.forEach((col, ci) => {
+          const c = sheet.getCell(rowIdx, ci + 1)
+          c.value = col.value
+          c.font = { name: 'Arial', size: 10, bold: !!col.bold, color: { argb: col.color ?? 'FF334155' } }
+          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: col.fill ?? stripe } }
+          c.alignment = { vertical: 'middle', horizontal: col.align, wrapText: ci === cols.length - 1 }
+          c.border = { bottom: { style: 'hair', color: { argb: 'FFE2E8F0' } } }
+        })
+        if (msgLines.length > 1) sheet.getRow(rowIdx).height = 15 * msgLines.length
+      })
+
+      sheet.getRow(headerRowIdx).eachCell(c => { c.border = { ...c.border, bottom: { style: 'thin', color: { argb: 'FF185FA5' } } } })
+
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const safeTitle = (event?.title ?? 'participants').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '')
+      a.href = url
+      a.download = `${safeTitle}-participants.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } finally {
+      setExporting(false)
     }
-
-    function reportHolesLabel(p: Participant): string {
-      if (p.status !== 'GOING') return '—'
-      if (!p.holes_played || p.holes_played === 18) return '18H'
-      if (p.holes_section === 'out') return '9H Front'
-      if (p.holes_section === 'in')  return '9H Back'
-      return '18H'
-    }
-
-    const rows = displayed.map(p => {
-      const name   = `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim()
-      const holes  = reportHolesLabel(p)
-      const status = statusLabelFr[p.status] ?? p.status
-      const msgParts: string[] = []
-      if (p.response_message) msgParts.push(`Msg: ${p.response_message}`)
-      if (p.admin_note)       msgParts.push(`Remarque: ${p.admin_note}`)
-      const msgCol = msgParts.join(' | ')
-      return extraActivityLabel
-        ? `${name}\t${holes}\t${p.extra_activity_count ?? '—'}\t${status}\t${msgCol}`
-        : `${name}\t${holes}\t${status}\t${msgCol}`
-    })
-
-    const text = [eventLine, '', summaryHeader, summaryValues, '', rowsHeader, ...rows].join('\n')
-    navigator.clipboard.writeText(text)
-    setListCopied(true)
-    setTimeout(() => setListCopied(false), 1500)
   }
 
   function changeSort(field: SortField) {
@@ -673,9 +777,9 @@ export default function ParticipantsPage() {
         {viewMode === 'list' && (
           <div className="flex items-center gap-2 ml-auto">
             {isOwner && (
-              <button type="button" onClick={copyFullList}
-                className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition-colors whitespace-nowrap">
-                {listCopied ? '✓ Copié' : '📋 Copier la liste'}
+              <button type="button" onClick={exportToExcel} disabled={exporting}
+                className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors whitespace-nowrap">
+                {exporting ? 'Génération…' : '📊 Exporter Excel'}
               </button>
             )}
             <a href={`/groups/${groupId}/invitations`}
