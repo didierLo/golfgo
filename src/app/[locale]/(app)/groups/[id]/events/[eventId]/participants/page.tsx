@@ -607,7 +607,7 @@ export default function ParticipantsPage() {
         const statusStyle = STATUS_STYLE[p.status] ?? { bg: '#F1F5F9', text: '#64748B' }
         const msgLines: string[] = []
         if (p.response_message) msgLines.push(`Msg: ${p.response_message}`)
-        if (p.admin_note)       msgLines.push(`Remarque: ${p.admin_note}`)
+        if (p.admin_note)       msgLines.push(`Rem: ${p.admin_note}`)
         const stripe = i % 2 === 1 ? argb('#F8FAFC') : 'FFFFFFFF'
 
         const cols: { value: any; align: 'left' | 'center'; color?: string; fill?: string; bold?: boolean }[] = hasExtra
