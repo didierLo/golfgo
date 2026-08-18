@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       body: isJoiningGoing
         ? `${playerName} a confirmé sa présence.`
         : `${playerName} n'est plus confirmé(e) (désormais ${statusLabels[newStatus] ?? newStatus}).`,
-      url: `/fr/events/${event.id}`,
+      url: `/fr/groups/${event.group_id}/events/${event.id}/participants`,
     })
 
     let sent = 0
