@@ -118,7 +118,7 @@ export default function EventsPage() {
     const { data, error } = await supabase
       .from('events')
       .select(`id, title, location, starts_at, max_participants, competition_formats(name)`)
-      .eq('group_id', groupId).order('starts_at', { ascending: true })
+      .eq('group_id', groupId).order('starts_at', { ascending: false })
     if (error) { console.error(error); setLoading(false); return }
     const evts = data ?? []
     setEvents(evts as any)

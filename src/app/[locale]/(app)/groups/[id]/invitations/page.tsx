@@ -206,7 +206,7 @@ export default function InvitationsPage() {
   // Paralléliser events, members et role
   const [{ data: evts }, { data: mbrs }, playerResult] = await Promise.all([
     supabase.from('events').select('id, title, starts_at')
-      .eq('group_id', groupId).order('starts_at', { ascending: true }),
+      .eq('group_id', groupId).order('starts_at', { ascending: false }),
     supabase.from('groups_players')
       .select(`player:players(id, first_name, surname, email)`).eq('group_id', groupId),
     user
@@ -231,7 +231,8 @@ export default function InvitationsPage() {
   const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
   const retainedUpcoming = upcomingEvents.find(e => e.id === retained)
   if (retainedUpcoming) setSelectedEvent(retainedUpcoming.id)
-  else if (upcomingEvents.length > 0) setSelectedEvent(upcomingEvents[0].id)
+  else if (upcomingEvents.length > 0) 
+  setSelectedEvent(upcomingEvents[upcomingEvents.length - 1].id)
 
   if (allEvents.length > 0) {
     const { data: inv } = await supabase.from('event_participants')

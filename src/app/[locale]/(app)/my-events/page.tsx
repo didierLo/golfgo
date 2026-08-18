@@ -394,7 +394,7 @@ async function loadData() {
                max_participants, fee_per_person,
                groups!events_group_id_fkey(name, color))`)
       .eq('player_id', player.id)
-      .order('starts_at', { foreignTable: 'events', ascending: true }),
+      .order('starts_at', { foreignTable: 'events', ascending: false }),
 
     supabase
       .from('event_participants')

@@ -179,7 +179,7 @@ useEffect(() => {
       .select('id, title, starts_at').in('id', eventIds)
       .gte('starts_at', twoMonthsAgo())
       .eq('group_id', activeGroupId ?? '')
-      .order('starts_at', { ascending: true })
+      .order('starts_at', { ascending: false })
 
     if (!eventsData?.length) { setError(t('scorecard.noRecentEvents')); setLoading(false); return }
 
@@ -191,7 +191,8 @@ useEffect(() => {
     setAllEvents(items)
    const retained = localStorage.getItem(`golfgo-active-event-${activeGroupId}`)
    const retainedExists = items.find(e => e.id === retained)
-    setSelectedEventId(retainedExists?.id ?? (items.find(e => !e.isPast) ?? items[items.length - 1]).id)
+    const nearestFuture = [...items].reverse().find(e => !e.isPast)
+    setSelectedEventId(retainedExists?.id ?? (nearestFuture ?? items[0]).id)
     setLoading(false)
       }
 

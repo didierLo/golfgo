@@ -55,7 +55,7 @@ export default function FlightsPage() {
       .from('events')
       .select('id, title, starts_at')
       .eq('group_id', groupId)
-      .order('starts_at', { ascending: true })
+      .order('starts_at', { ascending: false })
     const evts = data ?? []
     setEvents(evts)
     if (evts.length) {
@@ -65,8 +65,8 @@ export default function FlightsPage() {
         setActiveEventId(retainedExists.id)
       } else {
         const now = new Date()
-        const upcoming = evts.find(e => new Date(e.starts_at) >= now)
-        setActiveEventId(upcoming?.id ?? evts[evts.length - 1].id)
+        const upcoming = [...evts].reverse().find(e => new Date(e.starts_at) >= now)
+        setActiveEventId(upcoming?.id ?? evts[0].id)
       }
     }
     setEventsLoading(false)
