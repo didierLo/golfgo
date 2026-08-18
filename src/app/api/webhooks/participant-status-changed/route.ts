@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     )
 
     const [{ data: event }, { data: player }] = await Promise.all([
-      supabase.from('events').select('id, title, group_id').eq('id', payload.record.event_id).single(),
+         supabase.from('events').select('id, title, group_id, starts_at').eq('id', payload.record.event_id).single(),
       supabase.from('players').select('first_name, surname').eq('id', payload.record.player_id).single(),
     ])
 
@@ -61,12 +61,15 @@ export async function POST(req: Request) {
     }
 
     const playerName = player ? `${player.first_name} ${player.surname}` : 'Un joueur'
+    const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
+      weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
+    })
     const notifPayload = JSON.stringify({
       title: isJoiningGoing ? `Nouvelle confirmation — ${event.title}` : `Flight à revoir — ${event.title}`,
       body: isJoiningGoing
-        ? `${playerName} a confirmé sa présence.`
-        : `${playerName} n'est plus confirmé(e) (désormais ${statusLabels[newStatus] ?? newStatus}).`,
-      url: `/fr/groups/${event.group_id}/events/${event.id}/participants`,
+        ? `${playerName} a confirmé sa présence (${eventDate}).`
+        : `${playerName} n'est plus confirmé(e) (désormais ${statusLabels[newStatus] ?? newStatus}) — ${eventDate}.`,
+      url: `/fr/groups/${event.group_id}/events/${event.id}`,
     })
 
     let sent = 0
