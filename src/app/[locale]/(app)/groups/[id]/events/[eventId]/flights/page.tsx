@@ -170,9 +170,20 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
     finally { setGenerating(false) }
   }
 
-  async function handleSave() {
+   async function handleSave() {
     setSaving(true)
     try { await save() } finally { setSaving(false) }
+  }
+
+  function addManualFlight() {
+    const nextNo = flights.length > 0 ? Math.max(...flights.map((f: any) => f.flight_no)) + 1 : 1
+    setFlights((prev: any[]) => [...prev, { flight_no: nextNo, groupLabel: null, players: [] }])
+    setManualEdits(true)
+  }
+
+  function removeFlight(flightNo: number) {
+    setFlights((prev: any[]) => prev.filter((f: any) => f.flight_no !== flightNo))
+    setManualEdits(true)
   }
 
   function onDragStart(e: React.DragEvent, player: any, fromFlightNo: number | null) {
