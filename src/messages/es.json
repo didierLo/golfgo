@@ -431,6 +431,8 @@
     "saving": "Guardando...",
     "generate": "Generar",
     "generating": "Generando...",
+    "addManual": "Añadir flight", 
+    "removeFlight": "Eliminar flight",
     "confirmedPlayers": "Jugadores confirmados ({count})",
     "plays9": "{count} juega 9H",
     "noConfirmed": "Sin jugadores confirmados",
@@ -441,7 +443,8 @@
 
     "unassignedSuffix": "sin asignar",
     "allAssigned": "Todos los jugadores están asignados a un flight.",
-    "unassignedDragHint": "Arrastra un jugador sin asignar a un flight para añadirlo",    "unsaved": "Modificado — no olvides guardar",
+    "unassignedDragHint": "Arrastra un jugador sin asignar a un flight para añadirlo",    
+    "unsaved": "Modificado — no olvides guardar",
     "dropHere": "Soltar aquí",
     "emptyFlight": "Flight vacío",
     "avgWHS": "prom.",

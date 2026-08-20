@@ -435,6 +435,8 @@
     "saving": "Opslaan...",
     "generate": "Genereren",
     "generating": "Genereren...",
+    "addManual": "Flight toevoegen", 
+    "removeFlight": "Flight verwijderen",
     "confirmedPlayers": "Bevestigde spelers ({count})",
     "plays9": "{count} speelt 9G",
     "noConfirmed": "Geen bevestigde spelers",

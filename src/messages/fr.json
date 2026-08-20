@@ -438,6 +438,8 @@
     "saving": "Enregistrement en cours...",
     "generate": "Générer",
     "generating": "Génération en cours...",
+    "addManual": "Ajouter un flight", 
+    "removeFlight": "Supprimer ce flight",
     "confirmedPlayers": "Joueurs confirmés ({count})",
     "plays9": "{count} jouer 9T",
     "noConfirmed": "Aucun joueur confirmé",

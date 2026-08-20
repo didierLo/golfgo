@@ -432,6 +432,8 @@
     "saving": "Speichern...",
     "generate": "Generieren",
     "generating": "Generieren...",
+    "addManual": "Flight hinzufügen", 
+    "removeFlight": "Flight entfernen",
     "confirmedPlayers": "Bestätigte Spieler ({count})",
     "plays9": "{count} spielt 9L",
     "noConfirmed": "Keine bestätigten Spieler",

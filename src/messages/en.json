@@ -434,6 +434,8 @@
     "saving": "Saving...",
     "generate": "Generate",
     "generating": "Generating...",
+    "addManual": "Add flight", 
+    "removeFlight": "Remove flight",
     "confirmedPlayers": "Confirmed players ({count})",
     "plays9": "{count} playing 9H",
     "noConfirmed": "No confirmed players",
