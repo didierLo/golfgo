@@ -18,7 +18,7 @@ type FlightPlayer = {
   id: string; first_name: string; surname: string; whs: number | null
   holes_played?: number | null; holes_section?: HolesSection
 }
-type Flight = { flight_number: number; players: FlightPlayer[] }
+type Flight = { id: string; flight_number: number; players: FlightPlayer[] }
 
 function HolesBadge({ p }: { p: FlightPlayer }) {
   if (!p.holes_played || p.holes_played === 18) return null
@@ -77,6 +77,11 @@ export default function TeeSheetPage() {
   const [showPreview,  setShowPreview]  = useState(false)
   const [logoUrl,      setLogoUrl]      = useState<string | null>(null)
 
+  // ── Réorganisation manuelle des départs (glisser-déposer, souris + tactile) ──
+  const [dragFlightIdx,     setDragFlightIdx]     = useState<number | null>(null)
+  const [dragOverFlightIdx, setDragOverFlightIdx] = useState<number | null>(null)
+  const [reordering,        setReordering]        = useState(false)
+
   useEffect(() => {
     if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
   }, [nearestEventId, nearestLoading, eventIdFromRoute])
@@ -129,6 +134,7 @@ useEffect(() => {
   participants?.forEach(p => { holesMap[p.player_id] = { holes_played: p.holes_played, holes_section: p.holes_section as HolesSection } })
 
   const built: Flight[] = (flightsData || []).map((f: any) => ({
+    id: f.id,
     flight_number: f.flight_number,
     players: (f.flight_players || []).map((fp: any) => ({
       ...fp.players,
@@ -136,7 +142,11 @@ useEffect(() => {
       holes_section: holesMap[fp.player_id]?.holes_section ?? null,
     })).filter(Boolean),
   }))
-  built.sort((a, b) => a.players.length - b.players.length)
+  // Note : l'ordre vient déjà de la requête (.order('flight_number')) — on ne le
+  // retrie plus par nombre de joueurs, sinon toute réorganisation manuelle
+  // serait écrasée au prochain chargement de la page. On renumérote juste
+  // 1..N pour un affichage continu même si la table a des trous (flight
+  // supprimé entre-temps, etc.).
   setFlights(built.map((f, i) => ({ ...f, flight_number: i + 1 })))
   setLoading(false)
 }
@@ -148,6 +158,86 @@ useEffect(() => {
     return new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
   })
 , [flights, startsAt, interval, locale])
+
+  // ── Réorganisation manuelle des départs ──────────────────────────────────
+  function moveFlight(fromIdx: number, toIdx: number) {
+    if (fromIdx === toIdx) return
+    setFlights(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(fromIdx, 1)
+      next.splice(toIdx, 0, moved)
+      const renumbered = next.map((f, i) => ({ ...f, flight_number: i + 1 }))
+      persistOrder(renumbered)
+      return renumbered
+    })
+  }
+
+  async function persistOrder(orderedFlights: Flight[]) {
+    setReordering(true)
+    try {
+      // Écriture en 2 phases pour éviter tout conflit avec une contrainte
+      // d'unicité sur (event_id, flight_number) : on passe d'abord tous les
+      // flights concernés par des valeurs temporaires négatives uniques,
+      // puis on écrit les numéros finaux.
+      await Promise.all(orderedFlights.map((f, i) =>
+        supabase.from('flights').update({ flight_number: -(i + 1) }).eq('id', f.id)
+      ))
+      const results = await Promise.all(orderedFlights.map((f, i) =>
+        supabase.from('flights').update({ flight_number: i + 1 }).eq('id', f.id)
+      ))
+      const firstError = results.find(r => r.error)?.error
+      if (firstError) throw firstError
+    } catch (e: any) {
+      toast.error("Erreur lors de l'enregistrement de l'ordre — " + (e.message ?? 'réessaie'))
+      loadData(selectedEventId) // resynchronise avec la base en cas d'échec partiel
+    } finally {
+      setReordering(false)
+    }
+  }
+
+  function onFlightDragStart(idx: number) {
+    if (!isOwner) return
+    setDragFlightIdx(idx)
+  }
+  function onFlightDragOver(e: React.DragEvent, idx: number) {
+    if (!isOwner || dragFlightIdx === null) return
+    e.preventDefault()
+    setDragOverFlightIdx(idx)
+  }
+  function onFlightDrop(idx: number) {
+    if (!isOwner || dragFlightIdx === null) { onFlightDragEnd(); return }
+    moveFlight(dragFlightIdx, idx)
+    onFlightDragEnd()
+  }
+  function onFlightDragEnd() {
+    setDragFlightIdx(null)
+    setDragOverFlightIdx(null)
+  }
+
+  function onFlightTouchStart(e: React.TouchEvent, idx: number) {
+    if (!isOwner) return
+    e.preventDefault()
+    setDragFlightIdx(idx)
+  }
+  function onFlightTouchMove(e: React.TouchEvent) {
+    if (!isOwner || dragFlightIdx === null) return
+    e.preventDefault()
+    const touch = e.touches[0]
+    const el = document.elementFromPoint(touch.clientX, touch.clientY)
+    const flightEl = el?.closest('[data-flight-idx]')
+    if (flightEl) setDragOverFlightIdx(parseInt(flightEl.getAttribute('data-flight-idx') ?? '-1'))
+  }
+  function onFlightTouchEnd(e: React.TouchEvent) {
+    if (!isOwner || dragFlightIdx === null) { onFlightDragEnd(); return }
+    const touch = e.changedTouches[0]
+    const el = document.elementFromPoint(touch.clientX, touch.clientY)
+    const flightEl = el?.closest('[data-flight-idx]')
+    if (flightEl) {
+      const toIdx = parseInt(flightEl.getAttribute('data-flight-idx') ?? '-1')
+      if (toIdx >= 0) moveFlight(dragFlightIdx, toIdx)
+    }
+    onFlightDragEnd()
+  }
 
   function buildWhatsAppTeesheet(): string {
     const lines = [`📋 *${eventTitle}* — ${eventDate}`, '']
@@ -256,10 +346,40 @@ useEffect(() => {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
+          {isOwner && flights.length > 1 && (
+            <p className="text-[11px] text-slate-400 -mb-1 print:hidden">
+              ⠿ Glisse un départ pour changer l'ordre{reordering ? ' · enregistrement…' : ''}
+            </p>
+          )}
           {flights.map((flight, index) => (
-            <div key={flight.flight_number} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            <div key={flight.id}
+              data-flight-idx={index}
+              onDragOver={e => onFlightDragOver(e, index)}
+              onDrop={() => onFlightDrop(index)}
+              className={`bg-white border rounded-xl overflow-hidden transition-colors ${
+                dragFlightIdx === index
+                  ? 'border-[#185FA5] opacity-50'
+                  : dragOverFlightIdx === index && dragFlightIdx !== null
+                    ? 'border-[#185FA5] ring-2 ring-[#185FA5]/30'
+                    : 'border-slate-200'
+              }`}>
               <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
-                <span className="text-[13px] font-black text-slate-800">{t('teesheet.flight', { number: flight.flight_number })}</span>
+                <div className="flex items-center gap-2.5">
+                  {isOwner && (
+                    <span
+                      draggable
+                      onDragStart={() => onFlightDragStart(index)}
+                      onDragEnd={onFlightDragEnd}
+                      onTouchStart={e => onFlightTouchStart(e, index)}
+                      onTouchMove={onFlightTouchMove}
+                      onTouchEnd={onFlightTouchEnd}
+                      title="Glisser pour réorganiser"
+                      className="print:hidden cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 text-[16px] select-none touch-none px-1">
+                      ⠿
+                    </span>
+                  )}
+                  <span className="text-[13px] font-black text-slate-800">{t('teesheet.flight', { number: flight.flight_number })}</span>
+                </div>
                 <span className="text-[15px] font-black text-[#185FA5]">{flightTimes[index]}</span>
               </div>
               <div className="divide-y divide-slate-100">
