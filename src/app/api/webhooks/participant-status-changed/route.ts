@@ -28,11 +28,12 @@ export async function POST(req: Request) {
     const oldStatus = payload.old_record?.status
     const newStatus = payload.record?.status
 
-    const isLeavingGoing = oldStatus === 'GOING' && newStatus !== 'GOING'
-    const isJoiningGoing = oldStatus !== 'GOING' && newStatus === 'GOING'
+    const isLeavingGoing   = oldStatus === 'GOING'    && newStatus !== 'GOING'
+    const isJoiningGoing   = oldStatus !== 'GOING'    && newStatus === 'GOING'
+    const isJoiningWaitlist = oldStatus !== 'WAITLIST' && newStatus === 'WAITLIST'
 
-    if (!isLeavingGoing && !isJoiningGoing) {
-      return Response.json({ success: true, skipped: 'status change does not affect GOING count' })
+    if (!isLeavingGoing && !isJoiningGoing && !isJoiningWaitlist) {
+      return Response.json({ success: true, skipped: 'status change does not affect GOING/WAITLIST count' })
     }
 
     const supabase = createClient(
@@ -65,10 +66,14 @@ export async function POST(req: Request) {
       weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
     })
     const notifPayload = JSON.stringify({
-      title: isJoiningGoing ? `Nouvelle confirmation — ${event.title}` : `Flight à revoir — ${event.title}`,
-      body: isJoiningGoing
-        ? `${playerName} a confirmé sa présence (${eventDate}).`
-        : `${playerName} n'est plus confirmé(e) (désormais ${statusLabels[newStatus] ?? newStatus}) — ${eventDate}.`,
+      title: isJoiningWaitlist
+        ? `Liste d'attente — ${event.title}`
+        : isJoiningGoing ? `Nouvelle confirmation — ${event.title}` : `Flight à revoir — ${event.title}`,
+      body: isJoiningWaitlist
+        ? `${playerName} est en liste d'attente, événement complet (${eventDate}).`
+        : isJoiningGoing
+          ? `${playerName} a confirmé sa présence (${eventDate}).`
+          : `${playerName} n'est plus confirmé(e) (désormais ${statusLabels[newStatus] ?? newStatus}) — ${eventDate}.`,
       url: `/fr/groups/${event.group_id}/events/${event.id}`,
     })
 

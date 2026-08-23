@@ -673,7 +673,7 @@ export default function ParticipantsPage() {
 
   const statusOrder = { GOING: 0, INVITED: 1, WAITLIST: 2, DECLINED: 3 }
 
-  const { going, going18, going9front, going9back, going9, invited, declined, has9holers, extraActivityCount } = useMemo(() => {
+  const { going, going18, going9front, going9back, going9, invited, declined, waitlist, has9holers, extraActivityCount } = useMemo(() => {
     const going  = participants.filter(p => p.status === 'GOING')
     const going9 = going.filter(p => p.holes_played === 9)
     return {
@@ -684,6 +684,7 @@ export default function ParticipantsPage() {
       going9,
       invited:     participants.filter(p => p.status === 'INVITED').length,
       declined:    participants.filter(p => p.status === 'DECLINED').length,
+      waitlist:    participants.filter(p => p.status === 'WAITLIST').length,
       has9holers:  going9.length > 0,
       extraActivityCount: participants.reduce((sum, p) => sum + (p.extra_activity_count ?? 0), 0),
     }
@@ -838,6 +839,12 @@ export default function ParticipantsPage() {
               <span className="text-[20px] font-black text-[#A32D2D]">{declined}</span>
               <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{t('participants.declined')}</span>
             </div>
+            {waitlist > 0 && (
+              <div className="border rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: STATUS_STYLE.WAITLIST.bg, borderColor: STATUS_STYLE.WAITLIST.text + '40' }}>
+                <span className="text-[20px] font-black" style={{ color: STATUS_STYLE.WAITLIST.text }}>{waitlist}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap" style={{ color: STATUS_STYLE.WAITLIST.text }}>⏳ Attente</span>
+              </div>
+            )}
             <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: '#F1F5F9' }}>
               <span className="text-[20px] font-black text-slate-700">{participants.length}</span>
               <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{t('participants.total')}</span>

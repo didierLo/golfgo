@@ -39,15 +39,18 @@ function applyTemplateVars(text: string, vars: Record<string, string>): string {
 
 // ── Boutons de réponse (golf vs event non-golf) ────────────────────────────────
 
-function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string): string {
+function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isFull: boolean = false): string {
+  // Styles "liste d'attente" (ambre) utilisés à la place du vert/jaune/orange habituel quand l'événement est complet
+  const waitBg = '#FEF3C7', waitBorder = '#D97706', waitTitle = '#92400E', waitSub = '#B45309'
+
   if (!isGolf) {
     return `
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr><td>
-                <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+                <a href="${yes18Link}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#DCFCE7'};border:2px solid ${isFull ? waitBorder : '#16A34A'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">🙋</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div></td>
+                    <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🙋'}</td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -69,10 +72,10 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
   return `
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr><td>
-                <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+                <a href="${yes18Link}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#DCFCE7'};border:2px solid ${isFull ? waitBorder : '#16A34A'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">⛳</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div><div style="font-size:12px;color:#16A34A;margin-top:2px;">18 trous</div></td>
+                    <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '⛳'}</td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div><div style="font-size:12px;color:${isFull ? waitSub : '#16A34A'};margin-top:2px;">18 trous</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -80,10 +83,10 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
             </table>
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr><td>
-                <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:#FEF9C3;border:2px solid #CA8A04;border-radius:12px;padding:16px 20px;">
+                <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#FEF9C3'};border:2px solid ${isFull ? waitBorder : '#CA8A04'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">🌅</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#92400E;">Je participe</div><div style="font-size:12px;color:#B45309;margin-top:2px;">9 trous Front</div></td>
+                    <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🌅'}</td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#92400E'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div><div style="font-size:12px;color:${isFull ? waitSub : '#B45309'};margin-top:2px;">9 trous Front</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -91,10 +94,10 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
             </table>
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
               <tr><td>
-                <a href="${yes9backLink}" style="display:block;text-decoration:none;background:#FFEDD5;border:2px solid #EA580C;border-radius:12px;padding:16px 20px;">
+                <a href="${yes9backLink}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#FFEDD5'};border:2px solid ${isFull ? waitBorder : '#EA580C'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td style="font-size:22px;width:36px;">🌇</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:#9A3412;">Je participe</div><div style="font-size:12px;color:#C2410C;margin-top:2px;">9 trous Back</div></td>
+                    <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🌇'}</td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#9A3412'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div><div style="font-size:12px;color:${isFull ? waitSub : '#C2410C'};margin-top:2px;">9 trous Back</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -117,12 +120,15 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
 
 function buildReminderHtml({
   firstName, eventTitle, eventDate, eventTime, eventLocation, bodyText, isGolf,
-  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl,
+  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl, placesRestantes,
 }: {
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; bodyText: string; isGolf: boolean; yes18Link: string; yes9frontLink: string
-  yes9backLink: string; noLink: string; logoUrl: string | null
+  yes9backLink: string; noLink: string; logoUrl: string | null; placesRestantes: number | null
 }) {
+  // placesRestantes === null → pas de limite de places (max_participants non défini) → jamais complet
+  const isFull = placesRestantes !== null && placesRestantes <= 0
+
   return `
 <!DOCTYPE html>
 <html lang="fr">
@@ -152,7 +158,11 @@ function buildReminderHtml({
               </td></tr>
             </table>
             <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Confirmez votre présence</p>
-            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink)}
+            ${isFull ? `
+            <div style="background:#FEF3C7;border:1px solid #D97706;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">⚠️ Événement complet — tu seras placé(e) en liste d'attente si tu confirmes.</p>
+            </div>` : ''}
+            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, isFull)}
           </td>
         </tr>
         <tr>
@@ -220,12 +230,15 @@ function buildNoTeesheetHtml({
 }
 function buildInvitationHtml({
   firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName, bodyText, isGolf,
-  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl,
+  yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl, placesRestantes,
 }: {
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; ownerName: string; bodyText: string; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string; logoUrl: string | null
+  placesRestantes: number | null
 }) {
+  // placesRestantes === null → pas de limite définie sur l'événement → jamais complet
+  const isFull = placesRestantes !== null && placesRestantes <= 0
 
   return `
 <!DOCTYPE html>
@@ -257,7 +270,11 @@ function buildInvitationHtml({
               </td></tr>
             </table>
             <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink)}
+            ${isFull ? `
+            <div style="background:#FEF3C7;border:1px solid #D97706;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">⚠️ Événement complet — tu seras placé(e) en liste d'attente si tu confirmes.</p>
+            </div>` : ''}
+            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, isFull)}
             <div style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;">
               <p style="margin:0;font-size:12px;color:#92400E;font-style:italic;">
                 Si tu as déjà répondu via GolfGo, ne tiens pas compte de cet email.
@@ -362,8 +379,10 @@ if (days === 3 && group?.auto_reminders) {
           .eq('event_id', event.id)
           .eq('status', 'GOING')
 
-        const placesRestantes = Math.max(0, (event.max_participants ?? 99) - (goingCount ?? 0))
-
+        // event.max_participants === null → pas de limite définie sur l'événement
+        const placesRestantes = event.max_participants != null
+          ? Math.max(0, event.max_participants - (goingCount ?? 0))
+          : null
 
         const vars = {
           first_name:  player.first_name,
@@ -374,7 +393,7 @@ if (days === 3 && group?.auto_reminders) {
           event_title: event.title,
           event_date:  formatDate(event.starts_at),
           event_time:  formatTime(event.starts_at),
-          places_restantes: String(placesRestantes),  // ← ajout
+          places_restantes: placesRestantes != null ? String(placesRestantes) : '',  // ← ajout
           yes_button:       '',     
         }
 
@@ -391,6 +410,7 @@ if (days === 3 && group?.auto_reminders) {
           isGolf: event.is_golf ?? true,
           yes18Link, yes9frontLink, yes9backLink, noLink,
           logoUrl,
+          placesRestantes,
         })
 
       const icsContent = generateICS({
@@ -485,6 +505,17 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         const ownerName = ownerPlayer
           ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
 
+        // Calculer les places restantes pour cet événement (même logique que le rappel J-3)
+        const { count: goingCount } = await supabase
+          .from('event_participants')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('status', 'GOING')
+
+        const placesRestantes = event.max_participants != null
+          ? Math.max(0, event.max_participants - (goingCount ?? 0))
+          : null
+
         const vars = {
           first_name:  player.first_name,
           surname:     player.surname,
@@ -510,6 +541,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           isGolf: event.is_golf ?? true,
           yes18Link, yes9frontLink, yes9backLink, noLink,
           logoUrl,
+          placesRestantes,
         })
 
        const icsContent = generateICS({

@@ -18,6 +18,7 @@ function InviteYesContent() {
   const [holesPlayed,  setHolesPlayed]  = useState<9 | 18>(18)
   const [holesSection, setHolesSection] = useState<'out' | 'in' | null>(null)
   const [appLink,      setAppLink]      = useState<string | null>(null)
+  const [finalStatus,  setFinalStatus]  = useState<'GOING' | 'WAITLIST'>('GOING')
 
   // Message optionnel
   const [message,     setMessage]     = useState('')
@@ -63,23 +64,43 @@ function InviteYesContent() {
   async function confirmParticipation(tok: string, holes: 9 | 18, section: 'out' | 'in' | null) {
     setStep('saving')
 
-    const [{ data: participant }, { error }] = await Promise.all([
-      supabase.from('event_participants')
-        .select('event_id, extra_activity_count, events(group_id, extra_activity_label)')
-        .eq('invite_token', tok).maybeSingle(),
-      supabase.from('event_participants')
-        .update({
-          status:        'GOING',
-          holes_played:  holes,
-          holes_section: section,
-          responded_at:  new Date().toISOString(),
-        })
-        .eq('invite_token', tok),
-    ])
+    // 1. Récupérer le participant + la limite de places de l'événement
+    const { data: participant, error: fetchError } = await supabase
+      .from('event_participants')
+      .select('event_id, extra_activity_count, events(group_id, extra_activity_label, max_participants)')
+      .eq('invite_token', tok).maybeSingle()
+
+    if (fetchError || !participant?.event_id) { setStep('error'); return }
+
+    const maxParticipants = (participant.events as any)?.max_participants ?? null
+
+    // 2. Déterminer si l'événement est complet (hors places déjà occupées par ce joueur lui-même,
+    //    pour ne pas le compter deux fois s'il modifie son choix de trous après avoir déjà confirmé)
+    let newStatus: 'GOING' | 'WAITLIST' = 'GOING'
+    if (maxParticipants != null) {
+      const { count: goingCount } = await supabase
+        .from('event_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', participant.event_id)
+        .eq('status', 'GOING')
+        .neq('invite_token', tok)
+
+      if ((goingCount ?? 0) >= maxParticipants) newStatus = 'WAITLIST'
+    }
+
+    // 3. Écrire le statut final
+    const { error } = await supabase.from('event_participants')
+      .update({
+        status:        newStatus,
+        holes_played:  holes,
+        holes_section: section,
+        responded_at:  new Date().toISOString(),
+      })
+      .eq('invite_token', tok)
 
     if (error) { setStep('error'); return }
 
-    if (participant?.event_id && (participant?.events as any)?.group_id) {
+    if ((participant?.events as any)?.group_id) {
       setAppLink(`/groups/${(participant.events as any).group_id}/events/${participant.event_id}`)
     }
     setExtraActivityLabel((participant?.events as any)?.extra_activity_label ?? null)
@@ -89,6 +110,7 @@ function InviteYesContent() {
 
     setHolesPlayed(holes)
     setHolesSection(section)
+    setFinalStatus(newStatus)
     setStep('success')
   }
 
@@ -211,15 +233,29 @@ function InviteYesContent() {
 
         {step === 'success' && (
           <>
-            <div className="w-14 h-14 rounded-full bg-[#EAF3DE] flex items-center justify-center mx-auto mb-4">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M5 13l4 4L19 7" stroke="#3B6D11" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <h1 className="text-[18px] font-black text-slate-900 mb-2">{t('inviteYes.successTitle')}</h1>
-            <p className="text-[13px] text-slate-600 mb-6">
-              {t('inviteYes.successDesc', { holes: holesDisplayLabel() })}
-            </p>
+            {finalStatus === 'WAITLIST' ? (
+              <>
+                <div className="w-14 h-14 rounded-full bg-[#FEF3C7] flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">⏳</span>
+                </div>
+                <h1 className="text-[18px] font-black text-slate-900 mb-2">Tu es en liste d'attente</h1>
+                <p className="text-[13px] text-slate-600 mb-6">
+                  L'événement est complet ({holesDisplayLabel()}). Tu seras prévenu si une place se libère.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-14 h-14 rounded-full bg-[#EAF3DE] flex items-center justify-center mx-auto mb-4">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 13l4 4L19 7" stroke="#3B6D11" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <h1 className="text-[18px] font-black text-slate-900 mb-2">{t('inviteYes.successTitle')}</h1>
+                <p className="text-[13px] text-slate-600 mb-6">
+                  {t('inviteYes.successDesc', { holes: holesDisplayLabel() })}
+                </p>
+              </>
+            )}
 
             {/* ── Bloc activité annexe ── */}
             {extraActivityLabel && (
