@@ -18,7 +18,7 @@ type FlightPlayer = {
   id: string; first_name: string; surname: string; whs: number | null
   holes_played?: number | null; holes_section?: HolesSection
 }
-type Flight = { id: string; flight_number: number; players: FlightPlayer[] }
+type Flight = { id: string; flight_number: number; manual_start_at: string | null; players: FlightPlayer[] }
 
 function HolesBadge({ p }: { p: FlightPlayer }) {
   if (!p.holes_played || p.holes_played === 18) return null
@@ -82,6 +82,11 @@ export default function TeeSheetPage() {
   const [dragOverFlightIdx, setDragOverFlightIdx] = useState<number | null>(null)
   const [reordering,        setReordering]        = useState(false)
 
+  // ── Heure de départ modifiée manuellement ──
+  const [editingTimeIdx, setEditingTimeIdx] = useState<number | null>(null)
+  const [timeDraft,      setTimeDraft]      = useState('')
+  const [savingTime,     setSavingTime]     = useState(false)
+
   useEffect(() => {
     if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
   }, [nearestEventId, nearestLoading, eventIdFromRoute])
@@ -122,7 +127,7 @@ useEffect(() => {
   // Paralléliser flights et participants
   const [{ data: flightsData, error: fErr }, { data: participants }] = await Promise.all([
     supabase.from('flights')
-      .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
+      .select(`id, flight_number, manual_start_at, flight_players(player_id, players(id, first_name, surname, whs))`)
       .eq('event_id', evId).order('flight_number'),
     supabase.from('event_participants')
       .select('player_id, holes_played, holes_section').eq('event_id', evId)
@@ -136,6 +141,7 @@ useEffect(() => {
   const built: Flight[] = (flightsData || []).map((f: any) => ({
     id: f.id,
     flight_number: f.flight_number,
+    manual_start_at: f.manual_start_at ?? null,
     players: (f.flight_players || []).map((fp: any) => ({
       ...fp.players,
       holes_played:  holesMap[fp.player_id]?.holes_played  ?? null,
@@ -151,13 +157,71 @@ useEffect(() => {
   setLoading(false)
 }
 
- const flightTimes = useMemo(() =>
-  flights.map((_, i) => {
-    if (!startsAt) return t('common.noData')
-    const ms = new Date(startsAt).getTime() + i * interval * 60 * 1000
-    return new Date(ms).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
-  })
-, [flights, startsAt, interval, locale])
+ const flightTimes = useMemo(() => {
+   let cursorMs = startsAt ? new Date(startsAt).getTime() : null
+   return flights.map((f) => {
+     if (cursorMs === null) return { label: t('common.noData'), ms: null as number | null }
+     const thisMs = f.manual_start_at ? new Date(f.manual_start_at).getTime() : cursorMs
+     cursorMs = thisMs + interval * 60 * 1000
+     const label = new Date(thisMs).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+     return { label, ms: thisMs }
+   })
+ }, [flights, startsAt, interval, locale])
+
+  // Heure au format HH:MM (pour l'input type="time"), en lisant l'heure "cadran UTC"
+  // — même convention que le reste de l'app (starts_at stocké tel que son
+  // affichage en UTC corresponde à l'heure locale voulue).
+  function msToHHMM(ms: number): string {
+    const d = new Date(ms)
+    return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`
+  }
+
+  function hhmmToTimestamp(hhmm: string): string | null {
+    if (!startsAt) return null
+    const [hh, mm] = hhmm.split(':').map(Number)
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return null
+    const ref = new Date(startsAt)
+    return new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), ref.getUTCDate(), hh, mm, 0)).toISOString()
+  }
+
+  function startEditTime(idx: number) {
+    if (!isOwner) return
+    const ms = flightTimes[idx]?.ms
+    setTimeDraft(ms != null ? msToHHMM(ms) : '')
+    setEditingTimeIdx(idx)
+  }
+
+  async function saveManualTime(idx: number) {
+    const flight = flights[idx]
+    const iso = hhmmToTimestamp(timeDraft)
+    setEditingTimeIdx(null)
+    if (!flight || !iso) return
+    if (iso === flight.manual_start_at) return // pas de changement
+
+    const prevFlights = flights
+    setFlights(prev => prev.map((f, i) => i === idx ? { ...f, manual_start_at: iso } : f))
+    setSavingTime(true)
+    const { error } = await supabase.from('flights').update({ manual_start_at: iso }).eq('id', flight.id)
+    setSavingTime(false)
+    if (error) {
+      toast.error("Erreur lors de l'enregistrement de l'heure — réessaie")
+      setFlights(prevFlights)
+    }
+  }
+
+  async function clearManualTime(idx: number) {
+    const flight = flights[idx]
+    if (!flight) return
+    const prevFlights = flights
+    setFlights(prev => prev.map((f, i) => i === idx ? { ...f, manual_start_at: null } : f))
+    setSavingTime(true)
+    const { error } = await supabase.from('flights').update({ manual_start_at: null }).eq('id', flight.id)
+    setSavingTime(false)
+    if (error) {
+      toast.error("Erreur lors de la réinitialisation de l'heure — réessaie")
+      setFlights(prevFlights)
+    }
+  }
 
   // ── Réorganisation manuelle des départs ──────────────────────────────────
   function moveFlight(fromIdx: number, toIdx: number) {
@@ -242,7 +306,7 @@ useEffect(() => {
   function buildWhatsAppTeesheet(): string {
     const lines = [`📋 *${eventTitle}* — ${eventDate}`, '']
     flights.forEach((f, i) => {
-      lines.push(`*Flight ${f.flight_number}* — ${flightTimes[i]}`)
+      lines.push(`*Flight ${f.flight_number}* — ${flightTimes[i].label}`)
       f.players.forEach(p => lines.push(`  • ${p.first_name} ${p.surname}${p.whs !== null ? ` (${Number(p.whs).toFixed(1)})` : ''}`))
       lines.push('')
     })
@@ -253,7 +317,7 @@ useEffect(() => {
     setSending(true)
     try {
       const teesheetFlights = flights.map((f, index) => ({
-        flight_number: f.flight_number, start_time: flightTimes[index], players: f.players,
+        flight_number: f.flight_number, start_time: flightTimes[index].label, players: f.players,
       }))
       const res = await fetch('/api/send-teesheet', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -271,7 +335,7 @@ useEffect(() => {
   function openTeesheetPrintWindow() {
     if (flights.length === 0) return
     const teesheetFlights = flights.map((f, index) => ({
-      flight_number: f.flight_number, start_time: flightTimes[index], players: f.players,
+      flight_number: f.flight_number, start_time: flightTimes[index].label, players: f.players,
     }))
     const html = buildTeesheetHtml({
       playerName: null, playerFlightNumber: null,
@@ -346,9 +410,9 @@ useEffect(() => {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {isOwner && flights.length > 1 && (
+          {isOwner && flights.length > 0 && (
             <p className="text-[11px] text-slate-400 -mb-1 print:hidden">
-              ⠿ Glisse un départ pour changer l'ordre{reordering ? ' · enregistrement…' : ''}
+              ⠿ Glisse un départ pour changer l'ordre · touche l'heure pour la modifier manuellement{reordering || savingTime ? ' · enregistrement…' : ''}
             </p>
           )}
           {flights.map((flight, index) => (
@@ -378,9 +442,42 @@ useEffect(() => {
                       ⠿
                     </span>
                   )}
-                  <span className="text-[13px] font-black text-slate-800">{t('teesheet.flight', { number: flight.flight_number })}</span>
+                  <span className="flight-label-text text-[13px] font-black text-slate-800">{t('teesheet.flight', { number: flight.flight_number })}</span>
                 </div>
-                <span className="text-[15px] font-black text-[#185FA5]">{flightTimes[index]}</span>
+                {isOwner && editingTimeIdx === index ? (
+                  <input
+                    type="time"
+                    autoFocus
+                    value={timeDraft}
+                    onChange={e => setTimeDraft(e.target.value)}
+                    onBlur={() => saveManualTime(index)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                      if (e.key === 'Escape') setEditingTimeIdx(null)
+                    }}
+                    className="text-[15px] font-black text-[#185FA5] border border-[#185FA5]/40 rounded-lg px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30"
+                  />
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => startEditTime(index)}
+                      disabled={!isOwner}
+                      title={isOwner ? "Modifier l'heure de ce départ" : undefined}
+                      className={`flight-time-text text-[15px] font-black text-[#185FA5] ${isOwner ? 'hover:underline decoration-dashed underline-offset-2 cursor-pointer' : ''}`}>
+                      {flightTimes[index]?.label}
+                    </button>
+                    {flight.manual_start_at && (
+                      <button
+                        type="button"
+                        onClick={() => clearManualTime(index)}
+                        title="Revenir à l'heure automatique"
+                        className="print:hidden text-[11px] text-slate-300 hover:text-slate-500">
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="divide-y divide-slate-100">
                 {flight.players.map((p, i) => (
@@ -413,7 +510,7 @@ useEffect(() => {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               type: 'teesheet', eventId: selectedEventId,
-              flights: flights.map((f, i) => ({ ...f, start_time: flightTimes[i] })),
+              flights: flights.map((f, i) => ({ ...f, start_time: flightTimes[i].label })),
             }),
           }).then(r => r.json())}
         />
@@ -427,8 +524,8 @@ useEffect(() => {
           .flex.flex-col.gap-3 { gap: 12px; }
           .bg-white.border { border: 1px solid #E5E7EB !important; border-radius: 8px !important; overflow: hidden; break-inside: avoid; }
           .bg-slate-50.border-b { background: #185FA5 !important; padding: 8px 16px !important; }
-          .bg-slate-50.border-b span:first-child { color: white !important; font-size: 13px !important; font-weight: 700 !important; }
-          .bg-slate-50.border-b span:last-child  { color: #4CAF1A !important; font-size: 15px !important; font-weight: 900 !important; }
+          .bg-slate-50.border-b .flight-label-text { color: white !important; font-size: 13px !important; font-weight: 700 !important; }
+          .bg-slate-50.border-b .flight-time-text  { color: #4CAF1A !important; font-size: 15px !important; font-weight: 900 !important; }
           .divide-y > div { padding: 7px 16px !important; }
           .divide-y > div:nth-child(even) { background: #F8FAFF !important; }
           .font-mono { background: #E6F1FB !important; color: #185FA5 !important; font-weight: 600 !important; padding: 2px 6px !important; border-radius: 4px !important; }
