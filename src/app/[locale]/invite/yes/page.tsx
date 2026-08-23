@@ -12,7 +12,8 @@ function InviteYesContent() {
   const searchParams = useSearchParams()
   const t            = useTranslations()
 
-  type Step = 'choosing' | 'saving' | 'success' | 'error'
+  // 'confirming' = lien avec holes pré-rempli, en attente du clic explicite du joueur
+  type Step = 'choosing' | 'confirming' | 'saving' | 'success' | 'error'
   const [step,         setStep]         = useState<Step>('choosing')
   const [holesPlayed,  setHolesPlayed]  = useState<9 | 18>(18)
   const [holesSection, setHolesSection] = useState<'out' | 'in' | null>(null)
@@ -35,18 +36,28 @@ function InviteYesContent() {
   const holesParam   = searchParams.get('holes')
   const sectionParam = searchParams.get('section')
 
+  // IMPORTANT : ce useEffect ne fait plus AUCUNE écriture en base.
+  // Il se contente de préremplir le choix et d'afficher un écran de
+  // confirmation. L'écriture (confirmParticipation) n'est déclenchée que
+  // par un clic explicite sur un bouton (handleConfirm), pour ne pas être
+  // exécutée automatiquement par un scanner de liens (Safe Links,
+  // antivirus d'entreprise, aperçu de lien, etc.) qui ouvrirait la page
+  // sans intervention réelle du joueur.
   useEffect(() => {
     if (!token) { setStep('error'); return }
     if (holesParam === '18') {
       setHolesPlayed(18); setHolesSection(null)
-      confirmParticipation(token, 18, null)
+      setStep('confirming')
     } else if (holesParam === '9' && sectionParam === 'out') {
       setHolesPlayed(9); setHolesSection('out')
-      confirmParticipation(token, 9, 'out')
+      setStep('confirming')
     } else if (holesParam === '9' && sectionParam === 'in') {
       setHolesPlayed(9); setHolesSection('in')
-      confirmParticipation(token, 9, 'in')
+      setStep('confirming')
     }
+    // Si aucun paramètre "holes" n'est présent dans le lien, on reste sur
+    // 'choosing' (écran de choix manuel déjà existant) — ce cas était déjà
+    // sûr puisqu'il nécessite un clic sur "Confirmer ma participation".
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function confirmParticipation(tok: string, holes: 9 | 18, section: 'out' | 'in' | null) {
@@ -130,7 +141,7 @@ function InviteYesContent() {
           <span className="text-[22px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
         </div>
 
-        {/* Choix manuel */}
+        {/* Choix manuel (lien sans holes préremplis) */}
         {step === 'choosing' && (
           <>
             <div className="w-14 h-14 rounded-full bg-[#EBF3FC] flex items-center justify-center mx-auto mb-4">
@@ -163,6 +174,30 @@ function InviteYesContent() {
             <button onClick={handleConfirm}
               className="w-full bg-[#185FA5] text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-[#0C447C] transition-colors">
               {t('inviteYes.confirm')}
+            </button>
+          </>
+        )}
+
+        {/* Écran de confirmation (lien avec holes préremplis) — nécessite un clic explicite */}
+        {step === 'confirming' && (
+          <>
+            <div className="w-14 h-14 rounded-full bg-[#EBF3FC] flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">⛳</span>
+            </div>
+            <h1 className="text-[18px] font-black text-slate-900 mb-1">{t('inviteYes.title')}</h1>
+            <p className="text-[13px] text-slate-500 mb-6">
+              Tu confirmes ta participation en <strong>{holesDisplayLabel()}</strong> ?
+            </p>
+
+            <button onClick={handleConfirm}
+              className="w-full bg-[#185FA5] text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-[#0C447C] transition-colors mb-3">
+              {t('inviteYes.confirm')}
+            </button>
+
+            <button
+              onClick={() => setStep('choosing')}
+              className="text-[12px] font-semibold text-slate-400 hover:text-slate-600 underline underline-offset-2">
+              Ce n'est pas le bon choix ? Choisir manuellement
             </button>
           </>
         )}

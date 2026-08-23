@@ -11,7 +11,9 @@ function InviteNoContent() {
   const supabase     = createClient()
   const searchParams = useSearchParams()
   const t            = useTranslations()
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+
+  // 'confirming' = écran d'attente du clic explicite avant d'écrire DECLINED
+  const [status, setStatus] = useState<'confirming' | 'loading' | 'success' | 'error'>('confirming')
 
   // Activité annexe optionnelle
   const [extraActivityLabel, setExtraActivityLabel] = useState<string | null>(null)
@@ -27,20 +29,30 @@ function InviteNoContent() {
   const [msgSaving, setMsgSaving] = useState(false)
   const [msgSaved,  setMsgSaved]  = useState(false)
 
-  useEffect(() => { handleDecline() }, [])
-
-  async function handleDecline() {
+  // IMPORTANT : ce useEffect ne fait plus AUCUNE écriture en base — il se
+  // contente de récupérer le token depuis l'URL. L'écriture (handleDecline)
+  // n'est déclenchée que par un clic explicite sur le bouton "Confirmer mon
+  // forfait", pour ne pas être exécutée automatiquement par un scanner de
+  // liens (Safe Links, antivirus d'entreprise, aperçu de lien, etc.) qui
+  // ouvrirait la page sans intervention réelle du joueur.
+  useEffect(() => {
     const tok = searchParams.get('token')
     if (!tok) { setStatus('error'); return }
     setToken(tok)
+    setStatus('confirming')
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleDecline() {
+    if (!token) { setStatus('error'); return }
+    setStatus('loading')
 
     const [{ data: participant }, { error }] = await Promise.all([
       supabase.from('event_participants')
         .select('extra_activity_count, events(extra_activity_label)')
-        .eq('invite_token', tok).maybeSingle(),
+        .eq('invite_token', token).maybeSingle(),
       supabase.from('event_participants')
         .update({ status: 'DECLINED', responded_at: new Date().toISOString() })
-        .eq('invite_token', tok),
+        .eq('invite_token', token),
     ])
 
     setExtraActivityLabel((participant?.events as any)?.extra_activity_label ?? null)
@@ -88,6 +100,23 @@ function InviteNoContent() {
           <span className="text-[22px] font-black text-[#185FA5] tracking-tight">Golf</span>
           <span className="text-[22px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
         </div>
+
+        {status === 'confirming' && (
+          <>
+            <div className="w-14 h-14 rounded-full bg-[#FCEBEB] flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">🙁</span>
+            </div>
+            <h1 className="text-[18px] font-black text-slate-900 mb-1">Tu ne peux pas venir ?</h1>
+            <p className="text-[13px] text-slate-500 mb-6">
+              Confirme ton forfait pour cet événement.
+            </p>
+
+            <button onClick={handleDecline}
+              className="w-full bg-[#A32D2D] text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-[#8A2424] transition-colors">
+              Confirmer mon forfait
+            </button>
+          </>
+        )}
 
         {status === 'loading' && (
           <>
