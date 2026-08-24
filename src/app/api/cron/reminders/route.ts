@@ -586,7 +586,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
       // Vérifier si des flights existent
       const { data: flightsData } = await supabase
         .from('flights')
-        .select(`id, flight_number, flight_players(player_id, players(id, first_name, surname, whs))`)
+        .select(`id, flight_number, manual_start_at, flight_players(player_id, players(id, first_name, surname, whs))`)
         .eq('event_id', event.id)
         .order('flight_number')
 
@@ -628,10 +628,11 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           holesMap[p.player_id] = { holes_played: p.holes_played, holes_section: p.holes_section }
         })
 
-        const teeInterval = event.tee_interval ?? 9
+      const teeInterval = event.tee_interval ?? 9
 
       const flightsMapped = flightsData.map((f: any) => ({
-        flight_number: f.flight_number,
+        flight_number:   f.flight_number,
+        manual_start_at: f.manual_start_at ?? null,
         players: (f.flight_players || []).map((fp: any) => ({
           ...fp.players,
           holes_played:  holesMap[fp.player_id]?.holes_played  ?? null,
@@ -639,16 +640,19 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         })).filter(Boolean),
       }))
 
-      // Même tri que l'écran : flight le moins nombreux en premier
-      flightsMapped.sort((a: any, b: any) => a.players.length - b.players.length)
+      // On respecte l'ordre déjà trié en base (.order('flight_number')), qui
+      // reflète l'éventuelle réorganisation manuelle faite dans l'écran
+      // teesheet — on ne retrie plus par nombre de joueurs.
 
+      let cursorMs = new Date(event.starts_at).getTime()
       const flights = flightsMapped.map((f: any, index: number) => {
-        const ms = new Date(event.starts_at).getTime() + index * teeInterval * 60 * 1000
-        const startTime = new Date(ms).toLocaleTimeString('fr-BE', {
+        const thisMs = f.manual_start_at ? new Date(f.manual_start_at).getTime() : cursorMs
+        cursorMs = thisMs + teeInterval * 60 * 1000
+        const startTime = new Date(thisMs).toLocaleTimeString('fr-BE', {
           hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
         })
         return {
-          flight_number: index + 1,  // renuméroter après le tri
+          flight_number: index + 1,  // renuméroter pour un affichage continu (pas de trous)
           start_time:    startTime,
           players:       f.players,
         }
