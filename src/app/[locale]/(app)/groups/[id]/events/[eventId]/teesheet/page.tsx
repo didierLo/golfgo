@@ -412,7 +412,7 @@ useEffect(() => {
         <div className="flex flex-col gap-3">
           {isOwner && flights.length > 0 && (
             <p className="text-[11px] text-slate-400 -mb-1 print:hidden">
-              ⠿ Glisse un départ pour changer l'ordre · touche l'heure pour la modifier manuellement{reordering || savingTime ? ' · enregistrement…' : ''}
+              {t('teesheet.reorderHint')}{reordering || savingTime ? t('teesheet.reorderSaving') : ''}
             </p>
           )}
           {flights.map((flight, index) => (
@@ -437,7 +437,7 @@ useEffect(() => {
                       onTouchStart={e => onFlightTouchStart(e, index)}
                       onTouchMove={onFlightTouchMove}
                       onTouchEnd={onFlightTouchEnd}
-                      title="Glisser pour réorganiser"
+                      title={t('teesheet.dragHandleTitle')}
                       className="print:hidden cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 text-[16px] select-none touch-none px-1">
                       ⠿
                     </span>
@@ -463,7 +463,7 @@ useEffect(() => {
                       type="button"
                       onClick={() => startEditTime(index)}
                       disabled={!isOwner}
-                      title={isOwner ? "Modifier l'heure de ce départ" : undefined}
+                      title={isOwner ? t('teesheet.editTimeTitle') : undefined}
                       className={`flight-time-text text-[15px] font-black text-[#185FA5] ${isOwner ? 'hover:underline decoration-dashed underline-offset-2 cursor-pointer' : ''}`}>
                       {flightTimes[index]?.label}
                     </button>
@@ -471,7 +471,7 @@ useEffect(() => {
                       <button
                         type="button"
                         onClick={() => clearManualTime(index)}
-                        title="Revenir à l'heure automatique"
+                        title={t('teesheet.resetTimeTitle')}
                         className="print:hidden text-[11px] text-slate-300 hover:text-slate-500">
                         ✕
                       </button>

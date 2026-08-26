@@ -842,7 +842,7 @@ export default function ParticipantsPage() {
             {waitlist > 0 && (
               <div className="border rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: STATUS_STYLE.WAITLIST.bg, borderColor: STATUS_STYLE.WAITLIST.text + '40' }}>
                 <span className="text-[20px] font-black" style={{ color: STATUS_STYLE.WAITLIST.text }}>{waitlist}</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap" style={{ color: STATUS_STYLE.WAITLIST.text }}>⏳ Attente</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap" style={{ color: STATUS_STYLE.WAITLIST.text }}>{t('participants.waitlist')}</span>
               </div>
             )}
             <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: '#F1F5F9' }}>

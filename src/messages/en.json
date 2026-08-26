@@ -40,7 +40,7 @@
   "myEvents": {
     "title": "My events",
     "subtitle": "{upcoming} upcoming · {past} past",
-    "partners": "My partners", 
+    "partners": "My partners",
     "partnersMobile": "Partners",
     "sections": {
       "upcoming": "Upcoming",
@@ -103,11 +103,37 @@
     "printFooter": {
       "printedOn": "Printed on {date}",
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
-    }
+    },
+    "reorderHint": "⠿ Drag a tee time to reorder · tap the time to edit it manually",
+    "reorderSaving": " · saving…",
+    "dragHandleTitle": "Drag to reorder",
+    "editTimeTitle": "Edit this tee time",
+    "resetTimeTitle": "Revert to automatic time"
   },
   "calendar": {
-    "months": ["January","February","March","April","May","June","July","August","September","October","November","December"],
-    "days": ["Mo","Tu","We","Th","Fr","Sa","Su"]
+    "months": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "days": [
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa",
+      "Su"
+    ]
   },
   "common": {
     "loading": "Loading…",
@@ -115,11 +141,9 @@
     "noData": "—",
     "back": "Back"
   },
-
   "errors": {
     "generic": "An error occurred"
   },
-  
   "clubs": {
     "title": "Clubs & Courses",
     "subtitle": "Manage available clubs and courses",
@@ -176,7 +200,7 @@
       "chooseEvent": "Choose an event...",
       "apply": "Apply"
     },
-     "msgTypes": {
+    "msgTypes": {
       "invitation": "Invitation D-14",
       "reminder": "Reminder D-3",
       "teesheet": "Teesheet D-1",
@@ -281,7 +305,6 @@
       "missingBody": "Message missing",
       "noRecipients": "No recipients"
     },
-
     "groupInvite": {
       "tab": "🔗 Group invite",
       "title": "Invite to join the group",
@@ -302,7 +325,6 @@
       "installIphone": "iPhone / Safari — Share icon ↑ → More → Add to Home Screen",
       "installAndroid": "Android / Chrome — Menu ⋮ top right → Add to Home Screen"
     }
-
   },
   "constraints": {
     "title": "Flight constraints",
@@ -386,8 +408,6 @@
     "autoInvitationLabel": "Automatic invitation 14 days before the event",
     "autoInvitationDesc": "Sends an invitation to all members 14 days before the event"
   },
-
-
   "flightHistory": {
     "title": "Flight history",
     "subtitle": "Co-participations · hover to correct manually",
@@ -434,7 +454,7 @@
     "saving": "Saving...",
     "generate": "Generate",
     "generating": "Generating...",
-    "addManual": "Add flight", 
+    "addManual": "Add flight",
     "removeFlight": "Remove flight",
     "confirmedPlayers": "Confirmed players ({count})",
     "plays9": "{count} playing 9H",
@@ -443,10 +463,10 @@
     "noFlights": "No flights generated",
     "generateHint": "Configure the settings, then click Generate",
     "dragHint": "Drag a player to another flight to move them",
-
     "unassignedSuffix": "unassigned",
     "allAssigned": "All players are assigned to a flight.",
-    "unassignedDragHint": "Drag an unassigned player onto a flight to add them",    "unsaved": "Modified — don't forget to save",
+    "unassignedDragHint": "Drag an unassigned player onto a flight to add them",
+    "unsaved": "Modified — don't forget to save",
     "dropHere": "Drop here",
     "emptyFlight": "Empty flight",
     "avgWHS": "avg",
@@ -523,7 +543,8 @@
     "invited": "invited",
     "declined": "declined",
     "total": "total",
-    "notInvited": "not invited"
+    "notInvited": "not invited",
+    "waitlist": "⏳ Waiting"
   },
   "payments": {
     "readOnly": "Read-only",
@@ -548,7 +569,7 @@
     "buttons": {
       "PAID": "Paid",
       "PENDING": "Pending",
-      "EXEMPT": "Exempt"   
+      "EXEMPT": "Exempt"
     },
     "noFee": "No fee defined for this event.",
     "back": "← Back",
@@ -557,7 +578,6 @@
     "secureDesc": "Your payment is processed by <strong>Stripe</strong>, the world leader in secure online payments. GolfGo never stores your banking details. The transaction is encrypted and compliant with PCI-DSS standards. Accepts Visa, Mastercard, Bancontact and Apple/Google Pay.",
     "paying": "Redirecting...",
     "pay": "Pay {amount} €"
-   
   },
   "results": {
     "title": "Results",
@@ -702,7 +722,7 @@
     "visitor": "Visitor",
     "removeConfirm": "Remove this player from the group? Their upcoming event participations will also be deleted.",
     "adminOnly": "You must be an admin to use this feature",
-    "inviteTitle": "🔗 Invitation link", 
+    "inviteTitle": "🔗 Invitation link",
     "inviteDesc": "Share this link to invite new members to join the group.",
     "inviteCopy": "Copy",
     "inviteCopied": "✓ Copied",
@@ -805,7 +825,6 @@
     "save": "Save",
     "backToMembers": "← Back to members",
     "updateBlocked": "The update wasn't applied (insufficient permissions?)"
-    
   },
   "notOwner": {
     "title": "Feature reserved for organisers",
@@ -843,7 +862,6 @@
       "generic": "Something went wrong. Please try again.",
       "backToLogin": "← Back to login"
     },
-    
     "forgotPassword": {
       "title": "Forgot password",
       "subtitle": "Receive a reset code by email",
@@ -863,7 +881,7 @@
       "title": "New password",
       "subtitle": "Choose a new password for your account",
       "back": "← Back to login",
-      "checking": "Verifying link...", 
+      "checking": "Verifying link...",
       "invalidLink": "This reset link is invalid or has expired. Please request a new one from this device.",
       "email": "Email address",
       "newPassword": "New password",
@@ -895,7 +913,16 @@
       "signup": "Create one",
       "submit": "Sign in",
       "submitting": "Signing in...",
-      "checkEmail": "Check your inbox (or spam) to validate your account."
+      "checkEmail": "Check your inbox (or spam) to validate your account.",
+      "errorEmailNotConfirmed": "Check your inbox to confirm your email address before signing in.",
+      "errorInvalidCredentials": "Incorrect email or password.",
+      "errorTooManyRequests": "Too many attempts. Please try again in a few minutes.",
+      "errorUserNotFound": "No account found with this email address.",
+      "resendConfirmation": "Resend confirmation email",
+      "resendSending": "Sending…",
+      "resendSent": "Email resent ✓",
+      "resendRetryIn": "(retry in {seconds}s)",
+      "resendError": "Failed to send, please try again."
     }
   },
   "inviteYes": {
@@ -908,14 +935,21 @@
     "successDesc": "You are playing {holes} holes. See you on the course ⛳",
     "viewEvent": "View event",
     "errorTitle": "Invalid link",
-    "errorDesc": "This link has expired or is no longer valid. Please contact the organiser."
+    "errorDesc": "This link has expired or is no longer valid. Please contact the organiser.",
+    "confirmingQuestion": "You're confirming your participation for {holes}?",
+    "manualChoice": "Not the right choice? Choose manually",
+    "waitlistTitle": "You're on the waiting list",
+    "waitlistDesc": "The event is full ({holes}). You'll be notified if a spot opens up."
   },
   "inviteNo": {
     "loading": "Processing...",
     "successTitle": "Participation declined",
     "successDesc": "Your response has been recorded. See you next time!",
     "errorTitle": "Invalid link",
-    "errorDesc": "This link has expired or is no longer valid. Please contact the organiser."
+    "errorDesc": "This link has expired or is no longer valid. Please contact the organiser.",
+    "confirmingTitle": "Can't make it?",
+    "confirmingSubtitle": "Confirm that you're withdrawing from this event.",
+    "confirmButton": "Confirm I can't attend"
   },
   "addEvent": {
     "title": "New event",
@@ -994,8 +1028,7 @@
     "errorRead": "Unable to read file",
     "teesUpdated": "tees updated"
   },
-
-    "partners": {
+  "partners": {
     "title": "My partners",
     "subtitle": "Partner matrix",
     "noData": "No rounds recorded yet.",
@@ -1005,8 +1038,6 @@
     "rounds_plural": "rounds",
     "solo": "Solo"
   },
-
-  
   "legal": {
     "cgu": {
       "title": "Terms of Use",
@@ -1072,7 +1103,7 @@
       "title": "Privacy Policy",
       "lastUpdated": "Version of {date}",
       "back": "Back",
-       "linkToCgu": "View terms of use",
+      "linkToCgu": "View terms of use",
       "sections": {
         "controller": {
           "title": "1. Data controller",
@@ -1159,19 +1190,17 @@
         "updates": {
           "title": "10. Changes",
           "p1": "This policy may be updated. In the event of a significant change, you will be notified by in-app notification or email."
-        }}}},
-
-   "welcome": {
-        "badge": "⛳ Welcome to GolfGo",
-        "title": "How would you like to use GolfGo?",
-        "subtitle": "GolfGo organises your golf outings with friends — invitations, balanced flights, scorecards, leaderboard and much more, all in one place.",
-        "playerTitle": "I'm a player",
-        "playerDesc": "I find all my events, sign up in one click and check my tee sheet.",
-        "ownerTitle": "I'm starting a group",
-        "ownerDesc": "GolfGo handles everything — invitations, flights, tee sheets and email confirmations."
-      
-      }}
-
-
-
-
+        }
+      }
+    }
+  },
+  "welcome": {
+    "badge": "⛳ Welcome to GolfGo",
+    "title": "How would you like to use GolfGo?",
+    "subtitle": "GolfGo organises your golf outings with friends — invitations, balanced flights, scorecards, leaderboard and much more, all in one place.",
+    "playerTitle": "I'm a player",
+    "playerDesc": "I find all my events, sign up in one click and check my tee sheet.",
+    "ownerTitle": "I'm starting a group",
+    "ownerDesc": "GolfGo handles everything — invitations, flights, tee sheets and email confirmations."
+  }
+}

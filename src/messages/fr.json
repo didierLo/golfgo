@@ -37,7 +37,6 @@
     "cancel": "Annuler",
     "close": "Fermer"
   },
-
   "myEvents": {
     "title": "Mes événements",
     "subtitle": "{upcoming} à venir · {past} passés",
@@ -46,7 +45,6 @@
     "sections": {
       "upcoming": "À venir",
       "past": "Passés"
-      
     },
     "stats": {
       "next": "Prochain",
@@ -105,12 +103,37 @@
     "printFooter": {
       "printedOn": "Imprimé le {date}",
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
-    }
+    },
+    "reorderHint": "⠿ Glisse un départ pour changer l'ordre · touche l'heure pour la modifier manuellement",
+    "reorderSaving": " · enregistrement…",
+    "dragHandleTitle": "Glisser pour réorganiser",
+    "editTimeTitle": "Modifier l'heure de ce départ",
+    "resetTimeTitle": "Revenir à l'heure automatique"
   },
-
   "calendar": {
-    "months": ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
-    "days": ["Lu","Ma","Me","Je","Ve","Sa","Di"]
+    "months": [
+      "Janvier",
+      "Février",
+      "Mars",
+      "Avril",
+      "Mai",
+      "Juin",
+      "Juillet",
+      "Août",
+      "Septembre",
+      "Octobre",
+      "Novembre",
+      "Décembre"
+    ],
+    "days": [
+      "Lu",
+      "Ma",
+      "Me",
+      "Je",
+      "Ve",
+      "Sa",
+      "Di"
+    ]
   },
   "common": {
     "loading": "Chargement…",
@@ -118,11 +141,9 @@
     "noData": "—",
     "back": "Retour"
   },
-
   "errors": {
     "generic": "Une erreur est survenue"
   },
-
   "clubs": {
     "title": "Clubs et Parcours",
     "subtitle": "Gérer les clubs et parcours disponibles",
@@ -156,9 +177,9 @@
       "send": "✉️ Nouveau message",
       "templates": "🎨 Modèles",
       "settings": "Paramètres",
-    "invite": "Invitations",
-    "visual": "Identité visuelle",
-    "visualDesc": "Ces paramètres s'appliquent à tous les emails envoyés depuis ce groupe (invitations, teesheets, rappels)."
+      "invite": "Invitations",
+      "visual": "Identité visuelle",
+      "visualDesc": "Ces paramètres s'appliquent à tous les emails envoyés depuis ce groupe (invitations, teesheets, rappels)."
     },
     "recipients": {
       "title": "Destinataires",
@@ -179,25 +200,25 @@
       "chooseEvent": "Choisissez un événement...",
       "apply": "Appliquer"
     },
-      "msgTypes": {
-          "invitation": "Invitation J-14",
-          "reminder": "Rappel J-3",
-          "teesheet": "Teesheet J-1",
-          "newmember": "Nouveau membre",
-          "free": "Libre",
-          "reminderSubject": "⏰ Rappel — {{event_title}} dans 3 jours",
-          "reminderBody": "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}",
-          "newmemberSubject": "Bienvenue dans le groupe !",
-          "newmemberBody": "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nTu peux dès maintenant consulter les événements et confirmer ta participation.\n\nÀ bientôt,\n{{owner_name}}",
-          "invitationNote": "Ce texte est celui utilisé pour les invitations automatiques J-14. Toute modification ici sera envoyée telle quelle sans modifier le template sauvegardé.",
-          "teesheetNote": "Ce texte est celui utilisé pour les teesheets automatiques J-1. Toute modification ici sera envoyée telle quelle sans modifier le template sauvegardé.",
-          "templateWarning": "⚠️ Attention, après l'envoi, les modifications de ce template seront sauvegardées pour tous les envois automatiques."
-        },
-        "settings": {
-          "title": "Paramètres",
-          "visualIdentity": "Identité visuelle",
-          "visualDesc": "Logo et couleurs utilisés dans les emails envoyés depuis ce groupe."
-        },
+    "msgTypes": {
+      "invitation": "Invitation J-14",
+      "reminder": "Rappel J-3",
+      "teesheet": "Teesheet J-1",
+      "newmember": "Nouveau membre",
+      "free": "Libre",
+      "reminderSubject": "⏰ Rappel — {{event_title}} dans 3 jours",
+      "reminderBody": "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}",
+      "newmemberSubject": "Bienvenue dans le groupe !",
+      "newmemberBody": "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nTu peux dès maintenant consulter les événements et confirmer ta participation.\n\nÀ bientôt,\n{{owner_name}}",
+      "invitationNote": "Ce texte est celui utilisé pour les invitations automatiques J-14. Toute modification ici sera envoyée telle quelle sans modifier le template sauvegardé.",
+      "teesheetNote": "Ce texte est celui utilisé pour les teesheets automatiques J-1. Toute modification ici sera envoyée telle quelle sans modifier le template sauvegardé.",
+      "templateWarning": "⚠️ Attention, après l'envoi, les modifications de ce template seront sauvegardées pour tous les envois automatiques."
+    },
+    "settings": {
+      "title": "Paramètres",
+      "visualIdentity": "Identité visuelle",
+      "visualDesc": "Logo et couleurs utilisés dans les emails envoyés depuis ce groupe."
+    },
     "message": {
       "title": "Message",
       "event": "Événement concerné",
@@ -271,7 +292,6 @@
       "cancelSubject": "Annulation — {{group_name}}",
       "cancelBody": "Bonjour {{first_name}},\n\nNous sommes au regret de t'informer que l'événement est annulé.\n\nNous t'informerons dès que possible d'une nouvelle date.\n\nToutes nos excuses pour la gêne occasionnée.\n\n{{owner_name}}",
       "free": "✏️ Libre"
-      
     },
     "toasts": {
       "groupSaved": "Modèle de groupe enregistré",
@@ -285,7 +305,6 @@
       "missingBody": "Message manquant",
       "noRecipients": "Aucun destinataire"
     },
-
     "groupInvite": {
       "tab": "🔗 Invitation groupe",
       "title": "Inviter à rejoindre le groupe",
@@ -306,7 +325,6 @@
       "installIphone": "iPhone / Safari — Icône Partager ↑ → En voir plus → Ajouter à l'écran d'accueil",
       "installAndroid": "Android / Chrome — Menu ⋮ en haut à droite → Ajouter à l'écran d'accueil"
     }
-
   },
   "constraints": {
     "title": "Restrictions de flights",
@@ -369,7 +387,7 @@
     "photosAdd": "Ajouter des photos",
     "photosUploading": "Chargement en cours…",
     "clubCourseRequired": "Le club et le parcours sont obligatoires"
-      },
+  },
   "editGroup": {
     "title": "Modifier le groupe",
     "nameLabel": "Nom du groupe *",
@@ -389,9 +407,7 @@
     "autoTeesheetDesc": "Envoie la feuille de départ la veille si les flights sont générés, sinon avertit l'organisateur",
     "autoInvitationLabel": "Invitation automatique J-14",
     "autoInvitationDesc": "Envoie une invitation à tous les membres 14 jours avant l'événement"
-  } ,
-
- 
+  },
   "flightHistory": {
     "title": "Historique des flights",
     "subtitle": "Co-participations · passer la souris dessus pour corriger manuellement",
@@ -438,7 +454,7 @@
     "saving": "Enregistrement en cours...",
     "generate": "Générer",
     "generating": "Génération en cours...",
-    "addManual": "Ajouter un flight", 
+    "addManual": "Ajouter un flight",
     "removeFlight": "Supprimer ce flight",
     "confirmedPlayers": "Joueurs confirmés ({count})",
     "plays9": "{count} jouer 9T",
@@ -447,10 +463,10 @@
     "noFlights": "Aucun flight généré",
     "generateHint": "Configurez les paramètres, puis cliquez sur Générer ",
     "dragHint": "Faites glisser un joueur vers un autre flight pour le déplacer",
-
     "unassignedSuffix": "non assigné(s)",
     "allAssigned": "Tous les joueurs sont assignés à un flight.",
-    "unassignedDragHint": "Glissez un joueur non assigné vers un flight pour l'ajouter",    "unsaved": "Modifié — n'oubliez pas d'enregistrer",
+    "unassignedDragHint": "Glissez un joueur non assigné vers un flight pour l'ajouter",
+    "unsaved": "Modifié — n'oubliez pas d'enregistrer",
     "dropHere": "Déposez ici",
     "emptyFlight": "Flight vide",
     "avgWHS": "moyenne",
@@ -527,7 +543,8 @@
     "invited": "invité(s)",
     "declined": "décliné(s)",
     "total": "total",
-    "notInvited": "n'a pas été invité"
+    "notInvited": "n'a pas été invité",
+    "waitlist": "⏳ Attente"
   },
   "payments": {
     "readOnly": "Vue en lecture seule",
@@ -543,7 +560,7 @@
     "status": "Statut",
     "éditers": "Modifier",
     "noParticipants": "Aucun participant confirmé",
-     "actions": "Actions",
+    "actions": "Actions",
     "statuses": {
       "PAID": "Payé",
       "PENDING": "En attente",
@@ -560,8 +577,7 @@
     "secureTitle": "🔒 Paiement 100% sécurisé",
     "secureDesc": "Votre paiement est traité par <strong>Stripe</strong>, leader mondial du paiement en ligne sécurisé. GolfGo ne stocke jamais vos données bancaires. La transaction est chiffrée et conforme aux normes PCI-DSS. Accepte les cartes Visa, Mastercard, Bancontact et Apple/Google Pay.",
     "paying": "Redirection...",
-    "pay": "Payer {amount} €" 
-      
+    "pay": "Payer {amount} €"
   },
   "results": {
     "title": "Résultats",
@@ -609,7 +625,7 @@
     "validateConfirm": "Validation confirmée",
     "noParticipants": "Aucun joueur n'est confirmé pour cet événement",
     "noCourse": "Sélectionnez un club et un parcours pour accéder aux cartes de score",
-   "noCourseReadOnly": "Aucun parcours n'a été configuré pour cet événement",
+    "noCourseReadOnly": "Aucun parcours n'a été configuré pour cet événement",
     "whatsapp": "WhatsApp",
     "manageCourses": "Gérer les clubs et parcours"
   },
@@ -637,7 +653,6 @@
     "toast9out": "Confirmé — 9T Front ⛳",
     "toast9in": "Confirmé — 9T Back ⛳"
   },
-
   "invitations": {
     "title": "Invitations",
     "subtitle": "{invited} invité · {going} inscrits",
@@ -789,7 +804,6 @@
     "deleteConfirm": "Supprimer ce groupe ?",
     "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
   },
-  
   "editPlayer": {
     "title": "Modifier le profil du joueur",
     "bulkEditHint": "Besoin de modifier plusieurs joueurs à la fois (handicap, club...) ? Utilise l'import Excel depuis « Ajouter des membres » →",
@@ -812,7 +826,6 @@
     "backToMembers": "← Retour à la liste des membres",
     "updateBlocked": "La mise à jour n'a pas été appliquée (droits insuffisants ?)"
   },
-
   "notOwner": {
     "title": "Fonctionnalité réservée aux organisateurs",
     "desc": "Créez un groupe pour organiser vos événements et inviter des joueurs.",
@@ -849,7 +862,6 @@
       "generic": "Une erreur est survenue. Merci de réessayer.",
       "backToLogin": "← Retour à la page de connexion"
     },
-   
     "forgotPassword": {
       "title": "Mot de passe oublié",
       "subtitle": "Recevez un code de réinitialisation par email",
@@ -901,7 +913,16 @@
       "signup": "En créer un",
       "submit": "Se connecter",
       "submitting": "Connexion en cours...",
-      "checkEmail": "Vérifiez votre boîte mail (ou dans vos spam) pour valider votre compte."
+      "checkEmail": "Vérifiez votre boîte mail (ou dans vos spam) pour valider votre compte.",
+      "errorEmailNotConfirmed": "Vérifiez votre boîte mail pour confirmer votre adresse email avant de vous connecter.",
+      "errorInvalidCredentials": "Email ou mot de passe incorrect.",
+      "errorTooManyRequests": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "errorUserNotFound": "Aucun compte trouvé avec cette adresse email.",
+      "resendConfirmation": "Renvoyer l'email de confirmation",
+      "resendSending": "Envoi en cours…",
+      "resendSent": "Email renvoyé ✓",
+      "resendRetryIn": "(réessayer dans {seconds}s)",
+      "resendError": "Échec de l'envoi, réessayez."
     }
   },
   "inviteYes": {
@@ -914,14 +935,21 @@
     "successDesc": "Vous jouez sur le parcours «{holes}» trous. Rendez-vous sur le parcours ⛳",
     "viewEvent": "Voir l'événement",
     "errorTitle": "Lien invalide",
-    "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
+    "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur.",
+    "confirmingQuestion": "Vous confirmez votre participation en {holes} ?",
+    "manualChoice": "Ce n'est pas le bon choix ? Choisir manuellement",
+    "waitlistTitle": "Vous êtes en liste d'attente",
+    "waitlistDesc": "L'événement est complet ({holes}). Vous serez prévenu(e) si une place se libère."
   },
   "inviteNo": {
     "loading": "Traitement en cours...",
     "successTitle": "Indisponibilité",
     "successDesc": "Votre réponse a été enregistrée. À la prochaine !",
     "errorTitle": "Lien invalide",
-    "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur."
+    "errorDesc": "Ce lien a expiré ou n'est plus valide. Veuillez contacter l'organisateur.",
+    "confirmingTitle": "Vous ne pouvez pas venir ?",
+    "confirmingSubtitle": "Confirmez votre forfait pour cet événement.",
+    "confirmButton": "Confirmer mon forfait"
   },
   "addEvent": {
     "title": "Nouvel événement",
@@ -1000,8 +1028,7 @@
     "errorRead": "Impossible de lire le fichier",
     "teesUpdated": "tees mis à jour"
   },
-
-    "partners": {
+  "partners": {
     "title": "Mes partenaires",
     "subtitle": "Matrice des partenaires",
     "noData": "Aucune partie enregistrée.",
@@ -1011,8 +1038,6 @@
     "rounds_plural": "parties",
     "solo": "Solo"
   },
-
-  
   "legal": {
     "cgu": {
       "title": "Conditions Générales d'Utilisation",
@@ -1169,17 +1194,13 @@
       }
     }
   },
-
-   "welcome": {
-      "badge": "⛳ Bienvenue sur GolfGo",
-      "title": "Comment souhaitez-vous utiliser GolfGo ?",
-      "subtitle": "GolfGo organise vos sorties de golf entre amis — invitations, flights équilibrés, cartes de score, leaderboard et bien plus encore, tout au même endroit.",
-      "playerTitle": "Je suis un joueur",
-      "playerDesc": "Je retrouve tous mes événements, je m'inscris en un clic et je consulte ma feuille de départ.",
-      "ownerTitle": "Je lance mon groupe",
-      "ownerDesc": "GolfGo s'occupe de tout — invitations, flights, feuilles de départ et confirmations par email."
-     
-        }
-      }
-
-
+  "welcome": {
+    "badge": "⛳ Bienvenue sur GolfGo",
+    "title": "Comment souhaitez-vous utiliser GolfGo ?",
+    "subtitle": "GolfGo organise vos sorties de golf entre amis — invitations, flights équilibrés, cartes de score, leaderboard et bien plus encore, tout au même endroit.",
+    "playerTitle": "Je suis un joueur",
+    "playerDesc": "Je retrouve tous mes événements, je m'inscris en un clic et je consulte ma feuille de départ.",
+    "ownerTitle": "Je lance mon groupe",
+    "ownerDesc": "GolfGo s'occupe de tout — invitations, flights, feuilles de départ et confirmations par email."
+  }
+}

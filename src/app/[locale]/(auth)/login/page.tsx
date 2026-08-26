@@ -22,14 +22,59 @@ function LoginContent() {
   const [loading,      setLoading]      = useState(false)
   const [errorMsg,     setErrorMsg]     = useState('')
 
+  // ── Renvoi de l'email de confirmation (compte créé mais pas confirmé) ──
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null)
+  const [resendStatus,     setResendStatus]     = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [resendCooldown,   setResendCooldown]   = useState(0)
+
+  function friendlyAuthError(error: { code?: string; message?: string }): string {
+    const code = error.code ?? ''
+    const msg  = (error.message ?? '').toLowerCase()
+
+    if (code === 'email_not_confirmed' || msg.includes('email not confirmed')) {
+      setUnconfirmedEmail(email.trim())
+      return t('auth.login.errorEmailNotConfirmed')
+    }
+    setUnconfirmedEmail(null)
+    if (code === 'invalid_credentials' || msg.includes('invalid login credentials')) {
+      return t('auth.login.errorInvalidCredentials')
+    }
+    if (code === 'too_many_requests' || msg.includes('too many requests') || msg.includes('rate limit')) {
+      return t('auth.login.errorTooManyRequests')
+    }
+    if (code === 'user_not_found') {
+      return t('auth.login.errorUserNotFound')
+    }
+    return error.message || t('common.error')
+  }
+
+  async function handleResendConfirmation() {
+    if (!unconfirmedEmail || resendStatus === 'sending' || resendCooldown > 0) return
+    setResendStatus('sending')
+    const { error } = await supabase.auth.resend({ type: 'signup', email: unconfirmedEmail })
+    if (error) {
+      setResendStatus('error')
+      return
+    }
+    setResendStatus('sent')
+    setResendCooldown(30)
+    const timer = setInterval(() => {
+      setResendCooldown(c => {
+        if (c <= 1) { clearInterval(timer); return 0 }
+        return c - 1
+      })
+    }, 1000)
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true); setErrorMsg('')
+    setUnconfirmedEmail(null); setResendStatus('idle')
 
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
 
     if (error) {
-      setErrorMsg(error.message || t('common.error'))
+      setErrorMsg(friendlyAuthError(error))
       setLoading(false)
     } else {
       // Filet de sécurité : relie players.user_id si ce n'est pas déjà fait
@@ -104,6 +149,28 @@ function LoginContent() {
         </div>
 
         <AuthError message={errorMsg} />
+
+        {unconfirmedEmail && (
+          <div className="-mt-2">
+            {resendStatus === 'sent' ? (
+              <p className="text-[12px] text-green-700">
+                {t('auth.login.resendSent')} {resendCooldown > 0 && t('auth.login.resendRetryIn', { seconds: resendCooldown })}
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={resendStatus === 'sending' || resendCooldown > 0}
+                className="text-[12px] font-medium text-[#185FA5] hover:text-[#0C447C] disabled:opacity-50 disabled:cursor-not-allowed underline underline-offset-2"
+              >
+                {resendStatus === 'sending' ? t('auth.login.resendSending') : t('auth.login.resendConfirmation')}
+              </button>
+            )}
+            {resendStatus === 'error' && (
+              <p className="text-[12px] text-red-600 mt-1">{t('auth.login.resendError')}</p>
+            )}
+          </div>
+        )}
 
         <AuthButton loading={loading} label={t('auth.login.submit')} loadingLabel={t('auth.login.submitting')} />
       </form>

@@ -40,7 +40,7 @@
   "myEvents": {
     "title": "Mis eventos",
     "subtitle": "{upcoming} próximos · {past} pasados",
-    "partners": "Mis compañeros", 
+    "partners": "Mis compañeros",
     "partnersMobile": "Compañeros",
     "sections": {
       "upcoming": "Próximos",
@@ -103,11 +103,37 @@
     "printFooter": {
       "printedOn": "Impreso el {date}",
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
-    }
+    },
+    "reorderHint": "⠿ Arrastra una salida para cambiar el orden · toca la hora para editarla manualmente",
+    "reorderSaving": " · guardando…",
+    "dragHandleTitle": "Arrastrar para reordenar",
+    "editTimeTitle": "Editar esta hora de salida",
+    "resetTimeTitle": "Volver a la hora automática"
   },
   "calendar": {
-    "months": ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
-    "days": ["Lu","Ma","Mi","Ju","Vi","Sá","Do"]
+    "months": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ],
+    "days": [
+      "Lu",
+      "Ma",
+      "Mi",
+      "Ju",
+      "Vi",
+      "Sá",
+      "Do"
+    ]
   },
   "common": {
     "loading": "Cargando…",
@@ -115,11 +141,9 @@
     "noData": "—",
     "back": "Volver"
   },
-
   "errors": {
     "generic": "Se ha producido un error"
   },
-
   "clubs": {
     "title": "Clubs y Campos",
     "subtitle": "Gestionar clubs y campos disponibles",
@@ -153,9 +177,9 @@
       "send": "✉️ Nuevo mensaje",
       "templates": "🎨 Plantillas",
       "settings": "Configuración",
-    "invite": "Invitaciones",
-    "visual": "Identidad visual",
-    "visualDesc": "Estos ajustes se aplican a todos los correos enviados desde este grupo (invitaciones, teesheets, recordatorios)."
+      "invite": "Invitaciones",
+      "visual": "Identidad visual",
+      "visualDesc": "Estos ajustes se aplican a todos los correos enviados desde este grupo (invitaciones, teesheets, recordatorios)."
     },
     "recipients": {
       "title": "Destinatarios",
@@ -301,7 +325,6 @@
       "installIphone": "iPhone / Safari — Icono Compartir ↑ → Más → Añadir a pantalla de inicio",
       "installAndroid": "Android / Chrome — Menú ⋮ arriba a la derecha → Añadir a pantalla de inicio"
     }
-
   },
   "constraints": {
     "title": "Restricciones de flights",
@@ -431,7 +454,7 @@
     "saving": "Guardando...",
     "generate": "Generar",
     "generating": "Generando...",
-    "addManual": "Añadir flight", 
+    "addManual": "Añadir flight",
     "removeFlight": "Eliminar flight",
     "confirmedPlayers": "Jugadores confirmados ({count})",
     "plays9": "{count} juega 9H",
@@ -440,10 +463,9 @@
     "noFlights": "No hay flights generados",
     "generateHint": "Configura los parámetros y haz clic en Generar",
     "dragHint": "Arrastra un jugador a otro flight para moverlo",
-
     "unassignedSuffix": "sin asignar",
     "allAssigned": "Todos los jugadores están asignados a un flight.",
-    "unassignedDragHint": "Arrastra un jugador sin asignar a un flight para añadirlo",    
+    "unassignedDragHint": "Arrastra un jugador sin asignar a un flight para añadirlo",
     "unsaved": "Modificado — no olvides guardar",
     "dropHere": "Soltar aquí",
     "emptyFlight": "Flight vacío",
@@ -521,7 +543,8 @@
     "invited": "invitado(s)",
     "declined": "rechazado(s)",
     "total": "total",
-    "notInvited": "no invitado"
+    "notInvited": "no invitado",
+    "waitlist": "⏳ Espera"
   },
   "payments": {
     "readOnly": "Solo lectura",
@@ -555,7 +578,6 @@
     "secureDesc": "Su pago es procesado por <strong>Stripe</strong>, líder mundial en pagos en línea seguros. GolfGo nunca almacena sus datos bancarios. La transacción está cifrada y cumple con las normas PCI-DSS. Acepta Visa, Mastercard, Bancontact y Apple/Google Pay.",
     "paying": "Redirigiendo...",
     "pay": "Pagar {amount} €"
-   
   },
   "results": {
     "title": "Resultados",
@@ -700,7 +722,7 @@
     "visitor": "Visitante",
     "removeConfirm": "¿Retirar a este jugador del grupo? Sus participaciones en eventos futuros también se eliminarán.",
     "adminOnly": "Debes ser administrador para usar esta función",
-    "inviteTitle": "🔗 Enlace de invitación", 
+    "inviteTitle": "🔗 Enlace de invitación",
     "inviteDesc": "Comparte este enlace para invitar a nuevos miembros a unirse al grupo.",
     "inviteCopy": "Copiar",
     "inviteCopied": "✓ Copiado",
@@ -804,7 +826,6 @@
     "backToMembers": "← Volver a miembros",
     "updateBlocked": "La actualización no se aplicó (¿permisos insuficientes?)"
   },
-
   "notOwner": {
     "title": "Función reservada a organizadores",
     "desc": "Crea un grupo para organizar tus eventos e invitar jugadores.",
@@ -841,7 +862,6 @@
       "generic": "Ha ocurrido un error. Vuelve a intentarlo.",
       "backToLogin": "← Volver al inicio de sesión"
     },
-    
     "forgotPassword": {
       "title": "Contraseña olvidada",
       "subtitle": "Recibe un código de restablecimiento por correo",
@@ -861,7 +881,7 @@
       "title": "Nueva contraseña",
       "subtitle": "Elige una nueva contraseña para tu cuenta",
       "back": "← Volver al inicio de sesión",
-      "checking": "Verificando el enlace...", 
+      "checking": "Verificando el enlace...",
       "invalidLink": "Este enlace no es válido o ha caducado. Solicita uno nuevo desde este dispositivo.",
       "email": "Dirección de correo",
       "newPassword": "Nueva contraseña",
@@ -893,7 +913,16 @@
       "signup": "Créala",
       "submit": "Iniciar sesión",
       "submitting": "Iniciando sesión...",
-      "checkEmail": "Revisa tu bandeja de entrada (o spam) para validar tu cuenta."
+      "checkEmail": "Revisa tu bandeja de entrada (o spam) para validar tu cuenta.",
+      "errorEmailNotConfirmed": "Revisa tu bandeja de entrada para confirmar tu email antes de iniciar sesión.",
+      "errorInvalidCredentials": "Email o contraseña incorrectos.",
+      "errorTooManyRequests": "Demasiados intentos. Vuelve a intentarlo en unos minutos.",
+      "errorUserNotFound": "No se encontró ninguna cuenta con este email.",
+      "resendConfirmation": "Reenviar email de confirmación",
+      "resendSending": "Enviando…",
+      "resendSent": "Email reenviado ✓",
+      "resendRetryIn": "(reintentar en {seconds}s)",
+      "resendError": "Error al enviar, inténtalo de nuevo."
     }
   },
   "inviteYes": {
@@ -906,14 +935,21 @@
     "successDesc": "Juegas {holes} hoyos. ¡Nos vemos en el campo ⛳",
     "viewEvent": "Ver evento",
     "errorTitle": "Enlace inválido",
-    "errorDesc": "Este enlace ha caducado o ya no es válido. Contacta con el organizador."
+    "errorDesc": "Este enlace ha caducado o ya no es válido. Contacta con el organizador.",
+    "confirmingQuestion": "¿Confirmas tu participación en {holes}?",
+    "manualChoice": "¿No es la opción correcta? Elegir manualmente",
+    "waitlistTitle": "Estás en lista de espera",
+    "waitlistDesc": "El evento está completo ({holes}). Te avisaremos si se libera una plaza."
   },
   "inviteNo": {
     "loading": "Procesando...",
     "successTitle": "Participación rechazada",
     "successDesc": "Tu respuesta ha sido registrada. ¡Hasta la próxima!",
     "errorTitle": "Enlace inválido",
-    "errorDesc": "Este enlace ha caducado o ya no es válido. Contacta con el organizador."
+    "errorDesc": "Este enlace ha caducado o ya no es válido. Contacta con el organizador.",
+    "confirmingTitle": "¿No puedes venir?",
+    "confirmingSubtitle": "Confirma tu baja para este evento.",
+    "confirmButton": "Confirmar mi baja"
   },
   "addEvent": {
     "title": "Nuevo evento",
@@ -992,7 +1028,6 @@
     "errorRead": "No se puede leer el archivo",
     "teesUpdated": "tees actualizados"
   },
-
   "partners": {
     "title": "Mis compañeros",
     "subtitle": "Matriz de compañeros",
@@ -1003,8 +1038,6 @@
     "rounds_plural": "rondas",
     "solo": "Solo"
   },
-
-  
   "legal": {
     "cgu": {
       "title": "Condiciones Generales de Uso",
@@ -1157,19 +1190,17 @@
         "updates": {
           "title": "10. Cambios",
           "p1": "Esta política puede actualizarse. En caso de cambio significativo, se le notificará mediante notificación en la aplicación o por correo electrónico."
-       }}}},
-
-  "welcome": {
-      "badge": "⛳ Bienvenido a GolfGo",
-      "title": "¿Cómo desea utilizar GolfGo?",
-      "subtitle": "GolfGo organiza sus salidas de golf con amigos — invitaciones, flights equilibrados, tarjetas de puntuación, clasificación y mucho más, todo en un mismo lugar.",
-      "playerTitle": "Soy jugador",
-      "playerDesc": "Encuentro todos mis eventos, me apunto con un clic y consulto mi hoja de salida.",
-      "ownerTitle": "Creo un grupo",
-      "ownerDesc": "GolfGo se encarga de todo — invitaciones, flights, hojas de salida y confirmaciones por correo electrónico."
-    
-         }
+        }
       }
- 
-
-
+    }
+  },
+  "welcome": {
+    "badge": "⛳ Bienvenido a GolfGo",
+    "title": "¿Cómo desea utilizar GolfGo?",
+    "subtitle": "GolfGo organiza sus salidas de golf con amigos — invitaciones, flights equilibrados, tarjetas de puntuación, clasificación y mucho más, todo en un mismo lugar.",
+    "playerTitle": "Soy jugador",
+    "playerDesc": "Encuentro todos mis eventos, me apunto con un clic y consulto mi hoja de salida.",
+    "ownerTitle": "Creo un grupo",
+    "ownerDesc": "GolfGo se encarga de todo — invitaciones, flights, hojas de salida y confirmaciones por correo electrónico."
+  }
+}

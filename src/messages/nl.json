@@ -40,7 +40,7 @@
   "myEvents": {
     "title": "Mijn evenementen",
     "subtitle": "{upcoming} komende · {past} voorbije",
-    "partners": "Mijn partners", 
+    "partners": "Mijn partners",
     "partnersMobile": "Partners",
     "sections": {
       "upcoming": "Komende",
@@ -103,25 +103,47 @@
     "printFooter": {
       "printedOn": "Afgedrukt op {date}",
       "siteUrl": "GolfGo — golfgo-drab.vercel.app"
-    }
+    },
+    "reorderHint": "⠿ Sleep een vertrek om de volgorde te wijzigen · tik op het tijdstip om het handmatig aan te passen",
+    "reorderSaving": " · opslaan…",
+    "dragHandleTitle": "Slepen om te herordenen",
+    "editTimeTitle": "Dit vertrektijdstip wijzigen",
+    "resetTimeTitle": "Terug naar automatische tijd"
   },
-
   "calendar": {
-    "months": ["Januari","Februari","Maart","April","Mei","Juni","Juli","Augustus","September","Oktober","November","December"],
-    "days": ["Ma","Di","Wo","Do","Vr","Za","Zo"]
+    "months": [
+      "Januari",
+      "Februari",
+      "Maart",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Augustus",
+      "September",
+      "Oktober",
+      "November",
+      "December"
+    ],
+    "days": [
+      "Ma",
+      "Di",
+      "Wo",
+      "Do",
+      "Vr",
+      "Za",
+      "Zo"
+    ]
   },
-
   "common": {
     "loading": "Laden…",
     "error": "Er is een fout opgetreden",
     "noData": "—",
     "back": "Terug"
   },
-
   "errors": {
     "generic": "Er is een fout opgetreden"
   },
-
   "clubs": {
     "title": "Clubs & Parcours",
     "subtitle": "Beschikbare clubs en parcours beheren",
@@ -155,9 +177,9 @@
       "send": "✉️ Nieuw bericht",
       "templates": "🎨 Sjablonen",
       "settings": "Instellingen",
-    "invite": "Uitnodigingen",
-    "visual": "Visuele identiteit",
-    "visualDesc": "Deze instellingen gelden voor alle e-mails van deze groep (uitnodigingen, teesheets, herinneringen)."
+      "invite": "Uitnodigingen",
+      "visual": "Visuele identiteit",
+      "visualDesc": "Deze instellingen gelden voor alle e-mails van deze groep (uitnodigingen, teesheets, herinneringen)."
     },
     "recipients": {
       "title": "Ontvangers",
@@ -283,7 +305,6 @@
       "missingBody": "Bericht ontbreekt",
       "noRecipients": "Geen ontvangers"
     },
-
     "groupInvite": {
       "tab": "🔗 Groepsuitnodiging",
       "title": "Uitnodigen om de groep te vervoegen",
@@ -304,7 +325,6 @@
       "installIphone": "iPhone / Safari — Deelicoon ↑ → Meer → Voeg toe aan beginscherm",
       "installAndroid": "Android / Chrome — Menu ⋮ rechtsboven → Voeg toe aan beginscherm"
     }
-
   },
   "constraints": {
     "title": "Flightbeperkingen",
@@ -388,7 +408,6 @@
     "autoInvitationLabel": "Automatische uitnodiging 14 dagen voor het evenement",
     "autoInvitationDesc": "Verstuurt een uitnodiging naar alle leden 14 dagen voor het evenement"
   },
-
   "flightHistory": {
     "title": "Flightgeschiedenis",
     "subtitle": "Samen gespeeld · beweeg de muis om handmatig te corrigeren",
@@ -435,7 +454,7 @@
     "saving": "Opslaan...",
     "generate": "Genereren",
     "generating": "Genereren...",
-    "addManual": "Flight toevoegen", 
+    "addManual": "Flight toevoegen",
     "removeFlight": "Flight verwijderen",
     "confirmedPlayers": "Bevestigde spelers ({count})",
     "plays9": "{count} speelt 9G",
@@ -444,10 +463,10 @@
     "noFlights": "Geen flights gegenereerd",
     "generateHint": "Stel de parameters in en klik op Genereren",
     "dragHint": "Sleep een speler naar een andere flight om hem te verplaatsen",
-
     "unassignedSuffix": "niet toegewezen",
     "allAssigned": "Alle spelers zijn toegewezen aan een flight.",
-    "unassignedDragHint": "Sleep een niet-toegewezen speler naar een flight om hem toe te voegen",    "unsaved": "Gewijzigd — vergeet niet op te slaan",
+    "unassignedDragHint": "Sleep een niet-toegewezen speler naar een flight om hem toe te voegen",
+    "unsaved": "Gewijzigd — vergeet niet op te slaan",
     "dropHere": "Hier neerzetten",
     "emptyFlight": "Lege flight",
     "avgWHS": "gem.",
@@ -524,7 +543,8 @@
     "invited": "uitgenodigd",
     "declined": "afgewezen",
     "total": "totaal",
-    "notInvited": "niet uitgenodigd"
+    "notInvited": "niet uitgenodigd",
+    "waitlist": "⏳ Wachtlijst"
   },
   "payments": {
     "readOnly": "Alleen-lezen",
@@ -540,7 +560,7 @@
     "status": "Status",
     "éditers": "Bewerken",
     "noParticipants": "Geen bevestigde deelnemers",
-     "actions": "Acties",
+    "actions": "Acties",
     "statuses": {
       "PAID": "Betaald",
       "PENDING": "Uitstaand",
@@ -558,8 +578,6 @@
     "secureDesc": "Uw betaling wordt verwerkt door <strong>Stripe</strong>, wereldleider in veilige online betalingen. GolfGo slaat uw bankgegevens nooit op. De transactie is versleuteld en voldoet aan PCI-DSS-normen. Accepteert Visa, Mastercard, Bancontact en Apple/Google Pay.",
     "paying": "Doorverwijzen...",
     "pay": "Betalen {amount} €"
-
-   
   },
   "results": {
     "title": "Resultaten",
@@ -704,7 +722,7 @@
     "visitor": "Bezoeker",
     "removeConfirm": "Deze speler uit de groep verwijderen? Zijn deelnames aan komende evenementen worden ook verwijderd.",
     "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
-    "inviteTitle": "🔗 Uitnodigingslink", 
+    "inviteTitle": "🔗 Uitnodigingslink",
     "inviteDesc": "Deel deze link om nieuwe leden uit te nodigen voor de groep.",
     "inviteCopy": "Kopiëren",
     "inviteCopied": "✓ Gekopieerd",
@@ -844,7 +862,6 @@
       "generic": "Er is iets misgegaan. Probeer het opnieuw.",
       "backToLogin": "← Terug naar inloggen"
     },
-    
     "forgotPassword": {
       "title": "Wachtwoord vergeten",
       "subtitle": "Ontvang een resetcode per e-mail",
@@ -896,7 +913,16 @@
       "signup": "Aanmaken",
       "submit": "Aanmelden",
       "submitting": "Aanmelden...",
-      "checkEmail": "Controleer uw inbox (of spam) om uw account te valideren."
+      "checkEmail": "Controleer uw inbox (of spam) om uw account te valideren.",
+      "errorEmailNotConfirmed": "Controleer uw inbox om uw e-mailadres te bevestigen voordat u zich aanmeldt.",
+      "errorInvalidCredentials": "Onjuist e-mailadres of wachtwoord.",
+      "errorTooManyRequests": "Te veel pogingen. Probeer het over enkele minuten opnieuw.",
+      "errorUserNotFound": "Geen account gevonden met dit e-mailadres.",
+      "resendConfirmation": "Bevestigingsmail opnieuw versturen",
+      "resendSending": "Verzenden…",
+      "resendSent": "E-mail opnieuw verzonden ✓",
+      "resendRetryIn": "(opnieuw proberen over {seconds}s)",
+      "resendError": "Verzenden mislukt, probeer opnieuw."
     }
   },
   "inviteYes": {
@@ -909,14 +935,21 @@
     "successDesc": "U speelt {holes} holes. Tot ziens op het parcours ⛳",
     "viewEvent": "Evenement bekijken",
     "errorTitle": "Ongeldige link",
-    "errorDesc": "Deze link is verlopen of niet meer geldig. Neem contact op met de organisator."
+    "errorDesc": "Deze link is verlopen of niet meer geldig. Neem contact op met de organisator.",
+    "confirmingQuestion": "Bevestigt u uw deelname voor {holes}?",
+    "manualChoice": "Niet de juiste keuze? Handmatig kiezen",
+    "waitlistTitle": "U staat op de wachtlijst",
+    "waitlistDesc": "Het evenement zit vol ({holes}). U wordt verwittigd als er een plaats vrijkomt."
   },
   "inviteNo": {
     "loading": "Verwerken...",
     "successTitle": "Deelname afgewezen",
     "successDesc": "Uw antwoord is geregistreerd. Tot de volgende keer!",
     "errorTitle": "Ongeldige link",
-    "errorDesc": "Deze link is verlopen of niet meer geldig. Neem contact op met de organisator."
+    "errorDesc": "Deze link is verlopen of niet meer geldig. Neem contact op met de organisator.",
+    "confirmingTitle": "Kunt u niet komen?",
+    "confirmingSubtitle": "Bevestig uw afmelding voor dit evenement.",
+    "confirmButton": "Afmelding bevestigen"
   },
   "addEvent": {
     "title": "Nieuw evenement",
@@ -995,7 +1028,6 @@
     "errorRead": "Kan bestand niet lezen",
     "teesUpdated": "tees bijgewerkt"
   },
-
   "partners": {
     "title": "Mijn partners",
     "subtitle": "Partnermatrix",
@@ -1006,8 +1038,6 @@
     "rounds_plural": "rondes",
     "solo": "Solo"
   },
-
-  
   "legal": {
     "cgu": {
       "title": "Algemene Gebruiksvoorwaarden",
@@ -1160,8 +1190,10 @@
         "updates": {
           "title": "10. Wijzigingen",
           "p1": "Dit beleid kan worden bijgewerkt. Bij een wezenlijke wijziging wordt u geïnformeerd via een melding in de app of per e-mail."
-        }}}},
-
+        }
+      }
+    }
+  },
   "welcome": {
     "badge": "⛳ Welkom bij GolfGo",
     "title": "Hoe wilt u GolfGo gebruiken?",
@@ -1170,7 +1202,5 @@
     "playerDesc": "Ik vind al mijn evenementen, schrijf me in met één klik en bekijk mijn startlijst.",
     "ownerTitle": "Ik start een groep",
     "ownerDesc": "GolfGo regelt alles — uitnodigingen, flights, startlijsten en e-mailbevestigingen."
-   
-        }
-      }
-
+  }
+}

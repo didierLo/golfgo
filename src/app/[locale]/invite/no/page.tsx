@@ -106,14 +106,14 @@ function InviteNoContent() {
             <div className="w-14 h-14 rounded-full bg-[#FCEBEB] flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">🙁</span>
             </div>
-            <h1 className="text-[18px] font-black text-slate-900 mb-1">Tu ne peux pas venir ?</h1>
+            <h1 className="text-[18px] font-black text-slate-900 mb-1">{t('inviteNo.confirmingTitle')}</h1>
             <p className="text-[13px] text-slate-500 mb-6">
-              Confirme ton forfait pour cet événement.
+              {t('inviteNo.confirmingSubtitle')}
             </p>
 
             <button onClick={handleDecline}
               className="w-full bg-[#A32D2D] text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-[#8A2424] transition-colors">
-              Confirmer mon forfait
+              {t('inviteNo.confirmButton')}
             </button>
           </>
         )}

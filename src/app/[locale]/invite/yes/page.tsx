@@ -208,7 +208,7 @@ function InviteYesContent() {
             </div>
             <h1 className="text-[18px] font-black text-slate-900 mb-1">{t('inviteYes.title')}</h1>
             <p className="text-[13px] text-slate-500 mb-6">
-              Tu confirmes ta participation en <strong>{holesDisplayLabel()}</strong> ?
+              {t('inviteYes.confirmingQuestion', { holes: holesDisplayLabel() })}
             </p>
 
             <button onClick={handleConfirm}
@@ -219,7 +219,7 @@ function InviteYesContent() {
             <button
               onClick={() => setStep('choosing')}
               className="text-[12px] font-semibold text-slate-400 hover:text-slate-600 underline underline-offset-2">
-              Ce n'est pas le bon choix ? Choisir manuellement
+              {t('inviteYes.manualChoice')}
             </button>
           </>
         )}
@@ -238,9 +238,9 @@ function InviteYesContent() {
                 <div className="w-14 h-14 rounded-full bg-[#FEF3C7] flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">⏳</span>
                 </div>
-                <h1 className="text-[18px] font-black text-slate-900 mb-2">Tu es en liste d'attente</h1>
+                <h1 className="text-[18px] font-black text-slate-900 mb-2">{t('inviteYes.waitlistTitle')}</h1>
                 <p className="text-[13px] text-slate-600 mb-6">
-                  L'événement est complet ({holesDisplayLabel()}). Tu seras prévenu si une place se libère.
+                  {t('inviteYes.waitlistDesc', { holes: holesDisplayLabel() })}
                 </p>
               </>
             ) : (
