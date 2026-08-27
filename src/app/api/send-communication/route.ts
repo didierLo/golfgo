@@ -23,16 +23,18 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
   )
 }
 
-function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true) {
+function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true, isFull: boolean = false) {
+  const waitBg = '#FEF3C7', waitBorder = '#D97706', waitTitle = '#92400E', waitSub = '#B45309'
+
   if (!isGolf) {
     return `
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
   <tr><td>
-    <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+    <a href="${yes18Link}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#DCFCE7'};border:2px solid ${isFull ? waitBorder : '#16A34A'};border-radius:12px;padding:16px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:22px;width:36px;">🙋</td>
+        <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🙋'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -55,12 +57,12 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
   return `
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
   <tr><td>
-    <a href="${yes18Link}" style="display:block;text-decoration:none;background:#DCFCE7;border:2px solid #16A34A;border-radius:12px;padding:16px 20px;">
+    <a href="${yes18Link}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#DCFCE7'};border:2px solid ${isFull ? waitBorder : '#16A34A'};border-radius:12px;padding:16px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:22px;width:36px;">⛳</td>
+        <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '⛳'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
-          <div style="font-size:12px;color:#16A34A;margin-top:2px;">18 trous · Parcours complet</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
+          <div style="font-size:12px;color:${isFull ? waitSub : '#16A34A'};margin-top:2px;">18 trous · Parcours complet</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -69,12 +71,12 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 </table>
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
   <tr><td>
-    <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:#FEF9C3;border:2px solid #CA8A04;border-radius:12px;padding:16px 20px;">
+    <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#FEF9C3'};border:2px solid ${isFull ? waitBorder : '#CA8A04'};border-radius:12px;padding:16px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:22px;width:36px;">🏌️</td>
+        <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🏌️'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:#92400E;">Je participe</div>
-          <div style="font-size:12px;color:#B45309;margin-top:2px;">9 trous Front · Trous 1–9</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#92400E'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
+          <div style="font-size:12px;color:${isFull ? waitSub : '#B45309'};margin-top:2px;">9 trous Front · Trous 1–9</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -83,12 +85,12 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 </table>
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
   <tr><td>
-    <a href="${yes9backLink}" style="display:block;text-decoration:none;background:#FFEDD5;border:2px solid #EA580C;border-radius:12px;padding:16px 20px;">
+    <a href="${yes9backLink}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#FFEDD5'};border:2px solid ${isFull ? waitBorder : '#EA580C'};border-radius:12px;padding:16px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
-        <td style="font-size:22px;width:36px;">🏌️‍♀️</td>
+        <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🏌️‍♀️'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:#9A3412;">Je participe</div>
-          <div style="font-size:12px;color:#C2410C;margin-top:2px;">9 trous Back · Trous 10–18</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#9A3412'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
+          <div style="font-size:12px;color:${isFull ? waitSub : '#C2410C'};margin-top:2px;">9 trous Back · Trous 10–18</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -110,13 +112,14 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 
 function buildEmailHtml({
   eventTitle, eventDate, eventTime, eventLocation, eventMessage, eventLink, isGolf,
-  yes18Link, yes9frontLink, yes9backLink, noLink, hasButtons, logoUrl,
+  yes18Link, yes9frontLink, yes9backLink, noLink, hasButtons, logoUrl, placesRestantes,
 }: {
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null; eventLink: string; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string
-  noLink: string; hasButtons: boolean; logoUrl: string | null
+  noLink: string; hasButtons: boolean; logoUrl: string | null; placesRestantes: number | null
 }) {
+  const isFull = placesRestantes !== null && placesRestantes <= 0
   return `
 <!DOCTYPE html>
 <html lang="fr">
@@ -166,7 +169,11 @@ function buildEmailHtml({
             ${hasButtons ? `
             <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
             <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-            ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}` : ''}
+            ${isFull ? `
+            <div style="background:#FEF3C7;border:1px solid #D97706;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">⚠️ Événement complet — tu seras placé(e) en liste d'attente si tu confirmes.</p>
+            </div>` : ''}
+            ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf, isFull)}` : ''}
 
             <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
                Ou <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
@@ -254,9 +261,11 @@ const [countResult, goingResult] = await Promise.all([
     : Promise.resolve({ data: null }),
 ])
 
-const placesRestantes = event?.max_participants
-  ? String(Math.max(0, event.max_participants - ((countResult as any).count ?? 0)))
-  : '—'
+const placesRestantesNum = event?.max_participants
+  ? Math.max(0, event.max_participants - ((countResult as any).count ?? 0))
+  : null
+
+const placesRestantes = placesRestantesNum !== null ? String(placesRestantesNum) : '—'
 
 const listeInscrits = (goingResult as any).data?.length
   ? (goingResult as any).data.map((r: any) => `${r.player.first_name} ${r.player.surname}`).join(', ')
@@ -373,6 +382,7 @@ if (eventId) {
         yes18Link, yes9frontLink, yes9backLink, noLink,
         hasButtons:    hasYesButton && !!token,  // ← FIX : conditionné au token aussi
         logoUrl,
+        placesRestantes: placesRestantesNum,
       })
 
      const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${player.id}&gid=${groupId}`
