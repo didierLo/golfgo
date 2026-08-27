@@ -111,6 +111,58 @@ export default function CommunicationsPage() {
   const groupId = params.id as string
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
+
+  // ── File d'attente email (compact, visible pour l'admin site uniquement — l'API renvoie 403 sinon) ──
+  const [queueVisible, setQueueVisible] = useState(false)
+  const [queueCounts,  setQueueCounts]  = useState({ pending: 0, failed: 0 })
+  const [queueItems,   setQueueItems]   = useState<any[]>([])
+  const [queueOpen,    setQueueOpen]    = useState(false)
+  const [queueDraining, setQueueDraining] = useState(false)
+  const [queueRetryingId, setQueueRetryingId] = useState<string | null>(null)
+
+  useEffect(() => { loadQueue() }, [])
+
+  async function loadQueue() {
+    const res = await fetch('/api/admin/email-queue')
+    if (res.status === 403) { setQueueVisible(false); return }
+    const json = await res.json()
+    setQueueVisible(true)
+    setQueueCounts(json.counts ?? { pending: 0, failed: 0 })
+    setQueueItems([...(json.pending ?? []), ...(json.failed ?? [])])
+  }
+
+  async function handleQueueDrain() {
+    setQueueDraining(true)
+    try {
+      const res = await fetch('/api/admin/email-queue/drain', { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Erreur')
+      toast.success(`${json.sent} email(s) envoyé(s) — ${json.stillPending} encore en attente`)
+      loadQueue()
+    } catch (e: any) {
+      toast.error(e.message ?? 'Erreur')
+    } finally {
+      setQueueDraining(false)
+    }
+  }
+
+  async function handleQueueRetry(id: string) {
+    setQueueRetryingId(id)
+    try {
+      const res = await fetch('/api/admin/email-queue/retry', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Erreur')
+      toast.success('Remis en file')
+      loadQueue()
+    } catch (e: any) {
+      toast.error(e.message ?? 'Erreur')
+    } finally {
+      setQueueRetryingId(null)
+    }
+  }
   const t      = useTranslations()
   const locale = useLocale()
 
@@ -572,6 +624,50 @@ printFormatName, printScorecardNotes
           </button>
         </div>
       </div>
+
+      {queueVisible && (queueCounts.pending > 0 || queueCounts.failed > 0) && (
+        <div className="mb-6 border border-slate-200 rounded-xl px-4 py-2.5 text-[12px]">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <button onClick={() => setQueueOpen(o => !o)} className="flex items-center gap-2 font-semibold text-slate-700 hover:text-slate-900">
+              <span>{queueOpen ? '▾' : '▸'}</span>
+              📬 File email —
+              {queueCounts.pending > 0 && <span className="text-amber-700"> {queueCounts.pending} en attente</span>}
+              {queueCounts.pending > 0 && queueCounts.failed > 0 && <span className="text-slate-300"> · </span>}
+              {queueCounts.failed > 0 && <span className="text-red-600"> {queueCounts.failed} échec(s)</span>}
+            </button>
+            {queueCounts.pending > 0 && (
+              <button
+                onClick={handleQueueDrain}
+                disabled={queueDraining}
+                className="text-[11px] font-semibold text-[#185FA5] hover:text-[#0C447C] disabled:opacity-40"
+              >
+                {queueDraining ? 'Envoi…' : 'Vider maintenant'}
+              </button>
+            )}
+          </div>
+          {queueOpen && (
+            <div className="mt-2 pt-2 border-t border-slate-100 divide-y divide-slate-100">
+              {queueItems.map(item => (
+                <div key={item.id} className="py-1.5 flex items-center justify-between gap-2">
+                  <span className="text-slate-600 truncate">
+                    {item.to_email} — {item.subject}
+                    {item.status === 'failed' && <span className="text-red-500"> ({item.last_error})</span>}
+                  </span>
+                  {item.status === 'failed' && (
+                    <button
+                      onClick={() => handleQueueRetry(item.id)}
+                      disabled={queueRetryingId === item.id}
+                      className="text-[11px] font-semibold text-[#185FA5] hover:text-[#0C447C] underline underline-offset-2 disabled:opacity-40 shrink-0"
+                    >
+                      Réessayer
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
    {/* ── Panneau Paramètres (collapsible) ── */}
       {showSettings && (
