@@ -422,6 +422,9 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
       const json = await res.json()
       if (json.success) toast.success(`${json.sent} email${json.sent > 1 ? 's' : ''} envoyé${json.sent > 1 ? 's' : ''}${json.skipped ? ` · ${json.skipped} ignoré(s)` : ''}`)
       else toast.error(json.error ?? t('common.error'))
+      if (json.queued > 0) {
+        toast.error(`Quota journalier dépassé — ${json.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+      }
       if (json.errors?.length) toast.error(`Erreurs : ${json.errors.join(', ')}`)
     } catch (e: any) { toast.error(e.message) }
     finally { setSending(false) }

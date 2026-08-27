@@ -35,7 +35,8 @@
     "deleteRequestDesc": "Nous avons bien reçu votre demande et traiterons la suppression de vos données dans les 30 jours.",
     "confirmDelete": "Confirmer",
     "cancel": "Annuler",
-    "close": "Fermer"
+    "close": "Fermer",
+    "emailQueue": "File email"
   },
   "myEvents": {
     "title": "Mes événements",

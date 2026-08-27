@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
 const stripe   = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -30,20 +31,15 @@ export async function POST(req: Request) {
     ])
 
     if (player && email) {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'GolfGo <info@golfgo.be>',
-          to: email,
-          subject: 'Confirmation de paiement GolfGo',
-          html: `<p>Bonjour ${player.first_name},</p>
-                 <p>Votre paiement a bien été reçu. Merci !</p>
-                 <p>À bientôt sur le parcours ⛳</p>`,
-        }),
+      await sendOrQueueEmail({
+        category: 'other',
+        eventId:  eventId,
+        from:     'GolfGo <info@golfgo.be>',
+        to:       email,
+        subject:  'Confirmation de paiement GolfGo',
+        html: `<p>Bonjour ${player.first_name},</p>
+               <p>Votre paiement a bien été reçu. Merci !</p>
+               <p>À bientôt sur le parcours ⛳</p>`,
       })
     }
   }

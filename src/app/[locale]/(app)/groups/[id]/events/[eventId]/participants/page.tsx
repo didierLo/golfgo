@@ -397,7 +397,11 @@ export default function ParticipantsPage() {
   async function loadEvents() {
     const { data } = await supabase.from('events').select('id, title, starts_at')
       .eq('group_id', groupId).order('starts_at', { ascending: false })
-    setEvents(data || [])
+    const evts = data || []
+    setEvents(evts)
+    // Reprendre l'événement retenu (choisi sur une autre page) s'il existe toujours
+    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+    if (retained && evts.some(e => e.id === retained)) setSelectedEventId(retained)
   }
 
   async function loadParticipants(evId: string) {
@@ -798,7 +802,7 @@ export default function ParticipantsPage() {
             <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">
               {t('participants.byEvent')}
             </label>
-            <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
+            <select value={selectedEventId} onChange={e => { setSelectedEventId(e.target.value); localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value) }}
               className="border border-white/50 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 w-full max-w-sm">
               {events.map(e => (
                 <option key={e.id} value={e.id}>{e.title} — {formatDate(e.starts_at)}</option>

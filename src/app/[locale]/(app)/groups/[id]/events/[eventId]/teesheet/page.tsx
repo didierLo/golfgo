@@ -91,6 +91,14 @@ export default function TeeSheetPage() {
     if (!eventIdFromRoute && nearestEventId && !nearestLoading) setSelectedEventId(nearestEventId)
   }, [nearestEventId, nearestLoading, eventIdFromRoute])
 
+  // Reprendre l'événement retenu (choisi sur une autre page : flights, participants,
+  // invitations, communications...) au lieu de rester bloqué sur l'événement de l'URL.
+  useEffect(() => {
+    if (!groupId) return
+    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+    if (retained) setSelectedEventId(retained)
+  }, [groupId])
+
   useEffect(() => {
     if (!groupId) return
     supabase.from('groups').select('template_logo_url').eq('id', groupId).single()
@@ -327,6 +335,9 @@ useEffect(() => {
       if (!res.ok) throw new Error(result.error ?? t('common.error'))
       const skippedStr = result.skipped > 0 ? t('teesheet.email.skippedSuffix', { count: result.skipped }) : ''
       toast.success(t('teesheet.email.successToast', { sent: result.sent, skipped: skippedStr }))
+      if (result.queued > 0) {
+        toast.error(`Quota journalier dépassé — ${result.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+      }
     } catch (e: any) {
       toast.error(e.message ?? t('common.error'))
     } finally { setSending(false) }
@@ -394,7 +405,7 @@ useEffect(() => {
         <EventPillSelector
           groupId={groupId}
           selectedEventId={selectedEventId}
-          onChange={id => setSelectedEventId(id)}
+          onChange={id => { setSelectedEventId(id); localStorage.setItem(`golfgo-active-event-${groupId}`, id) }}
         />
       </div>
 

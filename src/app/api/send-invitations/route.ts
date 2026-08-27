@@ -1,9 +1,8 @@
-import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
+import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
 function formatDate(dateStr: string) {
@@ -271,7 +270,7 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
     const bodyTemplate    = groupData?.template_invitation_body    ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
     const logoUrl = groupData?.template_logo_url ?? null
 
-    let sent = 0, skipped = 0
+    let sent = 0, skipped = 0, queued = 0
     const errors: string[] = []
 
    for (const p of participants || []) {
@@ -326,20 +325,24 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
 
      const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${p.player_id}&gid=${event.group_id}`
 
-      const { error: emailErr } = await resend.emails.send({
-        from: 'GolfGo <noreply@golfgo.be>', replyTo: 'info@golfgo.be', to: player.email, subject, html,
+      const result = await sendOrQueueEmail({
+        category: 'invitation',
+        groupId:  event.group_id,
+        eventId:  event.id,
+        from:     'GolfGo <noreply@golfgo.be>', replyTo: 'info@golfgo.be', to: player.email, subject, html,
         headers: {
           'List-Unsubscribe': `<${unsubscribeUrl}>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
       })
 
-      if (emailErr) { errors.push(`${playerName}: ${emailErr.message}`) }
-      else { sent++ }
+      if (!result.sent && !result.queued) { errors.push(`${playerName}: ${result.error}`) }
+      else if (result.sent) { sent++ }
+      else { queued++ }
       await sleep(EMAIL_SEND_DELAY_MS)
     }
 
-    return Response.json({ success: true, sent, skipped, errors })
+    return Response.json({ success: true, sent, skipped, queued, errors })
   } catch (error: any) {
     return Response.json({ success: false, error: error.message }, { status: 500 })
   }

@@ -1,10 +1,9 @@
-import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildTeesheetHtml, type TeesheetFlight } from '@/lib/email/buildTeesheetHtml'
+import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
 export async function POST(req: Request) {
@@ -72,7 +71,7 @@ export async function POST(req: Request) {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     })
 
-    let sent = 0, skipped = 0
+    let sent = 0, skipped = 0, queued = 0
     const errors: string[] = []
 
     for (const ep of participants || []) {
@@ -102,11 +101,14 @@ export async function POST(req: Request) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
       const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${ep.player_id}&gid=${event.group_id}`
 
-      const { error: emailErr } = await resend.emails.send({
-        from:    'GolfGo <noreply@golfgo.be>',
-        replyTo: 'info@golfgo.be',
-        to:      player.email,
-        subject: `Tee Sheet — ${event.title}`,
+      const result = await sendOrQueueEmail({
+        category: 'teesheet',
+        groupId:  event.group_id,
+        eventId:  eventId,
+        from:     'GolfGo <noreply@golfgo.be>',
+        replyTo:  'info@golfgo.be',
+        to:       player.email,
+        subject:  `Tee Sheet — ${event.title}`,
         html,
         headers: {
           'List-Unsubscribe': `<${unsubscribeUrl}>`,
@@ -114,12 +116,13 @@ export async function POST(req: Request) {
         },
       })
 
-      if (emailErr) errors.push(`${playerName}: ${emailErr.message}`)
-      else sent++
+      if (!result.sent && !result.queued) errors.push(`${playerName}: ${result.error}`)
+      else if (result.sent) sent++
+      else queued++
       await sleep(EMAIL_SEND_DELAY_MS)
     }
 
-    return Response.json({ success: true, sent, skipped, errors })
+    return Response.json({ success: true, sent, skipped, queued, errors })
 
   } catch (error: any) {
     console.error('TEESHEET EMAIL ERROR:', error)

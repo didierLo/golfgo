@@ -1,10 +1,9 @@
-import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { randomUUID } from 'crypto'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
+import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
 function formatDate(dateStr: string) {
@@ -321,7 +320,7 @@ if (eventId) {
       .select('id, first_name, surname, email')
       .in('id', playerIds)
 
-    let sent = 0, skipped = 0
+    let sent = 0, skipped = 0, queued = 0
     const errors: string[] = []
 
     for (const player of playersData || []) {
@@ -378,10 +377,13 @@ if (eventId) {
 
      const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${player.id}&gid=${groupId}`
 
-      const { error: emailErr } = await resend.emails.send({
-        from:    'GolfGo <info@golfgo.be>',
-        to:      player.email,
-        subject: resolvedSubject,
+      const result = await sendOrQueueEmail({
+        category: 'communication',
+        groupId:  groupId,
+        eventId:  event?.id ?? null,
+        from:     'GolfGo <info@golfgo.be>',
+        to:       player.email,
+        subject:  resolvedSubject,
         html,
         headers: {
           'List-Unsubscribe': `<${unsubscribeUrl}>`,
@@ -389,12 +391,13 @@ if (eventId) {
         },
       })
 
-      if (emailErr) { errors.push(`${player.first_name} ${player.surname}: ${emailErr.message}`) }
-      else { sent++ }
+      if (!result.sent && !result.queued) { errors.push(`${player.first_name} ${player.surname}: ${result.error}`) }
+      else if (result.sent) { sent++ }
+      else { queued++ }
       await sleep(EMAIL_SEND_DELAY_MS)
     }
 
-    return Response.json({ success: true, sent, skipped, errors })
+    return Response.json({ success: true, sent, skipped, queued, errors })
   } catch (error: any) {
     console.error('COMMUNICATION EMAIL ERROR:', error)
     return Response.json({ success: false, error: error.message }, { status: 500 })

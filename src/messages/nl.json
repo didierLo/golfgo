@@ -35,7 +35,8 @@
     "deleteRequestDesc": "We hebben uw verzoek ontvangen en zullen uw gegevens binnen 30 dagen verwijderen.",
     "confirmDelete": "Bevestigen",
     "cancel": "Annuleren",
-    "close": "Sluiten"
+    "close": "Sluiten",
+    "emailQueue": "E-mailwachtrij"
   },
   "myEvents": {
     "title": "Mijn evenementen",

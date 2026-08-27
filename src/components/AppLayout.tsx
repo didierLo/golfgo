@@ -104,6 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [deleteModalOpen, setDeleteModalOpen]     = useState(false)
   const [deleteLoading,   setDeleteLoading]       = useState(false)
   const [deleteConfirmed, setDeleteConfirmed]     = useState(false)
+  const [isSiteAdmin,     setIsSiteAdmin]         = useState(false)
   const pillRef                                   = useRef<HTMLDivElement>(null)
   const avatarRef                                 = useRef<HTMLDivElement>(null)
 
@@ -124,6 +125,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession()
         const user = session?.user
         if (!user) { setLoading(false); return }
+
+        const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+        setIsSiteAdmin(!!adminEmail && user.email?.toLowerCase() === adminEmail.toLowerCase())
 
         let { data: playerData, error: playerError } = await supabase.from('players').select('id, first_name, surname').eq('user_id', user.id).single()
 
@@ -237,6 +241,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       { href: flightsHref ?? '/groups',     icon: Icons.flights,        label: t('nav.flights'),        color: '#EF9F27', active: !!flightsHref && isActive(flightsHref) },
       { href: resultsHref ?? '/groups',     icon: Icons.results,        label: t('nav.results'),        color: '#3B6D11', active: !!resultsHref && isActive(resultsHref) },
       { href: clubsHref,                    icon: Icons.clubs,          label: t('nav.clubs'),          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
+      ...(isSiteAdmin ? [{ href: '/admin/email-queue', icon: Icons.settings, label: t('nav.emailQueue'), color: '#94A3B8', active: isActive('/admin/email-queue') }] : []),
       { href: communicationsHref,           icon: Icons.communications, label: t('nav.communications'), color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
     ]
 
@@ -488,6 +493,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
             <NavItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
             <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
+            {isSiteAdmin && (
+              <NavItem href="/admin/email-queue" icon={Icons.settings} iconColor="#94A3B8" label={t('nav.emailQueue')} active={isActive('/admin/email-queue')} />
+            )}
             <NavItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </SidebarSection>
 
@@ -522,6 +530,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
             <NavIconItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
             <NavIconItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
+            {isSiteAdmin && (
+              <NavIconItem href="/admin/email-queue" icon={Icons.settings} iconColor="#94A3B8" label={t('nav.emailQueue')} active={isActive('/admin/email-queue')} />
+            )}
             <NavIconItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
           </div>
         </aside>

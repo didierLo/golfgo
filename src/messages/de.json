@@ -35,7 +35,8 @@
     "deleteRequestDesc": "Wir haben Ihre Anfrage erhalten und werden Ihre Daten innerhalb von 30 Tagen löschen.",
     "confirmDelete": "Bestätigen",
     "cancel": "Abbrechen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "emailQueue": "E-Mail-Warteschlange"
   },
   "myEvents": {
     "title": "Meine Veranstaltungen",

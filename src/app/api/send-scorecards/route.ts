@@ -1,9 +1,8 @@
-import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
+import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
 type TeeInfo = { id: string; tee_name: string; par_total: number; course_rating: number; slope: number }
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
       day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     })
 
-    let sent = 0, skipped = 0
+    let sent = 0, skipped = 0, queued = 0
     const errors: string[] = []
 
     for (const ep of participants || []) {
@@ -78,20 +77,24 @@ export async function POST(req: Request) {
 
       const html = buildScorecardHtml([printPlayer], holes, event.title, eventDate, clubName, courseName, logoUrl)
 
-      const { error: emailErr } = await resend.emails.send({
-        from:    'GolfGo <noreply@golfgo.be>',
-        replyTo: 'info@golfgo.be',
-        to:      player.email,
-        subject: `Ta carte de score — ${event.title}`,
+      const result = await sendOrQueueEmail({
+        category: 'scorecard',
+        groupId:  event.group_id,
+        eventId:  eventId,
+        from:     'GolfGo <noreply@golfgo.be>',
+        replyTo:  'info@golfgo.be',
+        to:       player.email,
+        subject:  `Ta carte de score — ${event.title}`,
         html,
       })
 
-      if (emailErr) errors.push(`${player.first_name} ${player.surname}: ${emailErr.message}`)
-      else sent++
+      if (!result.sent && !result.queued) errors.push(`${player.first_name} ${player.surname}: ${result.error}`)
+      else if (result.sent) sent++
+      else queued++
       await sleep(EMAIL_SEND_DELAY_MS)
     }
 
-    return Response.json({ success: true, sent, skipped, errors })
+    return Response.json({ success: true, sent, skipped, queued, errors })
 
   } catch (error: any) {
     console.error('SEND SCORECARDS BULK ERROR:', error)

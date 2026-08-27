@@ -275,7 +275,11 @@ export default function InvitationsPage() {
       if (sendEmail) {
         const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }) })
         if (!res.ok) throw new Error(t('common.error'))
+        const sendResult = await res.json()
         toast.success(t('invitations.invitationsSent', { count: toInvite.length }))
+        if (sendResult.queued > 0) {
+          toast.error(`Quota journalier dépassé — ${sendResult.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+        }
       } else {
         const nb9T = toInvite.filter(id => holesMap[id]?.holes === 9).length
         toast.success(nb9T > 0 ? t('invitations.added9T', { count: toInvite.length, nb: nb9T }) : t('invitations.added', { count: toInvite.length }))
@@ -301,7 +305,11 @@ export default function InvitationsPage() {
         if (updateErr) throw new Error(updateErr.message)
       const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: selectedPlayers }) })
       if (!res.ok) throw new Error(t('common.error'))
+      const resendResult = await res.json()
       toast.success(t('invitations.resendSuccess', { count: selectedPlayers.length }))
+      if (resendResult.queued > 0) {
+        toast.error(`Quota journalier dépassé — ${resendResult.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+      }
       setSelectedPlayers([])
       setResendMode(false)
       loadData()

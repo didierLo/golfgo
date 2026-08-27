@@ -3,6 +3,7 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { createClient } from '@supabase/supabase-js'
 import { generateICS } from '@/lib/ics'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
+import { sendOrQueueEmail, drainEmailQueue } from '@/lib/email/queueEmail'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -310,11 +311,17 @@ export async function GET(req: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
   const results = {
-    reminders:  { sent: 0, skipped: 0, errors: [] as string[] },
-    teesheets:  { sent: 0, skipped: 0, errors: [] as string[] },
+    reminders:  { sent: 0, queued: 0, skipped: 0, errors: [] as string[] },
+    teesheets:  { sent: 0, skipped: 0, queued: 0, errors: [] as string[] },
     noTeesheet: { sent: 0, errors: [] as string[] },
-    invitations: { sent: 0, skipped: 0, errors: [] as string[] },
+    invitations: { sent: 0, queued: 0, skipped: 0, errors: [] as string[] },
+    queue:      { sent: 0, stillPending: 0 },
   }
+
+  // ── 0. Vider la file d'attente (emails non partis les jours précédents à
+  //      cause du plafond Resend) avant tout nouvel envoi. On plafonne à 80
+  //      pour garder de la marge sur les 100/jour pour les envois du jour même.
+  results.queue = await drainEmailQueue(80)
 
   // ── 1. Récupérer les événements J-3 et J-1 ──────────────────────────────────
  const { data: events, error: eventsError } = await supabase
@@ -424,10 +431,13 @@ if (days === 3 && group?.auto_reminders) {
           attendeeName:  `${player.first_name} ${player.surname}`,
         })
 
-        const { error } = await resend.emails.send({
-            from:    'GolfGo <noreply@golfgo.be>',
-          replyTo: 'info@golfgo.be',
-          to:      player.email,
+        const result = await sendOrQueueEmail({
+          category: 'reminder',
+          groupId:  event.group_id,
+          eventId:  event.id,
+          from:     'GolfGo <noreply@golfgo.be>',
+          replyTo:  'info@golfgo.be',
+          to:       player.email,
           subject,
           html,
           attachments: [
@@ -439,8 +449,9 @@ if (days === 3 && group?.auto_reminders) {
           ],
         })
 
-        if (error) results.reminders.errors.push(`${player.first_name} ${player.surname}: ${error.message}`)
-        else results.reminders.sent++
+        if (!result.sent && !result.queued) results.reminders.errors.push(`${player.first_name} ${player.surname}: ${result.error}`)
+        else if (result.sent) results.reminders.sent++
+        else results.reminders.queued++
         await sleep(EMAIL_SEND_DELAY_MS)
       }
     }
@@ -555,10 +566,13 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           attendeeName:  `${player.first_name} ${player.surname}`,
         })
 
-        const { error } = await resend.emails.send({
-          from:    'GolfGo <noreply@golfgo.be>',
-          replyTo: 'info@golfgo.be',
-          to:      player.email,
+        const result = await sendOrQueueEmail({
+          category: 'invitation',
+          groupId:  event.group_id,
+          eventId:  event.id,
+          from:     'GolfGo <noreply@golfgo.be>',
+          replyTo:  'info@golfgo.be',
+          to:       player.email,
           subject,
           html,
           headers: {
@@ -574,8 +588,9 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           ],
         })
 
-        if (error) results.invitations.errors.push(`${player.first_name} ${player.surname}: ${error.message}`)
-        else results.invitations.sent++
+        if (!result.sent && !result.queued) results.invitations.errors.push(`${player.first_name} ${player.surname}: ${result.error}`)
+        else if (result.sent) results.invitations.sent++
+        else results.invitations.queued++
         await sleep(EMAIL_SEND_DELAY_MS)
       }
     }
@@ -611,14 +626,17 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           logoUrl,
         })
 
-        const { error } = await resend.emails.send({
-          from:    'GolfGo <info@golfgo.be>',
-          to:      ownerPlayer.email,
-          subject: `⚠️ Flights manquants — ${event.title} demain`,
+        const result = await sendOrQueueEmail({
+          category: 'other',
+          groupId:  event.group_id,
+          eventId:  event.id,
+          from:     'GolfGo <info@golfgo.be>',
+          to:       ownerPlayer.email,
+          subject:  `⚠️ Flights manquants — ${event.title} demain`,
           html,
         })
 
-        if (error) results.noTeesheet.errors.push(error.message)
+        if (!result.sent && !result.queued) results.noTeesheet.errors.push(result.error)
         else results.noTeesheet.sent++
 
       } else {
@@ -690,6 +708,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         if (teesheetJson.success) {
           results.teesheets.sent    += teesheetJson.sent    ?? 0
           results.teesheets.skipped += teesheetJson.skipped ?? 0
+          results.teesheets.queued  = (results.teesheets.queued ?? 0) + (teesheetJson.queued ?? 0)
         } else {
           results.teesheets.errors.push(`${event.title}: ${teesheetJson.error}`)
         }

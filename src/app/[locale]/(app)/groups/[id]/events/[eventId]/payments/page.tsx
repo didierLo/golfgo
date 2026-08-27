@@ -41,6 +41,14 @@ export default function PaymentsPage() {
 
   useEffect(() => { loadData() }, [selectedEventId])
 
+  // Reprendre l'événement retenu (choisi sur une autre page) au lieu de rester
+  // bloqué sur l'événement de l'URL.
+  useEffect(() => {
+    if (!groupId) return
+    const retained = localStorage.getItem(`golfgo-active-event-${groupId}`)
+    if (retained) setSelectedEventId(retained)
+  }, [groupId])
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setCurrentUserId(data.user?.id ?? null)
@@ -111,7 +119,7 @@ setLoading(false)
       <div className="mb-5">
         <select
           value={selectedEventId}
-          onChange={e => setSelectedEventId(e.target.value)}
+          onChange={e => { setSelectedEventId(e.target.value); localStorage.setItem(`golfgo-active-event-${groupId}`, e.target.value) }}
           className="w-full border border-slate-200 rounded-xl px-4 py-3 text-[13px] font-semibold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
           {events.map(e => (
             <option key={e.id} value={e.id}>

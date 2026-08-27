@@ -1,9 +1,8 @@
-import { Resend } from 'resend'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
+import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 const BATCH_SIZE = 10
 const BATCH_DELAY_MS = 2000
@@ -183,7 +182,7 @@ export async function POST(req: Request) {
 
     const html = buildGroupInviteHtml({ groupName, inviteUrl, qrUrl, senderName, logoUrl })
 
-    let sent = 0, skipped = 0
+    let sent = 0, skipped = 0, queued = 0
     const errors: string[] = []
 
     // Dédoublonner et nettoyer les emails
@@ -202,17 +201,20 @@ export async function POST(req: Request) {
       const batch = uniqueEmails.slice(i, i + BATCH_SIZE)
 
       for (const email of batch) {
-       const { error: emailErr } = await resend.emails.send({
-          from: 'GolfGo <info@golfgo.be>',
-          to: email,
+        const result = await sendOrQueueEmail({
+          category: 'group_invite',
+          groupId:  groupId,
+          from:     'GolfGo <info@golfgo.be>',
+          to:       email,
           subject,
           html,
           headers: {
             'List-Unsubscribe': '<mailto:info@golfgo.be?subject=Désinscription>',
           },
         })
-        if (emailErr) { errors.push(`${email}: ${emailErr.message}`); skipped++ }
-        else { sent++ }
+        if (!result.sent && !result.queued) { errors.push(`${email}: ${result.error}`); skipped++ }
+        else if (result.sent) { sent++ }
+        else { queued++ }
         await sleep(EMAIL_SEND_DELAY_MS)
       }
 
@@ -222,7 +224,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return Response.json({ success: true, sent, skipped, errors })
+    return Response.json({ success: true, sent, skipped, queued, errors })
   } catch (error: any) {
     return Response.json({ success: false, error: error.message }, { status: 500 })
   }
