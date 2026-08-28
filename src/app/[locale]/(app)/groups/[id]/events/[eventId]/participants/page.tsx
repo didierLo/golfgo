@@ -675,7 +675,7 @@ export default function ParticipantsPage() {
     ))
   }
 
-  const statusOrder = { GOING: 0, INVITED: 1, WAITLIST: 2, DECLINED: 3 }
+  const statusOrder = { GOING: 0, WAITLIST: 1, DECLINED: 2, INVITED: 3 }
 
   const { going, going18, going9front, going9back, going9, invited, declined, waitlist, has9holers, extraActivityCount } = useMemo(() => {
     const going  = participants.filter(p => p.status === 'GOING')
@@ -703,7 +703,15 @@ export default function ParticipantsPage() {
       return na.localeCompare(nb) * dir
     }
     if (sortField === 'whs')    return ((a.players?.whs ?? 999) - (b.players?.whs ?? 999)) * dir
-    if (sortField === 'status') return ((statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)) * dir
+    if (sortField === 'status') {
+      const diff = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9)
+      if (diff !== 0) return diff * dir
+      // À l'intérieur d'un même statut : toujours alphabétique, indépendamment
+      // du sens de tri choisi sur la colonne Statut.
+      const na = `${a.players?.surname ?? ''} ${a.players?.first_name ?? ''}`.toLowerCase()
+      const nb = `${b.players?.surname ?? ''} ${b.players?.first_name ?? ''}`.toLowerCase()
+      return na.localeCompare(nb, locale)
+    }
     if (sortField === 'holes')  return ((a.holes_played ?? 18) - (b.holes_played ?? 18)) * dir
     return 0
   }), [participants, sortField, sortDir])
