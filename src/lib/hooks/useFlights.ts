@@ -42,12 +42,26 @@ const list = (participants ?? []).map((p: any) => ({
 }))
 setPlayers(list)
 
+    // Table de correspondance joueur → trous choisis (event_participants), pour
+    // pouvoir l'appliquer aussi aux joueurs déjà assignés dans un flight — la
+    // table flight_players ne stocke pas cette info elle-même.
+    const holesMap: Record<string, { holes_played: number; holes_section: string | null }> = {}
+    ;(participants ?? []).forEach((p: any) => {
+      if (p.player?.id) {
+        holesMap[p.player.id] = { holes_played: p.holes_played ?? 18, holes_section: p.holes_section ?? null }
+      }
+    })
+
     const formatted = (flightsData ?? []).map((f: any) => ({
       flight_no:  f.flight_number,
       groupLabel: f.group_label ?? null,
       players: f.flight_players
         .sort((a: any, b: any) => a.position - b.position)
-        .map((fp: any) => fp.players),
+        .map((fp: any) => ({
+          ...fp.players,
+          holes_played:  holesMap[fp.players?.id]?.holes_played ?? 18,
+          holes_section: holesMap[fp.players?.id]?.holes_section ?? null,
+        })),
     }))
     setFlights(formatted)
 
