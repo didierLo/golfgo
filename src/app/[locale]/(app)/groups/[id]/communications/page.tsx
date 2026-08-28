@@ -128,7 +128,7 @@ export default function CommunicationsPage() {
     const json = await res.json()
     setQueueVisible(true)
     setQueueCounts(json.counts ?? { pending: 0, failed: 0 })
-    setQueueItems([...(json.pending ?? []), ...(json.failed ?? [])])
+    setQueueItems(json.failed ?? [])
   }
 
   async function handleQueueDrain() {
@@ -155,7 +155,12 @@ export default function CommunicationsPage() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Erreur')
-      toast.success('Remis en file')
+      toast.success('Remis en file — sera renvoyé au prochain passage')
+      // Retrait immédiat de la vue : la ligne passe en 'pending' côté base,
+      // pas la peine de la garder affichée avec son ancien statut le temps
+      // du rechargement complet.
+      setQueueItems(items => items.filter(i => i.id !== id))
+      setQueueCounts(c => ({ pending: c.pending + 1, failed: Math.max(0, c.failed - 1) }))
       loadQueue()
     } catch (e: any) {
       toast.error(e.message ?? 'Erreur')
@@ -647,21 +652,21 @@ printFormatName, printScorecardNotes
           </div>
           {queueOpen && (
             <div className="mt-2 pt-2 border-t border-slate-100 divide-y divide-slate-100">
-              {queueItems.map(item => (
+              {queueItems.length === 0 ? (
+                <p className="py-1.5 text-slate-400">Aucun échec — {queueCounts.pending} email(s) en attente du prochain envoi.</p>
+              ) : queueItems.map(item => (
                 <div key={item.id} className="py-1.5 flex items-center justify-between gap-2">
                   <span className="text-slate-600 truncate">
                     {item.to_email} — {item.subject}
-                    {item.status === 'failed' && <span className="text-red-500"> ({item.last_error})</span>}
+                    <span className="text-red-500"> ({item.last_error})</span>
                   </span>
-                  {item.status === 'failed' && (
-                    <button
-                      onClick={() => handleQueueRetry(item.id)}
-                      disabled={queueRetryingId === item.id}
-                      className="text-[11px] font-semibold text-[#185FA5] hover:text-[#0C447C] underline underline-offset-2 disabled:opacity-40 shrink-0"
-                    >
-                      Réessayer
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleQueueRetry(item.id)}
+                    disabled={queueRetryingId === item.id}
+                    className="text-[11px] font-semibold text-[#185FA5] hover:text-[#0C447C] underline underline-offset-2 disabled:opacity-40 shrink-0"
+                  >
+                    {queueRetryingId === item.id ? 'Remise en file…' : 'Réessayer'}
+                  </button>
                 </div>
               ))}
             </div>

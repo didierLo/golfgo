@@ -25,10 +25,14 @@ export async function POST(req: Request) {
   const { id } = await req.json() as { id: string }
   if (!id) return Response.json({ error: 'id requis' }, { status: 400 })
 
-  const { error } = await supabaseAdmin.from('email_queue')
+  const { data, error } = await supabaseAdmin.from('email_queue')
     .update({ status: 'pending', attempts: 0, last_error: null })
     .eq('id', id)
+    .select('id')
 
   if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (!data || data.length === 0) {
+    return Response.json({ error: "Aucune ligne mise à jour — id introuvable" }, { status: 404 })
+  }
   return Response.json({ ok: true })
 }
