@@ -425,7 +425,7 @@ if (days === 3 && group?.auto_reminders) {
           title:         event.title,
           startsAt:      event.starts_at,
           location:      event.location,
-          method:        'REQUEST',
+          method:        'PUBLISH', // pas 'REQUEST' : évite qu'Accepter/Décliner dans l'appli calendrier
           sequence:      1, // rappel J-3 = mise à jour de l'invitation J-14 (sequence 0)
           attendeeEmail: player.email,
           attendeeName:  `${player.first_name} ${player.surname}`,
@@ -560,7 +560,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           title:         event.title,
           startsAt:      event.starts_at,
           location:      event.location,
-          method:        'REQUEST',
+          method:        'PUBLISH', // pas 'REQUEST' : évite qu'Accepter/Décliner dans l'appli calendrier
           sequence:      0, // invitation initiale
           attendeeEmail: player.email,
           attendeeName:  `${player.first_name} ${player.surname}`,
