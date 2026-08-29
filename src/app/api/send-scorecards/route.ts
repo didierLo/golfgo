@@ -2,15 +2,11 @@ import { createServerClient } from '@/lib/supabase/server'
 import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
+import { computePhcp } from '@/components/scorecards/scorecard-types'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
 type TeeInfo = { id: string; tee_name: string; par_total: number; course_rating: number; slope: number }
-
-function computePhcp(whs: number, tee?: TeeInfo): number {
-  if (!tee) return Math.round(whs)
-  return Math.round(whs * (tee.slope / 113) + tee.course_rating - tee.par_total)
-}
 
 export async function POST(req: Request) {
   try {

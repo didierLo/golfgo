@@ -1,5 +1,6 @@
 import type { Hole, TeeInfo } from './scorecard-types'
 import { composeCards, type TeamFormat, type ComposedCard } from '@/lib/golf/scorecards/composeCards'
+import { strokesReceived } from '@/lib/golf/scoring/stableford'
 
 const DEFAULT_LOGO_URL = 'https://golfgo.be/logo/GG_Logo_avec_nom_bandeau.jpeg'
 
@@ -10,13 +11,6 @@ export type PrintPlayer = {
   whs: number
   phcp: number
   tee?: TeeInfo
-}
-
-function strokesReceived(playingHcp: number, strokeIndex: number): number {
-  if (playingHcp <= 0) return 0
-  const full = Math.floor(playingHcp / 18)
-  const remainder = playingHcp % 18
-  return full + (strokeIndex <= remainder ? 1 : 0)
 }
 
 export function buildScorecardCardsHtml(

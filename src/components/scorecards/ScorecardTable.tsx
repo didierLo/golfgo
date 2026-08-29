@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { ScorecardCell } from './ScorecardCell'
 import type { Hole, ScoreMap } from './scorecard-types'
+import { strokesReceived, getStablefordPoints } from '@/lib/golf/scoring/stableford'
 
 // ScorecardTable n'a besoin que de id + phcp — reste volontairement minimal pour accepter
 // aussi bien un Player réel qu'une "carte d'équipe virtuelle" (team2/team3_4) ou un PrintPlayer.
@@ -19,24 +20,12 @@ type Props = {
   readOnly?: boolean
 }
 
-function strokesReceived(phcp: number, strokeIndex: number): number {
-  if (phcp <= 0) return 0
-  const full = Math.floor(phcp / 18)
-  const remainder = phcp % 18
-  return full + (strokeIndex <= remainder ? 1 : 0)
-}
-
-// net-par : 0→2, 1→1, >1→0, -1→3, -2→4 (et au-delà, clampé à 0 en haut)
-function stablefordPoints(brut: number, par: number, recv: number): number {
-  return Math.max(0, par - (brut - recv) + 2)
-}
-
 function holeValues(player: ScoreEntrant, hole: Hole, scores: ScoreMap) {
   const brut = scores[player.id]?.[hole.hole_number] ?? null
   if (brut == null) return { brut: null as number | null, net: null as number | null, pts: null as number | null }
   const recv = strokesReceived(player.phcp, hole.stroke_index)
   const net  = brut - recv
-  const pts  = stablefordPoints(brut, hole.par, recv)
+  const pts  = getStablefordPoints(brut, hole.par, recv)
   return { brut, net, pts }
 }
 

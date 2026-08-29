@@ -135,12 +135,50 @@ export default function ClubCourseManager() {
     setTees(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t))
   }
 
+  // Trous dont le stroke index est en double avec un autre trou (mise en évidence en direct,
+  // avant même la sauvegarde — la validation bloquante reste dans handleSave/validateStrokeIndexes).
+  const duplicatedHoleNumbers = new Set<number>()
+  if (holes.length === 18) {
+    const bySi = new Map<number, number[]>()
+    holes.forEach(h => bySi.set(h.stroke_index, [...(bySi.get(h.stroke_index) ?? []), h.hole_number]))
+    bySi.forEach(holeNumbers => { if (holeNumbers.length > 1) holeNumbers.forEach(n => duplicatedHoleNumbers.add(n)) })
+  }
+
   function updateHole(index: number, field: keyof Hole, value: number) {
     setHoles(prev => prev.map((h, i) => i === index ? { ...h, [field]: value } : h))
   }
 
+  function validateStrokeIndexes(): string | null {
+    if (holes.length !== 18) return null // 9 trous ou config incomplète : pas de contrainte 1–18
+    const seen = new Map<number, number[]>() // stroke_index → numéros de trou concernés
+    for (const h of holes) {
+      const list = seen.get(h.stroke_index) ?? []
+      list.push(h.hole_number)
+      seen.set(h.stroke_index, list)
+    }
+    const duplicates = [...seen.entries()].filter(([, holeNumbers]) => holeNumbers.length > 1)
+    const missing = Array.from({ length: 18 }, (_, i) => i + 1).filter(si => !seen.has(si))
+
+    if (duplicates.length > 0) {
+      const detail = duplicates.map(([si, holeNumbers]) => `SI ${si} (trous ${holeNumbers.join(', ')})`).join(' · ')
+      return `Index en double : ${detail}`
+    }
+    if (missing.length > 0) {
+      return `Index manquant(s) : ${missing.join(', ')}`
+    }
+    return null
+  }
+
   async function handleSave() {
     if (!courseId) return
+
+    const validationError = validateStrokeIndexes()
+    if (validationError) {
+      setSaveMsg('⚠️ ' + validationError)
+      toast.error(validationError)
+      return
+    }
+
     setSaving(true)
     setSaveMsg('')
     try {
@@ -354,7 +392,7 @@ export default function ClubCourseManager() {
                           <tr key={h.hole_number} className="border-b border-gray-100 hover:bg-gray-50">
                             <td className="px-2 py-1 text-center text-[12px] font-medium text-gray-700">{h.hole_number}</td>
                             <td className="px-1 py-1"><input type="number" value={h.par} min={3} max={5} onChange={e => updateHole(start + i, 'par', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
-                            <td className="px-1 py-1"><input type="number" value={h.stroke_index} min={1} max={18} onChange={e => updateHole(start + i, 'stroke_index', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                            <td className="px-1 py-1"><input type="number" value={h.stroke_index} min={1} max={18} onChange={e => updateHole(start + i, 'stroke_index', Number(e.target.value))} className={inputClass + ' text-center' + (duplicatedHoleNumbers.has(h.hole_number) ? ' border-red-400 bg-red-50 text-red-700' : '')} /></td>
                             <td className="px-1 py-1"><input type="number" value={h.hole_distance === 0 ? '' : h.hole_distance} min={0} placeholder="-" onChange={e => updateHole(start + i, 'hole_distance', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
                           </tr>
                         ))}

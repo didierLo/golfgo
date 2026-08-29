@@ -10,6 +10,7 @@ import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
 import { getTeamGroups, playingHcp, teamPhcp, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
 import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
+import { computePhcp } from '@/components/scorecards/scorecard-types'
 
 const supabase = createClient()
 
@@ -19,11 +20,6 @@ type Hole     = { hole_number: number; par: number; stroke_index: number }
 type Player   = { id: string; first_name: string; surname: string; whs: number; tee_id: string | null; tee?: TeeInfo; phcp: number }
 type ScoreMap = Record<string, Record<number, number | null>>
 type EventItem = { id: string; title: string; starts_at: string; isPast: boolean }
-
-function computePhcp(whs: number, tee?: TeeInfo): number {
-  if (!tee) return Math.round(whs)
-  return Math.round(whs * (tee.slope / 113) + tee.course_rating - tee.par_total)
-}
 
 function twoMonthsAgo(): string {
   const d = new Date(); d.setMonth(d.getMonth() - 2); d.setHours(0,0,0,0); return d.toISOString()
