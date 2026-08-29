@@ -9,7 +9,7 @@ import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useEventScoring } from '@/lib/hooks/useEventScoring'
 import { getTeamGroups, playingHcp, teamPhcp } from '@/lib/golf/scorecards/composeCards'
 import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
-import { computePhcp } from '@/components/scorecards/scorecard-types'
+import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 import { useTranslations, useLocale } from 'next-intl'
 
 const supabase = createClient()
@@ -56,14 +56,6 @@ function getTeeColor(teeName: string): { bg: string; text: string } {
   if (n.includes('black'))  return { bg: '#1F2937', text: '#F9FAFB' }
   if (n.includes('gold'))   return { bg: '#FDE68A', text: '#78350F' }
   return { bg: '#F3F4F6', text: '#374151' }
-}
-function findDefaultTee(teesData: TeeInfo[], color: string, gender?: string): TeeInfo | undefined {
-  const c = color.toLowerCase()
-  const gw = gender === 'F' ? 'lad' : 'men'
-  return teesData.find(t => t.tee_name.toLowerCase().includes(c) && t.tee_name.toLowerCase().includes(gw))
-    ?? teesData.find(t => t.tee_name.toLowerCase() === c)
-    ?? teesData.find(t => t.tee_name.toLowerCase().startsWith(c))
-    ?? teesData.find(t => t.tee_name.toLowerCase().includes(c))
 }
 
 function EventPill({ event, isSelected, onSelect, locale }: { event: EventItem; isSelected: boolean; onSelect: () => void; locale: string }) {

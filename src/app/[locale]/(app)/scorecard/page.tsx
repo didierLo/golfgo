@@ -10,7 +10,7 @@ import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
 import { getTeamGroups, playingHcp, teamPhcp, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
 import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
-import { computePhcp } from '@/components/scorecards/scorecard-types'
+import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 
 const supabase = createClient()
 
@@ -265,7 +265,7 @@ useEffect(() => {
           .select('flight_number, flight_players(position, player_id)')
           .eq('event_id', evId).order('flight_number'),
         supabase.from('event_participants')
-          .select('player_id, tee_id, players(id, first_name, surname, whs)')
+          .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
           .eq('event_id', evId).eq('status', 'GOING'),
       ])
 
@@ -278,7 +278,8 @@ useEffect(() => {
           .map((fp: any) => {
             const ep = byPlayerId.get(fp.player_id)
             const pl = ep?.players
-            const tee = (teesData || []).find((t: any) => t.id === ep?.tee_id)
+            let tee = (teesData || []).find((t: any) => t.id === ep?.tee_id)
+            if (!tee && pl?.default_tee_color) tee = findDefaultTee(teesData || [], pl.default_tee_color, pl.gender)
             return {
               id: fp.player_id, first_name: pl?.first_name ?? '', surname: pl?.surname ?? '',
               whs: pl?.whs ?? 0, phcp: computePhcp(pl?.whs ?? 0, tee), tee,
@@ -310,13 +311,14 @@ useEffect(() => {
     }
 
     const { data: participants } = await supabase.from('event_participants')
-      .select('player_id, tee_id, players(id, first_name, surname, whs)')
+      .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
       .eq('event_id', evId).in('player_id', flightPlayerIds)
 
     const built: Player[] = (participants || []).map((ep: any) => {
       const pl = ep.players
       const teeId = ep.tee_id ?? myTeeId ?? null
-      const tee = (teesData || []).find(t => t.id === teeId)
+      let tee = (teesData || []).find(t => t.id === teeId)
+      if (!tee && pl?.default_tee_color) tee = findDefaultTee(teesData || [], pl.default_tee_color, pl.gender)
       return { id: pl.id, first_name: pl.first_name, surname: pl.surname, whs: pl.whs ?? 0, tee_id: teeId, tee, phcp: computePhcp(pl.whs ?? 0, tee) }
     })
 

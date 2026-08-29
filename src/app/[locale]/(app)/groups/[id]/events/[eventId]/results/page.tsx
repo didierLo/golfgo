@@ -9,7 +9,7 @@ import Leaderboard from '@/components/scorecards/Leaderboard'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useEventScoring } from '@/lib/hooks/useEventScoring'
 import { getTeamGroups, playingHcp, teamPhcp } from '@/lib/golf/scorecards/composeCards'
-import { computePhcp } from '@/components/scorecards/scorecard-types'
+import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
 import { useTranslations, useLocale } from 'next-intl'
 
@@ -99,17 +99,6 @@ function fallbackHoles(): Hole[] {
   return Array.from({ length: 18 }, (_, i) => ({
     hole_number: i + 1, par: [4,4,3,5,4,4,3,4,5][i % 9], stroke_index: i + 1,
   }))
-}
-
-function findDefaultTee(teesData: TeeInfo[], color: string, gender?: string): TeeInfo | undefined {
-  const c = color.toLowerCase()
-  const gw = gender === 'F' ? 'lad' : 'men'
-  return (
-    teesData.find(t => t.tee_name.toLowerCase().includes(c) && t.tee_name.toLowerCase().includes(gw)) ??
-    teesData.find(t => t.tee_name.toLowerCase() === c) ??
-    teesData.find(t => t.tee_name.toLowerCase().startsWith(c)) ??
-    teesData.find(t => t.tee_name.toLowerCase().includes(c))
-  )
 }
 
 const POLL_INTERVAL_MS = 30_000
