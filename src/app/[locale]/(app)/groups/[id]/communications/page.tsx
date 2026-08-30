@@ -119,6 +119,8 @@ export default function CommunicationsPage() {
   const [queueOpen,    setQueueOpen]    = useState(false)
   const [queueDraining, setQueueDraining] = useState(false)
   const [queueRetryingId, setQueueRetryingId] = useState<string | null>(null)
+  const [editingEmailId,  setEditingEmailId]  = useState<string | null>(null)
+  const [emailDraft,      setEmailDraft]      = useState('')
 
   useEffect(() => { loadQueue() }, [])
 
@@ -146,12 +148,12 @@ export default function CommunicationsPage() {
     }
   }
 
-  async function handleQueueRetry(id: string) {
+  async function handleQueueRetry(id: string, correctedEmail?: string) {
     setQueueRetryingId(id)
     try {
       const res = await fetch('/api/admin/email-queue/retry', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify(correctedEmail !== undefined ? { id, to_email: correctedEmail } : { id }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Erreur')
@@ -161,6 +163,7 @@ export default function CommunicationsPage() {
       // du rechargement complet.
       setQueueItems(items => items.filter(i => i.id !== id))
       setQueueCounts(c => ({ pending: c.pending + 1, failed: Math.max(0, c.failed - 1) }))
+      setEditingEmailId(null)
       loadQueue()
     } catch (e: any) {
       toast.error(e.message ?? 'Erreur')
@@ -656,12 +659,31 @@ printFormatName, printScorecardNotes
                 <p className="py-1.5 text-slate-400">Aucun échec — {queueCounts.pending} email(s) en attente du prochain envoi.</p>
               ) : queueItems.map(item => (
                 <div key={item.id} className="py-1.5 flex items-center justify-between gap-2">
-                  <span className="text-slate-600 truncate">
-                    {item.to_email} — {item.subject}
-                    <span className="text-red-500"> ({item.last_error})</span>
-                  </span>
+                  {editingEmailId === item.id ? (
+                    <input
+                      type="email"
+                      autoFocus
+                      value={emailDraft}
+                      onChange={e => setEmailDraft(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Escape') setEditingEmailId(null) }}
+                      className="flex-1 min-w-0 border border-[#185FA5]/40 rounded-lg px-1.5 py-0.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30"
+                    />
+                  ) : (
+                    <span className="text-slate-600 truncate">
+                      <button
+                        type="button"
+                        onClick={() => { setEditingEmailId(item.id); setEmailDraft(item.to_email) }}
+                        title="Corriger l'adresse"
+                        className="font-medium hover:underline decoration-dashed underline-offset-2"
+                      >
+                        {item.to_email}
+                      </button>
+                      {' '}— {item.subject}
+                      <span className="text-red-500"> ({item.last_error})</span>
+                    </span>
+                  )}
                   <button
-                    onClick={() => handleQueueRetry(item.id)}
+                    onClick={() => handleQueueRetry(item.id, editingEmailId === item.id ? emailDraft : undefined)}
                     disabled={queueRetryingId === item.id}
                     className="text-[11px] font-semibold text-[#185FA5] hover:text-[#0C447C] underline underline-offset-2 disabled:opacity-40 shrink-0"
                   >

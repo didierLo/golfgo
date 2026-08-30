@@ -22,11 +22,23 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
-  const { id } = await req.json() as { id: string }
+  const { id, to_email } = await req.json() as { id: string; to_email?: string }
   if (!id) return Response.json({ error: 'id requis' }, { status: 400 })
 
+  const update: Record<string, any> = { status: 'pending', attempts: 0, last_error: null }
+
+  if (to_email !== undefined) {
+    const trimmed = to_email.trim()
+    // Validation basique — le vrai contrôle se fait de toute façon côté Resend à l'envoi,
+    // ceci évite juste de remettre en file une adresse manifestement encore invalide.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      return Response.json({ error: 'Adresse email invalide' }, { status: 400 })
+    }
+    update.to_email = trimmed
+  }
+
   const { data, error } = await supabaseAdmin.from('email_queue')
-    .update({ status: 'pending', attempts: 0, last_error: null })
+    .update(update)
     .eq('id', id)
     .select('id')
 
