@@ -1027,7 +1027,9 @@
     "importAnother": "Import another file",
     "errorFormat": "Unrecognised format — CLUB and SLOPE columns not found",
     "errorRead": "Unable to read file",
-    "teesUpdated": "tees updated"
+    "teesUpdated": "tees updated",
+    "errorNoRows": "The file appears empty — no data rows found below the header.",
+    "errorAllSkipped": "{count} row(s) read, but none could be imported — check that the Tee and Slope columns are filled in."
   },
   "partners": {
     "title": "My partners",

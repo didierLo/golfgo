@@ -1027,7 +1027,9 @@
     "importAnother": "Importar otro archivo",
     "errorFormat": "Formato no reconocido — columnas CLUB y SLOPE no encontradas",
     "errorRead": "No se puede leer el archivo",
-    "teesUpdated": "tees actualizados"
+    "teesUpdated": "tees actualizados",
+    "errorNoRows": "El archivo parece vacío — no se encontraron filas de datos bajo el encabezado.",
+    "errorAllSkipped": "Se leyeron {count} fila(s), pero ninguna pudo importarse — comprueba que las columnas Tee y Slope estén completas."
   },
   "partners": {
     "title": "Mis compañeros",

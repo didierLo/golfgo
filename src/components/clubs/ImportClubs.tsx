@@ -29,7 +29,7 @@ const ws = XLSX.utils.aoa_to_sheet([
   XLSX.writeFile(wb, 'template_clubs_golfgo.xlsx')
 }
 
-function parseXLS(file: File): Promise<RawRow[]> {
+function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -62,19 +62,27 @@ function parseXLS(file: File): Promise<RawRow[]> {
           slope:   headers.findIndex(h => h === 'SLOPE'),
         }
 
+        // Tolère la virgule décimale (Excel en locale FR : "128,0" au lieu de "128.0")
+        function parseNum(v: any): number {
+          const n = Number(String(v ?? '').trim().replace(',', '.'))
+          return n
+        }
+
         const rows: RawRow[] = []
         let lastClub = '', lastCourse = ''
+        let examined = 0
 
         for (let i = headerRow + 1; i < raw.length; i++) {
           const row = raw[i]
           if (!row || row.every((c: any) => !c)) continue
+          examined++
 
           const country = idx.country >= 0 ? String(row[idx.country] ?? '').trim() || 'BE' : 'BE'
           const club    = String(row[idx.club]   ?? '').trim() || lastClub
           const course  = String(row[idx.course] ?? '').trim() || lastCourse
           const tee    = String(row[idx.tee]    ?? '').trim()
-          const par    = Number(row[idx.par])
-          const slope  = Number(row[idx.slope])
+          const par    = parseNum(row[idx.par])
+          const slope  = parseNum(row[idx.slope])
 
           if (club)   lastClub = club
           if (course) lastCourse = course
@@ -85,18 +93,17 @@ function parseXLS(file: File): Promise<RawRow[]> {
             country,
             club: lastClub, course: lastCourse, tee,
             par: isNaN(par) ? 72 : par,
-            length_m: idx.length >= 0 ? Number(row[idx.length]) || null : null,
+            length_m: idx.length >= 0 ? parseNum(row[idx.length]) || null : null,
             cr: idx.cr >= 0
               ? (() => {
-                  const raw = String(row[idx.cr] ?? '').trim().replace(',', '.')
-                  const n = Number(raw)
+                  const n = parseNum(row[idx.cr])
                   return isNaN(n) ? null : n
                 })()
               : null,
             slope,
           })
         }
-        resolve(rows)
+        resolve({ rows, examined })
       } catch (err: any) {
         reject(new Error(err.message ?? 'READ_ERROR'))
       }
@@ -179,8 +186,16 @@ export default function ImportClubs() {
     if (!f) return
     setPreview([]); setResult(null); setParseError(''); setParsing(true)
     try {
-      const rows = await parseXLS(f)
-      setPreview(rows)
+      const { rows, examined } = await parseXLS(f)
+      if (rows.length === 0) {
+        setParseError(
+          examined === 0
+            ? t('importClubs.errorNoRows')
+            : t('importClubs.errorAllSkipped', { count: examined })
+        )
+      } else {
+        setPreview(rows)
+      }
     } catch (err: any) {
       const msg = err.message === 'FORMAT_ERROR'
         ? t('importClubs.errorFormat')
@@ -188,7 +203,12 @@ export default function ImportClubs() {
         ? t('importClubs.errorRead')
         : err.message
       setParseError(msg)
-    } finally { setParsing(false) }
+    } finally {
+      setParsing(false)
+      // Réinitialise l'input : sans ça, resélectionner exactement le même fichier
+      // après un échec ne redéclenche pas onChange dans certains navigateurs.
+      e.target.value = ''
+    }
   }
 
   async function handleImport() {
