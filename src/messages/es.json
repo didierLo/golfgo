@@ -1029,7 +1029,8 @@
     "errorRead": "No se puede leer el archivo",
     "teesUpdated": "tees actualizados",
     "errorNoRows": "El archivo parece vacío — no se encontraron filas de datos bajo el encabezado.",
-    "errorAllSkipped": "Se leyeron {count} fila(s), pero ninguna pudo importarse — comprueba que las columnas Tee y Slope estén completas."
+    "errorAllSkipped": "Se leyeron {count} fila(s), pero ninguna pudo importarse — comprueba que las columnas Tee y Slope estén completas.",
+    "clubOnlyRow": "Solo club — recorridos/salidas por completar más tarde"
   },
   "partners": {
     "title": "Mis compañeros",

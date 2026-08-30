@@ -1029,7 +1029,8 @@
     "errorRead": "Kan bestand niet lezen",
     "teesUpdated": "tees bijgewerkt",
     "errorNoRows": "Het bestand lijkt leeg — geen gegevensrijen gevonden onder de kopregel.",
-    "errorAllSkipped": "{count} rij(en) gelezen, maar geen kon worden geïmporteerd — controleer of de kolommen Tee en Slope zijn ingevuld."
+    "errorAllSkipped": "{count} rij(en) gelezen, maar geen kon worden geïmporteerd — controleer of de kolommen Tee en Slope zijn ingevuld.",
+    "clubOnlyRow": "Alleen club — parcours/tees later toevoegen"
   },
   "partners": {
     "title": "Mijn partners",

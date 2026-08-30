@@ -1029,7 +1029,8 @@
     "errorRead": "Datei kann nicht gelesen werden",
     "teesUpdated": "Tees aktualisiert",
     "errorNoRows": "Die Datei scheint leer zu sein — keine Datenzeilen unter der Kopfzeile gefunden.",
-    "errorAllSkipped": "{count} Zeile(n) gelesen, aber keine konnte importiert werden — prüfen Sie, ob die Spalten Tee und Slope ausgefüllt sind."
+    "errorAllSkipped": "{count} Zeile(n) gelesen, aber keine konnte importiert werden — prüfen Sie, ob die Spalten Tee und Slope ausgefüllt sind.",
+    "clubOnlyRow": "Nur Club — Plätze/Abschläge werden später ergänzt"
   },
   "partners": {
     "title": "Meine Partner",

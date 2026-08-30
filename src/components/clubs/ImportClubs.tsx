@@ -9,8 +9,9 @@ const supabase = createClient()
 
 type RawRow = {
   club: string; course: string; tee: string; par: number
-  length_m: number | null; cr: number | null; slope: number
+  length_m: number | null; cr: number | null; slope: number | null
   country: string
+  clubOnly: boolean  // ligne "juste le nom du club" — pas de course/tee à créer, à compléter plus tard
 }
 
 type ImportResult = {
@@ -86,6 +87,21 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
 
           if (club)   lastClub = club
           if (course) lastCourse = course
+
+          // Ligne "club seul" : le nom du club est renseigné explicitement sur CETTE
+          // ligne (pas juste hérité), mais ni Tee ni Slope ne le sont — on la garde
+          // pour créer/retrouver le club, sans essayer de créer un parcours/tee vide.
+          const clubOnCell = String(row[idx.club] ?? '').trim()
+          const isClubOnly = !!clubOnCell && !tee && (!row[idx.slope] || String(row[idx.slope]).trim() === '')
+          if (isClubOnly) {
+            rows.push({
+              country, club: lastClub, course: '', tee: '',
+              par: 0, length_m: null, cr: null, slope: null,
+              clubOnly: true,
+            })
+            continue
+          }
+
           if (!tee || !slope || isNaN(slope)) continue
           if (par && par <= 30) continue
 
@@ -101,6 +117,7 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
                 })()
               : null,
             slope,
+            clubOnly: false,
           })
         }
         resolve({ rows, examined })
@@ -115,8 +132,21 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
 
 async function importToSupabase(rows: RawRow[]): Promise<ImportResult> {
   const result: ImportResult = { clubs: 0, courses: 0, tees: 0, updated: 0, skipped: 0, errors: [] }
+
+  const clubOnlyRows = rows.filter(r => r.clubOnly)
+  const teeRows       = rows.filter(r => !r.clubOnly)
+
+  // ── Lignes "club seul" : juste créer/retrouver le club, rien d'autre ──
+  for (const row of clubOnlyRows) {
+    const { data: existingClub } = await supabase.from('clubs').select('id').ilike('name', row.club).maybeSingle()
+    if (existingClub) { result.skipped++; continue }
+    const { error } = await supabase.from('clubs').insert({ name: row.club, country: row.country })
+    if (error) { result.errors.push(`Club "${row.club}": ${error.message}`); continue }
+    result.clubs++
+  }
+
   const clubMap = new Map<string, Map<string, RawRow[]>>()
-  for (const row of rows) {
+  for (const row of teeRows) {
     if (!clubMap.has(row.club)) clubMap.set(row.club, new Map())
     const courseMap = clubMap.get(row.club)!
     if (!courseMap.has(row.course)) courseMap.set(row.course, [])
@@ -150,12 +180,14 @@ async function importToSupabase(rows: RawRow[]): Promise<ImportResult> {
     .from('course_tees').select('id').eq('course_id', courseId).ilike('tee_name', row.tee).maybeSingle()
 
   if (existingTee) {
-    const { error } = await supabase.from('course_tees').update({
-      par_total: row.par,
-      course_rating: row.cr,
-      slope: row.slope,
-      distance_total: row.length_m,
-    }).eq('id', existingTee.id)
+    // Fusion, pas écrasement : par/slope sont obligatoires pour qu'une ligne soit
+    // retenue (donc toujours présents ici), mais CR et longueur sont optionnels —
+    // s'ils sont vides dans CE fichier, on ne touche pas à la valeur déjà en base.
+    const updates: Record<string, any> = { par_total: row.par, slope: row.slope }
+    if (row.cr !== null) updates.course_rating = row.cr
+    if (row.length_m !== null) updates.distance_total = row.length_m
+
+    const { error } = await supabase.from('course_tees').update(updates).eq('id', existingTee.id)
     if (error) { result.errors.push(`Tee "${row.tee}" (${courseName}): ${error.message}`); continue }
     result.updated++
     continue
@@ -218,10 +250,11 @@ export default function ImportClubs() {
     finally { setImporting(false) }
   }
 
-  const { clubCount, courseCount } = useMemo(() => ({
-  clubCount:   new Set(preview.map(r => r.club)).size,
-  courseCount: new Set(preview.map(r => `${r.club}__${r.course}`)).size,
-}), [preview])
+  const { clubCount, courseCount, teeCount } = useMemo(() => ({
+    clubCount:   new Set(preview.map(r => r.club)).size,
+    courseCount: new Set(preview.filter(r => !r.clubOnly).map(r => `${r.club}__${r.course}`)).size,
+    teeCount:    preview.filter(r => !r.clubOnly).length,
+  }), [preview])
 
   return (
     <div className="flex flex-col gap-4">
@@ -257,7 +290,7 @@ export default function ImportClubs() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-[12px] font-medium text-gray-500">
-              {t('importClubs.preview', { clubs: clubCount, courses: courseCount, tees: preview.length })}
+              {t('importClubs.preview', { clubs: clubCount, courses: courseCount, tees: teeCount })}
             </p>
             <button onClick={() => setPreview([])} className="text-[11px] text-gray-400 hover:text-gray-600">
               {t('importClubs.clear')}
@@ -279,14 +312,22 @@ export default function ImportClubs() {
               </thead>
               <tbody>
                 {preview.map((row, i) => (
-                  <tr key={i} className={`border-b border-gray-100 ${i % 2 ? 'bg-gray-50/50' : ''}`}>
+                  <tr key={i} className={`border-b border-gray-100 ${i % 2 ? 'bg-gray-50/50' : ''} ${row.clubOnly ? 'bg-amber-50/60' : ''}`}>
                     <td className="px-3 py-1.5 text-gray-500 font-mono">{row.country}</td>
                     <td className="px-3 py-1.5 text-gray-700 truncate">{row.club}</td>
-                    <td className="px-3 py-1.5 text-gray-600 truncate">{row.course}</td>
-                    <td className="px-3 py-1.5 text-gray-600 truncate">{row.tee}</td>
-                    <td className="px-3 py-1.5 text-center text-gray-500">{row.par}</td>
-                    <td className="px-3 py-1.5 text-center text-gray-500">{row.cr ?? '—'}</td>
-                    <td className="px-3 py-1.5 text-center text-gray-500">{row.slope}</td>
+                    {row.clubOnly ? (
+                      <td colSpan={5} className="px-3 py-1.5 text-amber-700 italic">
+                        {t('importClubs.clubOnlyRow')}
+                      </td>
+                    ) : (
+                      <>
+                        <td className="px-3 py-1.5 text-gray-600 truncate">{row.course}</td>
+                        <td className="px-3 py-1.5 text-gray-600 truncate">{row.tee}</td>
+                        <td className="px-3 py-1.5 text-center text-gray-500">{row.par}</td>
+                        <td className="px-3 py-1.5 text-center text-gray-500">{row.cr ?? '—'}</td>
+                        <td className="px-3 py-1.5 text-center text-gray-500">{row.slope}</td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
