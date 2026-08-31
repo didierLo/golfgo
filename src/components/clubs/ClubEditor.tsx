@@ -241,14 +241,14 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
 
       {/* ── Parcours ─────────────────────────────────────────────────────── */}
       <div>
-        <label className="block text-[12px] font-medium text-gray-500 mb-1.5">
+        <label className="block text-[12px] font-semibold text-gray-900 mb-1.5">
           {t('clubs.courseLabel')}
         </label>
 
         {/* Si un seul parcours → afficher directement sans dropdown */}
         {courses.length === 1 ? (
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
-            <span className="text-[13px] text-gray-700 flex-1">{courses[0].course_name}</span>
+            <span className="text-[13px] font-medium text-gray-900 flex-1">{courses[0].course_name}</span>
           </div>
         ) : (
           <select value={courseId || ''} onChange={e => setCourseId(e.target.value || null)}
@@ -335,34 +335,34 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
             </div>
 
             {/* ── Trous ── */}
-            <div>
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{t('clubs.holes')}</p>
+            <div className="rounded-2xl border border-white/60 bg-white/60 backdrop-blur-md shadow-sm p-4">
+              <p className="text-[12px] font-bold text-slate-700 uppercase tracking-wide mb-3">{t('clubs.holes')}</p>
               <div className="grid grid-cols-2 gap-4">
                 {[0, 1].map(half => {
                   const start    = half * 9
                   const label    = half === 0 ? 'OUT' : 'IN'
                   const subtotal = holes.slice(start, start + 9).reduce((s, h) => s + h.par, 0)
                   return (
-                    <table key={half} className="w-full text-[12px] border-collapse">
+                    <table key={half} className="w-full text-[13px] border-collapse">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
+                        <tr className="border-b border-slate-200/70">
                           {[t('clubs.colHole'), t('clubs.colPar'), t('clubs.colSI'), t('clubs.colM')].map(h => (
-                            <th key={h} className="px-2 py-1.5 text-center text-[11px] font-medium text-gray-400">{h}</th>
+                            <th key={h} className="px-2 py-2 text-center text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {holes.slice(start, start + 9).map((h, i) => (
-                          <tr key={h.hole_number} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="px-2 py-1 text-center text-[12px] font-medium text-gray-700">{h.hole_number}</td>
-                            <td className="px-1 py-1"><input type="number" value={h.par} min={3} max={5} onChange={e => updateHole(start + i, 'par', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
-                            <td className="px-1 py-1"><input type="number" value={h.stroke_index} min={1} max={18} onChange={e => updateHole(start + i, 'stroke_index', Number(e.target.value))} className={inputClass + ' text-center' + (duplicatedHoleNumbers.has(h.hole_number) ? ' border-red-400 bg-red-50 text-red-700' : '')} /></td>
-                            <td className="px-1 py-1"><input type="number" value={h.hole_distance === 0 ? '' : h.hole_distance} min={0} placeholder="-" onChange={e => updateHole(start + i, 'hole_distance', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                          <tr key={h.hole_number} className="border-b border-slate-100/70 hover:bg-white/50 transition-colors">
+                            <td className="px-2 py-1.5 text-center text-[13px] font-semibold text-slate-800">{h.hole_number}</td>
+                            <td className="px-1 py-1.5"><input type="number" value={h.par} min={3} max={5} onChange={e => updateHole(start + i, 'par', Number(e.target.value))} className={glassInputClass + ' text-center'} /></td>
+                            <td className="px-1 py-1.5"><input type="number" value={h.stroke_index} min={1} max={18} onChange={e => updateHole(start + i, 'stroke_index', Number(e.target.value))} className={glassInputClass + ' text-center' + (duplicatedHoleNumbers.has(h.hole_number) ? ' border-red-400 bg-red-50 text-red-700' : '')} /></td>
+                            <td className="px-1 py-1.5"><input type="number" value={h.hole_distance === 0 ? '' : h.hole_distance} min={0} placeholder="-" onChange={e => updateHole(start + i, 'hole_distance', Number(e.target.value))} className={glassInputClass + ' text-center'} /></td>
                           </tr>
                         ))}
-                        <tr className="bg-gray-50 font-medium">
-                          <td className="px-2 py-1.5 text-center text-[12px] text-gray-600">{label}</td>
-                          <td className="px-2 py-1.5 text-center text-[12px] text-gray-700">{subtotal}</td>
+                        <tr className="bg-[#185FA5]/5 font-semibold">
+                          <td className="px-2 py-2 text-center text-[13px] text-slate-700">{label}</td>
+                          <td className="px-2 py-2 text-center text-[13px] text-slate-900">{subtotal}</td>
                           <td colSpan={2} />
                         </tr>
                       </tbody>
@@ -370,7 +370,7 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
                   )
                 })}
               </div>
-              <div className="mt-2 text-right text-[12px] font-medium text-gray-600">
+              <div className="mt-3 text-right text-[13px] font-semibold text-slate-800">
                 {t('clubs.total')} : {parTotal}
               </div>
             </div>

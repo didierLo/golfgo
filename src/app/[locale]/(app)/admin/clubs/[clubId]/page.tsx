@@ -64,7 +64,7 @@ export default function ClubDetailPage() {
 
   return (
     <div className="p-6 max-w-4xl">
-      <button onClick={() => router.push('/admin/clubs')} className="text-[12px] text-gray-400 hover:text-gray-600 mb-3 inline-flex items-center gap-1">
+      <button onClick={() => router.push('/admin/clubs')} className="text-[12px] text-gray-900 hover:text-[#185FA5] mb-3 inline-flex items-center gap-1 font-medium">
         ← {t('clubs.backToList')}
       </button>
 
@@ -73,7 +73,7 @@ export default function ClubDetailPage() {
           value={club.name}
           onChange={e => setClub({ ...club, name: e.target.value })}
           onBlur={() => saveClubInfo({ name: club.name })}
-          className="text-[20px] font-medium text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-[#185FA5] focus:outline-none px-0.5 bg-transparent"
+          className="text-[20px] font-bold text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-[#185FA5] focus:outline-none px-0.5 bg-transparent"
         />
         <select
           value={club.country}
