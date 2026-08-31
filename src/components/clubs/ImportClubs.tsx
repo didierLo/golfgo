@@ -10,7 +10,7 @@ const supabase = createClient()
 type RawRow = {
   club: string; course: string; tee: string; par: number
   length_m: number | null; cr: number | null; slope: number | null
-  country: string
+  country: string; region: string | null
   clubOnly: boolean  // ligne "juste le nom du club" — pas de course/tee à créer, à compléter plus tard
 }
 
@@ -20,11 +20,12 @@ type ImportResult = {
 
 function downloadTemplate() {
 const ws = XLSX.utils.aoa_to_sheet([
-    ['COUNTRY', 'CLUB', 'COURSE', 'TEE', 'PAR', 'LENGTH', 'CR', 'SLOPE'],
-    ['BE', 'Royal Golf Club', 'Parcours Principal', 'Jaune', 72, 5800, 71.2, 128],
-    ['BE', 'Royal Golf Club', 'Parcours Principal', 'Rouge', 72, 5200, 69.4, 122],
+    ['COUNTRY', 'REGION', 'CLUB', 'COURSE', 'TEE', 'PAR', 'LENGTH', 'CR', 'SLOPE'],
+    ['BE', '', 'Royal Golf Club', 'Parcours Principal', 'Jaune', 72, 5800, 71.2, 128],
+    ['BE', '', 'Royal Golf Club', 'Parcours Principal', 'Rouge', 72, 5200, 69.4, 122],
+    ['GB', 'Scotland', 'St Andrews Links', 'Old Course', 'Jaune', 72, 6200, 72.1, 132],
   ])
-  ws['!cols'] = [{ wch: 10 }, { wch: 30 }, { wch: 25 }, { wch: 15 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 8 }]
+  ws['!cols'] = [{ wch: 10 }, { wch: 14 }, { wch: 30 }, { wch: 25 }, { wch: 15 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 8 }]
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Clubs')
   XLSX.writeFile(wb, 'template_clubs_golfgo.xlsx')
@@ -54,6 +55,7 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
         const headers = raw[headerRow].map((c: any) => String(c).trim().toUpperCase())
         const idx = {
           country: headers.findIndex(h => h === 'COUNTRY'),
+          region:  headers.findIndex(h => h === 'REGION'),
           club:    headers.findIndex(h => h === 'CLUB'),
           course:  headers.findIndex(h => h === 'COURSE'),
           tee:     headers.findIndex(h => h === 'TEE'),
@@ -70,7 +72,7 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
         }
 
         const rows: RawRow[] = []
-        let lastClub = '', lastCourse = ''
+        let lastClub = '', lastCourse = '', lastRegion = ''
         let examined = 0
 
         for (let i = headerRow + 1; i < raw.length; i++) {
@@ -79,6 +81,7 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
           examined++
 
           const country = idx.country >= 0 ? String(row[idx.country] ?? '').trim() || 'BE' : 'BE'
+          const region  = idx.region  >= 0 ? String(row[idx.region]  ?? '').trim() || lastRegion : lastRegion
           const club    = String(row[idx.club]   ?? '').trim() || lastClub
           const course  = String(row[idx.course] ?? '').trim() || lastCourse
           const tee    = String(row[idx.tee]    ?? '').trim()
@@ -87,6 +90,7 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
 
           if (club)   lastClub = club
           if (course) lastCourse = course
+          if (region) lastRegion = region
 
           // Ligne "club seul" : le nom du club est renseigné explicitement sur CETTE
           // ligne (pas juste hérité), mais ni Tee ni Slope ne le sont — on la garde
@@ -95,7 +99,7 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
           const isClubOnly = !!clubOnCell && !tee && (!row[idx.slope] || String(row[idx.slope]).trim() === '')
           if (isClubOnly) {
             rows.push({
-              country, club: lastClub, course: '', tee: '',
+              country, region: lastRegion || null, club: lastClub, course: '', tee: '',
               par: 0, length_m: null, cr: null, slope: null,
               clubOnly: true,
             })
@@ -106,7 +110,7 @@ function parseXLS(file: File): Promise<{ rows: RawRow[]; examined: number }> {
           if (par && par <= 30) continue
 
        rows.push({
-            country,
+            country, region: lastRegion || null,
             club: lastClub, course: lastCourse, tee,
             par: isNaN(par) ? 72 : par,
             length_m: idx.length >= 0 ? parseNum(row[idx.length]) || null : null,
@@ -138,9 +142,14 @@ async function importToSupabase(rows: RawRow[]): Promise<ImportResult> {
 
   // ── Lignes "club seul" : juste créer/retrouver le club, rien d'autre ──
   for (const row of clubOnlyRows) {
-    const { data: existingClub } = await supabase.from('clubs').select('id').ilike('name', row.club).maybeSingle()
-    if (existingClub) { result.skipped++; continue }
-    const { error } = await supabase.from('clubs').insert({ name: row.club, country: row.country })
+    const { data: existingClub } = await supabase.from('clubs').select('id, region').ilike('name', row.club).maybeSingle()
+    if (existingClub) {
+      if (!existingClub.region && row.region) {
+        await supabase.from('clubs').update({ region: row.region }).eq('id', existingClub.id)
+      }
+      result.skipped++; continue
+    }
+    const { error } = await supabase.from('clubs').insert({ name: row.club, country: row.country, region: row.region })
     if (error) { result.errors.push(`Club "${row.club}": ${error.message}`); continue }
     result.clubs++
   }
@@ -155,12 +164,18 @@ async function importToSupabase(rows: RawRow[]): Promise<ImportResult> {
 
   for (const [clubName, courseMap] of clubMap) {
     let clubId: string
-    const { data: existingClub } = await supabase.from('clubs').select('id').ilike('name', clubName).maybeSingle()
-    if (existingClub) { clubId = existingClub.id; result.skipped++ }
+    const { data: existingClub } = await supabase.from('clubs').select('id, region').ilike('name', clubName).maybeSingle()
+    if (existingClub) {
+      clubId = existingClub.id; result.skipped++
+      const firstRow = [...courseMap.values()][0]?.[0]
+      if (!existingClub.region && firstRow?.region) {
+        await supabase.from('clubs').update({ region: firstRow.region }).eq('id', clubId)
+      }
+    }
     else {
      const firstRow = [...courseMap.values()][0]?.[0]
       const country = firstRow?.country ?? 'BE'
-      const { data: newClub, error } = await supabase.from('clubs').insert({ name: clubName, country }).select('id').single()
+      const { data: newClub, error } = await supabase.from('clubs').insert({ name: clubName, country, region: firstRow?.region ?? null }).select('id').single()
       if (error || !newClub) { result.errors.push(`Club "${clubName}": ${error?.message}`); continue }
       clubId = newClub.id; result.clubs++
     }
@@ -301,19 +316,21 @@ export default function ImportClubs() {
             <table className="w-full text-[11px]" style={{ tableLayout: 'fixed' }}>
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[10%]">Country</th>
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[22%]">Club</th>
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[20%]">Course</th>
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[25%]">Tee</th>
-                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[10%]">Par</th>
-                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[10%]">CR</th>
-                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[10%]">Slope</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[8%]">Country</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[10%]">Region</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[20%]">Club</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[18%]">Course</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[22%]">Tee</th>
+                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[8%]">Par</th>
+                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[7%]">CR</th>
+                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[7%]">Slope</th>
                 </tr>
               </thead>
               <tbody>
                 {preview.map((row, i) => (
                   <tr key={i} className={`border-b border-gray-100 ${i % 2 ? 'bg-gray-50/50' : ''} ${row.clubOnly ? 'bg-amber-50/60' : ''}`}>
                     <td className="px-3 py-1.5 text-gray-500 font-mono">{row.country}</td>
+                    <td className="px-3 py-1.5 text-gray-500 truncate">{row.region ?? '—'}</td>
                     <td className="px-3 py-1.5 text-gray-700 truncate">{row.club}</td>
                     {row.clubOnly ? (
                       <td colSpan={5} className="px-3 py-1.5 text-amber-700 italic">
