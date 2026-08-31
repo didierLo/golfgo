@@ -1,0 +1,382 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
+import * as Sentry from '@sentry/nextjs'
+import toast from 'react-hot-toast'
+
+const supabase = createClient()
+
+type Course = { id: string; course_name: string; club_id: string }
+type Tee    = { id: string; course_id: string; tee_name: string; par_total: number; distance_total: number; course_rating: number; slope: number }
+type Hole   = { id?: string; course_id: string; hole_number: number; par: number; stroke_index: number; hole_distance: number }
+
+const inputClass = "w-full border border-gray-200 rounded px-2 py-1.5 text-[12px] focus:outline-none focus:border-blue-300"
+
+/** Vérifie qu'un jeu de 18 trous a un stroke index complet (1–18, sans doublon). */
+function holesIncomplete(holes: { stroke_index: number }[]): boolean {
+  if (holes.length !== 18) return true
+  const seen = new Set(holes.map(h => h.stroke_index))
+  if (seen.size !== 18) return true
+  for (let i = 1; i <= 18; i++) if (!seen.has(i)) return true
+  return false
+}
+
+/** Vérifie qu'un tee a toutes ses infos de base renseignées (pas juste des valeurs par défaut à 0). */
+function teeIncomplete(tee: Tee): boolean {
+  return !tee.par_total || !tee.course_rating || !tee.slope
+}
+
+export default function ClubEditor({ clubId }: { clubId: string }) {
+  const t = useTranslations()
+
+  const [courses, setCourses] = useState<Course[]>([])
+  const [tees, setTees]       = useState<Tee[]>([])
+  const [holes, setHoles]     = useState<Hole[]>([])
+
+  const [courseId, setCourseId] = useState<string | null>(null)
+
+  const [newCourse, setNewCourse] = useState('')
+  const [newTee, setNewTee]     = useState('')
+  const [newTeeData, setNewTeeData] = useState({ par_total: 72, distance_total: 0, course_rating: 72.0, slope: 120 })
+
+  const [saving, setSaving]   = useState(false)
+  const [saveMsg, setSaveMsg] = useState('')
+
+  // Complétude de CHAQUE parcours du club (pas juste celui affiché), pour le bandeau d'avertissement.
+  const [incompleteCourses, setIncompleteCourses] = useState<{ id: string; course_name: string; reasons: string[] }[]>([])
+
+  useEffect(() => { loadCourses(clubId) }, [clubId])
+
+  useEffect(() => {
+    if (courseId) {
+      Promise.all([loadTees(courseId), loadHoles(courseId)])
+    } else {
+      setTees([])
+      setHoles([])
+    }
+  }, [courseId])
+
+  async function loadCourses(cid: string) {
+    const { data } = await supabase
+      .from('courses').select('*').eq('club_id', cid).order('course_name')
+    const list = data || []
+    setCourses(list)
+    if (list.length === 1) setCourseId(list[0].id)
+    await checkCompleteness(list)
+  }
+
+  async function checkCompleteness(courseList: Course[]) {
+    const results: { id: string; course_name: string; reasons: string[] }[] = []
+    for (const c of courseList) {
+      const [{ data: courseTees }, { data: courseHoles }] = await Promise.all([
+        supabase.from('course_tees').select('*').eq('course_id', c.id),
+        supabase.from('course_holes').select('stroke_index').eq('course_id', c.id),
+      ])
+      const reasons: string[] = []
+      if (!courseTees || courseTees.length === 0) {
+        reasons.push(t('clubs.incompleteNoTees'))
+      } else if (courseTees.some(teeIncomplete)) {
+        reasons.push(t('clubs.incompleteTeeData'))
+      }
+      if (holesIncomplete(courseHoles || [])) {
+        reasons.push(t('clubs.incompleteHoles'))
+      }
+      if (reasons.length > 0) results.push({ id: c.id, course_name: c.course_name, reasons })
+    }
+    setIncompleteCourses(results)
+  }
+
+  async function loadTees(cid: string) {
+    const { data } = await supabase
+      .from('course_tees').select('*').eq('course_id', cid).order('tee_name')
+    setTees(data || [])
+  }
+
+  async function loadHoles(cid: string) {
+    const { data } = await supabase
+      .from('course_holes').select('*').eq('course_id', cid).order('hole_number')
+    if (data && data.length > 0) {
+      setHoles(data)
+    } else {
+      setHoles(Array.from({ length: 18 }, (_, i) => ({
+        course_id: cid, hole_number: i + 1, par: 4, stroke_index: i + 1, hole_distance: 0,
+      })))
+    }
+  }
+
+  async function handleCreateCourse() {
+    if (!newCourse.trim()) return
+    const { data } = await supabase
+      .from('courses').insert({ club_id: clubId, course_name: newCourse.trim() }).select().single()
+    setNewCourse('')
+    if (data) { setCourseId(data.id); await loadCourses(clubId) }
+  }
+
+  async function handleCreateTee() {
+    if (!courseId || !newTee.trim()) return
+    const { data } = await supabase.from('course_tees').insert({
+      course_id: courseId, tee_name: newTee.trim(),
+      par_total: newTeeData.par_total, course_rating: newTeeData.course_rating, slope: newTeeData.slope,
+    }).select().single()
+    setNewTee('')
+    setNewTeeData({ par_total: 72, distance_total: 0, course_rating: 72.0, slope: 120 })
+    if (data) setTees(prev => [...prev, data])
+  }
+
+  function updateTee(id: string, field: keyof Tee, value: string | number) {
+    setTees(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t))
+  }
+
+  // Trous dont le stroke index est en double avec un autre trou (mise en évidence en direct,
+  // avant même la sauvegarde — la validation bloquante reste dans handleSave/validateStrokeIndexes).
+  const duplicatedHoleNumbers = new Set<number>()
+  if (holes.length === 18) {
+    const bySi = new Map<number, number[]>()
+    holes.forEach(h => bySi.set(h.stroke_index, [...(bySi.get(h.stroke_index) ?? []), h.hole_number]))
+    bySi.forEach(holeNumbers => { if (holeNumbers.length > 1) holeNumbers.forEach(n => duplicatedHoleNumbers.add(n)) })
+  }
+
+  function updateHole(index: number, field: keyof Hole, value: number) {
+    setHoles(prev => prev.map((h, i) => i === index ? { ...h, [field]: value } : h))
+  }
+
+  function validateStrokeIndexes(): string | null {
+    if (holes.length !== 18) return null // 9 trous ou config incomplète : pas de contrainte 1–18
+    const seen = new Map<number, number[]>() // stroke_index → numéros de trou concernés
+    for (const h of holes) {
+      const list = seen.get(h.stroke_index) ?? []
+      list.push(h.hole_number)
+      seen.set(h.stroke_index, list)
+    }
+    const duplicates = [...seen.entries()].filter(([, holeNumbers]) => holeNumbers.length > 1)
+    const missing = Array.from({ length: 18 }, (_, i) => i + 1).filter(si => !seen.has(si))
+
+    if (duplicates.length > 0) {
+      const detail = duplicates.map(([si, holeNumbers]) => `SI ${si} (trous ${holeNumbers.join(', ')})`).join(' · ')
+      return `Index en double : ${detail}`
+    }
+    if (missing.length > 0) {
+      return `Index manquant(s) : ${missing.join(', ')}`
+    }
+    return null
+  }
+
+  async function handleSave() {
+    if (!courseId) return
+
+    const validationError = validateStrokeIndexes()
+    if (validationError) {
+      setSaveMsg('⚠️ ' + validationError)
+      toast.error(validationError)
+      return
+    }
+
+    setSaving(true)
+    setSaveMsg('')
+    try {
+      await Promise.all(tees.map(tee =>
+        supabase.from('course_tees').update({
+          tee_name: tee.tee_name, par_total: tee.par_total,
+          distance_total: tee.distance_total, course_rating: tee.course_rating, slope: tee.slope,
+        }).eq('id', tee.id)
+      ))
+      const { error: holesError } = await supabase.from('course_holes').upsert(
+        holes.map(h => ({
+          ...(h.id ? { id: h.id } : {}),
+          course_id: courseId, hole_number: h.hole_number,
+          par: h.par, stroke_index: h.stroke_index, hole_distance: h.hole_distance,
+        })),
+        { onConflict: 'course_id,hole_number' }
+      )
+      if (holesError) {
+        console.error('[handleSave] course_holes upsert error:', holesError)
+        setSaveMsg('Erreur trous: ' + holesError.message)
+      } else {
+        setSaveMsg('✓ Sauvegardé')
+      }
+      await loadHoles(courseId)
+      await checkCompleteness(courses)
+    } catch (e: any) {
+      console.error('[handleSave] catch:', e)
+      setSaveMsg('Erreur: ' + (e.message ?? 'inconnue'))
+    } finally {
+      setSaving(false)
+      setTimeout(() => setSaveMsg(''), 3000)
+    }
+  }
+
+  const parOut   = holes.slice(0, 9).reduce((s, h) => s + h.par, 0)
+  const parIn    = holes.slice(9, 18).reduce((s, h) => s + h.par, 0)
+  const parTotal = parOut + parIn
+
+  const selectClass = "w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] bg-white focus:outline-none focus:border-blue-300"
+
+  return (
+    <div className="space-y-5 max-w-4xl">
+
+      {/* ── Bandeau de complétude ────────────────────────────────────────── */}
+      {incompleteCourses.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <p className="text-[13px] font-semibold text-amber-800 mb-2">
+            {t('clubs.incompleteBanner')}
+          </p>
+          <ul className="space-y-1">
+            {incompleteCourses.map(c => (
+              <li key={c.id} className="text-[12px] text-amber-700">
+                <button
+                  onClick={() => setCourseId(c.id)}
+                  className="font-semibold underline underline-offset-2 hover:text-amber-900"
+                >
+                  {c.course_name}
+                </button>
+                {' '}— {c.reasons.join(' · ')}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* ── Parcours ─────────────────────────────────────────────────────── */}
+      <div>
+        <label className="block text-[12px] font-medium text-gray-500 mb-1.5">
+          {t('clubs.courseLabel')}
+        </label>
+
+        {/* Si un seul parcours → afficher directement sans dropdown */}
+        {courses.length === 1 ? (
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+            <span className="text-[13px] text-gray-700 flex-1">{courses[0].course_name}</span>
+          </div>
+        ) : (
+          <select value={courseId || ''} onChange={e => setCourseId(e.target.value || null)}
+            className={selectClass}>
+            <option value="">{t('clubs.chooseClub2')}</option>
+            {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
+          </select>
+        )}
+
+        <div className="flex gap-2 mt-2">
+          <input value={newCourse} onChange={e => setNewCourse(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleCreateCourse()}
+            placeholder={t('clubs.newCourse')} className={selectClass} />
+          <button onClick={handleCreateCourse}
+            className="bg-[#185FA5] text-white text-[12px] font-medium px-4 py-2 rounded-md hover:bg-[#0C447C] transition-colors">
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* ── Éditeur tees + trous ─────────────────────────────────────────── */}
+      {courseId && (
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <h2 className="text-[14px] font-medium text-gray-900">
+              {courses.find(c => c.id === courseId)?.course_name}
+            </h2>
+            <div className="flex items-center gap-3">
+              {saveMsg && <span className="text-[12px] text-green-600">{saveMsg}</span>}
+              <button onClick={handleSave} disabled={saving}
+                className="bg-[#185FA5] text-white text-[12px] font-medium px-4 py-1.5 rounded-md hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
+                {saving ? t('clubs.saving') : t('clubs.save')}
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 space-y-6">
+
+            {/* ── Tees ── */}
+            <div>
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{t('clubs.tees')}</p>
+              <table className="w-full text-[12px] border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    {[t('clubs.colTee'), t('clubs.colPar'), t('clubs.colDistance'), t('clubs.colCR'), t('clubs.colSlope')].map(h => (
+                      <th key={h} className="px-3 py-2 text-left text-[11px] font-medium text-gray-400">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {tees.map(tee => (
+                    <tr key={tee.id} className="border-b border-gray-100">
+                      <td className="px-2 py-1.5"><input value={tee.tee_name ?? ''} onChange={e => updateTee(tee.id, 'tee_name', e.target.value)} className={inputClass} /></td>
+                      <td className="px-2 py-1.5"><input type="number" value={tee.par_total ?? ''} onChange={e => updateTee(tee.id, 'par_total', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                      <td className="px-2 py-1.5"><input type="number" value={tee.distance_total ?? ''} onChange={e => updateTee(tee.id, 'distance_total', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                      <td className="px-2 py-1.5"><input type="number" step="0.1" value={tee.course_rating ?? ''} onChange={e => updateTee(tee.id, 'course_rating', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                      <td className="px-2 py-1.5"><input type="number" value={tee.slope ?? ''} onChange={e => updateTee(tee.id, 'slope', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                    </tr>
+                  ))}
+                  {/* Nouvelle ligne tee */}
+                  <tr className="bg-gray-50/50">
+                    <td className="px-2 py-1.5">
+                      <input value={newTee} onChange={e => setNewTee(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleCreateTee()}
+                        placeholder={t('clubs.teeName')} className={inputClass} />
+                    </td>
+                    <td className="px-2 py-1.5"><input type="number" value={newTeeData.par_total} onChange={e => setNewTeeData(p => ({ ...p, par_total: Number(e.target.value) }))} className={inputClass + ' text-center'} /></td>
+                    <td className="px-2 py-1.5"><input type="number" value={newTeeData.distance_total || ''} onChange={e => setNewTeeData(p => ({ ...p, distance_total: Number(e.target.value) }))} placeholder="-" className={inputClass + ' text-center'} /></td>
+                    <td className="px-2 py-1.5"><input type="number" step="0.1" value={newTeeData.course_rating} onChange={e => setNewTeeData(p => ({ ...p, course_rating: Number(e.target.value) }))} className={inputClass + ' text-center'} /></td>
+                    <td className="px-2 py-1.5">
+                      <div className="flex gap-1">
+                        <input type="number" value={newTeeData.slope} onChange={e => setNewTeeData(p => ({ ...p, slope: Number(e.target.value) }))} className={inputClass + ' text-center'} />
+                        <button onClick={handleCreateTee}
+                          className="bg-[#185FA5] text-white text-[12px] font-medium px-3 rounded-md hover:bg-[#0C447C] transition-colors whitespace-nowrap">
+                          +
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── Trous ── */}
+            <div>
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{t('clubs.holes')}</p>
+              <div className="grid grid-cols-2 gap-4">
+                {[0, 1].map(half => {
+                  const start    = half * 9
+                  const label    = half === 0 ? 'OUT' : 'IN'
+                  const subtotal = holes.slice(start, start + 9).reduce((s, h) => s + h.par, 0)
+                  return (
+                    <table key={half} className="w-full text-[12px] border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                          {[t('clubs.colHole'), t('clubs.colPar'), t('clubs.colSI'), t('clubs.colM')].map(h => (
+                            <th key={h} className="px-2 py-1.5 text-center text-[11px] font-medium text-gray-400">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {holes.slice(start, start + 9).map((h, i) => (
+                          <tr key={h.hole_number} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="px-2 py-1 text-center text-[12px] font-medium text-gray-700">{h.hole_number}</td>
+                            <td className="px-1 py-1"><input type="number" value={h.par} min={3} max={5} onChange={e => updateHole(start + i, 'par', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                            <td className="px-1 py-1"><input type="number" value={h.stroke_index} min={1} max={18} onChange={e => updateHole(start + i, 'stroke_index', Number(e.target.value))} className={inputClass + ' text-center' + (duplicatedHoleNumbers.has(h.hole_number) ? ' border-red-400 bg-red-50 text-red-700' : '')} /></td>
+                            <td className="px-1 py-1"><input type="number" value={h.hole_distance === 0 ? '' : h.hole_distance} min={0} placeholder="-" onChange={e => updateHole(start + i, 'hole_distance', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                          </tr>
+                        ))}
+                        <tr className="bg-gray-50 font-medium">
+                          <td className="px-2 py-1.5 text-center text-[12px] text-gray-600">{label}</td>
+                          <td className="px-2 py-1.5 text-center text-[12px] text-gray-700">{subtotal}</td>
+                          <td colSpan={2} />
+                        </tr>
+                      </tbody>
+                    </table>
+                  )
+                })}
+              </div>
+              <div className="mt-2 text-right text-[12px] font-medium text-gray-600">
+                {t('clubs.total')} : {parTotal}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
