@@ -13,6 +13,7 @@ type Tee    = { id: string; course_id: string; tee_name: string; par_total: numb
 type Hole   = { id?: string; course_id: string; hole_number: number; par: number; stroke_index: number; hole_distance: number }
 
 const inputClass = "w-full border border-gray-200 rounded px-2 py-1.5 text-[12px] focus:outline-none focus:border-blue-300"
+const glassInputClass = "w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-[13px] text-slate-800 bg-white/80 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] transition-colors"
 
 /** Vérifie qu'un jeu de 18 trous a un stroke index complet (1–18, sans doublon). */
 function holesIncomplete(holes: { stroke_index: number }[]): boolean {
@@ -289,41 +290,41 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
           <div className="p-4 space-y-6">
 
             {/* ── Tees ── */}
-            <div>
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-2">{t('clubs.tees')}</p>
-              <table className="w-full text-[12px] border-collapse">
+            <div className="rounded-2xl border border-white/60 bg-white/60 backdrop-blur-md shadow-sm p-4">
+              <p className="text-[12px] font-bold text-slate-700 uppercase tracking-wide mb-3">{t('clubs.tees')}</p>
+              <table className="w-full text-[13px] border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
+                  <tr className="border-b border-slate-200/70">
                     {[t('clubs.colTee'), t('clubs.colPar'), t('clubs.colDistance'), t('clubs.colCR'), t('clubs.colSlope')].map(h => (
-                      <th key={h} className="px-3 py-2 text-left text-[11px] font-medium text-gray-400">{h}</th>
+                      <th key={h} className="px-3 py-2 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {tees.map(tee => (
-                    <tr key={tee.id} className="border-b border-gray-100">
-                      <td className="px-2 py-1.5"><input value={tee.tee_name ?? ''} onChange={e => updateTee(tee.id, 'tee_name', e.target.value)} className={inputClass} /></td>
-                      <td className="px-2 py-1.5"><input type="number" value={tee.par_total ?? ''} onChange={e => updateTee(tee.id, 'par_total', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
-                      <td className="px-2 py-1.5"><input type="number" value={tee.distance_total ?? ''} onChange={e => updateTee(tee.id, 'distance_total', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
-                      <td className="px-2 py-1.5"><input type="number" step="0.1" value={tee.course_rating ?? ''} onChange={e => updateTee(tee.id, 'course_rating', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
-                      <td className="px-2 py-1.5"><input type="number" value={tee.slope ?? ''} onChange={e => updateTee(tee.id, 'slope', Number(e.target.value))} className={inputClass + ' text-center'} /></td>
+                    <tr key={tee.id} className="border-b border-slate-100/70 hover:bg-white/50 transition-colors">
+                      <td className="px-2 py-2"><input value={tee.tee_name ?? ''} onChange={e => updateTee(tee.id, 'tee_name', e.target.value)} className={glassInputClass} /></td>
+                      <td className="px-2 py-2"><input type="number" value={tee.par_total ?? ''} onChange={e => updateTee(tee.id, 'par_total', Number(e.target.value))} className={glassInputClass + ' text-center'} /></td>
+                      <td className="px-2 py-2"><input type="number" value={tee.distance_total ?? ''} onChange={e => updateTee(tee.id, 'distance_total', Number(e.target.value))} className={glassInputClass + ' text-center'} /></td>
+                      <td className="px-2 py-2"><input type="number" step="0.1" value={tee.course_rating ?? ''} onChange={e => updateTee(tee.id, 'course_rating', Number(e.target.value))} className={glassInputClass + ' text-center'} /></td>
+                      <td className="px-2 py-2"><input type="number" value={tee.slope ?? ''} onChange={e => updateTee(tee.id, 'slope', Number(e.target.value))} className={glassInputClass + ' text-center'} /></td>
                     </tr>
                   ))}
                   {/* Nouvelle ligne tee */}
-                  <tr className="bg-gray-50/50">
-                    <td className="px-2 py-1.5">
+                  <tr className="bg-[#185FA5]/5">
+                    <td className="px-2 py-2">
                       <input value={newTee} onChange={e => setNewTee(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleCreateTee()}
-                        placeholder={t('clubs.teeName')} className={inputClass} />
+                        placeholder={t('clubs.teeName')} className={glassInputClass} />
                     </td>
-                    <td className="px-2 py-1.5"><input type="number" value={newTeeData.par_total} onChange={e => setNewTeeData(p => ({ ...p, par_total: Number(e.target.value) }))} className={inputClass + ' text-center'} /></td>
-                    <td className="px-2 py-1.5"><input type="number" value={newTeeData.distance_total || ''} onChange={e => setNewTeeData(p => ({ ...p, distance_total: Number(e.target.value) }))} placeholder="-" className={inputClass + ' text-center'} /></td>
-                    <td className="px-2 py-1.5"><input type="number" step="0.1" value={newTeeData.course_rating} onChange={e => setNewTeeData(p => ({ ...p, course_rating: Number(e.target.value) }))} className={inputClass + ' text-center'} /></td>
-                    <td className="px-2 py-1.5">
-                      <div className="flex gap-1">
-                        <input type="number" value={newTeeData.slope} onChange={e => setNewTeeData(p => ({ ...p, slope: Number(e.target.value) }))} className={inputClass + ' text-center'} />
+                    <td className="px-2 py-2"><input type="number" value={newTeeData.par_total} onChange={e => setNewTeeData(p => ({ ...p, par_total: Number(e.target.value) }))} className={glassInputClass + ' text-center'} /></td>
+                    <td className="px-2 py-2"><input type="number" value={newTeeData.distance_total || ''} onChange={e => setNewTeeData(p => ({ ...p, distance_total: Number(e.target.value) }))} placeholder="-" className={glassInputClass + ' text-center'} /></td>
+                    <td className="px-2 py-2"><input type="number" step="0.1" value={newTeeData.course_rating} onChange={e => setNewTeeData(p => ({ ...p, course_rating: Number(e.target.value) }))} className={glassInputClass + ' text-center'} /></td>
+                    <td className="px-2 py-2">
+                      <div className="flex gap-1.5">
+                        <input type="number" value={newTeeData.slope} onChange={e => setNewTeeData(p => ({ ...p, slope: Number(e.target.value) }))} className={glassInputClass + ' text-center'} />
                         <button onClick={handleCreateTee}
-                          className="bg-[#185FA5] text-white text-[12px] font-medium px-3 rounded-md hover:bg-[#0C447C] transition-colors whitespace-nowrap">
+                          className="bg-[#185FA5] text-white text-[13px] font-semibold px-3.5 rounded-lg hover:bg-[#0C447C] transition-colors whitespace-nowrap shrink-0">
                           +
                         </button>
                       </div>
