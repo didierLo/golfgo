@@ -185,7 +185,15 @@
     "incompleteBanner": "⚠️ Einige Plätze dieses Clubs haben unvollständige Angaben:",
     "incompleteNoTees": "kein Abschlag angelegt",
     "incompleteTeeData": "unvollständige Abschlagdaten (Par, CR oder Slope fehlt)",
-    "incompleteHoles": "unvollständiger Stroke Index"
+    "incompleteHoles": "unvollständiger Stroke Index",
+    "confirmDelete": "Bestätigen",
+    "deleteCourse": "Diesen Platz löschen",
+    "courseDeleted": "Platz gelöscht",
+    "deleteBlockedCourse": "Nicht möglich: Dieser Platz wird von {count} Veranstaltungsteilnahme(n) verwendet",
+    "deleteClub": "Diesen Club löschen",
+    "confirmDeleteClub": "Diesen Club und alle seine Plätze löschen?",
+    "clubDeleted": "Club gelöscht",
+    "deleteBlockedClub": "Nicht möglich: Dieser Club wird von {count} Veranstaltungsteilnahme(n) verwendet"
   },
   "communications": {
     "title": "Kommunikation",

@@ -37,6 +37,8 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
   const [holes, setHoles]     = useState<Hole[]>([])
 
   const [courseId, setCourseId] = useState<string | null>(null)
+  const [courseNameDraft, setCourseNameDraft] = useState('')
+  const [deletingCourseId, setDeletingCourseId] = useState<string | null>(null)
 
   const [newCourse, setNewCourse] = useState('')
   const [newTee, setNewTee]     = useState('')
@@ -53,10 +55,13 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
   useEffect(() => {
     if (courseId) {
       Promise.all([loadTees(courseId), loadHoles(courseId)])
+      setCourseNameDraft(courses.find(c => c.id === courseId)?.course_name ?? '')
     } else {
       setTees([])
       setHoles([])
+      setCourseNameDraft('')
     }
+    setDeletingCourseId(null)
   }, [courseId])
 
   async function loadCourses(cid: string) {
@@ -113,6 +118,46 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
       .from('courses').insert({ club_id: clubId, course_name: newCourse.trim() }).select().single()
     setNewCourse('')
     if (data) { setCourseId(data.id); await loadCourses(clubId) }
+  }
+
+  async function handleRenameCourse() {
+    if (!courseId) return
+    const trimmed = courseNameDraft.trim()
+    const current = courses.find(c => c.id === courseId)
+    if (!current) return
+    if (!trimmed) { setCourseNameDraft(current.course_name); return } // pas de nom vide
+    if (trimmed === current.course_name) return
+
+    const { error } = await supabase.from('courses').update({ course_name: trimmed }).eq('id', courseId)
+    if (error) { toast.error(t('errors.generic') ?? 'Une erreur est survenue'); setCourseNameDraft(current.course_name); return }
+    setCourses(prev => prev.map(c => c.id === courseId ? { ...c, course_name: trimmed } : c))
+  }
+
+  async function handleDeleteCourse() {
+    if (!courseId) return
+    // Sécurité : un parcours déjà utilisé dans un événement (même passé) ne doit
+    // jamais être supprimé silencieusement — ça casserait les cartes de score liées.
+    const { data: teeRows } = await supabase.from('course_tees').select('id').eq('course_id', courseId)
+    const teeIds = (teeRows ?? []).map(t => t.id)
+    if (teeIds.length > 0) {
+      const { count } = await supabase.from('event_participants')
+        .select('*', { count: 'exact', head: true }).in('tee_id', teeIds)
+      if (count && count > 0) {
+        toast.error(t('clubs.deleteBlockedCourse', { count }))
+        setDeletingCourseId(null)
+        return
+      }
+    }
+
+    await supabase.from('course_holes').delete().eq('course_id', courseId)
+    await supabase.from('course_tees').delete().eq('course_id', courseId)
+    const { error } = await supabase.from('courses').delete().eq('id', courseId)
+    if (error) { toast.error(t('errors.generic') ?? 'Une erreur est survenue'); setDeletingCourseId(null); return }
+
+    toast.success(t('clubs.courseDeleted'))
+    setDeletingCourseId(null)
+    setCourseId(null)
+    await loadCourses(clubId)
   }
 
   async function handleCreateTee() {
@@ -245,17 +290,43 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
           {t('clubs.courseLabel')}
         </label>
 
-        {/* Si un seul parcours → afficher directement sans dropdown */}
-        {courses.length === 1 ? (
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
-            <span className="text-[13px] font-medium text-gray-900 flex-1">{courses[0].course_name}</span>
-          </div>
-        ) : (
+        {/* Le dropdown ne sert qu'à choisir QUEL parcours, s'il y en a plusieurs */}
+        {courses.length > 1 && (
           <select value={courseId || ''} onChange={e => setCourseId(e.target.value || null)}
             className={selectClass}>
             <option value="">{t('clubs.chooseClub2')}</option>
             {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
           </select>
+        )}
+
+        {/* Nom du parcours sélectionné : toujours éditable, + suppression avec confirmation */}
+        {courseId && (
+          <div className={`flex items-center gap-2 ${courses.length > 1 ? 'mt-2' : ''}`}>
+            <input
+              value={courseNameDraft}
+              onChange={e => setCourseNameDraft(e.target.value)}
+              onBlur={handleRenameCourse}
+              onKeyDown={e => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+              className={selectClass + ' flex-1'}
+            />
+            {deletingCourseId === courseId ? (
+              <>
+                <button onClick={handleDeleteCourse}
+                  className="text-[12px] font-semibold text-red-600 hover:text-red-700 px-2 whitespace-nowrap">
+                  {t('clubs.confirmDelete')}
+                </button>
+                <button onClick={() => setDeletingCourseId(null)}
+                  className="text-[13px] text-gray-400 hover:text-gray-600 px-1">
+                  ✕
+                </button>
+              </>
+            ) : (
+              <button onClick={() => setDeletingCourseId(courseId)} title={t('clubs.deleteCourse')}
+                className="text-red-400 hover:text-red-600 px-2 text-[15px] shrink-0">
+                🗑
+              </button>
+            )}
+          </div>
         )}
 
         <div className="flex gap-2 mt-2">

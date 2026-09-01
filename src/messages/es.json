@@ -185,7 +185,15 @@
     "incompleteBanner": "⚠️ Algunos recorridos de este club tienen información incompleta:",
     "incompleteNoTees": "sin salidas configuradas",
     "incompleteTeeData": "datos de salida incompletos (falta par, CR o slope)",
-    "incompleteHoles": "índice de golpes incompleto"
+    "incompleteHoles": "índice de golpes incompleto",
+    "confirmDelete": "Confirmar",
+    "deleteCourse": "Eliminar este recorrido",
+    "courseDeleted": "Recorrido eliminado",
+    "deleteBlockedCourse": "No es posible: este recorrido se usa en {count} participación(es) de eventos",
+    "deleteClub": "Eliminar este club",
+    "confirmDeleteClub": "¿Eliminar este club y todos sus recorridos?",
+    "clubDeleted": "Club eliminado",
+    "deleteBlockedClub": "No es posible: este club se usa en {count} participación(es) de eventos"
   },
   "communications": {
     "title": "Comunicaciones",

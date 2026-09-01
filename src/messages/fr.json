@@ -185,7 +185,15 @@
     "incompleteBanner": "⚠️ Certains parcours de ce club ont des informations incomplètes :",
     "incompleteNoTees": "aucun tee renseigné",
     "incompleteTeeData": "informations de tee incomplètes (par, CR ou slope manquant)",
-    "incompleteHoles": "index de trous incomplets"
+    "incompleteHoles": "index de trous incomplets",
+    "confirmDelete": "Confirmer",
+    "deleteCourse": "Supprimer ce parcours",
+    "courseDeleted": "Parcours supprimé",
+    "deleteBlockedCourse": "Impossible : ce parcours est utilisé par {count} participation(s) à un événement",
+    "deleteClub": "Supprimer ce club",
+    "confirmDeleteClub": "Supprimer ce club et tous ses parcours ?",
+    "clubDeleted": "Club supprimé",
+    "deleteBlockedClub": "Impossible : ce club est utilisé par {count} participation(s) à un événement"
   },
   "communications": {
     "title": "Communications",

@@ -185,7 +185,15 @@
     "incompleteBanner": "⚠️ Sommige parcours van deze club hebben onvolledige informatie:",
     "incompleteNoTees": "geen tee ingesteld",
     "incompleteTeeData": "onvolledige teegegevens (par, CR of slope ontbreekt)",
-    "incompleteHoles": "onvolledige stroke index"
+    "incompleteHoles": "onvolledige stroke index",
+    "confirmDelete": "Bevestigen",
+    "deleteCourse": "Dit parcours verwijderen",
+    "courseDeleted": "Parcours verwijderd",
+    "deleteBlockedCourse": "Niet mogelijk: dit parcours wordt gebruikt door {count} evenementdeelname(s)",
+    "deleteClub": "Deze club verwijderen",
+    "confirmDeleteClub": "Deze club en al zijn parcours verwijderen?",
+    "clubDeleted": "Club verwijderd",
+    "deleteBlockedClub": "Niet mogelijk: deze club wordt gebruikt door {count} evenementdeelname(s)"
   },
   "communications": {
     "title": "Communicatie",

@@ -185,7 +185,15 @@
     "incompleteBanner": "⚠️ Some courses at this club have incomplete information:",
     "incompleteNoTees": "no tee set up",
     "incompleteTeeData": "incomplete tee data (missing par, CR or slope)",
-    "incompleteHoles": "incomplete stroke index"
+    "incompleteHoles": "incomplete stroke index",
+    "confirmDelete": "Confirm",
+    "deleteCourse": "Delete this course",
+    "courseDeleted": "Course deleted",
+    "deleteBlockedCourse": "Can't delete: this course is used by {count} event participation(s)",
+    "deleteClub": "Delete this club",
+    "confirmDeleteClub": "Delete this club and all its courses?",
+    "clubDeleted": "Club deleted",
+    "deleteBlockedClub": "Can't delete: this club is used by {count} event participation(s)"
   },
   "communications": {
     "title": "Communications",
