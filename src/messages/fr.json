@@ -149,7 +149,7 @@
     "title": "Clubs et Parcours",
     "subtitle": "Gérer les clubs et parcours disponibles",
     "import": "Import depuis fichier Excel",
-    "manual": "Gestion manuelle",
+    "manual": "Import manuel",
     "chooseClub": "Choisir un club…",
     "newClub": "Nouveau club",
     "chooseClub2": "Choisir un parcours…",
@@ -195,7 +195,8 @@
     "clubDeleted": "Club supprimé",
     "deleteBlockedClub": "Impossible : ce club est utilisé par {count} participation(s) à un événement",
     "noResultsTryApi": "Si aucun golf trouvé, essaye avec GolfCourseAPI",
-    "noResultsTryApiLink": "ICI"
+    "noResultsTryApiLink": "ICI",
+    "searchInfo": "Rechercher les informations"
   },
   "communications": {
     "title": "Communications",

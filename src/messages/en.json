@@ -149,7 +149,7 @@
     "title": "Clubs & Courses",
     "subtitle": "Manage available clubs and courses",
     "import": "Import from Excel file",
-    "manual": "Manual management",
+    "manual": "Manual import",
     "chooseClub": "Choose a club…",
     "newClub": "New club",
     "chooseClub2": "Choose a course…",
@@ -195,7 +195,8 @@
     "clubDeleted": "Club deleted",
     "deleteBlockedClub": "Can't delete: this club is used by {count} event participation(s)",
     "noResultsTryApi": "If no club is found, try GolfCourseAPI",
-    "noResultsTryApiLink": "HERE"
+    "noResultsTryApiLink": "HERE",
+    "searchInfo": "Search for information"
   },
   "communications": {
     "title": "Communications",

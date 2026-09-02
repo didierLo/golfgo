@@ -149,7 +149,7 @@
     "title": "Clubs y Campos",
     "subtitle": "Gestionar clubs y campos disponibles",
     "import": "Importar desde archivo Excel",
-    "manual": "Gestión manual",
+    "manual": "Importación manual",
     "chooseClub": "Elegir un club…",
     "newClub": "Nuevo club",
     "chooseClub2": "Elegir un campo…",
@@ -195,7 +195,8 @@
     "clubDeleted": "Club eliminado",
     "deleteBlockedClub": "No es posible: este club se usa en {count} participación(es) de eventos",
     "noResultsTryApi": "¿No encuentras el club? Prueba con GolfCourseAPI",
-    "noResultsTryApiLink": "AQUÍ"
+    "noResultsTryApiLink": "AQUÍ",
+    "searchInfo": "Buscar información"
   },
   "communications": {
     "title": "Comunicaciones",

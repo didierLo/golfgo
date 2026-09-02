@@ -284,6 +284,10 @@ export default function ImportClubs() {
         </button>
       </div>
 
+      <p className="text-[12px] text-gray-500 -mt-2">
+        Pour plus de facilité, télécharge d'abord le modèle Excel ci-dessus, complète-le, puis importe-le ci-dessous.
+      </p>
+
       <div>
         <label className="block text-[12px] font-medium text-gray-500 mb-1.5">{t('importClubs.fileLabel')}</label>
         <input type="file" accept=".xls,.xlsx" onChange={handleFile}

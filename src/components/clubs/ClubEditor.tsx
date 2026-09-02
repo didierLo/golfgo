@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import * as Sentry from '@sentry/nextjs'
@@ -31,6 +32,7 @@ function teeIncomplete(tee: Tee): boolean {
 
 export default function ClubEditor({ clubId }: { clubId: string }) {
   const t = useTranslations()
+  const router = useRouter()
 
   const [courses, setCourses] = useState<Course[]>([])
   const [tees, setTees]       = useState<Tee[]>([])
@@ -265,9 +267,17 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
       {/* ── Bandeau de complétude ────────────────────────────────────────── */}
       {incompleteCourses.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <p className="text-[13px] font-semibold text-amber-800 mb-2">
-            {t('clubs.incompleteBanner')}
-          </p>
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <p className="text-[13px] font-semibold text-amber-800">
+              {t('clubs.incompleteBanner')}
+            </p>
+            <button
+              onClick={() => router.push('/admin/clubs/add')}
+              className="shrink-0 text-[12px] font-semibold text-white bg-amber-600 hover:bg-amber-700 px-3 py-1.5 rounded-md transition-colors whitespace-nowrap"
+            >
+              {t('clubs.searchInfo')}
+            </button>
+          </div>
           <ul className="space-y-1">
             {incompleteCourses.map(c => (
               <li key={c.id} className="text-[12px] text-amber-700">

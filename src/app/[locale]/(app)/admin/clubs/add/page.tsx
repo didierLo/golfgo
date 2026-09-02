@@ -289,12 +289,16 @@ export default function AddClubPage() {
         <h1 className="text-[18px] font-medium text-gray-900">{t('clubs.newClubTitle')}</h1>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 items-start">
+      <div className="flex flex-col gap-6 max-w-2xl">
 
         {/* ── Plaque FlyAway ── */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            Recherche FlyAway
+            Import avec FlyAway
+          </p>
+          <p className="text-[12px] text-gray-500 mb-3">
+            Tape le nom exact séparé par des tirets, ex : <code className="bg-gray-50 px-1 py-0.5 rounded text-gray-700">royal-waterloo-golf-club</code>. Si tu hésites, fais d'abord une recherche sur{' '}
+            <a href="https://flyawaygolf.com/" target="_blank" rel="noopener noreferrer" className="text-[#185FA5] hover:underline">flyawaygolf.com</a>, trouve le club, et copie le nom depuis l'adresse de la page.
           </p>
           <div className="flex gap-2 mb-3">
             <input value={flyQuery} onChange={e => setFlyQuery(e.target.value)}
@@ -352,7 +356,10 @@ export default function AddClubPage() {
         {/* ── Plaque GolfCourseAPI ── */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            Recherche GolfCourseAPI
+            Import avec GolfCourseAPI
+          </p>
+          <p className="text-[12px] text-gray-500 mb-3">
+            Tape au moins 3 lettres du nom du club — surtout efficace pour les clubs anglo-saxons.
           </p>
           <div className="flex gap-2 mb-3">
             <input value={apiQuery} onChange={e => setApiQuery(e.target.value)}
@@ -412,7 +419,7 @@ export default function AddClubPage() {
         {/* ── Plaque Import Excel ── */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            {t('clubs.import')}
+            Import avec Excel
           </p>
           <ImportClubs />
         </div>

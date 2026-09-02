@@ -149,7 +149,7 @@
     "title": "Clubs & Plätze",
     "subtitle": "Verfügbare Clubs und Plätze verwalten",
     "import": "Import aus Excel-Datei",
-    "manual": "Manuelle Verwaltung",
+    "manual": "Manueller Import",
     "chooseClub": "Club auswählen…",
     "newClub": "Neuer Club",
     "chooseClub2": "Platz auswählen…",
@@ -195,7 +195,8 @@
     "clubDeleted": "Club gelöscht",
     "deleteBlockedClub": "Nicht möglich: Dieser Club wird von {count} Veranstaltungsteilnahme(n) verwendet",
     "noResultsTryApi": "Keinen Club gefunden? Versuchen Sie es mit GolfCourseAPI",
-    "noResultsTryApiLink": "HIER"
+    "noResultsTryApiLink": "HIER",
+    "searchInfo": "Informationen suchen"
   },
   "communications": {
     "title": "Kommunikation",
