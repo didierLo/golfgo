@@ -193,7 +193,9 @@
     "deleteClub": "Diesen Club löschen",
     "confirmDeleteClub": "Diesen Club und alle seine Plätze löschen?",
     "clubDeleted": "Club gelöscht",
-    "deleteBlockedClub": "Nicht möglich: Dieser Club wird von {count} Veranstaltungsteilnahme(n) verwendet"
+    "deleteBlockedClub": "Nicht möglich: Dieser Club wird von {count} Veranstaltungsteilnahme(n) verwendet",
+    "noResultsTryApi": "Keinen Club gefunden? Versuchen Sie es mit GolfCourseAPI",
+    "noResultsTryApiLink": "HIER"
   },
   "communications": {
     "title": "Kommunikation",

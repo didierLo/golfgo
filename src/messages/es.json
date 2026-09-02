@@ -193,7 +193,9 @@
     "deleteClub": "Eliminar este club",
     "confirmDeleteClub": "¿Eliminar este club y todos sus recorridos?",
     "clubDeleted": "Club eliminado",
-    "deleteBlockedClub": "No es posible: este club se usa en {count} participación(es) de eventos"
+    "deleteBlockedClub": "No es posible: este club se usa en {count} participación(es) de eventos",
+    "noResultsTryApi": "¿No encuentras el club? Prueba con GolfCourseAPI",
+    "noResultsTryApiLink": "AQUÍ"
   },
   "communications": {
     "title": "Comunicaciones",

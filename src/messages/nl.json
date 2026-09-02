@@ -193,7 +193,9 @@
     "deleteClub": "Deze club verwijderen",
     "confirmDeleteClub": "Deze club en al zijn parcours verwijderen?",
     "clubDeleted": "Club verwijderd",
-    "deleteBlockedClub": "Niet mogelijk: deze club wordt gebruikt door {count} evenementdeelname(s)"
+    "deleteBlockedClub": "Niet mogelijk: deze club wordt gebruikt door {count} evenementdeelname(s)",
+    "noResultsTryApi": "Geen club gevonden? Probeer GolfCourseAPI",
+    "noResultsTryApiLink": "HIER"
   },
   "communications": {
     "title": "Communicatie",

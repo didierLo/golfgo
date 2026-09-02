@@ -105,7 +105,15 @@ export default function ClubsPage() {
           {loading ? (
             <p className="p-4 text-[13px] text-gray-400">…</p>
           ) : results.length === 0 ? (
-            <p className="p-4 text-[13px] text-gray-400">{t('clubs.noResults')}</p>
+            <div className="p-4">
+              <p className="text-[13px] text-gray-400">{t('clubs.noResults')}</p>
+              <p className="text-[13px] text-gray-500 mt-1">
+                {t('clubs.noResultsTryApi')}{' '}
+                <button onClick={() => router.push('/admin/clubs/add')} className="text-[#185FA5] font-semibold hover:underline">
+                  {t('clubs.noResultsTryApiLink')}
+                </button>
+              </p>
+            </div>
           ) : (
             <div className="divide-y divide-gray-100">
               {results.map(c => (

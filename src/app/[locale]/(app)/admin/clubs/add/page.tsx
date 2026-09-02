@@ -192,7 +192,7 @@ export default function AddClubPage() {
           <div className="flex gap-2 mb-3">
             <input value={apiQuery} onChange={e => setApiQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleApiSearch()}
-              placeholder="Nom du club ou du parcours…" className={inputClass} />
+              placeholder="Nom du club" className={inputClass} />
             <button onClick={handleApiSearch} disabled={apiSearching || apiQuery.trim().length < 2}
               className="bg-[#185FA5] text-white text-[12px] font-medium px-4 rounded-md hover:bg-[#0C447C] disabled:opacity-40 transition-colors whitespace-nowrap">
               {apiSearching ? '…' : 'Chercher'}
