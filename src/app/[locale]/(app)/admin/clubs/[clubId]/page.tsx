@@ -72,8 +72,13 @@ export default function ClubDetailPage() {
         await supabase.from('courses').delete().in('id', courseIds)
       }
 
-      const { error } = await supabase.from('clubs').delete().eq('id', clubId)
+      const { data: deleted, error } = await supabase.from('clubs').delete().eq('id', clubId).select('id')
       if (error) throw error
+      if (!deleted || deleted.length === 0) {
+        toast.error(t('clubs.deleteFailed'))
+        setConfirmingDelete(false)
+        return
+      }
 
       toast.success(t('clubs.clubDeleted'))
       router.push('/admin/clubs')

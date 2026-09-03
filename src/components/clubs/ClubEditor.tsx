@@ -156,8 +156,13 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
 
     await supabase.from('course_holes').delete().eq('course_id', courseId)
     await supabase.from('course_tees').delete().eq('course_id', courseId)
-    const { error } = await supabase.from('courses').delete().eq('id', courseId)
+    const { data: deleted, error } = await supabase.from('courses').delete().eq('id', courseId).select('id')
     if (error) { toast.error(t('errors.generic') ?? 'Une erreur est survenue'); setDeletingCourseId(null); return }
+    if (!deleted || deleted.length === 0) {
+      toast.error(t('clubs.deleteFailed'))
+      setDeletingCourseId(null)
+      return
+    }
 
     toast.success(t('clubs.courseDeleted'))
     setDeletingCourseId(null)

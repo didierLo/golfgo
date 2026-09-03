@@ -197,7 +197,8 @@
     "noResultsTryApi": "Si aucun golf trouvé, essaye avec GolfCourseAPI",
     "noResultsTryApiLink": "ICI",
     "searchInfo": "Rechercher les informations",
-    "renameCourse": "Renommer :"
+    "renameCourse": "Renommer :",
+    "deleteFailed": "La suppression n'a pas été effectuée (droits insuffisants ?). Réessaie ou contacte le support."
   },
   "communications": {
     "title": "Communications",

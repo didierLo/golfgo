@@ -197,7 +197,8 @@
     "noResultsTryApi": "¿No encuentras el club? Prueba con GolfCourseAPI",
     "noResultsTryApiLink": "AQUÍ",
     "searchInfo": "Buscar información",
-    "renameCourse": "Renombrar:"
+    "renameCourse": "Renombrar:",
+    "deleteFailed": "La eliminación no se realizó (¿permisos insuficientes?). Vuelve a intentarlo o contacta con soporte."
   },
   "communications": {
     "title": "Comunicaciones",

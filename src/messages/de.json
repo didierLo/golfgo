@@ -197,7 +197,8 @@
     "noResultsTryApi": "Keinen Club gefunden? Versuchen Sie es mit GolfCourseAPI",
     "noResultsTryApiLink": "HIER",
     "searchInfo": "Informationen suchen",
-    "renameCourse": "Umbenennen:"
+    "renameCourse": "Umbenennen:",
+    "deleteFailed": "Löschen wurde nicht durchgeführt (unzureichende Rechte?). Versuchen Sie es erneut oder kontaktieren Sie den Support."
   },
   "communications": {
     "title": "Kommunikation",

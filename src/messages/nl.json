@@ -197,7 +197,8 @@
     "noResultsTryApi": "Geen club gevonden? Probeer GolfCourseAPI",
     "noResultsTryApiLink": "HIER",
     "searchInfo": "Informatie opzoeken",
-    "renameCourse": "Hernoemen:"
+    "renameCourse": "Hernoemen:",
+    "deleteFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support."
   },
   "communications": {
     "title": "Communicatie",
