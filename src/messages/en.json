@@ -196,7 +196,8 @@
     "deleteBlockedClub": "Can't delete: this club is used by {count} event participation(s)",
     "noResultsTryApi": "If no club is found, try GolfCourseAPI",
     "noResultsTryApiLink": "HERE",
-    "searchInfo": "Search for information"
+    "searchInfo": "Search for information",
+    "renameCourse": "Rename:"
   },
   "communications": {
     "title": "Communications",
@@ -1233,5 +1234,32 @@
     "playerDesc": "I find all my events, sign up in one click and check my tee sheet.",
     "ownerTitle": "I'm starting a group",
     "ownerDesc": "GolfGo handles everything — invitations, flights, tee sheets and email confirmations."
+  },
+  "clubsAdd": {
+    "flyawayTitle": "Import from FlyAway",
+    "flyawayNotePrefix": "Type the exact name, hyphen-separated, e.g.:",
+    "flyawayNoteMiddle": "If you're not sure, search first on",
+    "flyawayNoteSuffix": "find the club, and copy the name from the page address.",
+    "flyawayPlaceholder": "Exact club name",
+    "flyawayNoScorecard": "No scorecard found for this course.",
+    "holesCount": "{count} holes",
+    "importThisCard": "Import this scorecard",
+    "noDetailAvailable": "No detail available.",
+    "golfcourseapiTitle": "Import from GolfCourseAPI",
+    "golfcourseapiNote": "Type at least 3 letters of the club name — works best for English-speaking clubs.",
+    "clubNamePlaceholder": "Club name",
+    "searchButton": "Search",
+    "noResult": "No results.",
+    "genericError": "Error",
+    "loading": "Loading…",
+    "importing": "Importing…",
+    "holesDetailed": "{count} holes detailed",
+    "noHoleDetail": "no hole-by-hole detail",
+    "noTeeFound": "No tee found for this course.",
+    "importThisCourse": "Import this course",
+    "excelTitle": "Import from Excel",
+    "importSuccess": "Imported — check and complete if needed",
+    "errorCreateClub": "Error creating club",
+    "errorCreateCourse": "Error creating course"
   }
 }

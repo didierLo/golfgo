@@ -196,7 +196,8 @@
     "deleteBlockedClub": "No es posible: este club se usa en {count} participación(es) de eventos",
     "noResultsTryApi": "¿No encuentras el club? Prueba con GolfCourseAPI",
     "noResultsTryApiLink": "AQUÍ",
-    "searchInfo": "Buscar información"
+    "searchInfo": "Buscar información",
+    "renameCourse": "Renombrar:"
   },
   "communications": {
     "title": "Comunicaciones",
@@ -1233,5 +1234,32 @@
     "playerDesc": "Encuentro todos mis eventos, me apunto con un clic y consulto mi hoja de salida.",
     "ownerTitle": "Creo un grupo",
     "ownerDesc": "GolfGo se encarga de todo — invitaciones, flights, hojas de salida y confirmaciones por correo electrónico."
+  },
+  "clubsAdd": {
+    "flyawayTitle": "Importar con FlyAway",
+    "flyawayNotePrefix": "Escribe el nombre exacto separado por guiones, ej.:",
+    "flyawayNoteMiddle": "Si tienes dudas, busca primero en",
+    "flyawayNoteSuffix": "encuentra el club y copia el nombre desde la dirección de la página.",
+    "flyawayPlaceholder": "Nombre exacto del club",
+    "flyawayNoScorecard": "No se encontró tarjeta de puntuación para este recorrido.",
+    "holesCount": "{count} hoyos",
+    "importThisCard": "Importar esta tarjeta",
+    "noDetailAvailable": "Sin detalle disponible.",
+    "golfcourseapiTitle": "Importar con GolfCourseAPI",
+    "golfcourseapiNote": "Escribe al menos 3 letras del nombre del club — funciona mejor para clubes anglosajones.",
+    "clubNamePlaceholder": "Nombre del club",
+    "searchButton": "Buscar",
+    "noResult": "Sin resultados.",
+    "genericError": "Error",
+    "loading": "Cargando…",
+    "importing": "Importando…",
+    "holesDetailed": "{count} hoyos detallados",
+    "noHoleDetail": "sin detalle hoyo a hoyo",
+    "noTeeFound": "No se encontró ninguna salida para este recorrido.",
+    "importThisCourse": "Importar este recorrido",
+    "excelTitle": "Importar con Excel",
+    "importSuccess": "Importado — revisa y completa si hace falta",
+    "errorCreateClub": "Error al crear el club",
+    "errorCreateCourse": "Error al crear el recorrido"
   }
 }

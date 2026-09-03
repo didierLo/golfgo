@@ -13,15 +13,18 @@ type Course = { id: string; course_name: string; club_id: string }
 type Tee    = { id: string; course_id: string; tee_name: string; par_total: number; distance_total: number; course_rating: number; slope: number }
 type Hole   = { id?: string; course_id: string; hole_number: number; par: number; stroke_index: number; hole_distance: number }
 
-const inputClass = "w-full border border-gray-200 rounded px-2 py-1.5 text-[12px] focus:outline-none focus:border-blue-300"
 const glassInputClass = "w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-[13px] text-slate-800 bg-white/80 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] transition-colors"
 
-/** Vérifie qu'un jeu de 18 trous a un stroke index complet (1–18, sans doublon). */
+/** Vérifie qu'un jeu de trous a un stroke index complet et sans doublon —
+ *  accepte aussi bien un parcours 9 trous (1–9) qu'un 18 trous (1–18) :
+ *  un vrai 9 trous ne doit jamais être signalé comme "incomplet" juste parce
+ *  qu'il lui manquerait les trous 10 à 18. */
 function holesIncomplete(holes: { stroke_index: number }[]): boolean {
-  if (holes.length !== 18) return true
+  const n = holes.length
+  if (n !== 9 && n !== 18) return true
   const seen = new Set(holes.map(h => h.stroke_index))
-  if (seen.size !== 18) return true
-  for (let i = 1; i <= 18; i++) if (!seen.has(i)) return true
+  if (seen.size !== n) return true
+  for (let i = 1; i <= n; i++) if (!seen.has(i)) return true
   return false
 }
 
@@ -259,7 +262,7 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
   const parIn    = holes.slice(9, 18).reduce((s, h) => s + h.par, 0)
   const parTotal = parOut + parIn
 
-  const selectClass = "w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] bg-white focus:outline-none focus:border-blue-300"
+  const selectClass = "w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] text-gray-900 bg-white focus:outline-none focus:border-blue-300"
 
   return (
     <div className="space-y-5 max-w-4xl">
@@ -300,18 +303,30 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
           {t('clubs.courseLabel')}
         </label>
 
-        {/* Le dropdown ne sert qu'à choisir QUEL parcours, s'il y en a plusieurs */}
+        {/* Pastilles pour choisir QUEL parcours, s'il y en a plusieurs — le nom
+            reste lisible en toutes circonstances (tablette/mobile compris) */}
         {courses.length > 1 && (
-          <select value={courseId || ''} onChange={e => setCourseId(e.target.value || null)}
-            className={selectClass}>
-            <option value="">{t('clubs.chooseClub2')}</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
-          </select>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {courses.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setCourseId(c.id)}
+                className={`px-3 py-1.5 rounded-full text-[13px] font-semibold border transition-colors ${
+                  c.id === courseId
+                    ? 'bg-[#185FA5] border-[#185FA5] text-white'
+                    : 'bg-white border-gray-300 text-gray-900 hover:border-[#185FA5]'
+                }`}
+              >
+                {c.course_name}
+              </button>
+            ))}
+          </div>
         )}
 
-        {/* Nom du parcours sélectionné : toujours éditable, + suppression avec confirmation */}
+        {/* Renommer le parcours sélectionné + suppression avec confirmation */}
         {courseId && (
-          <div className={`flex items-center gap-2 ${courses.length > 1 ? 'mt-2' : ''}`}>
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] text-gray-900 shrink-0">{t('clubs.renameCourse')}</span>
             <input
               value={courseNameDraft}
               onChange={e => setCourseNameDraft(e.target.value)}
@@ -326,13 +341,13 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
                   {t('clubs.confirmDelete')}
                 </button>
                 <button onClick={() => setDeletingCourseId(null)}
-                  className="text-[13px] text-gray-400 hover:text-gray-600 px-1">
+                  className="text-[13px] text-gray-500 hover:text-gray-700 px-1">
                   ✕
                 </button>
               </>
             ) : (
               <button onClick={() => setDeletingCourseId(courseId)} title={t('clubs.deleteCourse')}
-                className="text-red-400 hover:text-red-600 px-2 text-[15px] shrink-0">
+                className="text-red-500 hover:text-red-600 px-2 text-[15px] shrink-0">
                 🗑
               </button>
             )}
@@ -377,7 +392,7 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
                 <thead>
                   <tr className="border-b border-slate-200/70">
                     {[t('clubs.colTee'), t('clubs.colPar'), t('clubs.colDistance'), t('clubs.colCR'), t('clubs.colSlope')].map(h => (
-                      <th key={h} className="px-3 py-2 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                      <th key={h} className="px-3 py-2 text-left text-[11px] font-semibold text-slate-700 uppercase tracking-wide">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -428,7 +443,7 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
                       <thead>
                         <tr className="border-b border-slate-200/70">
                           {[t('clubs.colHole'), t('clubs.colPar'), t('clubs.colSI')].map(h => (
-                            <th key={h} className="px-2 py-2 text-center text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                            <th key={h} className="px-2 py-2 text-center text-[11px] font-semibold text-slate-700 uppercase tracking-wide">{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -441,7 +456,7 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
                           </tr>
                         ))}
                         <tr className="bg-[#185FA5]/5 font-semibold">
-                          <td className="px-2 py-2 text-center text-[13px] text-slate-700">{label}</td>
+                          <td className="px-2 py-2 text-center text-[13px] text-slate-800">{label}</td>
                           <td className="px-2 py-2 text-center text-[13px] text-slate-900">{subtotal}</td>
                           <td colSpan={1} />
                         </tr>

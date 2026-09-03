@@ -196,7 +196,8 @@
     "deleteBlockedClub": "Nicht möglich: Dieser Club wird von {count} Veranstaltungsteilnahme(n) verwendet",
     "noResultsTryApi": "Keinen Club gefunden? Versuchen Sie es mit GolfCourseAPI",
     "noResultsTryApiLink": "HIER",
-    "searchInfo": "Informationen suchen"
+    "searchInfo": "Informationen suchen",
+    "renameCourse": "Umbenennen:"
   },
   "communications": {
     "title": "Kommunikation",
@@ -1233,5 +1234,32 @@
     "playerDesc": "Ich finde alle meine Veranstaltungen, melde mich mit einem Klick an und schaue mir mein Abschlagblatt an.",
     "ownerTitle": "Ich gründe eine Gruppe",
     "ownerDesc": "GolfGo kümmert sich um alles — Einladungen, Flights, Abschlagblätter und E-Mail-Bestätigungen."
+  },
+  "clubsAdd": {
+    "flyawayTitle": "Import über FlyAway",
+    "flyawayNotePrefix": "Geben Sie den genauen Namen ein, mit Bindestrichen, z. B.:",
+    "flyawayNoteMiddle": "Wenn Sie unsicher sind, suchen Sie zuerst auf",
+    "flyawayNoteSuffix": "finden Sie den Club und kopieren Sie den Namen aus der Seitenadresse.",
+    "flyawayPlaceholder": "Genauer Name des Clubs",
+    "flyawayNoScorecard": "Keine Scorekarte für diesen Platz gefunden.",
+    "holesCount": "{count} Löcher",
+    "importThisCard": "Diese Scorekarte importieren",
+    "noDetailAvailable": "Keine Details verfügbar.",
+    "golfcourseapiTitle": "Import über GolfCourseAPI",
+    "golfcourseapiNote": "Geben Sie mindestens 3 Buchstaben des Clubnamens ein — funktioniert am besten für englischsprachige Clubs.",
+    "clubNamePlaceholder": "Name des Clubs",
+    "searchButton": "Suchen",
+    "noResult": "Keine Ergebnisse.",
+    "genericError": "Fehler",
+    "loading": "Lädt…",
+    "importing": "Import…",
+    "holesDetailed": "{count} Löcher im Detail",
+    "noHoleDetail": "kein Loch-für-Loch-Detail",
+    "noTeeFound": "Kein Abschlag für diesen Platz gefunden.",
+    "importThisCourse": "Diesen Platz importieren",
+    "excelTitle": "Import über Excel",
+    "importSuccess": "Importiert — bei Bedarf prüfen und ergänzen",
+    "errorCreateClub": "Fehler beim Erstellen des Clubs",
+    "errorCreateCourse": "Fehler beim Erstellen des Platzes"
   }
 }

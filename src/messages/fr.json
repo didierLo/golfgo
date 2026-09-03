@@ -196,7 +196,8 @@
     "deleteBlockedClub": "Impossible : ce club est utilisé par {count} participation(s) à un événement",
     "noResultsTryApi": "Si aucun golf trouvé, essaye avec GolfCourseAPI",
     "noResultsTryApiLink": "ICI",
-    "searchInfo": "Rechercher les informations"
+    "searchInfo": "Rechercher les informations",
+    "renameCourse": "Renommer :"
   },
   "communications": {
     "title": "Communications",
@@ -1233,5 +1234,32 @@
     "playerDesc": "Je retrouve tous mes événements, je m'inscris en un clic et je consulte ma feuille de départ.",
     "ownerTitle": "Je lance mon groupe",
     "ownerDesc": "GolfGo s'occupe de tout — invitations, flights, feuilles de départ et confirmations par email."
+  },
+  "clubsAdd": {
+    "flyawayTitle": "Import avec FlyAway",
+    "flyawayNotePrefix": "Tape le nom exact séparé par des tirets, ex :",
+    "flyawayNoteMiddle": "Si tu hésites, fais d'abord une recherche sur",
+    "flyawayNoteSuffix": "trouve le club, et copie le nom depuis l'adresse de la page.",
+    "flyawayPlaceholder": "Nom exact du club",
+    "flyawayNoScorecard": "Aucune carte de score trouvée pour ce parcours.",
+    "holesCount": "{count} trous",
+    "importThisCard": "Importer cette carte",
+    "noDetailAvailable": "Pas de détail disponible.",
+    "golfcourseapiTitle": "Import avec GolfCourseAPI",
+    "golfcourseapiNote": "Tape au moins 3 lettres du nom du club — surtout efficace pour les clubs anglo-saxons.",
+    "clubNamePlaceholder": "Nom du club",
+    "searchButton": "Chercher",
+    "noResult": "Aucun résultat.",
+    "genericError": "Erreur",
+    "loading": "Chargement…",
+    "importing": "Import…",
+    "holesDetailed": "{count} trous détaillés",
+    "noHoleDetail": "pas de détail trou par trou",
+    "noTeeFound": "Aucun tee trouvé pour ce parcours.",
+    "importThisCourse": "Importer ce parcours",
+    "excelTitle": "Import avec Excel",
+    "importSuccess": "Importé — vérifie et complète si besoin",
+    "errorCreateClub": "Erreur création club",
+    "errorCreateCourse": "Erreur création parcours"
   }
 }

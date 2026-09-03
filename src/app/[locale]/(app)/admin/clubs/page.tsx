@@ -27,22 +27,45 @@ export default function ClubsPage() {
   const [loading,  setLoading]  = useState(false)
 
   const [allCountries, setAllCountries] = useState<string[]>([])
-  const [allRegions,   setAllRegions]   = useState<string[]>([])
+  const [countryRegions, setCountryRegions] = useState<Record<string, string[]>>({})
 
   // Liste des pays/régions déjà présents en base, pour peupler les filtres —
-  // pas de liste figée à maintenir à la main.
+  // pas de liste figée à maintenir à la main. Les régions restent groupées
+  // par pays, pour ne jamais proposer les régions françaises quand on filtre
+  // sur un autre pays.
   useEffect(() => {
     supabase.from('clubs').select('country, region').then(({ data }) => {
       const countries = new Set<string>()
-      const regions   = new Set<string>()
+      const byCountry: Record<string, Set<string>> = {}
       ;(data ?? []).forEach(c => {
-        if (c.country) countries.add(c.country)
-        if (c.region)  regions.add(c.region)
+        if (c.country) {
+          countries.add(c.country)
+          if (c.region) {
+            if (!byCountry[c.country]) byCountry[c.country] = new Set()
+            byCountry[c.country].add(c.region)
+          }
+        }
       })
       setAllCountries([...countries].sort())
-      setAllRegions([...regions].sort())
+      setCountryRegions(
+        Object.fromEntries(Object.entries(byCountry).map(([k, v]) => [k, [...v].sort()]))
+      )
     })
   }, [])
+
+  // Les régions affichées dépendent du pays choisi — toutes les régions connues
+  // si aucun pays n'est sélectionné, sinon seulement celles de ce pays.
+  const visibleRegions = country
+    ? (countryRegions[country] ?? [])
+    : [...new Set(Object.values(countryRegions).flat())].sort()
+
+  // Si on change de pays et que la région choisie n'existe plus dans ce pays,
+  // on la réinitialise plutôt que de garder un filtre invalide/silencieux.
+  useEffect(() => {
+    if (region && country && !(countryRegions[country] ?? []).includes(region)) {
+      setRegion('')
+    }
+  }, [country])
 
   const searchActive = search.trim().length >= 3 || !!country || !!region
 
@@ -91,7 +114,7 @@ export default function ClubsPage() {
           </select>
           <select value={region} onChange={e => setRegion(e.target.value)} className={selectClass}>
             <option value="">{t('clubs.allRegions')}</option>
-            {allRegions.map(r => <option key={r} value={r}>{r}</option>)}
+            {visibleRegions.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
         {!searchActive && (
@@ -106,8 +129,8 @@ export default function ClubsPage() {
             <p className="p-4 text-[13px] text-gray-400">…</p>
           ) : results.length === 0 ? (
             <div className="p-4">
-              <p className="text-[13px] text-gray-400">{t('clubs.noResults')}</p>
-              <p className="text-[13px] text-gray-500 mt-1">
+              <p className="text-[13px] text-gray-700">{t('clubs.noResults')}</p>
+              <p className="text-[13px] text-gray-700 mt-1">
                 {t('clubs.noResultsTryApi')}{' '}
                 <button onClick={() => router.push('/admin/clubs/add')} className="text-[#185FA5] font-semibold hover:underline">
                   {t('clubs.noResultsTryApiLink')}
@@ -122,8 +145,8 @@ export default function ClubsPage() {
                   onClick={() => router.push(`/admin/clubs/${c.id}`)}
                   className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
                 >
-                  <span className="text-[13px] font-medium text-gray-800">{c.name}</span>
-                  <span className="text-[12px] text-gray-400 flex items-center gap-1.5">
+                  <span className="text-[13px] font-medium text-gray-900">{c.name}</span>
+                  <span className="text-[12px] text-gray-700 flex items-center gap-1.5">
                     {c.region && <span>{c.region}</span>}
                     <span>{COUNTRY_FLAGS[c.country] ?? ''} {c.country}</span>
                   </span>

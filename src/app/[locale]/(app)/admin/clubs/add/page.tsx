@@ -77,11 +77,11 @@ export default function AddClubPage() {
     try {
       const res = await fetch(`/api/admin/golfcourseapi/search?q=${encodeURIComponent(apiQuery.trim())}`)
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Erreur')
+      if (!res.ok) throw new Error(json.error ?? t('clubsAdd.genericError'))
       setApiResults(json.courses ?? [])
-      if ((json.courses ?? []).length === 0) setApiError('Aucun résultat.')
+      if ((json.courses ?? []).length === 0) setApiError(t('clubsAdd.noResult'))
     } catch (e: any) {
-      setApiError(e.message ?? 'Erreur')
+      setApiError(e.message ?? t('clubsAdd.genericError'))
     } finally {
       setApiSearching(false)
     }
@@ -92,10 +92,10 @@ export default function AddClubPage() {
     try {
       const res = await fetch(`/api/admin/golfcourseapi/course/${id}`)
       const json: ApiCourseDetail | { error: string } = await res.json()
-      if (!res.ok || 'error' in json) throw new Error('error' in json ? json.error : 'Erreur')
+      if (!res.ok || 'error' in json) throw new Error('error' in json ? json.error : t('clubsAdd.genericError'))
       setApiDetail(json.course)
     } catch (e: any) {
-      setApiError(e.message ?? 'Erreur')
+      setApiError(e.message ?? t('clubsAdd.genericError'))
     } finally {
       setApiLoadingDetail(false)
     }
@@ -117,7 +117,7 @@ export default function AddClubPage() {
         const { data: newClub, error } = await supabase.from('clubs')
           .insert({ name: clubName, country: guessCountry(apiDetail.location?.address) })
           .select('id').single()
-        if (error || !newClub) throw new Error(error?.message ?? 'Erreur création club')
+        if (error || !newClub) throw new Error(error?.message ?? t('clubsAdd.errorCreateClub'))
         clubId = newClub.id
       }
 
@@ -130,7 +130,7 @@ export default function AddClubPage() {
       } else {
         const { data: newCourse, error } = await supabase.from('courses')
           .insert({ club_id: clubId, course_name: courseName }).select('id').single()
-        if (error || !newCourse) throw new Error(error?.message ?? 'Erreur création parcours')
+        if (error || !newCourse) throw new Error(error?.message ?? t('clubsAdd.errorCreateCourse'))
         courseId = newCourse.id
       }
 
@@ -157,10 +157,10 @@ export default function AddClubPage() {
         }
       }
 
-      toast.success('Importé — vérifie et complète si besoin')
+      toast.success(t('clubsAdd.importSuccess'))
       router.push(`/admin/clubs/${clubId}`)
     } catch (e: any) {
-      toast.error(e.message ?? 'Erreur')
+      toast.error(e.message ?? t('clubsAdd.genericError'))
     } finally {
       setApiImporting(false)
     }
@@ -179,10 +179,10 @@ export default function AddClubPage() {
     try {
       const res = await fetch(`/api/admin/flyaway/search?q=${encodeURIComponent(flyQuery.trim())}`)
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Erreur')
+      if (!res.ok) throw new Error(json.error ?? t('clubsAdd.genericError'))
       setFlyProfile(json.course)
     } catch (e: any) {
-      setFlyError(e.message ?? 'Erreur')
+      setFlyError(e.message ?? t('clubsAdd.genericError'))
     } finally {
       setFlySearching(false)
     }
@@ -209,7 +209,7 @@ export default function AddClubPage() {
         const { data: newClub, error } = await supabase.from('clubs')
           .insert({ name: clubName, country: countryCode, region: flyProfile.region ?? null })
           .select('id').single()
-        if (error || !newClub) throw new Error(error?.message ?? 'Erreur création club')
+        if (error || !newClub) throw new Error(error?.message ?? t('clubsAdd.errorCreateClub'))
         clubId = newClub.id
       }
 
@@ -223,7 +223,7 @@ export default function AddClubPage() {
       } else {
         const { data: newCourse, error } = await supabase.from('courses')
           .insert({ club_id: clubId, course_name: courseName }).select('id').single()
-        if (error || !newCourse) throw new Error(error?.message ?? 'Erreur création parcours')
+        if (error || !newCourse) throw new Error(error?.message ?? t('clubsAdd.errorCreateCourse'))
         courseId = newCourse.id
       }
 
@@ -253,10 +253,10 @@ export default function AddClubPage() {
         })))
       }
 
-      toast.success('Importé — vérifie et complète si besoin')
+      toast.success(t('clubsAdd.importSuccess'))
       router.push(`/admin/clubs/${clubId}`)
     } catch (e: any) {
-      toast.error(e.message ?? 'Erreur')
+      toast.error(e.message ?? t('clubsAdd.genericError'))
     } finally {
       setFlyImportingId(null)
     }
@@ -294,19 +294,19 @@ export default function AddClubPage() {
         {/* ── Plaque FlyAway ── */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            Import avec FlyAway
+            {t('clubsAdd.flyawayTitle')}
           </p>
           <p className="text-[12px] text-gray-500 mb-3">
-            Tape le nom exact séparé par des tirets, ex : <code className="bg-gray-50 px-1 py-0.5 rounded text-gray-700">royal-waterloo-golf-club</code>. Si tu hésites, fais d'abord une recherche sur{' '}
-            <a href="https://flyawaygolf.com/" target="_blank" rel="noopener noreferrer" className="text-[#185FA5] hover:underline">flyawaygolf.com</a>, trouve le club, et copie le nom depuis l'adresse de la page.
+            {t('clubsAdd.flyawayNotePrefix')} <code className="bg-gray-50 px-1 py-0.5 rounded text-gray-700">royal-waterloo-golf-club</code>. {t('clubsAdd.flyawayNoteMiddle')}{' '}
+            <a href="https://flyawaygolf.com/" target="_blank" rel="noopener noreferrer" className="text-[#185FA5] hover:underline">flyawaygolf.com</a>, {t('clubsAdd.flyawayNoteSuffix')}
           </p>
           <div className="flex gap-2 mb-3">
             <input value={flyQuery} onChange={e => setFlyQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleFlySearch()}
-              placeholder="Nom exact du club" className={inputClass} />
+              placeholder={t('clubsAdd.flyawayPlaceholder')} className={inputClass} />
             <button onClick={handleFlySearch} disabled={flySearching || flyQuery.trim().length < 2}
               className="bg-[#185FA5] text-white text-[12px] font-medium px-4 rounded-md hover:bg-[#0C447C] disabled:opacity-40 transition-colors whitespace-nowrap">
-              {flySearching ? '…' : 'Chercher'}
+              {flySearching ? '…' : t('clubsAdd.searchButton')}
             </button>
           </div>
 
@@ -323,14 +323,14 @@ export default function AddClubPage() {
               </div>
 
               {(flyProfile.scorecards ?? []).length === 0 && (
-                <p className="text-amber-600 text-[12px]">Aucune carte de score trouvée pour ce parcours.</p>
+                <p className="text-amber-600 text-[12px]">{t('clubsAdd.flyawayNoScorecard')}</p>
               )}
 
               {(flyProfile.scorecards ?? []).map(sc => {
                 const grid = sc.grid?.[0]
                 return (
                   <div key={sc.scorecard_id} className="border-t border-gray-100 pt-2 mt-2 first:border-t-0 first:pt-0 first:mt-0">
-                    <div className="text-[12px] font-medium text-gray-700 mb-1">{sc.name} ({sc.holesCount} trous)</div>
+                    <div className="text-[12px] font-medium text-gray-700 mb-1">{sc.name} ({t('clubsAdd.holesCount', { count: sc.holesCount })})</div>
                     {grid ? (
                       <>
                         <div className="text-[12px] text-gray-600 space-y-0.5 mb-2">
@@ -340,11 +340,11 @@ export default function AddClubPage() {
                         </div>
                         <button onClick={() => handleFlyImport(sc)} disabled={flyImportingId === sc.scorecard_id}
                           className="w-full bg-[#185FA5] text-white text-[12px] font-semibold py-1.5 rounded-md hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-                          {flyImportingId === sc.scorecard_id ? 'Import…' : 'Importer cette carte'}
+                          {flyImportingId === sc.scorecard_id ? t('clubsAdd.importing') : t('clubsAdd.importThisCard')}
                         </button>
                       </>
                     ) : (
-                      <p className="text-[12px] text-gray-400">Pas de détail disponible.</p>
+                      <p className="text-[12px] text-gray-400">{t('clubsAdd.noDetailAvailable')}</p>
                     )}
                   </div>
                 )
@@ -356,18 +356,18 @@ export default function AddClubPage() {
         {/* ── Plaque GolfCourseAPI ── */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            Import avec GolfCourseAPI
+            {t('clubsAdd.golfcourseapiTitle')}
           </p>
           <p className="text-[12px] text-gray-500 mb-3">
-            Tape au moins 3 lettres du nom du club — surtout efficace pour les clubs anglo-saxons.
+            {t('clubsAdd.golfcourseapiNote')}
           </p>
           <div className="flex gap-2 mb-3">
             <input value={apiQuery} onChange={e => setApiQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleApiSearch()}
-              placeholder="Nom du club" className={inputClass} />
+              placeholder={t('clubsAdd.clubNamePlaceholder')} className={inputClass} />
             <button onClick={handleApiSearch} disabled={apiSearching || apiQuery.trim().length < 2}
               className="bg-[#185FA5] text-white text-[12px] font-medium px-4 rounded-md hover:bg-[#0C447C] disabled:opacity-40 transition-colors whitespace-nowrap">
-              {apiSearching ? '…' : 'Chercher'}
+              {apiSearching ? '…' : t('clubsAdd.searchButton')}
             </button>
           </div>
 
@@ -386,7 +386,7 @@ export default function AddClubPage() {
             </div>
           )}
 
-          {apiLoadingDetail && <p className="text-[12px] text-gray-400">Chargement…</p>}
+          {apiLoadingDetail && <p className="text-[12px] text-gray-400">{t('clubsAdd.loading')}</p>}
 
           {apiDetail && (
             <div className="border border-gray-100 rounded-md p-3">
@@ -398,19 +398,19 @@ export default function AddClubPage() {
                 <button onClick={() => setApiDetail(null)} className="text-[12px] text-gray-400 hover:text-gray-600">✕</button>
               </div>
               <div className="text-[12px] text-gray-600 space-y-0.5 mb-3">
-                {[...(apiDetail.tees?.male ?? []), ...(apiDetail.tees?.female ?? [])].map((t, i) => (
+                {[...(apiDetail.tees?.male ?? []), ...(apiDetail.tees?.female ?? [])].map((t2, i) => (
                   <div key={i}>
-                    {t.tee_name} — par {t.par_total}, CR {t.course_rating}, slope {t.slope_rating}
-                    {t.holes?.length ? ` (${t.holes.length} trous détaillés)` : ' (pas de détail trou par trou)'}
+                    {t2.tee_name} — par {t2.par_total}, CR {t2.course_rating}, slope {t2.slope_rating}
+                    {t2.holes?.length ? ` (${t('clubsAdd.holesDetailed', { count: t2.holes.length })})` : ` (${t('clubsAdd.noHoleDetail')})`}
                   </div>
                 ))}
                 {!apiDetail.tees?.male?.length && !apiDetail.tees?.female?.length && (
-                  <p className="text-amber-600">Aucun tee trouvé pour ce parcours.</p>
+                  <p className="text-amber-600">{t('clubsAdd.noTeeFound')}</p>
                 )}
               </div>
               <button onClick={handleApiImport} disabled={apiImporting}
                 className="w-full bg-[#185FA5] text-white text-[12px] font-semibold py-2 rounded-md hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-                {apiImporting ? 'Import…' : 'Importer ce parcours'}
+                {apiImporting ? t('clubsAdd.importing') : t('clubsAdd.importThisCourse')}
               </button>
             </div>
           )}
@@ -419,7 +419,7 @@ export default function AddClubPage() {
         {/* ── Plaque Import Excel ── */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            Import avec Excel
+            {t('clubsAdd.excelTitle')}
           </p>
           <ImportClubs />
         </div>

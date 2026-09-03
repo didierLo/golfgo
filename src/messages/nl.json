@@ -196,7 +196,8 @@
     "deleteBlockedClub": "Niet mogelijk: deze club wordt gebruikt door {count} evenementdeelname(s)",
     "noResultsTryApi": "Geen club gevonden? Probeer GolfCourseAPI",
     "noResultsTryApiLink": "HIER",
-    "searchInfo": "Informatie opzoeken"
+    "searchInfo": "Informatie opzoeken",
+    "renameCourse": "Hernoemen:"
   },
   "communications": {
     "title": "Communicatie",
@@ -1233,5 +1234,32 @@
     "playerDesc": "Ik vind al mijn evenementen, schrijf me in met één klik en bekijk mijn startlijst.",
     "ownerTitle": "Ik start een groep",
     "ownerDesc": "GolfGo regelt alles — uitnodigingen, flights, startlijsten en e-mailbevestigingen."
+  },
+  "clubsAdd": {
+    "flyawayTitle": "Import via FlyAway",
+    "flyawayNotePrefix": "Typ de exacte naam, met koppeltekens, bv.:",
+    "flyawayNoteMiddle": "Twijfel je? Zoek eerst op",
+    "flyawayNoteSuffix": "vind de club, en kopieer de naam uit het adres van de pagina.",
+    "flyawayPlaceholder": "Exacte naam van de club",
+    "flyawayNoScorecard": "Geen scorekaart gevonden voor dit parcours.",
+    "holesCount": "{count} holes",
+    "importThisCard": "Deze scorekaart importeren",
+    "noDetailAvailable": "Geen detail beschikbaar.",
+    "golfcourseapiTitle": "Import via GolfCourseAPI",
+    "golfcourseapiNote": "Typ minstens 3 letters van de clubnaam — werkt het best voor Engelstalige clubs.",
+    "clubNamePlaceholder": "Naam van de club",
+    "searchButton": "Zoeken",
+    "noResult": "Geen resultaten.",
+    "genericError": "Fout",
+    "loading": "Laden…",
+    "importing": "Bezig met importeren…",
+    "holesDetailed": "{count} holes in detail",
+    "noHoleDetail": "geen hole-per-hole detail",
+    "noTeeFound": "Geen tee gevonden voor dit parcours.",
+    "importThisCourse": "Dit parcours importeren",
+    "excelTitle": "Import via Excel",
+    "importSuccess": "Geïmporteerd — controleer en vul aan indien nodig",
+    "errorCreateClub": "Fout bij aanmaken club",
+    "errorCreateCourse": "Fout bij aanmaken parcours"
   }
 }
