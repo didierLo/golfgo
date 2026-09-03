@@ -172,10 +172,14 @@ export default function AddClubPage() {
   const [flyError,     setFlyError]     = useState('')
   const [flyProfile,   setFlyProfile]   = useState<FlyProfile | null>(null)
   const [flyImportingId, setFlyImportingId] = useState<string | null>(null)
+  const [flyImportingAll, setFlyImportingAll] = useState(false)
+  const [flyImportedIds, setFlyImportedIds] = useState<Set<string>>(new Set())
+  const [flyLastClubId, setFlyLastClubId]   = useState<string | null>(null)
 
   async function handleFlySearch() {
     if (flyQuery.trim().length < 2) return
     setFlySearching(true); setFlyError(''); setFlyProfile(null)
+    setFlyImportedIds(new Set()); setFlyLastClubId(null)
     try {
       const res = await fetch(`/api/admin/flyaway/search?q=${encodeURIComponent(flyQuery.trim())}`)
       const json = await res.json()
@@ -188,78 +192,108 @@ export default function AddClubPage() {
     }
   }
 
-  async function handleFlyImport(scorecard: FlyScorecard) {
-    if (!flyProfile) return
+  // Cœur de l'import, sans navigation ni toast — réutilisé par l'import
+  // individuel (une carte) et l'import groupé (toutes les cartes du profil).
+  async function importScorecardCore(scorecard: FlyScorecard): Promise<string> {
+    if (!flyProfile) throw new Error(t('clubsAdd.genericError'))
     const grid = scorecard.grid?.[0]
-    if (!grid) return
+    if (!grid) throw new Error(t('clubsAdd.noDetailAvailable'))
+
+    const clubName = flyProfile.name
+    const countryCode = COUNTRY_NAME_TO_CODE[(flyProfile.country ?? '').toLowerCase()] ?? 'OTHER'
+
+    // Club : retrouver ou créer (complète la région si elle manquait)
+    let clubId: string
+    const { data: existingClub } = await supabase.from('clubs').select('id, region').ilike('name', clubName).maybeSingle()
+    if (existingClub) {
+      clubId = existingClub.id
+      if (!existingClub.region && flyProfile.region) {
+        await supabase.from('clubs').update({ region: flyProfile.region }).eq('id', clubId)
+      }
+    } else {
+      const { data: newClub, error } = await supabase.from('clubs')
+        .insert({ name: clubName, country: countryCode, region: flyProfile.region ?? null })
+        .select('id').single()
+      if (error || !newClub) throw new Error(error?.message ?? t('clubsAdd.errorCreateClub'))
+      clubId = newClub.id
+    }
+
+    // Parcours : un nom distinct par scorecard s'il y en a plusieurs (ex. plusieurs 18 trous du même club)
+    const courseName = (flyProfile.scorecards?.length ?? 0) > 1 ? `${flyProfile.name} — ${scorecard.name}` : flyProfile.name
+    let courseId: string
+    const { data: existingCourse } = await supabase.from('courses').select('id')
+      .eq('club_id', clubId).ilike('course_name', courseName).maybeSingle()
+    if (existingCourse) {
+      courseId = existingCourse.id
+    } else {
+      const { data: newCourse, error } = await supabase.from('courses')
+        .insert({ club_id: clubId, course_name: courseName }).select('id').single()
+      if (error || !newCourse) throw new Error(error?.message ?? t('clubsAdd.errorCreateCourse'))
+      courseId = newCourse.id
+    }
+
+    // Tees — un nom peut apparaître deux fois (une fois par genre), on suffixe pour éviter les doublons
+    const seenNames = new Set<string>()
+    const teeRows = grid.teeboxes.map(tb => {
+      let teeName = tb.name
+      if (seenNames.has(teeName)) teeName = `${teeName} (${tb.gender === 'F' || tb.gender === 'female' ? 'D' : 'H'})`
+      seenNames.add(tb.name)
+      const total = tb.distances.reduce((s, d) => s + d, 0)
+      return {
+        course_id: courseId, tee_name: teeName,
+        par_total: grid.par.reduce((s, p) => s + p, 0),
+        course_rating: tb.rating ?? null, slope: tb.slope ?? null,
+        distance_total: total || null,
+      }
+    })
+    if (teeRows.length > 0) {
+      await supabase.from('course_tees').insert(teeRows)
+    }
+
+    // Trous : par + stroke index directement depuis la grille
+    const { data: existingHoles } = await supabase.from('course_holes').select('id').eq('course_id', courseId).limit(1)
+    if (!existingHoles || existingHoles.length === 0) {
+      await supabase.from('course_holes').insert(grid.par.map((par, i) => ({
+        course_id: courseId, hole_number: i + 1, par, stroke_index: grid.handicap[i],
+      })))
+    }
+
+    return clubId
+  }
+
+  async function handleFlyImport(scorecard: FlyScorecard) {
     setFlyImportingId(scorecard.scorecard_id)
     try {
-      const clubName = flyProfile.name
-      const countryCode = COUNTRY_NAME_TO_CODE[(flyProfile.country ?? '').toLowerCase()] ?? 'OTHER'
-
-      // Club : retrouver ou créer (complète la région si elle manquait)
-      let clubId: string
-      const { data: existingClub } = await supabase.from('clubs').select('id, region').ilike('name', clubName).maybeSingle()
-      if (existingClub) {
-        clubId = existingClub.id
-        if (!existingClub.region && flyProfile.region) {
-          await supabase.from('clubs').update({ region: flyProfile.region }).eq('id', clubId)
-        }
-      } else {
-        const { data: newClub, error } = await supabase.from('clubs')
-          .insert({ name: clubName, country: countryCode, region: flyProfile.region ?? null })
-          .select('id').single()
-        if (error || !newClub) throw new Error(error?.message ?? t('clubsAdd.errorCreateClub'))
-        clubId = newClub.id
-      }
-
-      // Parcours : un nom distinct par scorecard s'il y en a plusieurs (ex. plusieurs 18 trous du même club)
-      const courseName = (flyProfile.scorecards?.length ?? 0) > 1 ? `${flyProfile.name} — ${scorecard.name}` : flyProfile.name
-      let courseId: string
-      const { data: existingCourse } = await supabase.from('courses').select('id')
-        .eq('club_id', clubId).ilike('course_name', courseName).maybeSingle()
-      if (existingCourse) {
-        courseId = existingCourse.id
-      } else {
-        const { data: newCourse, error } = await supabase.from('courses')
-          .insert({ club_id: clubId, course_name: courseName }).select('id').single()
-        if (error || !newCourse) throw new Error(error?.message ?? t('clubsAdd.errorCreateCourse'))
-        courseId = newCourse.id
-      }
-
-      // Tees — un nom peut apparaître deux fois (une fois par genre), on suffixe pour éviter les doublons
-      const seenNames = new Set<string>()
-      const teeRows = grid.teeboxes.map(tb => {
-        let teeName = tb.name
-        if (seenNames.has(teeName)) teeName = `${teeName} (${tb.gender === 'F' || tb.gender === 'female' ? 'D' : 'H'})`
-        seenNames.add(tb.name)
-        const total = tb.distances.reduce((s, d) => s + d, 0)
-        return {
-          course_id: courseId, tee_name: teeName,
-          par_total: grid.par.reduce((s, p) => s + p, 0),
-          course_rating: tb.rating ?? null, slope: tb.slope ?? null,
-          distance_total: total || null,
-        }
-      })
-      if (teeRows.length > 0) {
-        await supabase.from('course_tees').insert(teeRows)
-      }
-
-      // Trous : par + stroke index directement depuis la grille
-      const { data: existingHoles } = await supabase.from('course_holes').select('id').eq('course_id', courseId).limit(1)
-      if (!existingHoles || existingHoles.length === 0) {
-        await supabase.from('course_holes').insert(grid.par.map((par, i) => ({
-          course_id: courseId, hole_number: i + 1, par, stroke_index: grid.handicap[i],
-        })))
-      }
-
+      const clubId = await importScorecardCore(scorecard)
+      setFlyImportedIds(prev => new Set(prev).add(scorecard.scorecard_id))
+      setFlyLastClubId(clubId)
       toast.success(t('clubsAdd.importSuccess'))
-      router.push(`/admin/clubs/${clubId}`)
     } catch (e: any) {
       toast.error(e.message ?? t('clubsAdd.genericError'))
     } finally {
       setFlyImportingId(null)
     }
+  }
+
+  async function handleFlyImportAll() {
+    if (!flyProfile) return
+    const remaining = (flyProfile.scorecards ?? []).filter(sc => !flyImportedIds.has(sc.scorecard_id))
+    if (remaining.length === 0) return
+    setFlyImportingAll(true)
+    let lastClubId: string | null = null
+    let failCount = 0
+    for (const sc of remaining) {
+      try {
+        lastClubId = await importScorecardCore(sc)
+        setFlyImportedIds(prev => new Set(prev).add(sc.scorecard_id))
+      } catch {
+        failCount++
+      }
+    }
+    if (lastClubId) setFlyLastClubId(lastClubId)
+    setFlyImportingAll(false)
+    if (failCount === 0) toast.success(t('clubsAdd.importSuccess'))
+    else toast.error(t('clubsAdd.genericError'))
   }
 
   async function handleCreateClub() {
@@ -319,15 +353,23 @@ export default function AddClubPage() {
                   <div className="text-[13px] font-semibold text-gray-900">{flyProfile.name}</div>
                   <div className="text-[12px] text-gray-500">{[flyProfile.city, flyProfile.region, flyProfile.country].filter(Boolean).join(', ')}</div>
                 </div>
-                <button onClick={() => setFlyProfile(null)} className="text-[12px] text-gray-400 hover:text-gray-600">✕</button>
+                <button onClick={() => { setFlyProfile(null); setFlyImportedIds(new Set()); setFlyLastClubId(null) }} className="text-[12px] text-gray-400 hover:text-gray-600">✕</button>
               </div>
 
               {(flyProfile.scorecards ?? []).length === 0 && (
                 <p className="text-amber-600 text-[12px]">{t('clubsAdd.flyawayNoScorecard')}</p>
               )}
 
+              {(flyProfile.scorecards ?? []).length > 1 && (
+                <button onClick={handleFlyImportAll} disabled={flyImportingAll || flyImportingId !== null || (flyProfile.scorecards ?? []).every(sc => flyImportedIds.has(sc.scorecard_id))}
+                  className="w-full mb-2 bg-[#0C447C] text-white text-[12px] font-semibold py-1.5 rounded-md hover:bg-[#083058] disabled:opacity-40 transition-colors">
+                  {flyImportingAll ? t('clubsAdd.importing') : t('clubsAdd.importAllCards')}
+                </button>
+              )}
+
               {(flyProfile.scorecards ?? []).map(sc => {
                 const grid = sc.grid?.[0]
+                const imported = flyImportedIds.has(sc.scorecard_id)
                 return (
                   <div key={sc.scorecard_id} className="border-t border-gray-100 pt-2 mt-2 first:border-t-0 first:pt-0 first:mt-0">
                     <div className="text-[12px] font-medium text-gray-700 mb-1">{sc.name} ({t('clubsAdd.holesCount', { count: sc.holesCount })})</div>
@@ -338,10 +380,16 @@ export default function AddClubPage() {
                             <div key={i}>{tb.name}{tb.gender ? ` (${tb.gender})` : ''} — slope {tb.slope ?? '—'}, CR {tb.rating ?? '—'}</div>
                           ))}
                         </div>
-                        <button onClick={() => handleFlyImport(sc)} disabled={flyImportingId === sc.scorecard_id}
-                          className="w-full bg-[#185FA5] text-white text-[12px] font-semibold py-1.5 rounded-md hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
-                          {flyImportingId === sc.scorecard_id ? t('clubsAdd.importing') : t('clubsAdd.importThisCard')}
-                        </button>
+                        {imported ? (
+                          <div className="w-full text-[12px] font-semibold text-green-700 bg-green-50 border border-green-200 py-1.5 rounded-md text-center">
+                            ✓ {t('clubsAdd.imported')}
+                          </div>
+                        ) : (
+                          <button onClick={() => handleFlyImport(sc)} disabled={flyImportingId === sc.scorecard_id || flyImportingAll}
+                            className="w-full bg-[#185FA5] text-white text-[12px] font-semibold py-1.5 rounded-md hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
+                            {flyImportingId === sc.scorecard_id ? t('clubsAdd.importing') : t('clubsAdd.importThisCard')}
+                          </button>
+                        )}
                       </>
                     ) : (
                       <p className="text-[12px] text-gray-400">{t('clubsAdd.noDetailAvailable')}</p>
@@ -349,6 +397,13 @@ export default function AddClubPage() {
                   </div>
                 )
               })}
+
+              {flyLastClubId && (
+                <button onClick={() => router.push(`/admin/clubs/${flyLastClubId}`)}
+                  className="w-full mt-3 text-[12px] font-semibold text-[#185FA5] hover:text-[#0C447C] border border-[#185FA5]/30 hover:border-[#185FA5] py-1.5 rounded-md transition-colors">
+                  {t('clubsAdd.viewClub')} →
+                </button>
+              )}
             </div>
           )}
         </div>

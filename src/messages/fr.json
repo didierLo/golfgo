@@ -1260,6 +1260,9 @@
     "excelTitle": "Import avec Excel",
     "importSuccess": "Importé — vérifie et complète si besoin",
     "errorCreateClub": "Erreur création club",
-    "errorCreateCourse": "Erreur création parcours"
+    "errorCreateCourse": "Erreur création parcours",
+    "importAllCards": "Importer toutes les cartes",
+    "imported": "Importé",
+    "viewClub": "Voir le club"
   }
 }

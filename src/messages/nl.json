@@ -1260,6 +1260,9 @@
     "excelTitle": "Import via Excel",
     "importSuccess": "Geïmporteerd — controleer en vul aan indien nodig",
     "errorCreateClub": "Fout bij aanmaken club",
-    "errorCreateCourse": "Fout bij aanmaken parcours"
+    "errorCreateCourse": "Fout bij aanmaken parcours",
+    "importAllCards": "Alle scorekaarten importeren",
+    "imported": "Geïmporteerd",
+    "viewClub": "Club bekijken"
   }
 }

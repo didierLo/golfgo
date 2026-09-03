@@ -1260,6 +1260,9 @@
     "excelTitle": "Import über Excel",
     "importSuccess": "Importiert — bei Bedarf prüfen und ergänzen",
     "errorCreateClub": "Fehler beim Erstellen des Clubs",
-    "errorCreateCourse": "Fehler beim Erstellen des Platzes"
+    "errorCreateCourse": "Fehler beim Erstellen des Platzes",
+    "importAllCards": "Alle Scorekarten importieren",
+    "imported": "Importiert",
+    "viewClub": "Club ansehen"
   }
 }

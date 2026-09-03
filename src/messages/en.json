@@ -1260,6 +1260,9 @@
     "excelTitle": "Import from Excel",
     "importSuccess": "Imported — check and complete if needed",
     "errorCreateClub": "Error creating club",
-    "errorCreateCourse": "Error creating course"
+    "errorCreateCourse": "Error creating course",
+    "importAllCards": "Import all scorecards",
+    "imported": "Imported",
+    "viewClub": "View club"
   }
 }
