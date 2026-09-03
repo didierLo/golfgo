@@ -44,6 +44,7 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
   const [courseId, setCourseId] = useState<string | null>(null)
   const [courseNameDraft, setCourseNameDraft] = useState('')
   const [deletingCourseId, setDeletingCourseId] = useState<string | null>(null)
+  const [sendingDeleteRequest, setSendingDeleteRequest] = useState(false)
 
   const [newCourse, setNewCourse] = useState('')
   const [newTee, setNewTee]     = useState('')
@@ -140,34 +141,36 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
 
   async function handleDeleteCourse() {
     if (!courseId) return
-    // Sécurité : un parcours déjà utilisé dans un événement (même passé) ne doit
-    // jamais être supprimé silencieusement — ça casserait les cartes de score liées.
+    const course = courses.find(c => c.id === courseId)
+    if (!course) return
+
+    // On informe l'admin si ce parcours est déjà utilisé dans un événement,
+    // mais ça ne bloque plus la demande — c'est une demande, pas une suppression
+    // immédiate, donc c'est à l'admin de décider en connaissance de cause.
     const { data: teeRows } = await supabase.from('course_tees').select('id').eq('course_id', courseId)
     const teeIds = (teeRows ?? []).map(t => t.id)
+    let usageNote: string | undefined
     if (teeIds.length > 0) {
       const { count } = await supabase.from('event_participants')
         .select('*', { count: 'exact', head: true }).in('tee_id', teeIds)
-      if (count && count > 0) {
-        toast.error(t('clubs.deleteBlockedCourse', { count }))
-        setDeletingCourseId(null)
-        return
-      }
+      if (count && count > 0) usageNote = t('clubs.deleteBlockedCourse', { count })
     }
 
-    await supabase.from('course_holes').delete().eq('course_id', courseId)
-    await supabase.from('course_tees').delete().eq('course_id', courseId)
-    const { data: deleted, error } = await supabase.from('courses').delete().eq('id', courseId).select('id')
-    if (error) { toast.error(t('errors.generic') ?? 'Une erreur est survenue'); setDeletingCourseId(null); return }
-    if (!deleted || deleted.length === 0) {
-      toast.error(t('clubs.deleteFailed'))
+    setSendingDeleteRequest(true)
+    try {
+      const res = await fetch('/api/admin/clubs/request-deletion', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'course', id: courseId, name: course.course_name, usageNote }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? t('errors.generic') ?? 'Une erreur est survenue')
+      toast.success(t('clubs.deleteRequestSent'))
+    } catch (e: any) {
+      toast.error(e.message ?? t('errors.generic') ?? 'Une erreur est survenue')
+    } finally {
+      setSendingDeleteRequest(false)
       setDeletingCourseId(null)
-      return
     }
-
-    toast.success(t('clubs.courseDeleted'))
-    setDeletingCourseId(null)
-    setCourseId(null)
-    await loadCourses(clubId)
   }
 
   async function handleCreateTee() {
@@ -341,11 +344,11 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
             />
             {deletingCourseId === courseId ? (
               <>
-                <button onClick={handleDeleteCourse}
-                  className="text-[12px] font-semibold text-red-600 hover:text-red-700 px-2 whitespace-nowrap">
-                  {t('clubs.confirmDelete')}
+                <button onClick={handleDeleteCourse} disabled={sendingDeleteRequest}
+                  className="text-[12px] font-semibold text-red-600 hover:text-red-700 px-2 whitespace-nowrap disabled:opacity-50">
+                  {sendingDeleteRequest ? t('clubs.sendingRequest') : t('clubs.confirmDeleteRequest')}
                 </button>
-                <button onClick={() => setDeletingCourseId(null)}
+                <button onClick={() => setDeletingCourseId(null)} disabled={sendingDeleteRequest}
                   className="text-[13px] text-gray-500 hover:text-gray-700 px-1">
                   ✕
                 </button>

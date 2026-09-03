@@ -187,18 +187,21 @@
     "incompleteTeeData": "informations de tee incomplètes (par, CR ou slope manquant)",
     "incompleteHoles": "index de trous incomplets",
     "confirmDelete": "Confirmer",
-    "deleteCourse": "Supprimer ce parcours",
+    "deleteCourse": "Demander la suppression de ce parcours",
     "courseDeleted": "Parcours supprimé",
-    "deleteBlockedCourse": "Impossible : ce parcours est utilisé par {count} participation(s) à un événement",
-    "deleteClub": "Supprimer ce club",
-    "confirmDeleteClub": "Supprimer ce club et tous ses parcours ?",
+    "deleteBlockedCourse": "Ce parcours est utilisé par {count} participation(s) à un événement.",
+    "deleteClub": "Demander la suppression de ce club",
+    "confirmDeleteClub": "Demander la suppression de ce club et de tous ses parcours ?",
     "clubDeleted": "Club supprimé",
-    "deleteBlockedClub": "Impossible : ce club est utilisé par {count} participation(s) à un événement",
+    "deleteBlockedClub": "Ce club est utilisé par {count} participation(s) à un événement.",
     "noResultsTryApi": "Si aucun golf trouvé, essaye avec GolfCourseAPI",
     "noResultsTryApiLink": "ICI",
     "searchInfo": "Rechercher les informations",
     "renameCourse": "Renommer :",
-    "deleteFailed": "La suppression n'a pas été effectuée (droits insuffisants ?). Réessaie ou contacte le support."
+    "deleteFailed": "La suppression n'a pas été effectuée (droits insuffisants ?). Réessaie ou contacte le support.",
+    "confirmDeleteRequest": "Envoyer la demande",
+    "sendingRequest": "Envoi…",
+    "deleteRequestSent": "Demande envoyée — l'administrateur va la traiter."
   },
   "communications": {
     "title": "Communications",
@@ -761,7 +764,8 @@
     "inviteRegen": "↺ Régénérer un nouveau lien",
     "inviteRegenLoading": "Génération…",
     "inviteNoLink": "Aucun lien actif pour ce groupe.",
-    "inviteGenerate": "🔗 Générer le lien d'invitation"
+    "inviteGenerate": "🔗 Générer le lien d'invitation",
+    "removeFailed": "Le retrait n'a pas été effectué (droits insuffisants ?). Réessaie ou contacte le support."
   },
   "addMember": {
     "title": "Ajouter un membre",

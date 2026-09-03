@@ -187,18 +187,21 @@
     "incompleteTeeData": "onvolledige teegegevens (par, CR of slope ontbreekt)",
     "incompleteHoles": "onvolledige stroke index",
     "confirmDelete": "Bevestigen",
-    "deleteCourse": "Dit parcours verwijderen",
+    "deleteCourse": "Verwijdering van dit parcours aanvragen",
     "courseDeleted": "Parcours verwijderd",
-    "deleteBlockedCourse": "Niet mogelijk: dit parcours wordt gebruikt door {count} evenementdeelname(s)",
-    "deleteClub": "Deze club verwijderen",
-    "confirmDeleteClub": "Deze club en al zijn parcours verwijderen?",
+    "deleteBlockedCourse": "Dit parcours wordt gebruikt door {count} evenementdeelname(s).",
+    "deleteClub": "Verwijdering van deze club aanvragen",
+    "confirmDeleteClub": "Verwijdering van deze club en al zijn parcours aanvragen?",
     "clubDeleted": "Club verwijderd",
-    "deleteBlockedClub": "Niet mogelijk: deze club wordt gebruikt door {count} evenementdeelname(s)",
+    "deleteBlockedClub": "Deze club wordt gebruikt door {count} evenementdeelname(s).",
     "noResultsTryApi": "Geen club gevonden? Probeer GolfCourseAPI",
     "noResultsTryApiLink": "HIER",
     "searchInfo": "Informatie opzoeken",
     "renameCourse": "Hernoemen:",
-    "deleteFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support."
+    "deleteFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support.",
+    "confirmDeleteRequest": "Aanvraag verzenden",
+    "sendingRequest": "Verzenden…",
+    "deleteRequestSent": "Aanvraag verzonden — de beheerder verwerkt ze."
   },
   "communications": {
     "title": "Communicatie",
@@ -761,7 +764,8 @@
     "inviteRegen": "↺ Nieuwe link genereren",
     "inviteRegenLoading": "Genereren…",
     "inviteNoLink": "Geen actieve link voor deze groep.",
-    "inviteGenerate": "🔗 Uitnodigingslink genereren"
+    "inviteGenerate": "🔗 Uitnodigingslink genereren",
+    "removeFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support."
   },
   "addMember": {
     "title": "Lid toevoegen",

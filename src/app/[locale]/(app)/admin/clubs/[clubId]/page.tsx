@@ -50,40 +50,36 @@ export default function ClubDetailPage() {
   }
 
   async function handleDeleteClub() {
+    if (!club) return
     setDeleting(true)
     try {
+      // On informe l'admin si des parcours de ce club sont déjà utilisés dans un
+      // événement, mais ça ne bloque plus la demande — l'admin décide en connaissance
+      // de cause, comme pour une demande de suppression de compte joueur.
       const { data: courseRows } = await supabase.from('courses').select('id').eq('club_id', clubId)
       const courseIds = (courseRows ?? []).map(c => c.id)
-
+      let usageNote: string | undefined
       if (courseIds.length > 0) {
         const { data: teeRows } = await supabase.from('course_tees').select('id').in('course_id', courseIds)
         const teeIds = (teeRows ?? []).map(t => t.id)
         if (teeIds.length > 0) {
           const { count } = await supabase.from('event_participants')
             .select('*', { count: 'exact', head: true }).in('tee_id', teeIds)
-          if (count && count > 0) {
-            toast.error(t('clubs.deleteBlockedClub', { count }))
-            setConfirmingDelete(false)
-            return
-          }
+          if (count && count > 0) usageNote = t('clubs.deleteBlockedClub', { count })
         }
-        await supabase.from('course_holes').delete().in('course_id', courseIds)
-        await supabase.from('course_tees').delete().in('course_id', courseIds)
-        await supabase.from('courses').delete().in('id', courseIds)
       }
 
-      const { data: deleted, error } = await supabase.from('clubs').delete().eq('id', clubId).select('id')
-      if (error) throw error
-      if (!deleted || deleted.length === 0) {
-        toast.error(t('clubs.deleteFailed'))
-        setConfirmingDelete(false)
-        return
-      }
+      const res = await fetch('/api/admin/clubs/request-deletion', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'club', id: clubId, name: club.name, usageNote }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? t('errors.generic') ?? 'Une erreur est survenue')
 
-      toast.success(t('clubs.clubDeleted'))
-      router.push('/admin/clubs')
-    } catch (err) {
-      toast.error(t('errors.generic') ?? 'Une erreur est survenue')
+      toast.success(t('clubs.deleteRequestSent'))
+      setConfirmingDelete(false)
+    } catch (err: any) {
+      toast.error(err.message ?? t('errors.generic') ?? 'Une erreur est survenue')
       setConfirmingDelete(false)
     } finally {
       setDeleting(false)
@@ -140,9 +136,9 @@ export default function ClubDetailPage() {
               <span className="text-[12px] text-red-600">{t('clubs.confirmDeleteClub')}</span>
               <button onClick={handleDeleteClub} disabled={deleting}
                 className="text-[12px] font-semibold text-red-600 hover:text-red-700 px-2 disabled:opacity-50">
-                {deleting ? t('clubs.saving') : t('clubs.confirmDelete')}
+                {deleting ? t('clubs.sendingRequest') : t('clubs.confirmDeleteRequest')}
               </button>
-              <button onClick={() => setConfirmingDelete(false)}
+              <button onClick={() => setConfirmingDelete(false)} disabled={deleting}
                 className="text-[13px] text-gray-400 hover:text-gray-600 px-1">
                 ✕
               </button>

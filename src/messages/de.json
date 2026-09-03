@@ -187,18 +187,21 @@
     "incompleteTeeData": "unvollständige Abschlagdaten (Par, CR oder Slope fehlt)",
     "incompleteHoles": "unvollständiger Stroke Index",
     "confirmDelete": "Bestätigen",
-    "deleteCourse": "Diesen Platz löschen",
+    "deleteCourse": "Löschung dieses Platzes beantragen",
     "courseDeleted": "Platz gelöscht",
-    "deleteBlockedCourse": "Nicht möglich: Dieser Platz wird von {count} Veranstaltungsteilnahme(n) verwendet",
-    "deleteClub": "Diesen Club löschen",
-    "confirmDeleteClub": "Diesen Club und alle seine Plätze löschen?",
+    "deleteBlockedCourse": "Dieser Platz wird von {count} Veranstaltungsteilnahme(n) verwendet.",
+    "deleteClub": "Löschung dieses Clubs beantragen",
+    "confirmDeleteClub": "Löschung dieses Clubs und aller seiner Plätze beantragen?",
     "clubDeleted": "Club gelöscht",
-    "deleteBlockedClub": "Nicht möglich: Dieser Club wird von {count} Veranstaltungsteilnahme(n) verwendet",
+    "deleteBlockedClub": "Dieser Club wird von {count} Veranstaltungsteilnahme(n) verwendet.",
     "noResultsTryApi": "Keinen Club gefunden? Versuchen Sie es mit GolfCourseAPI",
     "noResultsTryApiLink": "HIER",
     "searchInfo": "Informationen suchen",
     "renameCourse": "Umbenennen:",
-    "deleteFailed": "Löschen wurde nicht durchgeführt (unzureichende Rechte?). Versuchen Sie es erneut oder kontaktieren Sie den Support."
+    "deleteFailed": "Löschen wurde nicht durchgeführt (unzureichende Rechte?). Versuchen Sie es erneut oder kontaktieren Sie den Support.",
+    "confirmDeleteRequest": "Anfrage senden",
+    "sendingRequest": "Wird gesendet…",
+    "deleteRequestSent": "Anfrage gesendet — der Administrator wird sie bearbeiten."
   },
   "communications": {
     "title": "Kommunikation",
@@ -761,7 +764,8 @@
     "inviteRegen": "↺ Neuen Link generieren",
     "inviteRegenLoading": "Generieren…",
     "inviteNoLink": "Kein aktiver Link für diese Gruppe.",
-    "inviteGenerate": "🔗 Einladungslink generieren"
+    "inviteGenerate": "🔗 Einladungslink generieren",
+    "removeFailed": "Die Entfernung wurde nicht durchgeführt (unzureichende Rechte?). Versuchen Sie es erneut oder kontaktieren Sie den Support."
   },
   "addMember": {
     "title": "Mitglied hinzufügen",

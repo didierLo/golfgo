@@ -206,8 +206,13 @@ export default function MembersPage() {
         await supabase.from('flight_players').delete().eq('player_id', playerId).in('flight_id', flightIds)
       }
     }
-    const { error } = await supabase.from('groups_players').delete().eq('group_id', groupId).eq('player_id', playerId)
-    if (error) { alert(error.message); return }
+    // On vérifie qu'une ligne a vraiment été supprimée — sans ça, une règle de
+    // sécurité (RLS) qui bloque silencieusement le DELETE ferait croire à un
+    // retrait réussi alors que le joueur est toujours membre du groupe.
+    const { data: deleted, error } = await supabase.from('groups_players')
+      .delete().eq('group_id', groupId).eq('player_id', playerId).select('player_id')
+    if (error) { showToast(error.message); return }
+    if (!deleted || deleted.length === 0) { showToast(t('members.removeFailed')); return }
     loadMembers()
   }
 

@@ -187,18 +187,21 @@
     "incompleteTeeData": "incomplete tee data (missing par, CR or slope)",
     "incompleteHoles": "incomplete stroke index",
     "confirmDelete": "Confirm",
-    "deleteCourse": "Delete this course",
+    "deleteCourse": "Request deletion of this course",
     "courseDeleted": "Course deleted",
-    "deleteBlockedCourse": "Can't delete: this course is used by {count} event participation(s)",
-    "deleteClub": "Delete this club",
-    "confirmDeleteClub": "Delete this club and all its courses?",
+    "deleteBlockedCourse": "This course is used by {count} event participation(s).",
+    "deleteClub": "Request deletion of this club",
+    "confirmDeleteClub": "Request deletion of this club and all its courses?",
     "clubDeleted": "Club deleted",
-    "deleteBlockedClub": "Can't delete: this club is used by {count} event participation(s)",
+    "deleteBlockedClub": "This club is used by {count} event participation(s).",
     "noResultsTryApi": "If no club is found, try GolfCourseAPI",
     "noResultsTryApiLink": "HERE",
     "searchInfo": "Search for information",
     "renameCourse": "Rename:",
-    "deleteFailed": "Deletion did not go through (insufficient permissions?). Try again or contact support."
+    "deleteFailed": "Deletion did not go through (insufficient permissions?). Try again or contact support.",
+    "confirmDeleteRequest": "Send request",
+    "sendingRequest": "Sending…",
+    "deleteRequestSent": "Request sent — the administrator will process it."
   },
   "communications": {
     "title": "Communications",
@@ -761,7 +764,8 @@
     "inviteRegen": "↺ Generate a new link",
     "inviteRegenLoading": "Generating…",
     "inviteNoLink": "No active link for this group.",
-    "inviteGenerate": "🔗 Generate invitation link"
+    "inviteGenerate": "🔗 Generate invitation link",
+    "removeFailed": "The removal did not go through (insufficient permissions?). Try again or contact support."
   },
   "addMember": {
     "title": "Add a member",

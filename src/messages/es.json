@@ -187,18 +187,21 @@
     "incompleteTeeData": "datos de salida incompletos (falta par, CR o slope)",
     "incompleteHoles": "índice de golpes incompleto",
     "confirmDelete": "Confirmar",
-    "deleteCourse": "Eliminar este recorrido",
+    "deleteCourse": "Solicitar la eliminación de este recorrido",
     "courseDeleted": "Recorrido eliminado",
-    "deleteBlockedCourse": "No es posible: este recorrido se usa en {count} participación(es) de eventos",
-    "deleteClub": "Eliminar este club",
-    "confirmDeleteClub": "¿Eliminar este club y todos sus recorridos?",
+    "deleteBlockedCourse": "Este recorrido se usa en {count} participación(es) de eventos.",
+    "deleteClub": "Solicitar la eliminación de este club",
+    "confirmDeleteClub": "¿Solicitar la eliminación de este club y todos sus recorridos?",
     "clubDeleted": "Club eliminado",
-    "deleteBlockedClub": "No es posible: este club se usa en {count} participación(es) de eventos",
+    "deleteBlockedClub": "Este club se usa en {count} participación(es) de eventos.",
     "noResultsTryApi": "¿No encuentras el club? Prueba con GolfCourseAPI",
     "noResultsTryApiLink": "AQUÍ",
     "searchInfo": "Buscar información",
     "renameCourse": "Renombrar:",
-    "deleteFailed": "La eliminación no se realizó (¿permisos insuficientes?). Vuelve a intentarlo o contacta con soporte."
+    "deleteFailed": "La eliminación no se realizó (¿permisos insuficientes?). Vuelve a intentarlo o contacta con soporte.",
+    "confirmDeleteRequest": "Enviar solicitud",
+    "sendingRequest": "Enviando…",
+    "deleteRequestSent": "Solicitud enviada — el administrador la procesará."
   },
   "communications": {
     "title": "Comunicaciones",
@@ -761,7 +764,8 @@
     "inviteRegen": "↺ Generar nuevo enlace",
     "inviteRegenLoading": "Generando…",
     "inviteNoLink": "No hay enlace activo para este grupo.",
-    "inviteGenerate": "🔗 Generar enlace de invitación"
+    "inviteGenerate": "🔗 Generar enlace de invitación",
+    "removeFailed": "La baja no se realizó (¿permisos insuficientes?). Vuelve a intentarlo o contacta con soporte."
   },
   "addMember": {
     "title": "Añadir un miembro",
