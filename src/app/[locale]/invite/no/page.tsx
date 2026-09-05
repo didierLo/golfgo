@@ -46,16 +46,16 @@ function InviteNoContent() {
     if (!token) { setStatus('error'); return }
     setStatus('loading')
 
-    const [{ data: participant }, { error }] = await Promise.all([
-      supabase.from('event_participants')
-        .select('extra_activity_count, events(extra_activity_label)')
-        .eq('invite_token', token).maybeSingle(),
-      supabase.from('event_participants')
-        .update({ status: 'DECLINED', responded_at: new Date().toISOString() })
-        .eq('invite_token', token),
+    // Lecture + écriture via RPC SECURITY DEFINER — l'accès direct à la table
+    // est bloqué par RLS pour un visiteur anonyme non connecté (cf. checkpoint 2).
+    const [{ data: rows }, { error }] = await Promise.all([
+      supabase.rpc('rsvp_get_participant', { p_token: token }),
+      supabase.rpc('rsvp_decline', { p_token: token }),
     ])
 
-    setExtraActivityLabel((participant?.events as any)?.extra_activity_label ?? null)
+    const participant = rows?.[0] ?? null
+
+    setExtraActivityLabel(participant?.extra_activity_label ?? null)
     setExtraActivityCount(participant?.extra_activity_count ?? null)
     setExtraDraft(participant?.extra_activity_count ?? 1)
     setExtraEditing(participant?.extra_activity_count == null)
@@ -67,9 +67,8 @@ function InviteNoContent() {
     if (!token) return
     setExtraSaving(true)
     setExtraError(false)
-    const { error } = await supabase.from('event_participants')
-      .update({ extra_activity_count: count })
-      .eq('invite_token', token)
+    const { error } = await supabase
+      .rpc('rsvp_set_extra_activity', { p_token: token, p_count: count })
     if (error) {
       setExtraError(true)
       setExtraSaving(false)
