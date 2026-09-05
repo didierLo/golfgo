@@ -65,48 +65,40 @@ function InviteYesContent() {
     setStep('saving')
 
     // 1. Récupérer le participant + la limite de places de l'événement
-    const { data: participant, error: fetchError } = await supabase
-      .from('event_participants')
-      .select('event_id, extra_activity_count, events(group_id, extra_activity_label, max_participants)')
-      .eq('invite_token', tok).maybeSingle()
+    //    (via RPC SECURITY DEFINER — la lecture directe de la table est bloquée
+    //    par RLS pour un visiteur anonyme non connecté, cf. rsvp_get_participant)
+    const { data: rows, error: fetchError } = await supabase
+      .rpc('rsvp_get_participant', { p_token: tok })
+
+    const participant = rows?.[0] ?? null
 
     if (fetchError || !participant?.event_id) { setStep('error'); return }
 
-    const maxParticipants = (participant.events as any)?.max_participants ?? null
+    const maxParticipants = participant.max_participants ?? null
 
     // 2. Déterminer si l'événement est complet (hors places déjà occupées par ce joueur lui-même,
     //    pour ne pas le compter deux fois s'il modifie son choix de trous après avoir déjà confirmé)
     let newStatus: 'GOING' | 'WAITLIST' = 'GOING'
     if (maxParticipants != null) {
-      const { count: goingCount } = await supabase
-        .from('event_participants')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', participant.event_id)
-        .eq('status', 'GOING')
-        .neq('invite_token', tok)
+      const { data: goingCount } = await supabase
+        .rpc('rsvp_going_count', { p_event_id: participant.event_id, p_exclude_token: tok })
 
       if ((goingCount ?? 0) >= maxParticipants) newStatus = 'WAITLIST'
     }
 
     // 3. Écrire le statut final
-    const { error } = await supabase.from('event_participants')
-      .update({
-        status:        newStatus,
-        holes_played:  holes,
-        holes_section: section,
-        responded_at:  new Date().toISOString(),
-      })
-      .eq('invite_token', tok)
+    const { error } = await supabase
+      .rpc('rsvp_confirm', { p_token: tok, p_status: newStatus, p_holes: holes, p_section: section })
 
     if (error) { setStep('error'); return }
 
-    if ((participant?.events as any)?.group_id) {
-      setAppLink(`/groups/${(participant.events as any).group_id}/events/${participant.event_id}`)
+    if (participant.group_id) {
+      setAppLink(`/groups/${participant.group_id}/events/${participant.event_id}`)
     }
-    setExtraActivityLabel((participant?.events as any)?.extra_activity_label ?? null)
-    setExtraActivityCount(participant?.extra_activity_count ?? null)
-    setExtraDraft(participant?.extra_activity_count ?? 1)
-    setExtraEditing(participant?.extra_activity_count == null)
+    setExtraActivityLabel(participant.extra_activity_label ?? null)
+    setExtraActivityCount(participant.extra_activity_count ?? null)
+    setExtraDraft(participant.extra_activity_count ?? 1)
+    setExtraEditing(participant.extra_activity_count == null)
 
     setHolesPlayed(holes)
     setHolesSection(section)
@@ -135,9 +127,8 @@ function InviteYesContent() {
     if (!token) return
     setExtraSaving(true)
     setExtraError(false)
-    const { error } = await supabase.from('event_participants')
-      .update({ extra_activity_count: count })
-      .eq('invite_token', token)
+    const { error } = await supabase
+      .rpc('rsvp_set_extra_activity', { p_token: token, p_count: count })
     if (error) {
       setExtraError(true)
       setExtraSaving(false)
