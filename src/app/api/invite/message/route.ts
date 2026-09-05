@@ -11,22 +11,21 @@ export async function POST(req: Request) {
 
     const supabase = await createServerClient()
 
-    // Retrouver le participant via son invite_token
-    const { data: participant, error: findErr } = await supabase
-      .from('event_participants')
-      .select('player_id, event_id')
-      .eq('invite_token', token)
-      .single()
+    // Retrouver le participant via son invite_token — via RPC SECURITY DEFINER,
+    // l'accès direct à la table est bloqué par RLS pour un visiteur anonyme
+    // non connecté (cf. rsvp_get_participant, même famille que invite/yes et invite/no).
+    const { data: rows, error: findErr } = await supabase
+      .rpc('rsvp_get_participant', { p_token: token })
 
-    if (findErr || !participant) {
+    const participant = rows?.[0] ?? null
+
+    if (findErr || !participant?.event_id) {
       return Response.json({ success: false, error: 'Token invalide' }, { status: 404 })
     }
 
     // Sauvegarder le message (max 300 chars)
     const { error: updateErr } = await supabase
-      .from('event_participants')
-      .update({ response_message: message.slice(0, 300) })
-      .eq('invite_token', token)
+      .rpc('rsvp_set_message', { p_token: token, p_message: message.slice(0, 300) })
 
     if (updateErr) {
       return Response.json({ success: false, error: updateErr.message }, { status: 500 })
