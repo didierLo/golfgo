@@ -554,6 +554,7 @@
   "participants": {
     "byEvent": "By event",
     "overview": "Overview",
+    "exporterExcel": "Export to Excel",
     "invitations": "← Invitations",
     "readOnly": "Read-only — only the organiser can modify registrations",
     "noParticipants": "No participants — send invitations from the Invitations page",
