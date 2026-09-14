@@ -138,9 +138,14 @@ export default function ScorecardsPage() {
     const { data } = await supabase.from('events')
       .select('id, title, starts_at, group_id').eq('group_id', groupId)
       .gte('starts_at', twoMonthsAgo()).order('starts_at', { ascending: false })
-    if (data?.length) {
+       if (data?.length) {
       const now = new Date()
-      setAllEvents(data.map(e => ({ id: e.id, title: e.title, starts_at: e.starts_at, isPast: new Date(e.starts_at) < now })))
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      setAllEvents(data.map(e => {
+        const eventDay = new Date(e.starts_at)
+        const eventDayStart = new Date(eventDay.getFullYear(), eventDay.getMonth(), eventDay.getDate())
+        return { id: e.id, title: e.title, starts_at: e.starts_at, isPast: eventDayStart < todayStart }
+      }))
     }
     setEventsLoading(false)
   }
