@@ -877,6 +877,7 @@
     "noFlight": "Keine Spieler in dieser Kategorie",
     "closed": "Geschlossen",
     "readOnly": "Nur-Lesen",
+    "signConfirm": "Partie beenden bestätigen? Die Scorekarte wird gesperrt und kann nicht mehr bearbeitet werden.",
     "send": "Scorekarte(n) senden",
     "sending": "Senden...",
     "sent": "✓ Gesendet",

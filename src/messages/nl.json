@@ -877,6 +877,7 @@
     "noFlight": "Geen spelers in deze categorie",
     "closed": "Gesloten",
     "readOnly": "Alleen-lezen",
+    "signConfirm": "Einde van de partij bevestigen? De scorekaart wordt vergrendeld en kan niet meer worden gewijzigd.",
     "send": "Scorekaart(en) verzenden",
     "sending": "Verzenden...",
     "sent": "✓ Verzonden",

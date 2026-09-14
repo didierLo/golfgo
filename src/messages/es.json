@@ -877,6 +877,7 @@
     "noFlight": "No hay jugadores en esta categoría",
     "closed": "Cerrado",
     "readOnly": "Solo lectura",
+    "signConfirm": "¿Confirmar el fin de la partida? La tarjeta se bloqueará y ya no podrá modificarse.",
     "send": "Enviar tarjeta(s) de puntuación",
     "sending": "Enviando...",
     "sent": "✓ Enviado",

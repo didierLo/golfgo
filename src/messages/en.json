@@ -878,6 +878,7 @@
     "noFlight": "No players in this category",
     "closed": "Closed",
     "readOnly": "Read-only",
+    "signConfirm": "Confirm end of round? The scorecard will be locked and can no longer be edited.",
     "send": "Send scorecard(s)",
     "sending": "Sending...",
     "sent": "✓ Sent",

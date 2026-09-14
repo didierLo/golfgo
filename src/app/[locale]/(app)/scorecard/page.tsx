@@ -130,10 +130,11 @@ useEffect(() => {
     })
   }
 
-  // Signe la carte du flight (tous les scores saisis pour ce flight) et l'envoie au leaderboard
+    // Signe la carte du flight (tous les scores saisis pour ce flight) et l'envoie au leaderboard
   async function handleSignScorecard() {
     const scId = scorecardRef.current; const evId = eventRef.current
     if (!scId || !evId || isValidated) return
+    if (!window.confirm(t('scorecard.signConfirm'))) return
     setSaving(true); setSaveStatus('saving')
     try {
       const rows = Object.entries(scoresRef.current).flatMap(([pid, holeScores]) =>
@@ -145,9 +146,11 @@ useEffect(() => {
       )
       if (rows.length > 0)
         await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+      const now = new Date().toISOString()
+      await supabase.from('scorecards').update({ validated_at: now }).eq('id', scId)
+      setIsValidated(true)
       setSaveStatus('sent')
-      setTimeout(() => setSaveStatus('idle'), 3000)
-    } catch { setSaveStatus('error') }
+    } catch { setSaveStatus('error'); setTimeout(() => setSaveStatus('idle'), 3000) }
     finally { setSaving(false) }
   }
 
