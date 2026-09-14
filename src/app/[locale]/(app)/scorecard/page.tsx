@@ -230,7 +230,10 @@ useEffect(() => {
       const event = events?.[0] as any
       if (!event) { setError(t('common.error')); return }
 
-      setIsPastEvent(new Date(event.starts_at) < now)
+      const eventDay = new Date(event.starts_at)
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const eventDayStart = new Date(eventDay.getFullYear(), eventDay.getMonth(), eventDay.getDate())
+      setIsPastEvent(eventDayStart < todayStart)
       const myTeeId = participations?.find(p => p.event_id === event.id)?.tee_id ?? null
       setEventTitle(event.title)
       setEventStartsAt(event.starts_at)
