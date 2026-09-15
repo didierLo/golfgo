@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
@@ -14,7 +14,8 @@ const COUNTRIES = [
   { code: 'BE', flag: '🇧🇪' }, { code: 'FR', flag: '🇫🇷' }, { code: 'NL', flag: '🇳🇱' },
   { code: 'LU', flag: '🇱🇺' }, { code: 'DE', flag: '🇩🇪' }, { code: 'GB', flag: '🇬🇧' },
   { code: 'ES', flag: '🇪🇸' }, { code: 'PT', flag: '🇵🇹' }, { code: 'IT', flag: '🇮🇹' },
-  { code: 'CH', flag: '🇨🇭' }, { code: 'OTHER', flag: '🌍' },
+  { code: 'CH', flag: '🇨🇭' }, { code: 'US', flag: '🇺🇸' }, { code: 'ID', flag: '🇮🇩' },
+  { code: 'OTHER', flag: '🌍' },
 ]
 
 const inputClass = "w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] bg-white focus:outline-none focus:border-blue-300"
@@ -34,6 +35,8 @@ function guessCountry(address: string | undefined): string {
   if (a.includes('portugal')) return 'PT'
   if (a.includes('italia') || a.includes('italy')) return 'IT'
   if (a.includes('switzerland') || a.includes('suisse') || a.includes('schweiz')) return 'CH'
+  if (a.includes('united states') || a.includes('usa') || a.includes(', us')) return 'US'
+  if (a.includes('indonesia') || a.includes('bali')) return 'ID'
   return 'OTHER'
 }
 
@@ -51,6 +54,7 @@ type FlyProfile = { golf_id: string; name: string; slug: string; country?: strin
 const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   belgium: 'BE', france: 'FR', netherlands: 'NL', luxembourg: 'LU', germany: 'DE',
   'united kingdom': 'GB', spain: 'ES', portugal: 'PT', italy: 'IT', switzerland: 'CH',
+  'united states': 'US', indonesia: 'ID',
 }
 
 export default function AddClubPage() {
@@ -70,10 +74,26 @@ export default function AddClubPage() {
   const [apiDetail,    setApiDetail]    = useState<ApiCourseDetail['course'] | null>(null)
   const [apiLoadingDetail, setApiLoadingDetail] = useState(false)
   const [apiImporting, setApiImporting] = useState(false)
+  const [apiImportingAllClub, setApiImportingAllClub] = useState<string | null>(null)
+  const [apiImportedIds, setApiImportedIds] = useState<Set<number>>(new Set())
+  const [apiLastClubId, setApiLastClubId]   = useState<string | null>(null)
+
+  // Regroupe les résultats de recherche par club — permet de proposer
+  // "importer tous les parcours" quand un club en a plusieurs (ex. East/West course).
+  const apiGroups = useMemo(() => {
+    const map = new Map<string, ApiSearchResult[]>()
+    for (const r of apiResults) {
+      const key = r.club_name
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(r)
+    }
+    return Array.from(map.entries())
+  }, [apiResults])
 
   async function handleApiSearch() {
     if (apiQuery.trim().length < 2) return
     setApiSearching(true); setApiError(''); setApiResults([]); setApiDetail(null)
+    setApiImportedIds(new Set()); setApiLastClubId(null)
     try {
       const res = await fetch(`/api/admin/golfcourseapi/search?q=${encodeURIComponent(apiQuery.trim())}`)
       const json = await res.json()
@@ -101,62 +121,69 @@ export default function AddClubPage() {
     }
   }
 
+  // Cœur de l'import, sans navigation ni toast — réutilisé par l'import
+  // individuel (un parcours) et l'import groupé (tous les parcours du même club).
+  async function importApiCourseCore(detail: ApiCourseDetail['course']): Promise<string> {
+    const clubName = detail.club_name || detail.course_name
+    const courseName = detail.course_name || detail.club_name
+
+    // Club : retrouver ou créer
+    let clubId: string
+    const { data: existingClub } = await supabase.from('clubs').select('id').ilike('name', clubName).maybeSingle()
+    if (existingClub) {
+      clubId = existingClub.id
+    } else {
+      const { data: newClub, error } = await supabase.from('clubs')
+        .insert({ name: clubName, country: guessCountry(detail.location?.address) })
+        .select('id').single()
+      if (error || !newClub) throw new Error(error?.message ?? t('clubsAdd.errorCreateClub'))
+      clubId = newClub.id
+    }
+
+    // Parcours : retrouver ou créer
+    let courseId: string
+    const { data: existingCourse } = await supabase.from('courses').select('id')
+      .eq('club_id', clubId).ilike('course_name', courseName).maybeSingle()
+    if (existingCourse) {
+      courseId = existingCourse.id
+    } else {
+      const { data: newCourse, error } = await supabase.from('courses')
+        .insert({ club_id: clubId, course_name: courseName }).select('id').single()
+      if (error || !newCourse) throw new Error(error?.message ?? t('clubsAdd.errorCreateCourse'))
+      courseId = newCourse.id
+    }
+
+    // Tees (hommes + dames, en évitant les doublons de nom)
+    const maleTees   = detail.tees?.male ?? []
+    const femaleTees = detail.tees?.female ?? []
+    const maleNames  = new Set(maleTees.map(t => t.tee_name))
+    const teeRows = [
+      ...maleTees.map(t => ({ tee_name: t.tee_name, par_total: t.par_total, course_rating: t.course_rating, slope: t.slope_rating, distance_total: t.total_yards ?? null })),
+      ...femaleTees.map(t => ({ tee_name: maleNames.has(t.tee_name) ? `${t.tee_name} (F)` : t.tee_name, par_total: t.par_total, course_rating: t.course_rating, slope: t.slope_rating, distance_total: t.total_yards ?? null })),
+    ]
+    if (teeRows.length > 0) {
+      await supabase.from('course_tees').insert(teeRows.map(t => ({ ...t, course_id: courseId })))
+    }
+
+    // Trous : par + stroke index (handicap), à partir du premier jeu de tees qui en a
+    const holesSource = maleTees.find(t => t.holes?.length) ?? femaleTees.find(t => t.holes?.length)
+    if (holesSource?.holes?.length) {
+      const { data: existingHoles } = await supabase.from('course_holes').select('id').eq('course_id', courseId).limit(1)
+      if (!existingHoles || existingHoles.length === 0) {
+        await supabase.from('course_holes').insert(holesSource.holes.map((h, i) => ({
+          course_id: courseId, hole_number: i + 1, par: h.par, stroke_index: h.handicap,
+        })))
+      }
+    }
+
+    return clubId
+  }
+
   async function handleApiImport() {
     if (!apiDetail) return
     setApiImporting(true)
     try {
-      const clubName = apiDetail.club_name || apiDetail.course_name
-      const courseName = apiDetail.course_name || apiDetail.club_name
-
-      // Club : retrouver ou créer
-      let clubId: string
-      const { data: existingClub } = await supabase.from('clubs').select('id').ilike('name', clubName).maybeSingle()
-      if (existingClub) {
-        clubId = existingClub.id
-      } else {
-        const { data: newClub, error } = await supabase.from('clubs')
-          .insert({ name: clubName, country: guessCountry(apiDetail.location?.address) })
-          .select('id').single()
-        if (error || !newClub) throw new Error(error?.message ?? t('clubsAdd.errorCreateClub'))
-        clubId = newClub.id
-      }
-
-      // Parcours : retrouver ou créer
-      let courseId: string
-      const { data: existingCourse } = await supabase.from('courses').select('id')
-        .eq('club_id', clubId).ilike('course_name', courseName).maybeSingle()
-      if (existingCourse) {
-        courseId = existingCourse.id
-      } else {
-        const { data: newCourse, error } = await supabase.from('courses')
-          .insert({ club_id: clubId, course_name: courseName }).select('id').single()
-        if (error || !newCourse) throw new Error(error?.message ?? t('clubsAdd.errorCreateCourse'))
-        courseId = newCourse.id
-      }
-
-      // Tees (hommes + dames, en évitant les doublons de nom)
-      const maleTees   = apiDetail.tees?.male ?? []
-      const femaleTees = apiDetail.tees?.female ?? []
-      const maleNames  = new Set(maleTees.map(t => t.tee_name))
-      const teeRows = [
-        ...maleTees.map(t => ({ tee_name: t.tee_name, par_total: t.par_total, course_rating: t.course_rating, slope: t.slope_rating, distance_total: t.total_yards ?? null })),
-        ...femaleTees.map(t => ({ tee_name: maleNames.has(t.tee_name) ? `${t.tee_name} (F)` : t.tee_name, par_total: t.par_total, course_rating: t.course_rating, slope: t.slope_rating, distance_total: t.total_yards ?? null })),
-      ]
-      if (teeRows.length > 0) {
-        await supabase.from('course_tees').insert(teeRows.map(t => ({ ...t, course_id: courseId })))
-      }
-
-      // Trous : par + stroke index (handicap), à partir du premier jeu de tees qui en a
-      const holesSource = maleTees.find(t => t.holes?.length) ?? femaleTees.find(t => t.holes?.length)
-      if (holesSource?.holes?.length) {
-        const { data: existingHoles } = await supabase.from('course_holes').select('id').eq('course_id', courseId).limit(1)
-        if (!existingHoles || existingHoles.length === 0) {
-          await supabase.from('course_holes').insert(holesSource.holes.map((h, i) => ({
-            course_id: courseId, hole_number: i + 1, par: h.par, stroke_index: h.handicap,
-          })))
-        }
-      }
-
+      const clubId = await importApiCourseCore(apiDetail)
       toast.success(t('clubsAdd.importSuccess'))
       router.push(`/admin/clubs/${clubId}`)
     } catch (e: any) {
@@ -164,6 +191,32 @@ export default function AddClubPage() {
     } finally {
       setApiImporting(false)
     }
+  }
+
+  // Importe d'affilée tous les parcours d'un même club (ex. East + West course)
+  async function handleApiImportAllForClub(results: ApiSearchResult[]) {
+    const clubName = results[0]?.club_name
+    if (!clubName) return
+    const remaining = results.filter(r => !apiImportedIds.has(r.id))
+    if (remaining.length === 0) return
+    setApiImportingAllClub(clubName)
+    let lastClubId: string | null = null
+    let failCount = 0
+    for (const r of remaining) {
+      try {
+        const res = await fetch(`/api/admin/golfcourseapi/course/${r.id}`)
+        const json: ApiCourseDetail | { error: string } = await res.json()
+        if (!res.ok || 'error' in json) throw new Error('error' in json ? json.error : t('clubsAdd.genericError'))
+        lastClubId = await importApiCourseCore(json.course)
+        setApiImportedIds(prev => new Set(prev).add(r.id))
+      } catch {
+        failCount++
+      }
+    }
+    if (lastClubId) setApiLastClubId(lastClubId)
+    setApiImportingAllClub(null)
+    if (failCount === 0) toast.success(t('clubsAdd.importSuccess'))
+    else toast.error(t('clubsAdd.genericError'))
   }
 
   // ── Panneau FlyAway ──
@@ -428,17 +481,41 @@ export default function AddClubPage() {
 
           {apiError && <p className="text-[12px] text-red-600 mb-2">{apiError}</p>}
 
-          {!apiDetail && apiResults.length > 0 && (
-            <div className="border border-gray-100 rounded-md divide-y divide-gray-100 max-h-64 overflow-y-auto">
-              {apiResults.map(r => (
-                <button key={r.id} onClick={() => handleApiSelect(r.id)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-50 transition-colors">
-                  <div className="text-[13px] font-medium text-gray-800">{r.club_name}</div>
-                  {r.course_name !== r.club_name && <div className="text-[12px] text-gray-500">{r.course_name}</div>}
-                  {r.location?.address && <div className="text-[11px] text-gray-400 truncate">{r.location.address}</div>}
-                </button>
+          {!apiDetail && apiGroups.length > 0 && (
+            <div className="border border-gray-100 rounded-md divide-y divide-gray-100 max-h-80 overflow-y-auto">
+              {apiGroups.map(([clubName, group]) => (
+                <div key={clubName}>
+                  {group.map(r => (
+                    <button key={r.id} onClick={() => handleApiSelect(r.id)}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50 transition-colors flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-medium text-gray-800">{r.club_name}</div>
+                        {r.course_name !== r.club_name && <div className="text-[12px] text-gray-500">{r.course_name}</div>}
+                        {r.location?.address && <div className="text-[11px] text-gray-400 truncate">{r.location.address}</div>}
+                      </div>
+                      {apiImportedIds.has(r.id) && <span className="text-[11px] font-semibold text-green-700 whitespace-nowrap">✓ {t('clubsAdd.imported')}</span>}
+                    </button>
+                  ))}
+                  {group.length > 1 && (
+                    <div className="px-3 pb-2">
+                      <button
+                        onClick={() => handleApiImportAllForClub(group)}
+                        disabled={apiImportingAllClub === clubName || group.every(r => apiImportedIds.has(r.id))}
+                        className="w-full bg-[#0C447C] text-white text-[12px] font-semibold py-1.5 rounded-md hover:bg-[#083058] disabled:opacity-40 transition-colors">
+                        {apiImportingAllClub === clubName ? t('clubsAdd.importing') : t('clubsAdd.importAllCourses', { count: group.length })}
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
+          )}
+
+          {apiLastClubId && !apiDetail && (
+            <button onClick={() => router.push(`/admin/clubs/${apiLastClubId}`)}
+              className="w-full mt-3 text-[12px] font-semibold text-[#185FA5] hover:text-[#0C447C] border border-[#185FA5]/30 hover:border-[#185FA5] py-1.5 rounded-md transition-colors">
+              {t('clubsAdd.viewClub')} →
+            </button>
           )}
 
           {apiLoadingDetail && <p className="text-[12px] text-gray-400">{t('clubsAdd.loading')}</p>}
