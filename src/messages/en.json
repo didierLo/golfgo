@@ -1264,6 +1264,7 @@
     "noHoleDetail": "no hole-by-hole detail",
     "noTeeFound": "No tee found for this course.",
     "importThisCourse": "Import this course",
+    "importAllCourses": "Import all {count} courses for this club",
     "excelTitle": "Import from Excel",
     "importSuccess": "Imported — check and complete if needed",
     "errorCreateClub": "Error creating club",

@@ -1263,6 +1263,7 @@
     "noHoleDetail": "geen hole-per-hole detail",
     "noTeeFound": "Geen tee gevonden voor dit parcours.",
     "importThisCourse": "Dit parcours importeren",
+    "importAllCourses": "Alle {count} banen van deze club importeren",
     "excelTitle": "Import via Excel",
     "importSuccess": "Geïmporteerd — controleer en vul aan indien nodig",
     "errorCreateClub": "Fout bij aanmaken club",

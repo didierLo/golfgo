@@ -1263,6 +1263,7 @@
     "noHoleDetail": "pas de détail trou par trou",
     "noTeeFound": "Aucun tee trouvé pour ce parcours.",
     "importThisCourse": "Importer ce parcours",
+    "importAllCourses": "Importer les {count} parcours de ce club",
     "excelTitle": "Import avec Excel",
     "importSuccess": "Importé — vérifie et complète si besoin",
     "errorCreateClub": "Erreur création club",

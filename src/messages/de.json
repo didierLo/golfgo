@@ -1263,6 +1263,7 @@
     "noHoleDetail": "kein Loch-für-Loch-Detail",
     "noTeeFound": "Kein Abschlag für diesen Platz gefunden.",
     "importThisCourse": "Diesen Platz importieren",
+    "importAllCourses": "Alle {count} Plätze dieses Clubs importieren",
     "excelTitle": "Import über Excel",
     "importSuccess": "Importiert — bei Bedarf prüfen und ergänzen",
     "errorCreateClub": "Fehler beim Erstellen des Clubs",

@@ -1263,6 +1263,7 @@
     "noHoleDetail": "sin detalle hoyo a hoyo",
     "noTeeFound": "No se encontró ninguna salida para este recorrido.",
     "importThisCourse": "Importar este recorrido",
+    "importAllCourses": "Importar los {count} recorridos de este club",
     "excelTitle": "Importar con Excel",
     "importSuccess": "Importado — revisa y completa si hace falta",
     "errorCreateClub": "Error al crear el club",
