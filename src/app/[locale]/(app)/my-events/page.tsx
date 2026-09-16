@@ -28,6 +28,7 @@ type MyEvent = {
       name: string
       color: string | null
     }
+    courses: { course_name: string; clubs: { name: string } | null } | null
   }
 }
 
@@ -180,9 +181,12 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, loc
   </button>
 )}
 
-  {e.events.location && (
-    <a
-      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.events.location)}`}
+  {(() => {
+    const mapsQuery = [e.events.location, e.events.courses?.course_name, e.events.courses?.clubs?.name]
+      .filter(Boolean).join(' ')
+    return mapsQuery ? (
+      <a
+        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
       target="_blank" rel="noopener noreferrer"
       onClick={ev => ev.stopPropagation()}
       title={t('myEvents.directions')}
@@ -190,9 +194,10 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, loc
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
         <path d="M8 1L1 5.5v7L8 15l7-2.5v-7L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
         <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
-      </svg>
-    </a>
-  )}
+           </svg>
+      </a>
+    ) : null
+  })()}
 
   <button
     onClick={ev => { ev.stopPropagation(); onICS() }}
@@ -403,10 +408,11 @@ async function loadData() {
   const [{ data }, { data: counts }] = await Promise.all([
     supabase
       .from('event_participants')
-      .select(`event_id, status, payment_status,
+          .select(`event_id, status, payment_status,
         events(id, title, starts_at, location, group_id,
                max_participants, fee_per_person,
-               groups!events_group_id_fkey(name, color))`)
+               groups!events_group_id_fkey(name, color),
+               courses(course_name, clubs(name)))`)
       .eq('player_id', player.id)
       .order('starts_at', { foreignTable: 'events', ascending: false }),
 
