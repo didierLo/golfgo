@@ -180,6 +180,20 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, loc
   </button>
 )}
 
+  {e.events.location && (
+    <a
+      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.events.location)}`}
+      target="_blank" rel="noopener noreferrer"
+      onClick={ev => ev.stopPropagation()}
+      title={t('myEvents.directions')}
+      className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#185FA5] hover:bg-blue-50 transition-colors">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1L1 5.5v7L8 15l7-2.5v-7L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+        <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
+      </svg>
+    </a>
+  )}
+
   <button
     onClick={ev => { ev.stopPropagation(); onICS() }}
   
