@@ -664,6 +664,7 @@
   },
   "eventOverview": {
     "notFound": "Evento no encontrado",
+    "directions": "Cómo llegar",
     "myParticipation": "Mi participación",
     "going18": "Participo — 18 hoyos",
     "going18active": "✓ Participo — 18 hoyos",

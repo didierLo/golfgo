@@ -664,7 +664,8 @@
     "manageCourses": "Manage clubs and courses"
   },
   "eventOverview": {
-    "notFound": "Event not found",
+     "notFound": "Event not found",
+    "directions": "Directions",
     "myParticipation": "My participation",
     "going18": "I'm in — 18 holes",
     "going18active": "✓ I'm in — 18 holes",

@@ -664,6 +664,7 @@
   },
   "eventOverview": {
     "notFound": "Evenement niet gevonden",
+    "directions": "Route",
     "myParticipation": "Mijn deelname",
     "going18": "Ik doe mee — 18 holes",
     "going18active": "✓ Ik doe mee — 18 holes",

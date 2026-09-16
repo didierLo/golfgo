@@ -664,6 +664,7 @@
   },
   "eventOverview": {
     "notFound": "Événement introuvable",
+    "directions": "Itinéraire",
     "myParticipation": "Ma participation",
     "going18": "Je participe — 18 trous",
     "going18active": "✓ Je participe — 18 trous",

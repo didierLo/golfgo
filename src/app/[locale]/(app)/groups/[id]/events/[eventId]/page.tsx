@@ -176,16 +176,28 @@ export default function EventOverviewPage() {
           </div>
         )}
 
-        {event.courses?.course_name && (
+        {(event.courses?.course_name || event.location) && (
           <div className="flex items-center gap-3">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
               <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3"/>
               <path d="M8 5v3M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
-            <span className="text-[13px] text-slate-700">
-              {event.courses.course_name}
-              {(event.courses.clubs as any)?.name && ` · ${(event.courses.clubs as any).name}`}
+            <span className="text-[13px] text-slate-700 flex-1">
+              {event.courses?.course_name}
+              {(event.courses?.clubs as any)?.name && ` · ${(event.courses?.clubs as any).name}`}
+              {!event.courses?.course_name && event.location}
             </span>
+            {(() => {
+              const mapsQuery = [event.location, event.courses?.course_name, (event.courses?.clubs as any)?.name]
+                .filter(Boolean).join(' ')
+              return mapsQuery ? (
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-[12px] font-medium text-[#185FA5] hover:text-[#0C447C] whitespace-nowrap flex items-center gap-1">
+                  🧭 {t('eventOverview.directions')}
+                </a>
+              ) : null
+            })()}
           </div>
         )}
 

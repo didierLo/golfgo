@@ -664,6 +664,7 @@
   },
   "eventOverview": {
     "notFound": "Veranstaltung nicht gefunden",
+    "directions": "Route",
     "myParticipation": "Meine Teilnahme",
     "going18": "Ich mache mit — 18 Löcher",
     "going18active": "✓ Ich mache mit — 18 Löcher",
