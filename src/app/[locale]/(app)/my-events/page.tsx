@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
 import { generateICS } from '@/lib/ics' 
+import { geocodeEventLocation, fetchHourlyWindow, weatherCodeInfo, type HourlyPoint } from '@/lib/weather'
 
 const supabase = createClient()
 
@@ -113,104 +114,141 @@ function daysUntil(dateStr: string): number {
   return Math.round((utcTarget.getTime() - utcNow.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, locale }: {
-  event: MyEvent; onView: () => void; onICS: () => void; onPay: () => void; onPhotos: () => void; past?: boolean; locale: string
+function ActionPill({ onClick, icon, label, href }: {
+  onClick?: (ev: React.MouseEvent) => void; icon: React.ReactNode; label: string; href?: string
+}) {
+  const className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-600 hover:bg-white hover:text-[#185FA5] hover:shadow-sm transition-all whitespace-nowrap flex-shrink-0"
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={className}>
+        {icon}<span>{label}</span>
+      </a>
+    )
+  }
+  return (
+    <button onClick={onClick} className={className}>
+      {icon}<span>{label}</span>
+    </button>
+  )
+}
+
+function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past = false, locale }: {
+  event: MyEvent; onView: () => void; onICS: () => void; onPay: () => void; onPhotos: () => void
+  onWeather: () => void; past?: boolean; locale: string
 }) {
   const t = useTranslations()
   const groupColor = e.events.groups?.color ?? '#378ADD'
   const { day, month } = getDayMonth(e.events.starts_at, locale)
+
+  const mapsQuery = [e.events.location, e.events.courses?.course_name, e.events.courses?.clubs?.name]
+    .filter(Boolean).join(' ')
+  const showPhotos = (e.photoCount ?? 0) > 0 || past
+
   return (
-    <div className={`bg-white border rounded-xl flex items-center gap-3 px-4 py-3 hover:border-slate-300 hover:shadow-sm transition-all ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}>
-      <div onClick={onView} className="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 cursor-pointer"
-        style={{ background: `${groupColor}18` }}>
-        <span className="text-[13px] font-black leading-none" style={{ color: groupColor }}>{day}</span>
-        <span className="text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5" style={{ color: groupColor }}>{month}</span>
+    <div className={`bg-white border rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}>
+      <div className="flex items-center gap-3 px-4 py-3">
+        <div onClick={onView} className="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 cursor-pointer"
+          style={{ background: `${groupColor}18` }}>
+          <span className="text-[13px] font-black leading-none" style={{ color: groupColor }}>{day}</span>
+          <span className="text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5" style={{ color: groupColor }}>{month}</span>
+        </div>
+
+        <div onClick={onView} className="flex-1 min-w-0 cursor-pointer">
+          <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">{e.events.title}</div>
+          <div className="text-[11.5px] text-slate-500 mt-0.5 truncate capitalize">
+            {formatDayFull(e.events.starts_at, locale)}
+          </div>
+          <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
+            <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: groupColor }} />
+            <span className="truncate">{e.events.groups?.name}</span>
+            <span className="flex-shrink-0">·</span>
+            <span className="flex-shrink-0 font-medium">{formatTime(e.events.starts_at, locale)}</span>
+            {e.events.location && (<><span className="flex-shrink-0">·</span><span className="truncate">{e.events.location}</span></>)}
+          </div>
+          {e.events.max_participants && (
+            <span className={`text-[11px] font-medium ${
+              (e.events.max_participants - (e.goingCount ?? 0)) <= 0 ? 'text-red-400'
+              : (e.events.max_participants - (e.goingCount ?? 0)) <= 3 ? 'text-amber-500'
+              : 'text-slate-800'}`}>
+              {t('myEvents.availability.spotsLeft', { count: Math.max(0, e.events.max_participants - (e.goingCount ?? 0)) })}
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          <Badge status={e.status} />
+
+          {e.events.fee_per_person && !past && (
+            e.payment_status === 'PAID' ? (
+              <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#EAF3DE] text-[#3B6D11]">
+                ✓ Payé
+              </span>
+            ) : e.status === 'GOING' && (
+              <button
+                onClick={ev => { ev.stopPropagation(); onPay() }}
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
+                {t('payments.pay', { amount: e.events.fee_per_person })}
+              </button>
+            )
+          )}
+        </div>
       </div>
 
-      <div onClick={onView} className="flex-1 min-w-0 cursor-pointer">
-        <div className="text-[13.5px] font-semibold text-slate-900 truncate leading-tight">{e.events.title}</div>
-        <div className="text-[11.5px] text-slate-500 mt-0.5 truncate capitalize">
-          {formatDayFull(e.events.starts_at, locale)}
-        </div>
-        <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
-          <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: groupColor }} />
-          <span className="truncate">{e.events.groups?.name}</span>
-          <span className="flex-shrink-0">·</span>
-          <span className="flex-shrink-0 font-medium">{formatTime(e.events.starts_at, locale)}</span>
-          {e.events.location && (<><span className="flex-shrink-0">·</span><span className="truncate">{e.events.location}</span></>)}
-        </div>
-        {e.events.max_participants && (
-          <span className={`text-[11px] font-medium ${
-            (e.events.max_participants - (e.goingCount ?? 0)) <= 0 ? 'text-red-400'
-            : (e.events.max_participants - (e.goingCount ?? 0)) <= 3 ? 'text-amber-500'
-            : 'text-slate-800'}`}>
-            {t('myEvents.availability.spotsLeft', { count: Math.max(0, e.events.max_participants - (e.goingCount ?? 0)) })}
-          </span>
+      {/* Barre d'actions — icône + libellé, pour que ce soit clair sans avoir à deviner */}
+      <div className="flex items-center gap-1 px-2 py-1.5 border-t border-slate-100 bg-slate-50/60 overflow-x-auto">
+        <ActionPill
+          onClick={ev => { ev.stopPropagation(); onICS() }}
+          label={t('myEvents.calendar.addToCalendar')}
+          icon={
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="2" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+              <path d="M1 6h14" stroke="currentColor" strokeWidth="1.4"/>
+              <path d="M5 1v3M11 1v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              <path d="M5 10h2M9 10h2M5 12.5h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
+          }
+        />
+
+        {!past && (
+          <ActionPill
+            onClick={ev => { ev.stopPropagation(); onWeather() }}
+            label={t('myEvents.weather')}
+            icon={
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="7" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.4"/>
+                <path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M3 3l1 1M11 11l1 1M11 3l-1 1M3 11l1-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+            }
+          />
         )}
-      </div>
 
-     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-  <Badge status={e.status} />
+        {mapsQuery && (
+          <ActionPill
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
+            onClick={ev => ev.stopPropagation()}
+            label={t('myEvents.directions')}
+            icon={
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1L1 5.5v7L8 15l7-2.5v-7L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+                <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
+              </svg>
+            }
+          />
+        )}
 
-  {e.events.fee_per_person && !past && (
-    e.payment_status === 'PAID' ? (
-      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#EAF3DE] text-[#3B6D11]">
-        ✓ Payé
-      </span>
-    ) : e.status === 'GOING' && (
-      <button
-        onClick={ev => { ev.stopPropagation(); onPay() }}
-        className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
-        {t('payments.pay', { amount: e.events.fee_per_person })}
-      </button>
-    )
-  )}
-
-
- {((e.photoCount ?? 0) > 0 || past) && (
-  <button
-    onClick={ev => { ev.stopPropagation(); onPhotos() }}
-    className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-[#185FA5] transition-colors"
-  >
-    {e.photoCount}  {/* ← nombre en premier */}
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-      <rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
-      <circle cx="8" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
-      <path d="M5 4l1.5-2h3L11 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  </button>
-)}
-
-  {(() => {
-    const mapsQuery = [e.events.location, e.events.courses?.course_name, e.events.courses?.clubs?.name]
-      .filter(Boolean).join(' ')
-    return mapsQuery ? (
-      <a
-        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
-      target="_blank" rel="noopener noreferrer"
-      onClick={ev => ev.stopPropagation()}
-      title={t('myEvents.directions')}
-      className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#185FA5] hover:bg-blue-50 transition-colors">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-        <path d="M8 1L1 5.5v7L8 15l7-2.5v-7L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-        <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
-           </svg>
-      </a>
-    ) : null
-  })()}
-
-  <button
-    onClick={ev => { ev.stopPropagation(); onICS() }}
-  
-          title={t('myEvents.calendar.addToCalendar')}
-          className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-[#185FA5] hover:bg-blue-50 transition-colors">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <rect x="1" y="2" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.4"/>
-            <path d="M1 6h14" stroke="currentColor" strokeWidth="1.4"/>
-            <path d="M5 1v3M11 1v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-            <path d="M5 10h2M9 10h2M5 12.5h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-          </svg>
-        </button>
+        {showPhotos && (
+          <ActionPill
+            onClick={ev => { ev.stopPropagation(); onPhotos() }}
+          label={(e.photoCount ?? 0) > 0 ? t('myEvents.photo.count', { count: e.photoCount ?? 0 }) : t('myEvents.photo.add')}
+            icon={
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+                <circle cx="8" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
+                <path d="M5 4l1.5-2h3L11 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            }
+          />
+        )}
       </div>
     </div>
   )
@@ -424,6 +462,70 @@ function PhotoModal({ eventId, onClose, onUploaded }: { eventId: string; onClose
   )
 }
 
+function WeatherModal({ event, onClose }: { event: MyEvent; onClose: () => void }) {
+  const t = useTranslations()
+  const [points, setPoints] = useState<HourlyPoint[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [unavailable, setUnavailable] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const geo = await geocodeEventLocation({ location: event.events.location, courses: event.events.courses })
+      if (!geo) { if (!cancelled) { setUnavailable(true); setLoading(false) }; return }
+      const forecast = await fetchHourlyWindow(geo.coords.lat, geo.coords.lon, event.events.starts_at, 1, 6)
+      if (cancelled) return
+      if (!forecast) setUnavailable(true)
+      else setPoints(forecast)
+      setLoading(false)
+    }
+    load()
+    return () => { cancelled = true }
+  }, [event])
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4"
+      onClick={onClose}>
+      <div className="rounded-2xl w-full max-w-lg p-4"
+        style={{
+          background: 'rgba(255,255,255,0.75)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.6)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        }}
+        onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="font-bold text-slate-900">{t('myEvents.weather')}</span>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 text-xl leading-none">×</button>
+        </div>
+        {loading ? (
+          <div className="flex gap-1.5 overflow-x-auto">
+            {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="w-14 h-24 bg-slate-100 rounded-lg animate-pulse flex-shrink-0" />)}
+          </div>
+        ) : unavailable || !points?.length ? (
+          <p className="text-center text-slate-400 text-[13px] py-6">{t('myEvents.weatherUnavailable')}</p>
+        ) : (
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {points.map((p, i) => {
+              const info = weatherCodeInfo(p.code)
+              return (
+                <div key={i} className="flex flex-col items-center flex-shrink-0 w-14 py-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-[10px] text-slate-400 mb-1">{p.label}</span>
+                  <span className="text-[20px] leading-none mb-1">{info.emoji}</span>
+                  <span className="text-[12px] font-bold text-slate-900">{p.temp}°</span>
+                  <span className="text-[9px] text-blue-500 mt-1">💧{p.precipProb}%</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+
 export default function MyEventsPage() {
   const router  = useRouter()
   const t       = useTranslations()
@@ -433,6 +535,7 @@ export default function MyEventsPage() {
   const [view,    setView]    = useState<View>('list')
 
   const [photoEventId, setPhotoEventId] = useState<string | null>(null)
+  const [weatherEventId, setWeatherEventId] = useState<string | null>(null)
 
   const locale = useLocale()
   const searchParams = useSearchParams()
@@ -632,7 +735,8 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
                     locale} onView={() => goToEvent(e)}
                     onPay={() => router.push(`/${locale}/my-events/${e.event_id}/pay`)}
                     onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} 
-                     onPhotos={() => setPhotoEventId(e.event_id)} />
+                     onPhotos={() => setPhotoEventId(e.event_id)}
+                     onWeather={() => setWeatherEventId(e.event_id)} />
                 ))}
               </div>
             </div>
@@ -642,12 +746,13 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
             <div>
               <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest mb-3">{t('myEvents.sections.past')}</p>
               <div className="flex flex-col gap-2">
-                {past.slice().reverse().map(e => (
+                          {past.slice().reverse().map(e => (
                   <EventCard key={e.event_id} event={e} past locale={locale} 
                     onView={() => goToEvent(e)}
                     onPay={() => {}}
                     onICS={() => { downloadICS(e); toast.success(t('myEvents.calendar.toastSuccess')) }} 
-                     onPhotos={() => setPhotoEventId(e.event_id)} />
+                     onPhotos={() => setPhotoEventId(e.event_id)}
+                     onWeather={() => setWeatherEventId(e.event_id)} />
                 ))}
               </div>
             </div>
@@ -678,6 +783,10 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
     ))}
   />
 )}
+{weatherEventId && (() => {
+  const weatherEvent = events.find(e => e.event_id === weatherEventId)
+  return weatherEvent ? <WeatherModal event={weatherEvent} onClose={() => setWeatherEventId(null)} /> : null
+})()}
     </div>
   )
 }
