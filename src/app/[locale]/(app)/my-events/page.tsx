@@ -167,7 +167,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, past = false, loc
   )}
 
 
- {(e.photoCount ?? 0) > 0 && (
+ {((e.photoCount ?? 0) > 0 || past) && (
   <button
     onClick={ev => { ev.stopPropagation(); onPhotos() }}
     className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-[#185FA5] transition-colors"
@@ -316,26 +316,59 @@ function CalendarView({ events, onView, locale }: { events: MyEvent[]; onView: (
   )
 }
 
-function PhotoModal({ eventId, onClose }: { eventId: string; onClose: () => void }) {
+function PhotoModal({ eventId, onClose, onUploaded }: { eventId: string; onClose: () => void; onUploaded?: (added: number) => void }) {
+  const t = useTranslations()
   const [urls, setUrls] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
 
-  useEffect(() => {
   async function load() {
-  const { data } = await supabase
-    .from('event_photos')
-    .select('storage_path')
-    .eq('event_id', eventId)
-    .order('created_at', { ascending: false })
+    setLoading(true)
+    const { data } = await supabase
+      .from('event_photos')
+      .select('storage_path')
+      .eq('event_id', eventId)
+      .order('created_at', { ascending: false })
 
-  const urls = (data || []).map((row: { storage_path: string }) =>
-  supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
-)
-  setUrls(urls)
-  setLoading(false)
-}
-    load()
-  }, [eventId])
+    const urls = (data || []).map((row: { storage_path: string }) =>
+      supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
+    )
+    setUrls(urls)
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [eventId])
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    setUploading(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: player } = await supabase.from('players').select('id').eq('user_id', user!.id).single()
+
+    let added = 0
+    for (const file of files) {
+      const path = `${eventId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
+      const { error } = await supabase.storage.from('event-photos').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+      if (!error) {
+        await supabase.from('event_photos').insert({
+          event_id: eventId,
+          storage_path: path,
+          uploaded_by: player?.id,
+        })
+        added++
+      }
+    }
+
+    await load()
+    setUploading(false)
+    e.target.value = ''
+    if (added > 0) onUploaded?.(added)
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4"
@@ -353,12 +386,28 @@ function PhotoModal({ eventId, onClose }: { eventId: string; onClose: () => void
           <span className="font-bold text-slate-900">Photos</span>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-700 text-xl leading-none">×</button>
         </div>
+
+        <label className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-xl p-3 mb-3 cursor-pointer transition-colors bg-white/60
+          ${uploading ? 'border-slate-200 opacity-60 pointer-events-none' : 'border-slate-300 hover:border-[#185FA5] hover:bg-blue-50/40'}`}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-slate-400">
+            <rect x="3" y="5" width="18" height="15" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+            <circle cx="8.5" cy="10.5" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
+            <path d="M3 16l5-4 4 3 3-2.5 6 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 2v5M10 4l2-2 2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="text-[12px] font-semibold text-slate-600">
+            {uploading ? t('myEvents.photo.uploading') : t('myEvents.photo.add')}
+          </span>
+          <input type="file" accept="image/*" multiple className="hidden"
+            onChange={handleUpload} disabled={uploading} />
+        </label>
+
         {loading ? (
           <div className="grid grid-cols-3 gap-2">
             {[1,2,3].map(i => <div key={i} className="aspect-square bg-slate-100 rounded-lg animate-pulse"/>)}
           </div>
         ) : urls.length === 0 ? (
-          <p className="text-center text-slate-400 text-[13px] py-8">Aucune photo</p>
+          <p className="text-center text-slate-400 text-[13px] py-8">{t('myEvents.photo.empty')}</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             {urls.map((url, i) => (
@@ -622,8 +671,12 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
     )}
             </>
       )}
-      {photoEventId && (
-  <PhotoModal eventId={photoEventId} onClose={() => setPhotoEventId(null)} />
+       {photoEventId && (
+  <PhotoModal eventId={photoEventId} onClose={() => setPhotoEventId(null)}
+    onUploaded={added => setEvents(prev => prev.map(e =>
+      e.event_id === photoEventId ? { ...e, photoCount: (e.photoCount ?? 0) + added } : e
+    ))}
+  />
 )}
     </div>
   )

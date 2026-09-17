@@ -1242,6 +1242,13 @@
     "ownerTitle": "Ik start een groep",
     "ownerDesc": "GolfGo regelt alles — uitnodigingen, flights, startlijsten en e-mailbevestigingen."
   },
+
+  "photo": {
+    "add": "Foto toevoegen", 
+    "uploading": "Uploaden…", 
+    "empty": "Geen foto's" 
+  },
+  
   "clubsAdd": {
     "flyawayTitle": "Import via FlyAway",
     "flyawayNotePrefix": "Typ de exacte naam, met koppeltekens, bv.:",

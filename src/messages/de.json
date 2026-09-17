@@ -1242,6 +1242,12 @@
     "ownerTitle": "Ich gründe eine Gruppe",
     "ownerDesc": "GolfGo kümmert sich um alles — Einladungen, Flights, Abschlagblätter und E-Mail-Bestätigungen."
   },
+
+  "photo": { 
+    "add": "Foto hinzufügen", 
+    "uploading": "Wird hochgeladen…", 
+    "empty": "Keine Fotos" },
+
   "clubsAdd": {
     "flyawayTitle": "Import über FlyAway",
     "flyawayNotePrefix": "Geben Sie den genauen Namen ein, mit Bindestrichen, z. B.:",

@@ -1243,6 +1243,13 @@
     "ownerTitle": "I'm starting a group",
     "ownerDesc": "GolfGo handles everything — invitations, flights, tee sheets and email confirmations."
   },
+
+  "photo": { 
+    "add": "Add a photo", 
+    "uploading": "Uploading…", 
+    "empty": "No photos" 
+  },
+  
   "clubsAdd": {
     "flyawayTitle": "Import from FlyAway",
     "flyawayNotePrefix": "Type the exact name, hyphen-separated, e.g.:",
