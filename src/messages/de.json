@@ -73,7 +73,17 @@
       "toastSuccess": "Zu Ihrem Kalender hinzugefügt!"
     },
     "availability": {
-      "spotsLeft": "{count} Plätze verfügbar"
+    "spotsLeft": "{count} Plätze frei"
+  },
+  "directions": "Route",
+  "weather": "Wetter",
+  "weatherUnavailable": "Keine Vorhersage für diesen Ort oder dieses Datum verfügbar",
+
+  "photo": {
+    "add": "Foto hinzufügen",
+    "uploading": "Wird hochgeladen…",
+    "empty": "Keine Fotos",
+    "count": "{count} Fotos"
     }
   },
   "status": {
@@ -1243,10 +1253,7 @@
     "ownerDesc": "GolfGo kümmert sich um alles — Einladungen, Flights, Abschlagblätter und E-Mail-Bestätigungen."
   },
 
-  "photo": { 
-    "add": "Foto hinzufügen", 
-    "uploading": "Wird hochgeladen…", 
-    "empty": "Keine Fotos" },
+
 
   "clubsAdd": {
     "flyawayTitle": "Import über FlyAway",

@@ -37,6 +37,7 @@
     "cancel": "Cancel",
     "close": "Close",
     "emailQueue": "Email queue"
+
   },
   "myEvents": {
     "title": "My events",
@@ -73,7 +74,17 @@
       "toastSuccess": "Added to your calendar!"
     },
     "availability": {
-      "spotsLeft": "{count} spots left"
+    "spotsLeft": "{count} spots left"
+  },
+  "directions": "Directions",
+  "weather": "Weather",
+  "weatherUnavailable": "Forecast unavailable for this place or date",
+
+  "photo": {
+    "add": "Add a photo",
+    "uploading": "Uploading…",
+    "empty": "No photos",
+    "count": "{count} photos"
     }
   },
   "status": {
@@ -1244,12 +1255,7 @@
     "ownerDesc": "GolfGo handles everything — invitations, flights, tee sheets and email confirmations."
   },
 
-  "photo": { 
-    "add": "Add a photo", 
-    "uploading": "Uploading…", 
-    "empty": "No photos" 
-  },
-  
+
   "clubsAdd": {
     "flyawayTitle": "Import from FlyAway",
     "flyawayNotePrefix": "Type the exact name, hyphen-separated, e.g.:",

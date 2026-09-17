@@ -73,7 +73,16 @@
       "toastSuccess": "Toegevoegd aan je kalender!"
     },
     "availability": {
-      "spotsLeft": "{count} plaatsen beschikbaar"
+    "spotsLeft": "{count} plaatsen vrij"
+  },
+  "directions": "Route",
+  "weather": "Weer",
+  "weatherUnavailable": "Geen voorspelling beschikbaar voor deze locatie of datum",
+  "photo": {
+    "add": "Foto toevoegen",
+    "uploading": "Uploaden…",
+    "empty": "Geen foto's",
+    "count": "{count} foto's"
     }
   },
   "status": {
@@ -1248,7 +1257,7 @@
     "uploading": "Uploaden…", 
     "empty": "Geen foto's" 
   },
-  
+
   "clubsAdd": {
     "flyawayTitle": "Import via FlyAway",
     "flyawayNotePrefix": "Typ de exacte naam, met koppeltekens, bv.:",

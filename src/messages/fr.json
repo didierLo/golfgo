@@ -72,8 +72,19 @@
       "addToCalendar": "Ajouter à mon calendrier",
       "toastSuccess": "Ajouté à ton calendrier !"
     },
-    "availability": {
-      "spotsLeft": "{count} places dispo"
+     "availability": {
+    "spotsLeft": "{count} places dispo"
+    },
+
+    "directions": "Itinéraire",
+    "weather": "Météo du jour",
+    "weatherUnavailable": "Prévision indisponible pour ce lieu ou cette date",
+
+    "photo": {
+      "add": "Ajouter une photo",
+      "uploading": "Envoi…",
+      "empty": "Aucune photo",
+      "count": "{count} photos"
     }
   },
   "status": {
@@ -1242,13 +1253,6 @@
     "ownerTitle": "Je lance mon groupe",
     "ownerDesc": "GolfGo s'occupe de tout — invitations, flights, feuilles de départ et confirmations par email."
   },
-  
-  "photo": { 
-    "add": "Ajouter une photo", 
-    "uploading": "Envoi…", 
-    "empty": "Aucune photo" 
-  },
-
   "clubsAdd": {
     "flyawayTitle": "Import avec FlyAway",
     "flyawayNotePrefix": "Tape le nom exact séparé par des tirets, ex :",
