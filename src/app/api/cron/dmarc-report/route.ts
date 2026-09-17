@@ -135,10 +135,14 @@ export async function GET(request: NextRequest) {
 
   try {
     await client.connect()
+
+    // Crée le sous-libellé de destination s'il n'existe pas déjà (sans erreur si déjà présent)
+    try { await client.mailboxCreate('DMARC-golfgo/Traité') } catch { /* existe déjà */ }
+
     const lock = await client.getMailboxLock('DMARC-golfgo')
 
     try {
-      const uids = await client.search({ seen: false })
+      const uids = await client.search({ all: true })
 
       for (const uid of uids || []) {
         const message = await client.fetchOne(uid, { source: true })
@@ -155,7 +159,7 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        await client.messageFlagsAdd(uid, ['\\Seen'])
+        await client.messageMove(uid, 'DMARC-golfgo/Traité')
       }
     } finally {
       lock.release()
