@@ -1,4 +1,24 @@
 import { buildEmailLogoHeader } from './logo'
+import { weatherCodeInfo, type HourlyPoint } from '@/lib/weather'
+
+function buildHourlyWeatherHtml(points: HourlyPoint[]): string {
+  const cells = points.map(p => {
+    const info = weatherCodeInfo(p.code)
+    return `
+      <td style="padding:8px 4px;text-align:center;border-right:1px solid #F1F5F9;">
+        <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;">${p.label}</div>
+        <div style="font-size:18px;line-height:1;margin-bottom:4px;">${info.emoji}</div>
+        <div style="font-size:12px;font-weight:700;color:#0F172A;">${p.temp}°</div>
+        <div style="font-size:9px;color:#3B82F6;margin-top:2px;">💧${p.precipProb}%</div>
+      </td>`
+  }).join('')
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:24px;">
+      <tr><td style="padding:6px 4px;">
+        <table width="100%" cellpadding="0" cellspacing="0"><tr>${cells}</tr></table>
+      </td></tr>
+    </table>`
+}
 
 export type TeesheetFlightPlayer = {
   first_name: string
@@ -22,7 +42,7 @@ function holesLabel(p: TeesheetFlightPlayer): string | null {
 }
 
 export function buildTeesheetHtml({
-  playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights, logoUrl, autoPrint = false,
+  playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights, logoUrl, autoPrint = false, hourlyForecast = null,
 }: {
   playerName: string | null
   playerFlightNumber: number | null
@@ -32,6 +52,7 @@ export function buildTeesheetHtml({
   flights: TeesheetFlight[]
   logoUrl: string | null
   autoPrint?: boolean
+  hourlyForecast?: HourlyPoint[] | null
 }) {
   const flightsHtml = flights.map(flight => {
     const isMyFlight  = playerFlightNumber !== null && flight.flight_number === playerFlightNumber
@@ -129,6 +150,7 @@ export function buildTeesheetHtml({
                   </td>
                 </tr>
               </table>
+                          ${hourlyForecast?.length ? buildHourlyWeatherHtml(hourlyForecast) : ''}
               <p style="margin:0 0 14px;font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">
                 Ordre de départ
               </p>

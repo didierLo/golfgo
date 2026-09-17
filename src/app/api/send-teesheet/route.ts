@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildTeesheetHtml, type TeesheetFlight } from '@/lib/email/buildTeesheetHtml'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
+import { geocodeEventLocation, fetchHourlyWindow } from '@/lib/weather'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
 
     const [{ data: event }, { data: participants }] = await Promise.all([
       supabase.from('events')
-        .select('title, starts_at, location, group_id')
+        .select('title, starts_at, location, group_id, is_golf, courses(course_name, clubs(name, region, country))')
         .eq('id', eventId).single(),
       participantsQuery,
     ])
@@ -56,6 +57,15 @@ export async function POST(req: Request) {
       .eq('id', event.group_id)
       .single()
     const logoUrl = groupData?.template_logo_url ?? null
+
+    // ── Météo — calculée une seule fois pour l'événement, partagée par tous les emails ──
+    let hourlyForecast: Awaited<ReturnType<typeof fetchHourlyWindow>> = null
+    if (event.is_golf ?? true) {
+      const geo = await geocodeEventLocation(event as any)
+      if (geo) {
+        hourlyForecast = await fetchHourlyWindow(geo.coords.lat, geo.coords.lon, event.starts_at, 1, 6)
+      }
+    }
 
     // ── Opt-out : charger qui a désactivé les emails pour ce groupe ─────────
     const participantIds = (participants || []).map((p: any) => p.player_id)
@@ -96,6 +106,7 @@ export async function POST(req: Request) {
         eventLocation: event.location,
         flights,
         logoUrl,
+        hourlyForecast,
       })
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'

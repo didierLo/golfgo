@@ -31,173 +31,6 @@ function daysDiff(dateStr: string): number {
   return Math.round((utcTarget.getTime() - utcNow.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-// ── Météo (Open-Meteo — gratuit, sans clé API) ──────────────────────────────
-
-const WEATHER_CODES: Record<number, { emoji: string; label: string }> = {
-  0:  { emoji: '☀️', label: 'Ciel dégagé' },
-  1:  { emoji: '🌤️', label: 'Peu nuageux' },
-  2:  { emoji: '⛅', label: 'Partiellement nuageux' },
-  3:  { emoji: '☁️', label: 'Couvert' },
-  45: { emoji: '🌫️', label: 'Brouillard' },
-  48: { emoji: '🌫️', label: 'Brouillard givrant' },
-  51: { emoji: '🌦️', label: 'Bruine légère' },
-  53: { emoji: '🌦️', label: 'Bruine' },
-  55: { emoji: '🌦️', label: 'Bruine forte' },
-  61: { emoji: '🌧️', label: 'Pluie légère' },
-  63: { emoji: '🌧️', label: 'Pluie' },
-  65: { emoji: '🌧️', label: 'Pluie forte' },
-  71: { emoji: '🌨️', label: 'Neige légère' },
-  73: { emoji: '🌨️', label: 'Neige' },
-  75: { emoji: '🌨️', label: 'Neige forte' },
-  80: { emoji: '🌧️', label: 'Averses' },
-  81: { emoji: '🌧️', label: 'Averses' },
-  82: { emoji: '🌧️', label: 'Averses fortes' },
-  95: { emoji: '⛈️', label: 'Orage' },
-  96: { emoji: '⛈️', label: 'Orage avec grêle' },
-  99: { emoji: '⛈️', label: 'Orage violent' },
-}
-
-function weatherCodeInfo(code: number) {
-  return WEATHER_CODES[code] ?? { emoji: '🌡️', label: 'Prévision indisponible' }
-}
-
-// Nom français des pays connus de golfgo (pour affiner la recherche géo par région)
-const COUNTRY_CODE_TO_NAME: Record<string, string> = {
-  BE: 'Belgique', FR: 'France', NL: 'Pays-Bas', LU: 'Luxembourg', DE: 'Allemagne',
-  GB: 'Royaume-Uni', ES: 'Espagne', PT: 'Portugal', IT: 'Italie', CH: 'Suisse',
-  US: 'États-Unis', ID: 'Indonésie',
-}
-
-// Retire les préfixes golfiques courants pour améliorer les chances de géocodage
-// (ex. "Golf de Louvain-La-Neuve" → "Louvain-La-Neuve")
-function simplifyLocationQuery(raw: string): string {
-  return raw
-    .replace(/^(royal\s+)?golf(\s*(club|course))?\s+(de|du|des|d')\s+/i, '')
-    .replace(/^golfclub\s+/i, '')
-    .trim()
-}
-
-async function geocodeLocation(query: string, countryCode?: string): Promise<{ lat: number; lon: number } | null> {
-  try {
-    const params = new URLSearchParams({ name: query, count: '1', language: 'fr', format: 'json' })
-    if (countryCode && countryCode !== 'OTHER') params.set('countryCode', countryCode)
-    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`)
-    if (!res.ok) return null
-    const json = await res.json()
-    const first = json?.results?.[0]
-    return first ? { lat: first.latitude, lon: first.longitude } : null
-  } catch {
-    return null
-  }
-}
-
-// Essaie plusieurs sources dans l'ordre, du plus précis (texte libre de l'organisateur)
-// au plus fiable (région/pays du club lié à l'événement), jusqu'à ce qu'une réussisse.
-async function geocodeEventLocation(event: {
-  location: string | null
-  courses: { course_name: string; clubs: { name: string; region: string | null; country: string | null } | null } | null
-}): Promise<{ coords: { lat: number; lon: number }; label: string } | null> {
-  const club = event.courses?.clubs
-  const attempts: { query: string; countryCode?: string; label: string }[] = []
-
-  if (event.location) {
-    attempts.push({ query: event.location, label: event.location })
-    const simplified = simplifyLocationQuery(event.location)
-    if (simplified !== event.location) attempts.push({ query: simplified, label: event.location })
-  }
-  if (event.courses?.course_name) {
-    attempts.push({ query: event.courses.course_name, countryCode: club?.country ?? undefined, label: event.courses.course_name })
-  }
-  if (club?.name) {
-    attempts.push({ query: club.name, countryCode: club.country ?? undefined, label: club.name })
-  }
-  if (club?.region) {
-    const countryName = club.country ? COUNTRY_CODE_TO_NAME[club.country] : undefined
-    const query = countryName ? `${club.region}, ${countryName}` : club.region
-    attempts.push({ query, countryCode: club.country ?? undefined, label: club.name ?? club.region })
-  }
-
-  for (const attempt of attempts) {
-    const coords = await geocodeLocation(attempt.query, attempt.countryCode)
-    if (coords) return { coords, label: attempt.label }
-  }
-  return null
-}
-
-async function fetchDailyForecast(lat: number, lon: number, dateISO: string) {
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-      `&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max` +
-      `&timezone=Europe%2FBrussels&start_date=${dateISO}&end_date=${dateISO}`
-    const res = await fetch(url)
-    if (!res.ok) return null
-    const json = await res.json()
-    if (!json?.daily?.time?.length) return null
-    return {
-      code:       json.daily.weathercode[0] as number,
-      tempMax:    Math.round(json.daily.temperature_2m_max[0]),
-      tempMin:    Math.round(json.daily.temperature_2m_min[0]),
-      precipProb: json.daily.precipitation_probability_max[0] as number,
-      windMax:    Math.round(json.daily.windspeed_10m_max[0]),
-    }
-  } catch {
-    return null
-  }
-}
-
-function buildWeatherHtml({
-  firstName, eventTitle, eventDate, eventLocation, forecast, logoUrl,
-}: {
-  firstName: string; eventTitle: string; eventDate: string; eventLocation: string
-  forecast: { code: number; tempMax: number; tempMin: number; precipProb: number; windMax: number }
-  logoUrl: string | null
-}) {
-  const info = weatherCodeInfo(forecast.code)
-  return `
-<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Météo — ${eventTitle}</title></head>
-<body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
-        <tr>
-          <td style="background:#185FA5;border-radius:12px 12px 0 0;padding:20px 32px;vertical-align:middle;">
-            ${buildEmailLogoHeader(logoUrl)}
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#ffffff;padding:36px 32px;">
-            <p style="margin:0 0 6px;font-size:14px;color:#64748B;">Bonjour ${firstName},</p>
-            <h1 style="margin:0 0 20px;font-size:18px;font-weight:700;color:#0F172A;">Météo prévue pour demain ⛳</h1>
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:20px;">
-              <tr><td style="padding:20px;">
-                <p style="margin:0 0 2px;font-size:13px;color:#64748B;">${eventTitle} — ${eventDate}</p>
-                <p style="margin:0 0 16px;font-size:12px;color:#94A3B8;">${eventLocation}</p>
-                <table cellpadding="0" cellspacing="0"><tr>
-                  <td style="font-size:40px;padding-right:16px;">${info.emoji}</td>
-                  <td>
-                    <div style="font-size:17px;font-weight:700;color:#0F172A;">${info.label}</div>
-                    <div style="font-size:13px;color:#334155;margin-top:2px;">${forecast.tempMin}° / ${forecast.tempMax}° · 💧 ${forecast.precipProb}% · 💨 ${forecast.windMax} km/h</div>
-                  </td>
-                </tr></table>
-              </td></tr>
-            </table>
-            <p style="margin:0;font-size:12px;color:#94A3B8;font-style:italic;">Prévision indicative, susceptible d'évoluer d'ici demain.</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
-            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Notification automatique GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a></p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body></html>`.trim()
-}
-
 function applyTemplateVars(text: string, vars: Record<string, string>): string {
   return Object.entries(vars).reduce(
     (acc, [key, value]) => acc.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value),
@@ -482,7 +315,6 @@ export async function GET(req: Request) {
     teesheets:  { sent: 0, skipped: 0, queued: 0, errors: [] as string[] },
     noTeesheet: { sent: 0, errors: [] as string[] },
     invitations: { sent: 0, queued: 0, skipped: 0, errors: [] as string[] },
-    weather:    { sent: 0, queued: 0, skipped: 0, errors: [] as string[] },
     queue:      { sent: 0, stillPending: 0 },
   }
 
@@ -496,7 +328,6 @@ export async function GET(req: Request) {
   .from('events')
   .select(`
     id, title, starts_at, location, group_id, tee_interval, is_golf, max_participants,
-    courses(course_name, clubs(name, region, country)),
     groups!events_group_id_fkey(
       id, name, auto_reminders, auto_teesheet, auto_invitation, template_logo_url,
       template_reminder_subject, template_reminder_body,
@@ -880,56 +711,6 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           results.teesheets.queued  = (results.teesheets.queued ?? 0) + (teesheetJson.queued ?? 0)
         } else {
           results.teesheets.errors.push(`${event.title}: ${teesheetJson.error}`)
-        }
-      }
-    }
-
-    // ── J-1 : Météo du lendemain pour les participants confirmés ─────────────
-    if (days === 1 && event.is_golf) {
-      const forecastDate = new Date(event.starts_at).toISOString().slice(0, 10)
-      const geo = await geocodeEventLocation(event)
-
-      if (geo) {
-        const forecast = await fetchDailyForecast(geo.coords.lat, geo.coords.lon, forecastDate)
-
-        if (forecast) {
-          const { data: goingParticipants } = await supabase
-            .from('event_participants')
-            .select('players(first_name, surname, email)')
-            .eq('event_id', event.id)
-            .eq('status', 'GOING')
-
-          for (const ep of goingParticipants || []) {
-            const player = (ep as any).players
-            if (!player?.email) { results.weather.skipped++; continue }
-
-            if (!EMAIL_ENABLED) { results.weather.sent++; continue }
-
-            const html = buildWeatherHtml({
-              firstName:     player.first_name,
-              eventTitle:    event.title,
-              eventDate:     formatDate(event.starts_at),
-              eventLocation: geo.label,
-              forecast,
-              logoUrl,
-            })
-
-            const result = await sendOrQueueEmail({
-              category: 'other',
-              groupId:  event.group_id,
-              eventId:  event.id,
-              from:     'GolfGo <noreply@golfgo.be>',
-              replyTo:  'info@golfgo.be',
-              to:       player.email,
-              subject:  `🌤️ Météo pour demain — ${event.title}`,
-              html,
-            })
-
-            if (!result.sent && !result.queued) results.weather.errors.push(`${player.first_name} ${player.surname}: ${result.error}`)
-            else if (result.sent) results.weather.sent++
-            else results.weather.queued++
-            await sleep(EMAIL_SEND_DELAY_MS)
-          }
         }
       }
     }
