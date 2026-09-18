@@ -5,11 +5,17 @@ import { XMLParser } from 'fast-xml-parser'
 import AdmZip from 'adm-zip'
 import { gunzipSync } from 'zlib'
 import { Resend } from 'resend'
+import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const resend = new Resend(process.env.RESEND_API_KEY)
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false } }
+)
 
 interface DmarcRecord {
   sourceIp: string
@@ -171,7 +177,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'IMAP processing failed', details: String(err) }, { status: 500 })
   }
 
-  const summaryHtml = buildSummaryHtml(allRecords, messageCount, periodLabel)
+   const summaryHtml = buildSummaryHtml(allRecords, messageCount, periodLabel)
+
+  const totalVolume = allRecords.reduce((sum, r) => sum + r.count, 0)
+  const dkimPass = allRecords.filter(r => r.dkimResult === 'pass').reduce((s, r) => s + r.count, 0)
+  const spfPass = allRecords.filter(r => r.spfResult === 'pass').reduce((s, r) => s + r.count, 0)
+  const fullFailures = allRecords.filter(r => r.dkimResult !== 'pass' && r.spfResult !== 'pass')
+
+  // Trace ce passage dans l'historique, indépendamment du succès de l'envoi d'email —
+  // c'est ce que le dashboard santé système ira relire.
+  await supabaseAdmin.from('system_health_log').insert({
+    job: 'dmarc-report',
+    summary: {
+      periodLabel,
+      messagesProcessed: messageCount,
+      totalVolume,
+      dkimPassPercent: totalVolume ? Math.round((dkimPass / totalVolume) * 100) : null,
+      spfPassPercent:  totalVolume ? Math.round((spfPass  / totalVolume) * 100) : null,
+      fullFailuresCount: fullFailures.length,
+    },
+  })
 
   try {
     await resend.emails.send({
