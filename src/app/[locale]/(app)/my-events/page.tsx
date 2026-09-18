@@ -195,7 +195,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
       </div>
 
       {/* Barre d'actions — icône + libellé, pour que ce soit clair sans avoir à deviner */}
-      <div className="flex items-center gap-1 px-2 py-1.5 border-t border-slate-100 bg-slate-50/60 overflow-x-auto">
+            <div className="flex items-center flex-wrap gap-1 px-2 py-1.5 border-t border-slate-100 bg-slate-50/60">
         <ActionPill
           onClick={ev => { ev.stopPropagation(); onICS() }}
           label={t('myEvents.calendar.addToCalendar')}
