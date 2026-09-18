@@ -8,7 +8,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import Image from 'next/image'
 
 interface Group       { id: string; name: string; color: string; role: 'owner' | 'member' }
-interface CurrentUser { initials: string; name: string }
+interface CurrentUser { initials: string; name: string; email: string | null }
 
 const FALLBACK_COLORS = ['#378ADD', '#EF9F27', '#7F77DD', '#1D9E75', '#D85A30', '#D4537E']
 
@@ -147,7 +147,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         if (playerError || !playerData) { setLoading(false); return }
         const initials = ((playerData.first_name?.[0] ?? '') + (playerData.surname?.[0] ?? '')).toUpperCase()
-        setCurrentUser({ initials, name: `${playerData.first_name} ${playerData.surname}` })
+              setCurrentUser({ initials, name: `${playerData.first_name} ${playerData.surname}`, email: user.email ?? null })
         setCurrentPlayerId(playerData.id)
         const { data, error } = await supabase.from('groups_players').select(`role, groups(id, name, color)`).eq('player_id', playerData.id)
         if (error) { setLoading(false); return }
@@ -379,12 +379,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="px-4 py-2.5 border-b border-slate-100">
                       <p className="text-[12px] font-bold text-slate-800 truncate">{currentUser.name}</p>
                     </div>
-                    <Link href={currentPlayerId ? `/players/${currentPlayerId}/edit` : '/settings'}
+                   <Link href={currentPlayerId ? `/players/${currentPlayerId}/edit` : '/settings'}
                       onClick={() => setAvatarMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
                       <span className="text-slate-400">{Icons.user}</span>
                       <span className="text-[13px] text-slate-700 font-medium">{t('nav.myProfile')}</span>
                     </Link>
+                    {currentUser.email?.toLowerCase() === 'didier.lozet@gmail.com' && (
+                      <Link href="/admin/health"
+                        onClick={() => setAvatarMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                        <span className="text-slate-400">🩺</span>
+                        <span className="text-[13px] text-slate-700 font-medium">Santé du système</span>
+                      </Link>
+                    )}
                     <div className="px-4 py-2.5">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Language</p>
                       <div className="flex gap-1">
