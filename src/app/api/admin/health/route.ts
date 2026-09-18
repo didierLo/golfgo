@@ -27,7 +27,7 @@ function friendlyLevel(level: string): string {
 
 async function trySentryHost(host: string, token: string) {
   const res = await fetch(
-    `https://${host}/api/0/projects/golfgo/javascript-nextjs/issues/?query=is:unresolved&statsPeriod=7d&limit=5&sort=freq`,
+    `https://${host}/api/0/projects/golfgo/javascript-nextjs/issues/?query=is:unresolved&limit=5&sort=freq`,
     { headers: { Authorization: `Bearer ${token}` } }
   )
   return res
@@ -45,7 +45,10 @@ async function fetchSentrySummary() {
       res = await trySentryHost('de.sentry.io', token)
     }
 
-    if (!res.ok) return { available: false, reason: `Sentry a répondu ${res.status}` }
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      return { available: false, reason: `Sentry a répondu ${res.status} — ${body.slice(0, 200)}` }
+    }
 
     const issues = await res.json() as any[]
     return {
