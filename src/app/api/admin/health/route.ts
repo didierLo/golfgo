@@ -25,15 +25,26 @@ function friendlyLevel(level: string): string {
   return map[level] ?? level
 }
 
+async function trySentryHost(host: string, token: string) {
+  const res = await fetch(
+    `https://${host}/api/0/projects/golfgo/javascript-nextjs/issues/?query=is:unresolved&statsPeriod=7d&limit=5&sort=freq`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  return res
+}
+
 async function fetchSentrySummary() {
   const token = process.env.SENTRY_HEALTH_API_TOKEN
   if (!token) return { available: false, reason: 'Jeton Sentry non configuré' }
 
   try {
-    const res = await fetch(
-      'https://sentry.io/api/0/projects/golfgo/javascript-nextjs/issues/?query=is:unresolved&statsPeriod=7d&limit=5&sort=freq',
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
+    // Certaines organisations Sentry stockent leurs données en Europe, ce qui
+    // change l'hôte d'API attendu — on essaie les deux plutôt que de deviner.
+    let res = await trySentryHost('sentry.io', token)
+    if (res.status === 401 || res.status === 404) {
+      res = await trySentryHost('de.sentry.io', token)
+    }
+
     if (!res.ok) return { available: false, reason: `Sentry a répondu ${res.status}` }
 
     const issues = await res.json() as any[]
