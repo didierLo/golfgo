@@ -84,6 +84,7 @@
       "add": "Ajouter une photo",
       "uploading": "Envoi…",
       "empty": "Aucune photo",
+      "deleteConfirm": "Supprimer cette photo ?",
       "count": "{count} photos"
     }
   },

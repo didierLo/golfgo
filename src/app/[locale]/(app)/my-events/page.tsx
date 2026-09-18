@@ -142,7 +142,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
 
   const mapsQuery = [e.events.location, e.events.courses?.course_name, e.events.courses?.clubs?.name]
     .filter(Boolean).join(' ')
-  const showPhotos = (e.photoCount ?? 0) > 0 || past
+  const showPhotos = true
 
   return (
     <div className={`bg-white border rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}>
@@ -356,26 +356,50 @@ function CalendarView({ events, onView, locale }: { events: MyEvent[]; onView: (
 
 function PhotoModal({ eventId, onClose, onUploaded }: { eventId: string; onClose: () => void; onUploaded?: (added: number) => void }) {
   const t = useTranslations()
-  const [urls, setUrls] = useState<string[]>([])
+  const [photos, setPhotos] = useState<{ id: string; url: string; storagePath: string; uploadedBy: string | null }[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
 
   async function load() {
     setLoading(true)
     const { data } = await supabase
       .from('event_photos')
-      .select('storage_path')
+      .select('id, storage_path, uploaded_by')
       .eq('event_id', eventId)
       .order('created_at', { ascending: false })
 
-    const urls = (data || []).map((row: { storage_path: string }) =>
-      supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
-    )
-    setUrls(urls)
+    const mapped = (data || []).map((row: { id: string; storage_path: string; uploaded_by: string | null }) => ({
+      id:          row.id,
+      storagePath: row.storage_path,
+      uploadedBy:  row.uploaded_by,
+      url:         supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl,
+    }))
+    setPhotos(mapped)
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [eventId])
+  useEffect(() => {
+    async function loadMyPlayerId() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: player } = await supabase.from('players').select('id').eq('user_id', user.id).single()
+      setMyPlayerId(player?.id ?? null)
+    }
+    loadMyPlayerId()
+    load()
+  }, [eventId])
+
+  async function handleDelete(photo: { id: string; storagePath: string }) {
+    if (!window.confirm(t('myEvents.photo.deleteConfirm'))) return
+    setDeletingId(photo.id)
+    await supabase.storage.from('event-photos').remove([photo.storagePath])
+    await supabase.from('event_photos').delete().eq('id', photo.id)
+    await load()
+    setDeletingId(null)
+    onUploaded?.(-1)
+  }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || [])
@@ -444,16 +468,26 @@ function PhotoModal({ eventId, onClose, onUploaded }: { eventId: string; onClose
           <div className="grid grid-cols-3 gap-2">
             {[1,2,3].map(i => <div key={i} className="aspect-square bg-slate-100 rounded-lg animate-pulse"/>)}
           </div>
-        ) : urls.length === 0 ? (
+        ) : photos.length === 0 ? (
           <p className="text-center text-slate-400 text-[13px] py-8">{t('myEvents.photo.empty')}</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
-            {urls.map((url, i) => (
-              <img key={i} src={url} alt=""
-                className="aspect-square object-cover rounded-lg cursor-pointer hover:opacity-90"
-                onClick={() => window.open(url, '_blank')}
-                loading="lazy"
-              />
+            {photos.map(photo => (
+              <div key={photo.id} className="relative aspect-square">
+                <img src={photo.url} alt=""
+                  className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-90"
+                  onClick={() => window.open(photo.url, '_blank')}
+                  loading="lazy"
+                />
+                {photo.uploadedBy === myPlayerId && (
+                  <button
+                    onClick={ev => { ev.stopPropagation(); handleDelete(photo) }}
+                    disabled={deletingId === photo.id}
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-[13px] leading-none hover:bg-red-600 transition-colors disabled:opacity-50">
+                    {deletingId === photo.id ? '…' : '×'}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         )}

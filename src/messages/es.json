@@ -83,6 +83,7 @@
     "add": "Añadir foto",
     "uploading": "Subiendo…",
     "empty": "Sin fotos",
+    "deleteConfirm": "¿Eliminar esta foto?",
     "count": "{count} fotos"
     }
   },

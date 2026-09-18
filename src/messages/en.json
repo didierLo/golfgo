@@ -84,6 +84,7 @@
     "add": "Add a photo",
     "uploading": "Uploading…",
     "empty": "No photos",
+    "deleteConfirm": "Delete this photo?",
     "count": "{count} photos"
     }
   },

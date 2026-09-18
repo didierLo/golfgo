@@ -82,6 +82,7 @@
     "add": "Foto toevoegen",
     "uploading": "Uploaden…",
     "empty": "Geen foto's",
+    "deleteConfirm": "Deze foto verwijderen?",
     "count": "{count} foto's"
     }
   },
