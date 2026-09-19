@@ -265,7 +265,7 @@ export default function ResultsPage() {
 
   function buildWhatsAppLeaderboard(): string {
     const ev = events.find(e => e.id === selectedId)
-    const lines = [`🏆 *${ev?.title ?? 'Leaderboard'}*`, '']
+    const lines = [`🏆 *${ev?.title ?? t('leaderboard.title')}*`, '']
     players.forEach((p, i) => {
       const total = Object.values(scoresRef.current[p.id] ?? {}).reduce((s, v) => (s ?? 0) + (v ?? 0), 0) ?? 0
       lines.push(`${i + 1}. ${p.first_name} ${p.surname} — ${total} (Phcp ${p.phcp})`)
@@ -284,7 +284,7 @@ export default function ResultsPage() {
       label: flights.length > 1 ? `Flight ${i + 1}` : '',
       groups: getTeamGroups(fl, teamFormat),
     })),
-    ...(unassigned.length ? [{ label: flights.length > 0 ? 'Sans flight' : '', groups: unassigned.map(p => [p]) }] : []),
+    ...(unassigned.length ? [{ label: flights.length > 0 ? t('scoring.unassigned') : '', groups: unassigned.map(p => [p]) }] : []),
   ]
 
   const activeFlight = flights.find(fl => fl.some(p => p.id === activePlayerId))
@@ -318,7 +318,7 @@ export default function ResultsPage() {
   <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
     <div>
       <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('results.title')}</h1>
-      <p className="text-[13px] text-slate-900 mt-0.5">{t('results.subtitle', { count: players.length, format: eventFormat })}</p>
+      <p className="text-[13px] text-slate-900 mt-0.5">{t('results.subtitle', { count: players.length, format: t(`scoring.format.${eventFormat}`) })}</p>
     </div>
     <div className="flex items-center gap-1.5">
       {isOwner && (
@@ -327,8 +327,8 @@ export default function ResultsPage() {
         </IconBtn>
       )}
       <IconBtn onClick={() => window.print()} title={t('results.print')}>🖨</IconBtn>
-      <IconBtn onClick={() => {}} disabled={players.length === 0} title="Aperçu">👁</IconBtn>
-      <IconBtn onClick={() => {}} disabled={players.length === 0} title="Email">📤</IconBtn>
+      <IconBtn onClick={() => {}} disabled={players.length === 0} title={t('scoring.preview')}>👁</IconBtn>
+      <IconBtn onClick={() => {}} disabled={players.length === 0} title={t('scoring.email')}>📤</IconBtn>
       <IconBtn href={players.length > 0 ? buildWhatsAppLeaderboard() : undefined}
         disabled={players.length === 0} title="WhatsApp">💬</IconBtn>
     </div>
@@ -440,7 +440,7 @@ export default function ResultsPage() {
                     <div className="flex gap-3 mt-0.5">
                       <span className="text-[12px] text-slate-500">Hcp <span className="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded-lg text-[11px] ml-0.5">{activePlayer.whs}</span></span>
                       <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{activePlayer.phcp}</span></span>
-                      {activePlayer.tee && <span className="text-[12px] text-slate-500">Tee <span className="font-bold text-slate-800 ml-0.5">{activePlayer.tee.tee_name}</span></span>}
+                      {activePlayer.tee && <span className="text-[12px] text-slate-500">{t('clubs.colTee')} <span className="font-bold text-slate-800 ml-0.5">{activePlayer.tee.tee_name}</span></span>}
                     </div>
                   </div>
                 )}

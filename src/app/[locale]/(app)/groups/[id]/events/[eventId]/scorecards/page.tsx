@@ -273,7 +273,7 @@ export default function ScorecardsPage() {
   }
 
   function buildWhatsAppLeaderboard(): string {
-    const eventTitle = allEvents.find(e => e.id === activeEventId)?.title ?? 'Leaderboard'
+    const eventTitle = allEvents.find(e => e.id === activeEventId)?.title ?? t('leaderboard.title')
     const lines = [`🏆 *${eventTitle}*`, '']
     players.forEach((p, i) => {
       const total = Object.values(scores[p.id] ?? {}).reduce((sum, s) => (sum ?? 0) + (s ?? 0), 0) ?? 0
@@ -297,7 +297,7 @@ export default function ScorecardsPage() {
       label: flights.length > 1 ? `Flight ${i + 1}` : '',
       groups: getTeamGroups(fl, teamFormat),
     })),
-    ...(unassigned.length ? [{ label: flights.length > 0 ? 'Sans flight' : '', groups: unassigned.map(p => [p]) }] : []),
+    ...(unassigned.length ? [{ label: flights.length > 0 ? t('scoring.unassigned') : '', groups: unassigned.map(p => [p]) }] : []),
   ]
 
   const activeFlight = flights.find(fl => fl.some(p => p.id === activePlayerId))
@@ -385,15 +385,15 @@ export default function ScorecardsPage() {
       {!clubName && !courseName && isOwner && !scorecardLoading && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-6 print:hidden">
           <p className="text-[12px] text-amber-700 font-medium">
-            Aucun parcours configuré pour cet événement —{' '}
+            {t('scorecards.noCourseBanner')}{' '}
             <a href={`/${params.locale}/groups/${groupId}/events/${activeEventId}/edit`}
               className="underline font-semibold">
-              modifier l'événement
+              {t('scorecards.editEventLink')}
             </a>
-            {' '}ou{' '}
+            {' '}{t('scorecards.orSeparator')}{' '}
             <a href={`/${params.locale}/admin/clubs`}
               className="underline font-semibold">
-              gérer les clubs
+              {t('scorecards.manageClubsLink')}
             </a>
           </p>
         </div>
@@ -459,7 +459,7 @@ export default function ScorecardsPage() {
                   <div className="flex gap-3 mt-0.5">
                     <span className="text-[12px] text-slate-500">Hcp <span className="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded-lg text-[11px] ml-0.5">{activePlayer.whs}</span></span>
                     <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{activePlayer.phcp}</span></span>
-                    {activePlayer.tee && <span className="text-[12px] text-slate-500">Tee <span className="font-bold text-slate-800 ml-0.5">{activePlayer.tee.tee_name}</span></span>}
+                    {activePlayer.tee && <span className="text-[12px] text-slate-500">{t('clubs.colTee')} <span className="font-bold text-slate-800 ml-0.5">{activePlayer.tee.tee_name}</span></span>}
                   </div>
                 </div>
                 {isOwner && !isValidated && (
@@ -494,10 +494,10 @@ export default function ScorecardsPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 {players.length > 0 && holes.length > 0 && (
-                  <IconBtn onClick={() => window.print()} title="Imprimer les cartes">🖨</IconBtn>
+                  <IconBtn onClick={() => window.print()} title={t('scoring.printCards')}>🖨</IconBtn>
                 )}
                 {players.length > 0 && (
-                  <IconBtn href={buildWhatsAppLeaderboard()} title="WhatsApp leaderboard">💬</IconBtn>
+                  <IconBtn href={buildWhatsAppLeaderboard()} title={t('scorecards.whatsapp')}>💬</IconBtn>
                 )}
                 {!isValidated && (<>
                   <IconBtn onClick={handleSave} disabled={saving} title={t('scorecards.save')}>
@@ -546,7 +546,7 @@ export default function ScorecardsPage() {
           clubName={clubName}
           courseName={courseName}
           eventDate={activeEvent
-            ? new Date(activeEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+            ? new Date(activeEvent.starts_at).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
             : ''}
         />
       )}
@@ -570,6 +570,7 @@ function PrintScorecards({
   courseName: string
   eventDate: string
 }) {
+  const t = useTranslations()
   const front9 = holes.filter(h => h.hole_number <= 9)
   const back9  = holes.filter(h => h.hole_number > 9)
 
@@ -619,12 +620,12 @@ function PrintScorecards({
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '7.5px' }}>
                     <thead>
                       <tr style={{ background: '#F1F5F9' }}>
-                        <th style={thStyle}>Trou</th>
+                        <th style={thStyle}>{t('scoring.hole')}</th>
                         <th style={thStyle}>Par</th>
                         <th style={thStyle}>SI</th>
-                        <th style={thStyle}>Recv</th>
-                        <th style={{ ...thStyle, width: '22px', background: '#EBF3FC' }}>Brut</th>
-                        <th style={{ ...thStyle, width: '22px', background: '#EAF3DE' }}>Pts</th>
+                        <th style={thStyle}>{t('scoring.received')}</th>
+                        <th style={{ ...thStyle, width: '22px', background: '#EBF3FC' }}>{t('scoring.gross')}</th>
+                        <th style={{ ...thStyle, width: '22px', background: '#EAF3DE' }}>{t('scoring.pts')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -666,8 +667,8 @@ function PrintScorecards({
 
                   {/* Signature */}
                   <div style={{ marginTop: '4px', borderTop: '1px solid #E2E8F0', paddingTop: '3px', display: 'flex', justifyContent: 'space-between', color: '#94A3B8', fontSize: '7px' }}>
-                    <span>Signature marqueur : _______________</span>
-                    <span>Signature joueur : _______________</span>
+                    <span>{t('scoring.markerSignature')} : _______________</span>
+                    <span>{t('scoring.playerSignature')} : _______________</span>
                   </div>
                 </div>
               ))}

@@ -59,11 +59,11 @@ function HolesBadge({ holes, section }: { holes: number | null; section: HolesSe
   )
 }
 
-function holesLabel(holes: number | null, section: HolesSection): string {
-  if (!holes || holes === 18) return '18T'
+function holesLabel(holes: number | null, section: HolesSection, code18: string): string {
+  if (!holes || holes === 18) return code18
   if (section === 'out') return '9F'
   if (section === 'in') return '9B'
-  return '18T'   // ← fallback sécurisé si section null
+  return code18   // ← fallback sécurisé si section null
 }
 
 // ─── Cellule activité annexe (nombre de personnes) ─────────────────────────
@@ -78,6 +78,7 @@ function ExtraActivityCell({
   onChange?: (next: number | null) => void
   onCommit?: (next: number | null) => void
 }) {
+  const t = useTranslations()
   if (isOwner) {
     return (
       <input
@@ -86,7 +87,7 @@ function ExtraActivityCell({
         max={20}
         value={count ?? ''}
         placeholder="—"
-        title="Nombre de personnes (toi/le joueur compris) — modifiable"
+        title={t('participants.extraCountTitle')}
         onChange={e => {
           const raw = e.target.value
           onChange?.(raw === '' ? null : Math.max(0, parseInt(raw, 10) || 0))
@@ -131,6 +132,7 @@ function MessageModal({
   onSaved: (playerId: string, msg: string) => void
   onNoteSaved: (playerId: string, note: string) => void
 }) {
+  const t = useTranslations()
   const [text, setText]     = useState(participant.response_message ?? '')
   const [saving, setSaving] = useState(false)
   const [saved,  setSaved]  = useState(false)
@@ -212,7 +214,7 @@ function MessageModal({
             <p className="text-[14px] font-bold text-slate-800">
               {firstName} {surname}
             </p>
-            <p className="text-[11px] text-slate-400">Message & remarque</p>
+            <p className="text-[11px] text-slate-400">{t('participants.messageAndNote')}</p>
           </div>
         </div>
 
@@ -222,7 +224,7 @@ function MessageModal({
             {canEditMessage ? (
               <>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
-                  Ton message pour l'organisateur
+                  {t('participants.yourMessageLabel')}
                 </p>
                 <textarea
                   value={text}
@@ -232,34 +234,34 @@ function MessageModal({
                   }}
                   maxLength={300}
                   rows={3}
-                  placeholder="Votre message pour l'organisateur…"
+                  placeholder={t('participants.messagePlaceholder')}
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 resize-none"
                 />
                 <div className="flex items-center justify-between mt-1 mb-5">
-                  <span className="text-[11px] text-slate-400">{text.length}/300 · max 3 lignes</span>
+                  <span className="text-[11px] text-slate-400">{t('participants.charLimit', { count: text.length })}</span>
                   {participant.response_message && (
                     <button onClick={handleDelete}
                       className="text-[11px] text-red-400 hover:text-red-600 font-semibold">
-                      Supprimer le message
+                      {t('participants.deleteMessage')}
                     </button>
                   )}
                 </div>
                 {saved ? (
-                  <p className="text-center text-[13px] text-[#3B6D11] font-semibold mb-5">✓ Message enregistré</p>
+                  <p className="text-center text-[13px] text-[#3B6D11] font-semibold mb-5">{t('participants.messageSaved')}</p>
                 ) : (
                   <button onClick={handleSave} disabled={!text.trim() || saving}
                     className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-40 transition-colors mb-5">
-                    {saving ? 'Enregistrement…' : 'Enregistrer le message'}
+                    {saving ? t('participants.saving') : t('participants.saveMessage')}
                   </button>
                 )}
               </>
             ) : (
               <>
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
-                  Message du joueur
+                  {t('participants.playerMessageLabel')}
                 </p>
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[60px] mb-5">
-                  {participant.response_message || <span className="text-slate-400 italic">Aucun message</span>}
+                  {participant.response_message || <span className="text-slate-400 italic">{t('participants.noMessage')}</span>}
                 </div>
               </>
             )}
@@ -268,7 +270,7 @@ function MessageModal({
 
         {/* ── Remarque (visible par tous, éditable par le joueur lui-même ou l'admin) ── */}
         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
-          Remarque
+          {t('participants.note')}
         </p>
         {canEditNote ? (
           <>
@@ -280,31 +282,31 @@ function MessageModal({
               }}
               maxLength={300}
               rows={3}
-              placeholder="Ex : viendra accompagné(e) pour le repas…"
+              placeholder={t('participants.notePlaceholder')}
               className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4338CA]/30 resize-none"
             />
             <div className="flex items-center justify-between mt-1 mb-4">
-              <span className="text-[11px] text-slate-400">{noteText.length}/300 · max 3 lignes</span>
+              <span className="text-[11px] text-slate-400">{t('participants.charLimit', { count: noteText.length })}</span>
               {participant.admin_note && (
                 <button onClick={handleDeleteNote} disabled={noteSaving}
                   className="text-[11px] text-red-400 hover:text-red-600 font-semibold disabled:opacity-40">
-                  Supprimer la remarque
+                  {t('participants.deleteNote')}
                 </button>
               )}
             </div>
             {noteSaved ? (
-              <p className="text-center text-[13px] text-[#4338CA] font-semibold">✓ Remarque enregistrée</p>
+              <p className="text-center text-[13px] text-[#4338CA] font-semibold">{t('participants.noteSaved')}</p>
             ) : (
               <button onClick={handleSaveNote} disabled={noteSaving}
                 className="w-full text-white text-[13px] font-semibold py-2.5 rounded-xl disabled:opacity-40 transition-colors"
                 style={{ background: '#4338CA' }}>
-                {noteSaving ? 'Enregistrement…' : 'Enregistrer la remarque'}
+                {noteSaving ? t('participants.saving') : t('participants.saveNote')}
               </button>
             )}
           </>
         ) : (
           <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap min-h-[60px]">
-            {participant.admin_note || <span className="text-slate-400 italic">Aucune remarque</span>}
+            {participant.admin_note || <span className="text-slate-400 italic">{t('participants.noNote')}</span>}
           </div>
         )}
       </div>
@@ -314,10 +316,11 @@ function MessageModal({
 
 // ─── Badge "M" ───────────────────────────────────────────────────────────────
 function MBadge({ onClick }: { onClick: () => void }) {
+  const t = useTranslations()
   return (
     <button
       onClick={onClick}
-      title="Voir le message du joueur"
+      title={t('participants.viewMessageTitle')}
       className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-colors hover:scale-110"
       style={{ background: '#185FA5', color: '#fff' }}
     >
@@ -328,10 +331,11 @@ function MBadge({ onClick }: { onClick: () => void }) {
 
 // ─── Badge "R" (remarque admin) ────────────────────────────────────────────
 function RBadge({ onClick }: { onClick: () => void }) {
+  const t = useTranslations()
   return (
     <button
       onClick={onClick}
-      title="Voir la remarque admin"
+      title={t('participants.viewNoteTitle')}
       className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-colors hover:scale-110"
       style={{ background: '#4338CA', color: '#fff' }}
     >
@@ -515,29 +519,33 @@ export default function ParticipantsPage() {
       const event = events.find(e => e.id === selectedEventId)
       const hasExtra = !!extraActivityLabel
 
-      const statusLabelFr: Record<string, string> = {
-        GOING: 'Confirmé', INVITED: 'Invité', DECLINED: 'Décliné', WAITLIST: 'Attente',
-      }
+      const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+      // Libellés dans la langue de l'interface (statuts : clés status.*)
+      const statusLabel = (s: string) => t(`status.${s}`)
       // Couleurs reprises telles quelles de STATUS_STYLE / des boutons golf de l'app
+      // (clés internes indépendantes de la langue : le texte affiché est dans HOLES_TEXT)
       const HOLES_COLOR: Record<string, string> = {
-        '18H':      'FF16A34A', // vert — bouton 18 trous
-        '9H Front': 'FFCA8A04', // ambre — bouton 9 trous Front
-        '9H Back':  'FFEA580C', // orange — bouton 9 trous Back
-        '—':        'FF94A3B8',
+        '18':  'FF16A34A', // vert — bouton 18 trous
+        'out': 'FFCA8A04', // ambre — bouton 9 trous Front
+        'in':  'FFEA580C', // orange — bouton 9 trous Back
+        '—':   'FF94A3B8',
       }
-      function reportHolesLabel(p: Participant): string {
+      const HOLES_TEXT: Record<string, string> = {
+        '18': t('participants.holes18code'), 'out': t('holes.out'), 'in': t('holes.in'), '—': '—',
+      }
+      function reportHolesKey(p: Participant): string {
         if (p.status !== 'GOING') return '—'
-        if (!p.holes_played || p.holes_played === 18) return '18H'
-        if (p.holes_section === 'out') return '9H Front'
-        if (p.holes_section === 'in')  return '9H Back'
-        return '18H'
+        if (!p.holes_played || p.holes_played === 18) return '18'
+        if (p.holes_section === 'out') return 'out'
+        if (p.holes_section === 'in')  return 'in'
+        return '18'
       }
       const argb = (hex: string) => 'FF' + hex.replace('#', '').toUpperCase()
 
       const workbook = new ExcelJS.Workbook()
       workbook.creator = 'GolfGo'
       workbook.created = new Date()
-      const sheet = workbook.addWorksheet('Participants', {
+      const sheet = workbook.addWorksheet(t('nav.participants'), {
         views: [{ showGridLines: false }],
       })
 
@@ -552,16 +560,18 @@ export default function ParticipantsPage() {
       // ── Titre ──
       sheet.mergeCells(1, 1, 1, totalColCount)
       const titleCell = sheet.getCell(1, 1)
-      titleCell.value = event ? `${event.title} — ${formatDate(event.starts_at)}` : 'Participants'
+      titleCell.value = event ? `${event.title} — ${formatDate(event.starts_at)}` : t('nav.participants')
       titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } }
       titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argb('#185FA5') } }
       titleCell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 }
       sheet.getRow(1).height = 30
 
       // ── Ligne de synthèse (ligne 3) ──
-      const summaryLabels = hasExtra
-        ? ['18H', '9H Front', '9H Back', 'En attente', 'Décliné', 'Total', 'Activité annexe']
-        : ['18H', '9H Front', '9H Back', 'En attente', 'Décliné', 'Total']
+      const summaryBase = [
+        HOLES_TEXT['18'], HOLES_TEXT.out, HOLES_TEXT.in,
+        t('participants.pending'), statusLabel('DECLINED'), cap(t('participants.total')),
+      ]
+      const summaryLabels = hasExtra ? [...summaryBase, t('participants.extraActivity')] : summaryBase
       const summaryValues = hasExtra
         ? [going18.length, going9front.length, going9back.length, invited, declined, participants.length, extraActivityCount]
         : [going18.length, going9front.length, going9back.length, invited, declined, participants.length]
@@ -591,8 +601,8 @@ export default function ParticipantsPage() {
       // ── En-tête du tableau détail (ligne 6) ──
       const headerRowIdx = 6
       const headers = hasExtra
-        ? ['Prénom et Nom', 'Trous', 'Activité annexe', 'Statut', 'Message et Remarque']
-        : ['Prénom et Nom', 'Trous', 'Statut', 'Message et Remarque']
+        ? [t('participants.excelName'), t('participants.holes'), t('participants.extraActivity'), t('participants.status'), t('participants.messageAndNote')]
+        : [t('participants.excelName'), t('participants.holes'), t('participants.status'), t('participants.messageAndNote')]
       headers.forEach((h, i) => {
         const c = sheet.getCell(headerRowIdx, i + 1)
         c.value = h
@@ -606,25 +616,26 @@ export default function ParticipantsPage() {
       displayed.forEach((p, i) => {
         const rowIdx = headerRowIdx + 1 + i
         const name   = `${p.players?.first_name ?? ''} ${p.players?.surname ?? ''}`.trim()
-        const holes  = reportHolesLabel(p)
-        const status = statusLabelFr[p.status] ?? p.status
+        const holesKey = reportHolesKey(p)
+        const holes    = HOLES_TEXT[holesKey]
+        const status = statusLabel(p.status)
         const statusStyle = STATUS_STYLE[p.status] ?? { bg: '#F1F5F9', text: '#64748B' }
         const msgLines: string[] = []
-        if (p.response_message) msgLines.push(`Msg: ${p.response_message}`)
-        if (p.admin_note)       msgLines.push(`Rem: ${p.admin_note}`)
+        if (p.response_message) msgLines.push(`${t('participants.message')}: ${p.response_message}`)
+        if (p.admin_note)       msgLines.push(`${t('participants.note')}: ${p.admin_note}`)
         const stripe = i % 2 === 1 ? argb('#F8FAFC') : 'FFFFFFFF'
 
         const cols: { value: any; align: 'left' | 'center'; color?: string; fill?: string; bold?: boolean }[] = hasExtra
           ? [
               { value: name, align: 'left' },
-              { value: holes, align: 'center', color: HOLES_COLOR[holes], bold: true },
+              { value: holes, align: 'center', color: HOLES_COLOR[holesKey], bold: true },
               { value: p.extra_activity_count ?? '—', align: 'center' },
               { value: status, align: 'center', color: argb(statusStyle.text), fill: argb(statusStyle.bg), bold: true },
               { value: msgLines.join('\n'), align: 'left' },
             ]
           : [
               { value: name, align: 'left' },
-              { value: holes, align: 'center', color: HOLES_COLOR[holes], bold: true },
+              { value: holes, align: 'center', color: HOLES_COLOR[holesKey], bold: true },
               { value: status, align: 'center', color: argb(statusStyle.text), fill: argb(statusStyle.bg), bold: true },
               { value: msgLines.join('\n'), align: 'left' },
             ]
@@ -792,7 +803,7 @@ export default function ParticipantsPage() {
             {isOwner && (
               <button type="button" onClick={exportToExcel} disabled={exporting}
                 className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors whitespace-nowrap">
-                {exporting ? 'Génération…' : '📊 Exporter Excel'}
+                {exporting ? t('participants.exporting') : `📊 ${t('participants.exporterExcel')}`}
               </button>
             )}
             <a href={`/groups/${groupId}/invitations`}
@@ -834,13 +845,13 @@ export default function ParticipantsPage() {
             {going9front.length > 0 && (
               <div className="border border-amber-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: '#FEF3C7' }}>
                 <span className="text-[20px] font-black text-amber-700">{going9front.length}</span>
-                <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide whitespace-nowrap">9H Front</span>
+                <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide whitespace-nowrap">{t('holes.out')}</span>
               </div>
             )}
             {going9back.length > 0 && (
               <div className="border border-orange-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: '#FFF7ED' }}>
                 <span className="text-[20px] font-black text-orange-700">{going9back.length}</span>
-                <span className="text-[10px] font-semibold text-orange-600 uppercase tracking-wide whitespace-nowrap">9H Back</span>
+                <span className="text-[10px] font-semibold text-orange-600 uppercase tracking-wide whitespace-nowrap">{t('holes.in')}</span>
               </div>
             )}
             <div className="border border-white/50 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: '#EBF3FC' }}>
@@ -923,7 +934,7 @@ export default function ParticipantsPage() {
                       {!p.admin_note && canEditNote(p) && (
                         <button
                           onClick={() => setMsgModal(p)}
-                          title="Ajouter une remarque"
+                          title={t('participants.addNoteTitle')}
                           className="w-5 h-5 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-300 hover:border-[#4338CA] hover:text-[#4338CA] transition-colors"
                         >
                           +
@@ -932,7 +943,7 @@ export default function ParticipantsPage() {
                       {!p.response_message && canEditMessage(p) && (
                         <button
                           onClick={() => setMsgModal(p)}
-                          title="Ajouter un message"
+                          title={t('participants.addMessageTitle')}
                           className="w-5 h-5 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-300 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors"
                         >
                           +
@@ -952,7 +963,7 @@ export default function ParticipantsPage() {
                               ? 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100'
                               : 'bg-white/60 border-slate-200 text-slate-400 hover:border-amber-300 hover:text-amber-600'
                           }`}>
-                                                {holesLabel(p.holes_played, p.holes_section)}</button>
+                                                {holesLabel(p.holes_played, p.holes_section, t('participants.holes18code'))}</button>
                       ) : p.status === 'GOING' ? (                              // ← ajout filtre statut
                         <HolesBadge holes={p.holes_played} section={p.holes_section} />
                       ) : (

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { getStablefordTotal, getBrutTotal, getNetTotal, type ScoringHole, type ScoringScore } from '@/lib/golf/scoring/stableford'
 import type { Player } from '@/components/scorecards/scorecard-types'
@@ -20,6 +21,8 @@ type Props = {
 const supabase = createClient()
 export default function Leaderboard({ eventId, scorecardId, players, holes, eventFormat, isOwner = false, eventTitle = '', eventDate = '' }: Props) {
  
+  const t      = useTranslations()
+  const locale = useLocale()
   const isStableford = eventFormat === 'stableford'
 
   const [entries,   setEntries]   = useState<LeaderboardEntry[]>([])
@@ -58,13 +61,13 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
         entries.map(e => ({ player_id: e.player.id, total: e.score })),
         { onConflict: 'player_id' }
       )
-      setSaveMsgLb('✓ Sauvegardé')
-    } catch { setSaveMsgLb('Erreur') }
+      setSaveMsgLb('✓ ' + t('scorecards.saved'))
+    } catch { setSaveMsgLb(t('scorecards.error')) }
     finally { setSavingLb(false); setTimeout(() => setSaveMsgLb(''), 3000) }
   }
 
-  if (loading) return <div className="text-[13px] text-slate-400 py-4">Chargement…</div>
-  if (entries.length === 0) return <div className="text-[13px] text-slate-400 py-4">Aucun score pour l'instant.</div>
+  if (loading) return <div className="text-[13px] text-slate-400 py-4">{t('common.loading')}</div>
+  if (entries.length === 0) return <div className="text-[13px] text-slate-400 py-4">{t('leaderboard.noScores')}</div>
 
   return (
     <>
@@ -95,7 +98,7 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
           <span className="print-lb-logo-go">Go</span>
         </div>
         <div>
-          <div className="print-lb-title">{eventTitle} — Leaderboard</div>
+          <div className="print-lb-title">{eventTitle} — {t('leaderboard.title')}</div>
           <div className="print-lb-date">{eventDate}</div>
         </div>
       </div>
@@ -107,12 +110,12 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
                 <th className="px-3 py-2.5 text-center w-8 text-[11px] font-semibold text-slate-500">#</th>
-                <th className="px-3 py-2.5 text-left text-[11px] font-semibold text-slate-500">Joueur</th>
+                <th className="px-3 py-2.5 text-left text-[11px] font-semibold text-slate-500">{t('participants.player')}</th>
                 <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-500">Phcp</th>
-                <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-500">Trous</th>
-                <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-500">Brut</th>
+                <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-500">{t('participants.holes')}</th>
+                <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-500">{t('scoring.gross')}</th>
                 <th className="px-3 py-2.5 text-center text-[11px] font-bold text-slate-700">
-                  {isStableford ? 'Pts' : 'Net'}
+                  {isStableford ? t('scoring.pts') : t('scoring.net')}
                 </th>
               </tr>
             </thead>
@@ -132,8 +135,8 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
         </div>
 
         <div className="print-lb-footer">
-          <span>GolfGo — golfgo-drab.vercel.app</span>
-          <span>Imprimé le {new Date().toLocaleDateString('fr-BE')}</span>
+          <span>{t('teesheet.printFooter.siteUrl')}</span>
+          <span>{t('teesheet.printFooter.printedOn', { date: new Date().toLocaleDateString(locale) })}</span>
         </div>
       </div>
     </>

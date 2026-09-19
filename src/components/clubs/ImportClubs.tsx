@@ -227,10 +227,12 @@ export default function ImportClubs() {
   const [importing,  setImporting]  = useState(false)
   const [result,     setResult]     = useState<ImportResult | null>(null)
   const [parseError, setParseError] = useState('')
+  const [fileName,   setFileName]   = useState('')
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
+    setFileName(f.name)
     setPreview([]); setResult(null); setParseError(''); setParsing(true)
     try {
       const { rows, examined } = await parseXLS(f)
@@ -285,13 +287,17 @@ export default function ImportClubs() {
       </div>
 
       <p className="text-[12px] text-gray-500 -mt-2">
-        Pour plus de facilité, télécharge d'abord le modèle Excel ci-dessus, complète-le, puis importe-le ci-dessous.
+        {t('importClubs.templateHint')}
       </p>
 
       <div>
         <label className="block text-[12px] font-medium text-gray-500 mb-1.5">{t('importClubs.fileLabel')}</label>
-        <input type="file" accept=".xls,.xlsx" onChange={handleFile}
-          className="w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] text-gray-600 file:mr-3 file:border-0 file:bg-blue-50 file:text-blue-700 file:text-[12px] file:font-medium file:px-3 file:py-1 file:rounded-md cursor-pointer" />
+        {/* Bouton personnalisé : le texte natif « Choisir un fichier / Aucun fichier choisi » dépend de la langue du navigateur, pas de celle de l'app */}
+        <label className="flex items-center gap-3 w-full border border-gray-200 rounded-md px-3 py-2 text-[13px] text-gray-600 cursor-pointer focus-within:ring-2 focus-within:ring-[#185FA5]/30">
+          <span className="bg-blue-50 text-blue-700 text-[12px] font-medium px-3 py-1 rounded-md whitespace-nowrap">{t('importClubs.chooseFile')}</span>
+          <span className="truncate">{fileName || t('importClubs.noFile')}</span>
+          <input type="file" accept=".xls,.xlsx" onChange={handleFile} className="sr-only" />
+        </label>
       </div>
 
       {parsing && (
@@ -311,7 +317,7 @@ export default function ImportClubs() {
             <p className="text-[12px] font-medium text-gray-500">
               {t('importClubs.preview', { clubs: clubCount, courses: courseCount, tees: teeCount })}
             </p>
-            <button onClick={() => setPreview([])} className="text-[11px] text-gray-400 hover:text-gray-600">
+            <button onClick={() => { setPreview([]); setFileName('') }} className="text-[11px] text-gray-400 hover:text-gray-600">
               {t('importClubs.clear')}
             </button>
           </div>
@@ -320,14 +326,14 @@ export default function ImportClubs() {
             <table className="w-full text-[11px]" style={{ tableLayout: 'fixed' }}>
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[8%]">Country</th>
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[10%]">Region</th>
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[20%]">Club</th>
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[18%]">Course</th>
-                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[22%]">Tee</th>
-                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[8%]">Par</th>
-                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[7%]">CR</th>
-                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[7%]">Slope</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[8%]">{t('clubs.country')}</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[10%]">{t('clubs.region')}</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[20%]">{t('scorecards.club')}</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[18%]">{t('clubs.courseLabel')}</th>
+                  <th className="px-3 py-2 text-left text-gray-400 font-medium w-[22%]">{t('clubs.colTee')}</th>
+                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[8%]">{t('clubs.colPar')}</th>
+                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[7%]">{t('clubs.colCR')}</th>
+                  <th className="px-3 py-2 text-center text-gray-400 font-medium w-[7%]">{t('clubs.colSlope')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -387,7 +393,7 @@ export default function ImportClubs() {
               {result.errors.map((e, i) => <div key={i}>{e}</div>)}
             </div>
           )}
-          <button onClick={() => { setResult(null); setPreview([]) }}
+          <button onClick={() => { setResult(null); setPreview([]); setFileName('') }}
             className="text-[12px] text-blue-600 hover:underline self-start">
             {t('importClubs.importAnother')}
           </button>

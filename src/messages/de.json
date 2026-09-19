@@ -114,7 +114,7 @@
     "whatsapp": "WhatsApp",
     "printFooter": {
       "printedOn": "Gedruckt am {date}",
-      "siteUrl": "GolfGo — golfgo-drab.vercel.app"
+      "siteUrl": "GolfGo — golfgo.be"
     },
     "reorderHint": "⠿ Ziehen Sie einen Abschlag, um die Reihenfolge zu ändern · tippen Sie auf die Uhrzeit, um sie manuell zu bearbeiten",
     "reorderSaving": " · wird gespeichert…",
@@ -151,10 +151,14 @@
     "loading": "Laden…",
     "error": "Ein Fehler ist aufgetreten",
     "noData": "—",
-    "back": "Zurück"
+    "back": "Zurück",
+    "popupBlocked": "Pop-up blockiert — bitte erlauben Sie Pop-ups, um fortzufahren",
+    "quotaExceeded": "Tageskontingent überschritten — {count} E-Mail(s) in die Warteschlange gestellt, sie werden automatisch gesendet.",
+    "errorsList": "Fehler: {errors}"
   },
   "errors": {
-    "generic": "Ein Fehler ist aufgetreten"
+    "generic": "Ein Fehler ist aufgetreten",
+    "unexpected": "Unerwarteter Fehler"
   },
   "clubs": {
     "title": "Clubs & Plätze",
@@ -430,7 +434,18 @@
     "photosOptional": "optional",
     "photosAdd": "Fotos hinzufügen",
     "photosUploading": "Hochladen…",
-    "clubCourseRequired": "Club und Platz sind erforderlich"
+    "clubCourseRequired": "Club und Platz sind erforderlich",
+    "extraActivity": "Zusatzaktivität",
+    "extraActivityPlaceholder": "Z.B.: Essen im Clubhaus — 19 Uhr",
+    "scorecardNotes": "Hinweise zur Scorekarte",
+    "scorecardNotesPlaceholder": "Besondere Regeln, lokale Infos, Hinweise...",
+    "scorecardNotesHint": "Wird unter jede Scorekarte gedruckt.",
+    "hcpPercent": "% HCP für das Team",
+    "hcpDefault": "Standard {value}%",
+    "feePlaceholder": "Z.B.: 35",
+    "maxPlaceholder": "Z.B.: 24",
+    "extraActivityHint": "Wenn ausgefüllt, kann jeder Teilnehmer zusätzlich zur Golf-Antwort mit Ja/Nein auf diese Aktivität antworten. Leer lassen zum Deaktivieren.",
+    "photosHint": "JPG, PNG, WEBP · max. 10 MB"
   },
   "editGroup": {
     "title": "Gruppe bearbeiten",
@@ -551,7 +566,9 @@
     "fromFlight": "Flight {no} →"
   },
   "leaderboard": {
-    "noScorecard": "Keine Scorekarte für diese Veranstaltung gefunden"
+    "noScorecard": "Keine Scorekarte für diese Veranstaltung gefunden",
+    "title": "Rangliste",
+    "noScores": "Noch keine Scores."
   },
   "addParticipants": {
     "title": "Teilnehmer hinzufügen",
@@ -588,7 +605,35 @@
     "declined": "abgelehnt",
     "total": "gesamt",
     "notInvited": "nicht eingeladen",
-    "waitlist": "⏳ Warteliste"
+    "waitlist": "⏳ Warteliste",
+    "exporterExcel": "Nach Excel exportieren",
+    "exporting": "Wird erstellt…",
+    "holes18code": "18L",
+    "extraActivity": "Zusatzaktivität",
+    "pending": "Ausstehend",
+    "excelName": "Vor- und Nachname",
+    "messageAndNote": "Nachricht & Bemerkung",
+    "message": "Nachricht",
+    "note": "Bemerkung",
+    "extraCountTitle": "Anzahl Personen (Spieler eingeschlossen) — änderbar",
+    "yourMessageLabel": "Ihre Nachricht an den Organisator",
+    "playerMessageLabel": "Nachricht des Spielers",
+    "messagePlaceholder": "Ihre Nachricht an den Organisator…",
+    "charLimit": "{count}/300 · max. 3 Zeilen",
+    "deleteMessage": "Nachricht löschen",
+    "messageSaved": "✓ Nachricht gespeichert",
+    "saving": "Wird gespeichert…",
+    "saveMessage": "Nachricht speichern",
+    "noMessage": "Keine Nachricht",
+    "notePlaceholder": "Z.B.: kommt in Begleitung zum Essen…",
+    "deleteNote": "Bemerkung löschen",
+    "noteSaved": "✓ Bemerkung gespeichert",
+    "saveNote": "Bemerkung speichern",
+    "noNote": "Keine Bemerkung",
+    "viewMessageTitle": "Nachricht des Spielers anzeigen",
+    "viewNoteTitle": "Bemerkung des Admins anzeigen",
+    "addNoteTitle": "Bemerkung hinzufügen",
+    "addMessageTitle": "Nachricht hinzufügen"
   },
   "payments": {
     "readOnly": "Nur-Lesen",
@@ -671,7 +716,11 @@
     "noCourse": "Club und Platz auswählen, um Scorekarten aufzurufen",
     "noCourseReadOnly": "Kein Platz für diese Veranstaltung konfiguriert",
     "whatsapp": "WhatsApp",
-    "manageCourses": "Clubs und Plätze verwalten"
+    "manageCourses": "Clubs und Plätze verwalten",
+    "noCourseBanner": "Kein Platz für diese Veranstaltung konfiguriert —",
+    "editEventLink": "Veranstaltung bearbeiten",
+    "orSeparator": "oder",
+    "manageClubsLink": "Clubs verwalten"
   },
   "eventOverview": {
     "notFound": "Veranstaltung nicht gefunden",
@@ -818,7 +867,8 @@
     "backToMembers": "← Zurück zu Mitgliedern",
     "continueToEvents": "Weiter zu Veranstaltungen →",
     "alreadyMember": "Dieser Spieler ist bereits als {role} in dieser Gruppe",
-    "importTitle": "Spieler importieren"
+    "importTitle": "Spieler importieren",
+    "importHint": "Diese Datei kann auch bestehende Spieler aktualisieren (Handicap, Club usw.): Nur ausgefüllte Zellen werden geändert, der Rest wird nie überschrieben."
   },
   "addGroup": {
     "title": "Neue Gruppe",
@@ -851,7 +901,6 @@
   },
   "editPlayer": {
     "title": "Spielerprofil bearbeiten",
-    "importHint": "Diese Datei kann auch bestehende Spieler aktualisieren (Handicap, Club usw.): Nur ausgefüllte Zellen werden geändert, der Rest wird nie überschrieben.",
     "bulkEditHint": "Mehrere Spieler auf einmal ändern (Handicap, Club...)? Nutze den Excel-Import unter \"Mitglieder hinzufügen\" →",
     "notFound": "Spieler nicht gefunden",
     "firstName": "Vorname *",
@@ -896,7 +945,16 @@
     "sendError": "Fehler beim Senden",
     "myFlight": "Mein Flight",
     "me": "Ich",
-    "myScorecard": "Meine Scorekarte"
+    "myScorecard": "Meine Scorekarte",
+    "noFlightsForEvent": "Kein Flight für diese Veranstaltung",
+    "allScorecards": "Alle Scorekarten",
+    "confirmedCount": "{count, plural, one {# bestätigter Teilnehmer} other {# bestätigte Teilnehmer}}",
+    "endOfRoundHint": "Hier am Ende der Runde klicken",
+    "signAndFinish": "Scorekarte unterschreiben und Runde beenden",
+    "signed": "Die Scorekarte wurde unterschrieben und an die Rangliste gesendet.",
+    "retryError": "Fehler — bitte erneut versuchen",
+    "bulkSent": "{count, plural, one {# Scorekarte gesendet} other {# Scorekarten gesendet}}",
+    "bulkSkipped": " · {count} übersprungen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -1034,7 +1092,17 @@
     "cancel": "Abbrechen",
     "errorUnexpected": "Unerwarteter Fehler",
     "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen",
-    "clubCourseRequired": "Club und Platz sind erforderlich"
+    "clubCourseRequired": "Club und Platz sind erforderlich",
+    "extraActivity": "Zusatzaktivität",
+    "extraActivityPlaceholder": "Z.B.: Essen im Clubhaus — 19 Uhr",
+    "scorecardNotes": "Hinweise zur Scorekarte",
+    "scorecardNotesPlaceholder": "Besondere Regeln, lokale Infos, Hinweise...",
+    "scorecardNotesHint": "Wird unter jede Scorekarte gedruckt.",
+    "hcpPercent": "% HCP für das Team",
+    "hcpDefault": "Standard {value}%",
+    "feePlaceholder": "Z.B.: 35",
+    "maxPlaceholder": "Z.B.: 24",
+    "extraActivityHint": "Wenn ausgefüllt, kann jeder Teilnehmer zusätzlich zur Golf-Antwort mit Ja/Nein auf diese Aktivität antworten."
   },
   "events": {
     "title": "Veranstaltungen",
@@ -1076,7 +1144,10 @@
     "teesUpdated": "Tees aktualisiert",
     "errorNoRows": "Die Datei scheint leer zu sein — keine Datenzeilen unter der Kopfzeile gefunden.",
     "errorAllSkipped": "{count} Zeile(n) gelesen, aber keine konnte importiert werden — prüfen Sie, ob die Spalten Tee und Slope ausgefüllt sind.",
-    "clubOnlyRow": "Nur Club — Plätze/Abschläge werden später ergänzt"
+    "clubOnlyRow": "Nur Club — Plätze/Abschläge werden später ergänzt",
+    "templateHint": "Laden Sie zunächst die Excel-Vorlage oben herunter, füllen Sie sie aus und importieren Sie sie dann unten.",
+    "chooseFile": "Datei auswählen",
+    "noFile": "Keine Datei ausgewählt"
   },
   "partners": {
     "title": "Meine Partner",
@@ -1286,5 +1357,34 @@
     "importAllCards": "Alle Scorekarten importieren",
     "imported": "Importiert",
     "viewClub": "Club ansehen"
+  },
+
+  "scoring": {
+    "hole": "Loch",
+    "gross": "Brutto",
+    "net": "Netto",
+    "pts": "Pkt",
+    "received": "Vorg.",
+    "bestBall": "Bestball",
+    "unassigned": "Ohne Flight",
+    "markerSignature": "Unterschrift Marker",
+    "playerSignature": "Unterschrift Spieler",
+    "print": "Drucken",
+    "printCards": "Scorekarten drucken",
+    "preview": "Vorschau",
+    "email": "E-Mail",
+    "format": {
+      "stroke": "Zählspiel",
+      "stableford": "Stableford"
+    }
+  },
+
+  "push": {
+    "denied": "Berechtigung verweigert — aktivieren Sie die Benachrichtigungen in den Browsereinstellungen",
+    "activationError": "Fehler bei der Aktivierung",
+    "activated": "Benachrichtigungen auf diesem Gerät aktiviert",
+    "enable": "Benachrichtigungen bei Absagen aktivieren",
+    "enabled": "Benachrichtigungen aktiviert",
+    "enabling": "Aktivierung…"
   }
 }

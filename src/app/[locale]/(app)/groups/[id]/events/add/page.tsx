@@ -153,7 +153,7 @@ export default function AddEventPage() {
               <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('addEvent.club')}</label>
               <div className="flex gap-2">
                 <select value={selectedCountry} onChange={e => { setSelectedCountry(e.target.value); setSelectedClubId('') }} className={inputClass}>
-                  <option value="">🌍 Pays</option>
+                  <option value="">🌍 {t('clubs.country')}</option>
                   {[...new Set(clubs.map(c => c.country || 'OTHER'))].sort().map(country => (
                     <option key={country} value={country}>{country}</option>
                   ))}
@@ -194,7 +194,7 @@ export default function AddEventPage() {
                 return (
                   <div className="mt-3">
                     <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-                      % HCP appliqué à l'équipe <span className="text-slate-400 font-normal">— défaut {selected.hcp_percentage}%</span>
+                      {t('addEvent.hcpPercent')} <span className="text-slate-400 font-normal">— {t('addEvent.hcpDefault', { value: selected.hcp_percentage })}</span>
                     </label>
                     <input type="number" min={0} max={100} step={5}
                       value={hcpOverride} onChange={e => setHcpOverride(e.target.value)}
@@ -212,7 +212,7 @@ export default function AddEventPage() {
             <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
               {t('addEvent.fee')} <span className="text-slate-400 font-normal">— {t('addEvent.feeOptional')}</span>
             </label>
-            <input value={fee} onChange={e => setFee(e.target.value)} placeholder="Ex: 35" className={inputClass} />
+            <input value={fee} onChange={e => setFee(e.target.value)} placeholder={t('addEvent.feePlaceholder')} className={inputClass} />
             {fee && <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.feeHint')}</p>}
           </div>
 
@@ -221,7 +221,7 @@ export default function AddEventPage() {
               {t('addEvent.maxParticipants')} <span className="text-slate-400 font-normal">— {t('addEvent.maxOptional')}</span>
             </label>
             <input value={maxParticipants} onChange={e => setMaxParticipants(e.target.value)}
-              placeholder="Ex: 24" type="number" min="1" className={inputClass} />
+              placeholder={t('addEvent.maxPlaceholder')} type="number" min="1" className={inputClass} />
             {maxParticipants && <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.maxHint')}</p>}
           </div>
         </div>
@@ -238,23 +238,23 @@ export default function AddEventPage() {
 
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            Activité annexe <span className="text-slate-400 font-normal">— optionnel</span>
+            {t('addEvent.extraActivity')} <span className="text-slate-400 font-normal">— {t('addEvent.emailOptional')}</span>
           </label>
           <input value={extraActivityLabel} onChange={e => setExtraActivityLabel(e.target.value)}
-            placeholder="Ex: Repas au clubhouse — 19h" className={inputClass} />
+            placeholder={t('addEvent.extraActivityPlaceholder')} className={inputClass} />
           <p className="text-[11px] text-slate-500 mt-1">
-            Si rempli, chaque participant pourra dire oui/non à cette activité en plus de sa réponse golf.
+            {t('addEvent.extraActivityHint')}
           </p>
         </div>
 
         <div>
         <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-          Notes sur la carte de score <span className="text-slate-400 font-normal">— optionnel</span>
+          {t('addEvent.scorecardNotes')} <span className="text-slate-400 font-normal">— {t('addEvent.emailOptional')}</span>
         </label>
         <textarea value={scorecardNotes} onChange={e => setScorecardNotes(e.target.value)}
-          placeholder="Règles spécifiques, infos locales, consignes..."
+          placeholder={t('addEvent.scorecardNotesPlaceholder')}
           rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
-        <p className="text-[11px] text-slate-500 mt-1">S'imprime sous chaque carte de score.</p>
+        <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.scorecardNotesHint')}</p>
       </div>
 
         {error && <div className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</div>}

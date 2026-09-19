@@ -113,7 +113,7 @@
     "whatsapp": "WhatsApp",
     "printFooter": {
       "printedOn": "Afgedrukt op {date}",
-      "siteUrl": "GolfGo — golfgo-drab.vercel.app"
+      "siteUrl": "GolfGo — golfgo.be"
     },
     "reorderHint": "⠿ Sleep een vertrek om de volgorde te wijzigen · tik op het tijdstip om het handmatig aan te passen",
     "reorderSaving": " · opslaan…",
@@ -150,10 +150,14 @@
     "loading": "Laden…",
     "error": "Er is een fout opgetreden",
     "noData": "—",
-    "back": "Terug"
+    "back": "Terug",
+    "popupBlocked": "Pop-up geblokkeerd — sta pop-ups toe om door te gaan",
+    "quotaExceeded": "Dagelijks quotum overschreden — {count} e-mail(s) in de wachtrij geplaatst, ze worden automatisch verzonden.",
+    "errorsList": "Fouten: {errors}"
   },
   "errors": {
-    "generic": "Er is een fout opgetreden"
+    "generic": "Er is een fout opgetreden",
+    "unexpected": "Onverwachte fout"
   },
   "clubs": {
     "title": "Clubs & Parcours",
@@ -429,7 +433,18 @@
     "photosOptional": "optioneel",
     "photosAdd": "Foto's toevoegen",
     "photosUploading": "Uploaden…",
-    "clubCourseRequired": "Club en parcours zijn verplicht"
+    "clubCourseRequired": "Club en parcours zijn verplicht",
+    "extraActivity": "Nevenactiviteit",
+    "extraActivityPlaceholder": "Bijv.: Maaltijd in het clubhuis — 19u",
+    "scorecardNotes": "Notities op de scorekaart",
+    "scorecardNotesPlaceholder": "Specifieke regels, lokale info, instructies...",
+    "scorecardNotesHint": "Wordt onder elke scorekaart afgedrukt.",
+    "hcpPercent": "% HCP toegepast op het team",
+    "hcpDefault": "standaard {value}%",
+    "feePlaceholder": "Bijv.: 35",
+    "maxPlaceholder": "Bijv.: 24",
+    "extraActivityHint": "Indien ingevuld kan elke deelnemer ja/nee antwoorden op deze activiteit, naast het golfantwoord. Laat leeg om uit te schakelen.",
+    "photosHint": "JPG, PNG, WEBP · max. 10 MB"
   },
   "editGroup": {
     "title": "Groep bewerken",
@@ -550,7 +565,9 @@
     "fromFlight": "Flight {no} →"
   },
   "leaderboard": {
-    "noScorecard": "Geen scorekaart gevonden voor dit evenement"
+    "noScorecard": "Geen scorekaart gevonden voor dit evenement",
+    "title": "Klassement",
+    "noScores": "Nog geen scores."
   },
   "addParticipants": {
     "title": "Deelnemers toevoegen",
@@ -587,7 +604,35 @@
     "declined": "afgewezen",
     "total": "totaal",
     "notInvited": "niet uitgenodigd",
-    "waitlist": "⏳ Wachtlijst"
+    "waitlist": "⏳ Wachtlijst",
+    "exporterExcel": "Exporteren naar Excel",
+    "exporting": "Genereren…",
+    "holes18code": "18G",
+    "extraActivity": "Nevenactiviteit",
+    "pending": "In afwachting",
+    "excelName": "Voor- en achternaam",
+    "messageAndNote": "Bericht & opmerking",
+    "message": "Bericht",
+    "note": "Opmerking",
+    "extraCountTitle": "Aantal personen (speler inbegrepen) — aanpasbaar",
+    "yourMessageLabel": "Jouw bericht voor de organisator",
+    "playerMessageLabel": "Bericht van de speler",
+    "messagePlaceholder": "Je bericht voor de organisator…",
+    "charLimit": "{count}/300 · max. 3 regels",
+    "deleteMessage": "Bericht verwijderen",
+    "messageSaved": "✓ Bericht opgeslagen",
+    "saving": "Opslaan…",
+    "saveMessage": "Bericht opslaan",
+    "noMessage": "Geen bericht",
+    "notePlaceholder": "Bijv.: komt met een gast naar de maaltijd…",
+    "deleteNote": "Opmerking verwijderen",
+    "noteSaved": "✓ Opmerking opgeslagen",
+    "saveNote": "Opmerking opslaan",
+    "noNote": "Geen opmerking",
+    "viewMessageTitle": "Bericht van de speler bekijken",
+    "viewNoteTitle": "Opmerking van de beheerder bekijken",
+    "addNoteTitle": "Opmerking toevoegen",
+    "addMessageTitle": "Bericht toevoegen"
   },
   "payments": {
     "readOnly": "Alleen-lezen",
@@ -670,7 +715,11 @@
     "noCourse": "Selecteer een club en parcours om scorekaarten te openen",
     "noCourseReadOnly": "Geen parcours ingesteld voor dit evenement",
     "whatsapp": "WhatsApp",
-    "manageCourses": "Clubs en parcoursen beheren"
+    "manageCourses": "Clubs en parcoursen beheren",
+    "noCourseBanner": "Geen parcours ingesteld voor dit evenement —",
+    "editEventLink": "het evenement bewerken",
+    "orSeparator": "of",
+    "manageClubsLink": "clubs beheren"
   },
   "eventOverview": {
     "notFound": "Evenement niet gevonden",
@@ -817,7 +866,8 @@
     "backToMembers": "← Terug naar leden",
     "continueToEvents": "Doorgaan naar evenementen →",
     "alreadyMember": "Deze speler maakt al deel uit van deze groep als {role}",
-    "importTitle": "Spelers importeren"
+    "importTitle": "Spelers importeren",
+    "importHint": "Dit bestand kan ook bestaande spelers bijwerken (handicap, club, ...): alleen ingevulde cellen worden gewijzigd, de rest wordt nooit overschreven."
   },
   "addGroup": {
     "title": "Nieuwe groep",
@@ -850,7 +900,6 @@
   },
   "editPlayer": {
     "title": "Spelersprofiel bewerken",
-    "importHint": "Dit bestand kan ook bestaande spelers bijwerken (handicap, club, ...): alleen ingevulde cellen worden gewijzigd, de rest wordt nooit overschreven.",
     "bulkEditHint": "Meerdere spelers tegelijk wijzigen (handicap, club...)? Gebruik de Excel-import via 'Leden toevoegen' →",
     "notFound": "Speler niet gevonden",
     "firstName": "Voornaam *",
@@ -895,7 +944,16 @@
     "sendError": "Fout bij verzenden",
     "myFlight": "Mijn flight",
     "me": "Ik",
-    "myScorecard": "Mijn scorekaart"
+    "myScorecard": "Mijn scorekaart",
+    "noFlightsForEvent": "Geen flight voor dit evenement",
+    "allScorecards": "Alle scorekaarten",
+    "confirmedCount": "{count, plural, one {# bevestigde deelnemer} other {# bevestigde deelnemers}}",
+    "endOfRoundHint": "Klik hier na afloop van de partij",
+    "signAndFinish": "Onderteken de scorekaart en beëindig de partij",
+    "signed": "De scorekaart is ondertekend en naar het klassement gestuurd.",
+    "retryError": "Fout — probeer het opnieuw",
+    "bulkSent": "{count, plural, one {# scorekaart verzonden} other {# scorekaarten verzonden}}",
+    "bulkSkipped": " · {count} overgeslagen"
   },
   "settings": {
     "title": "Instellingen",
@@ -1033,7 +1091,17 @@
     "cancel": "Annuleren",
     "errorUnexpected": "Onverwachte fout",
     "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
-    "clubCourseRequired": "Club en parcours zijn verplicht"
+    "clubCourseRequired": "Club en parcours zijn verplicht",
+    "extraActivity": "Nevenactiviteit",
+    "extraActivityPlaceholder": "Bijv.: Maaltijd in het clubhuis — 19u",
+    "scorecardNotes": "Notities op de scorekaart",
+    "scorecardNotesPlaceholder": "Specifieke regels, lokale info, instructies...",
+    "scorecardNotesHint": "Wordt onder elke scorekaart afgedrukt.",
+    "hcpPercent": "% HCP toegepast op het team",
+    "hcpDefault": "standaard {value}%",
+    "feePlaceholder": "Bijv.: 35",
+    "maxPlaceholder": "Bijv.: 24",
+    "extraActivityHint": "Indien ingevuld kan elke deelnemer ja/nee antwoorden op deze activiteit, naast het golfantwoord."
   },
   "events": {
     "title": "Evenementen",
@@ -1075,7 +1143,10 @@
     "teesUpdated": "tees bijgewerkt",
     "errorNoRows": "Het bestand lijkt leeg — geen gegevensrijen gevonden onder de kopregel.",
     "errorAllSkipped": "{count} rij(en) gelezen, maar geen kon worden geïmporteerd — controleer of de kolommen Tee en Slope zijn ingevuld.",
-    "clubOnlyRow": "Alleen club — parcours/tees later toevoegen"
+    "clubOnlyRow": "Alleen club — parcours/tees later toevoegen",
+    "templateHint": "Download voor het gemak eerst de Excel-sjabloon hierboven, vul hem in en importeer hem daarna hieronder.",
+    "chooseFile": "Bestand kiezen",
+    "noFile": "Geen bestand gekozen"
   },
   "partners": {
     "title": "Mijn partners",
@@ -1253,12 +1324,6 @@
     "ownerDesc": "GolfGo regelt alles — uitnodigingen, flights, startlijsten en e-mailbevestigingen."
   },
 
-  "photo": {
-    "add": "Foto toevoegen", 
-    "uploading": "Uploaden…", 
-    "empty": "Geen foto's" 
-  },
-
   "clubsAdd": {
     "flyawayTitle": "Import via FlyAway",
     "flyawayNotePrefix": "Typ de exacte naam, met koppeltekens, bv.:",
@@ -1289,5 +1354,34 @@
     "importAllCards": "Alle scorekaarten importeren",
     "imported": "Geïmporteerd",
     "viewClub": "Club bekijken"
+  },
+
+  "scoring": {
+    "hole": "Hole",
+    "gross": "Bruto",
+    "net": "Netto",
+    "pts": "Ptn",
+    "received": "Ontv.",
+    "bestBall": "Beste bal",
+    "unassigned": "Zonder flight",
+    "markerSignature": "Handtekening marker",
+    "playerSignature": "Handtekening speler",
+    "print": "Afdrukken",
+    "printCards": "Scorekaarten afdrukken",
+    "preview": "Voorbeeld",
+    "email": "E-mail",
+    "format": {
+      "stroke": "Strokeplay",
+      "stableford": "Stableford"
+    }
+  },
+
+  "push": {
+    "denied": "Toestemming geweigerd — schakel meldingen in via de browserinstellingen",
+    "activationError": "Fout bij het activeren",
+    "activated": "Meldingen ingeschakeld op dit apparaat",
+    "enable": "Meldingen bij afmeldingen inschakelen",
+    "enabled": "Meldingen ingeschakeld",
+    "enabling": "Activeren…"
   }
 }

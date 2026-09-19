@@ -1,5 +1,6 @@
 'use client'
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { ScorecardCell } from './ScorecardCell'
 import type { Hole, ScoreMap } from './scorecard-types'
 import { strokesReceived, getStablefordPoints } from '@/lib/golf/scoring/stableford'
@@ -54,6 +55,7 @@ function bestBallSubtotal(holesList: Hole[], players: ScoreEntrant[], scores: Sc
 }
 
 export default function ScorecardTable({ holes, players, scores, setScores, eventFormat, readOnly = false }: Props) {
+  const t = useTranslations()
   const isStableford = eventFormat === 'stableford'
   const isPair        = players.length === 2 // 4BBB
   const front9 = holes.filter(h => h.hole_number <= 9)
@@ -79,17 +81,17 @@ export default function ScorecardTable({ holes, players, scores, setScores, even
 
   return (
     <div className="overflow-x-auto -mx-4 px-4">
-      {readOnly && <p className="text-[11px] text-slate-400 mb-2 italic">Lecture seule</p>}
+      {readOnly && <p className="text-[11px] text-slate-400 mb-2 italic">{t('scorecards.readOnly')}</p>}
       <table className="border-collapse text-[13px] w-full">
         <thead>
           <tr className="text-[11px] text-slate-500 border-b border-white/40">
-            <th className="py-2.5 text-center font-semibold text-slate-700 w-10">Hole</th>
+            <th className="py-2.5 text-center font-semibold text-slate-700 w-10">{t('scoring.hole')}</th>
             <th className="py-2.5 text-center font-semibold w-10">Par</th>
             <th className="py-2.5 text-center font-semibold w-12">SI</th>
             <th className="py-2.5 text-center font-semibold w-4" />
             <th className="py-2.5 text-center font-semibold" colSpan={3}>Score</th>
-            <th className="py-2.5 text-center font-semibold w-12">Brut</th>
-            <th className="py-2.5 text-center font-semibold w-12">Net</th>
+            <th className="py-2.5 text-center font-semibold w-12">{t('scoring.gross')}</th>
+            <th className="py-2.5 text-center font-semibold w-12">{t('scoring.net')}</th>
             {isStableford && <th className="py-2.5 text-center font-semibold w-12">Stb</th>}
           </tr>
         </thead>
@@ -183,6 +185,7 @@ function SubtotalBlock({ label, players, subs, bestSub, isStableford, count, isT
   count: number
   isTot?: boolean
 }) {
+  const t = useTranslations()
   const isPair = players.length === 2
   const bg = isTot ? 'bg-slate-200' : 'bg-slate-100'
 
@@ -216,7 +219,7 @@ function SubtotalBlock({ label, players, subs, bestSub, isStableford, count, isT
       ))}
       <tr className={`border-b text-[13px] font-black ${isTot ? 'bg-[#DBEAFE]' : 'bg-[#EAF3DE]'}`}>
         <td className="py-2 text-right pr-2 text-[11px] uppercase tracking-wide text-slate-600" colSpan={isStableford ? 9 : 8}>
-          Meilleure balle
+          {t('scoring.bestBall')}
         </td>
         <td className="py-2 text-center">{bestSub?.sum ?? ''}</td>
       </tr>

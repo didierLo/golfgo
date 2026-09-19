@@ -361,13 +361,13 @@ useEffect(() => {
   }
 
   function requireOwner(): boolean {
-    if (!isOwner) { toast.error('Action réservée à l\'organisateur du groupe'); return false }
+    if (!isOwner) { toast.error(t('events.adminOnly')); return false }
     return true
   }
 
   function openAllScorecardsWindow() {
     if (!requireOwner()) return
-    if (allFlights.length === 0) { toast.error('Aucun flight pour cet événement'); return }
+    if (allFlights.length === 0) { toast.error(t('scorecard.noFlightsForEvent')); return }
     if (holes.length === 0) { toast.error(t('scorecard.noCourse')); return }
 
     const eventDate = eventStartsAt
@@ -399,7 +399,7 @@ useEffect(() => {
     const url  = URL.createObjectURL(blob)
     const win  = window.open(url, '_blank')
     if (!win) {
-      toast.error('Pop-up bloquée — autorisez les pop-ups pour continuer')
+      toast.error(t('common.popupBlocked'))
       URL.revokeObjectURL(url)
     } else {
       setTimeout(() => URL.revokeObjectURL(url), 300000)
@@ -409,7 +409,7 @@ useEffect(() => {
   async function handleSendAllScorecards() {
     if (!requireOwner()) return
     if (!selectedEventId) return
-    if (allFlights.length === 0) { toast.error('Aucun flight pour cet événement'); return }
+    if (allFlights.length === 0) { toast.error(t('scorecard.noFlightsForEvent')); return }
 
     setBulkSending(true)
     try {
@@ -419,14 +419,14 @@ useEffect(() => {
       })
       const json = await res.json()
       if (json.success) {
-        toast.success(`${json.sent} carte${json.sent > 1 ? 's' : ''} envoyée${json.sent > 1 ? 's' : ''}${json.skipped ? ` · ${json.skipped} ignoré(s)` : ''}`)
+        toast.success(t('scorecard.bulkSent', { count: json.sent }) + (json.skipped ? t('scorecard.bulkSkipped', { count: json.skipped }) : ''))
       } else {
         toast.error(json.error ?? t('common.error'))
       }
       if (json.queued > 0) {
-        toast.error(`Quota journalier dépassé — ${json.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+        toast.error(t('common.quotaExceeded', { count: json.queued }), { duration: 6000 })
       }
-      if (json.errors?.length) toast.error(`Erreurs : ${json.errors.join(', ')}`)
+      if (json.errors?.length) toast.error(t('common.errorsList', { errors: json.errors.join(', ') }))
     } catch (e: any) {
       toast.error(e.message ?? t('common.error'))
     } finally {
@@ -510,17 +510,17 @@ useEffect(() => {
           style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <p className="text-[14px] font-black text-slate-900">Toutes les cartes de score</p>
+              <p className="text-[14px] font-black text-slate-900">{t('scorecard.allScorecards')}</p>
               <p className="text-[11px] text-slate-500 mt-0.5">
-              {allFlights.flat().length} participant{allFlights.flat().length > 1 ? 's' : ''} confirmé{allFlights.flat().length > 1 ? 's' : ''}
+              {t('scorecard.confirmedCount', { count: allFlights.flat().length })}
             </p>
             </div>
             <div className="flex items-center gap-1.5">
-              <IconBtn onClick={openAllScorecardsWindow} locked={!isOwner} title="Imprimer">🖨</IconBtn>
-              <IconBtn onClick={openAllScorecardsWindow} locked={!isOwner} title="Aperçu">👁</IconBtn>
+              <IconBtn onClick={openAllScorecardsWindow} locked={!isOwner} title={t('scoring.print')}>🖨</IconBtn>
+              <IconBtn onClick={openAllScorecardsWindow} locked={!isOwner} title={t('scoring.preview')}>👁</IconBtn>
               <IconBtn disabled title="WhatsApp">💬</IconBtn>
               <IconBtn onClick={handleSendAllScorecards} locked={!isOwner} color="blue"
-                title={bulkSending ? 'Envoi…' : 'Envoyer'}>
+                title={bulkSending ? t('scorecard.sending') : t('scorecard.send')}>
                 {bulkSending ? '⏳' : '📤'}
               </IconBtn>
             </div>
@@ -612,12 +612,12 @@ useEffect(() => {
               )}
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">
-                  Cliquez ici en fin de partie
+                  {t('scorecard.endOfRoundHint')}
                 </span>
                 <span className="text-[18px] animate-bounce" style={{ animationDuration: '1.4s' }}>👉</span>
                 <button onClick={handleSignScorecard} disabled={saving}
                   className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5">
-                  {saving ? '⏳' : '✅'} {saving ? 'Envoi…' : 'Signer la carte et terminer la partie'}
+                  {saving ? '⏳' : '✅'} {saving ? t('scorecard.sending') : t('scorecard.signAndFinish')}
                 </button>
               </div>
             </>
@@ -648,8 +648,9 @@ useEffect(() => {
 }
 
 function SaveFeedback({ status }: { status: 'idle' | 'saving' | 'sent' | 'error' }) {
+  const t = useTranslations()
   if (status === 'idle') return null
-  if (status === 'sent')  return <span className="text-[11px] font-semibold text-emerald-600">La carte de score a été signée et envoyée au leaderboard.</span>
-  if (status === 'error') return <span className="text-[11px] font-semibold text-red-500">Erreur — réessaie</span>
-  return <span className="text-[11px] font-semibold text-slate-900">Envoi…</span>
+  if (status === 'sent')  return <span className="text-[11px] font-semibold text-emerald-600">{t('scorecard.signed')}</span>
+  if (status === 'error') return <span className="text-[11px] font-semibold text-red-500">{t('scorecard.retryError')}</span>
+  return <span className="text-[11px] font-semibold text-slate-900">{t('scorecard.sending')}</span>
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
+import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
@@ -16,6 +17,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export default function PushSubscribeButton() {
+  const t = useTranslations()
   const [supported, setSupported]   = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [loading, setLoading]       = useState(false)
@@ -35,7 +37,7 @@ export default function PushSubscribeButton() {
     try {
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
-        toast.error('Permission refusée — active les notifications dans les réglages du navigateur')
+        toast.error(t('push.denied'))
         return
       }
 
@@ -46,7 +48,7 @@ export default function PushSubscribeButton() {
       })
 
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) { toast.error('Non connecté'); return }
+      if (!session?.user) { toast.error(t('scorecard.notConnected')); return }
 
       const json = sub.toJSON() as any
       const res = await fetch('/api/push/subscribe', {
@@ -58,12 +60,12 @@ export default function PushSubscribeButton() {
         }),
       })
 
-      if (!res.ok) { toast.error('Erreur lors de l\'activation'); return }
+      if (!res.ok) { toast.error(t('push.activationError')); return }
 
       setSubscribed(true)
-      toast.success('Notifications activées sur cet appareil')
+      toast.success(t('push.activated'))
     } catch (e: any) {
-      toast.error(e.message ?? 'Erreur inattendue')
+      toast.error(e.message ?? t('errors.unexpected'))
     } finally {
       setLoading(false)
     }
@@ -77,7 +79,7 @@ export default function PushSubscribeButton() {
       disabled={loading || subscribed}
       className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
     >
-      {subscribed ? '🔔 Notifications activées' : loading ? '⏳ Activation…' : '🔔 Activer les notifications de désistement'}
+      {subscribed ? `🔔 ${t('push.enabled')}` : loading ? `⏳ ${t('push.enabling')}` : `🔔 ${t('push.enable')}`}
     </button>
   )
 }

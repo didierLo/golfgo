@@ -115,7 +115,7 @@
     "whatsapp": "WhatsApp",
     "printFooter": {
       "printedOn": "Printed on {date}",
-      "siteUrl": "GolfGo — golfgo-drab.vercel.app"
+      "siteUrl": "GolfGo — golfgo.be"
     },
     "reorderHint": "⠿ Drag a tee time to reorder · tap the time to edit it manually",
     "reorderSaving": " · saving…",
@@ -152,10 +152,14 @@
     "loading": "Loading…",
     "error": "An error occurred",
     "noData": "—",
-    "back": "Back"
+    "back": "Back",
+    "popupBlocked": "Pop-up blocked — allow pop-ups to continue",
+    "quotaExceeded": "Daily quota exceeded — {count} email(s) queued, they will be sent automatically.",
+    "errorsList": "Errors: {errors}"
   },
   "errors": {
-    "generic": "An error occurred"
+    "generic": "An error occurred",
+    "unexpected": "Unexpected error"
   },
   "clubs": {
     "title": "Clubs & Courses",
@@ -430,8 +434,19 @@
     "photosLabel": "Photos",
     "photosOptional": "optional",
     "photosAdd": "Add photos",
-    "photosUploading": "Upload en cours…",
-    "clubCourseRequired": "Club and course are required"
+    "photosUploading": "Uploading…",
+    "clubCourseRequired": "Club and course are required",
+    "extraActivity": "Side activity",
+    "extraActivityPlaceholder": "E.g.: Clubhouse meal — 7 pm",
+    "scorecardNotes": "Scorecard notes",
+    "scorecardNotesPlaceholder": "Specific rules, local info, instructions...",
+    "scorecardNotesHint": "Printed under each scorecard.",
+    "hcpPercent": "% HCP applied to the team",
+    "hcpDefault": "default {value}%",
+    "feePlaceholder": "E.g.: 35",
+    "maxPlaceholder": "E.g.: 24",
+    "extraActivityHint": "If filled in, each participant can answer yes/no to this activity in addition to their golf answer. Leave empty to disable.",
+    "photosHint": "JPG, PNG, WEBP · max 10 MB"
   },
   "editGroup": {
     "title": "Edit group",
@@ -552,7 +567,9 @@
     "fromFlight": "Flight {no} →"
   },
   "leaderboard": {
-    "noScorecard": "No scorecard found for this event"
+    "noScorecard": "No scorecard found for this event",
+    "title": "Leaderboard",
+    "noScores": "No scores yet."
   },
   "addParticipants": {
     "title": "Add participants",
@@ -590,7 +607,34 @@
     "declined": "declined",
     "total": "total",
     "notInvited": "not invited",
-    "waitlist": "⏳ Waiting"
+    "waitlist": "⏳ Waiting",
+    "exporting": "Generating…",
+    "holes18code": "18H",
+    "extraActivity": "Side activity",
+    "pending": "Pending",
+    "excelName": "First name and surname",
+    "messageAndNote": "Message & note",
+    "message": "Message",
+    "note": "Note",
+    "extraCountTitle": "Number of people (player included) — editable",
+    "yourMessageLabel": "Your message for the organiser",
+    "playerMessageLabel": "Player's message",
+    "messagePlaceholder": "Your message for the organiser…",
+    "charLimit": "{count}/300 · max 3 lines",
+    "deleteMessage": "Delete the message",
+    "messageSaved": "✓ Message saved",
+    "saving": "Saving…",
+    "saveMessage": "Save the message",
+    "noMessage": "No message",
+    "notePlaceholder": "E.g.: will bring a guest to the meal…",
+    "deleteNote": "Delete the note",
+    "noteSaved": "✓ Note saved",
+    "saveNote": "Save the note",
+    "noNote": "No note",
+    "viewMessageTitle": "View the player's message",
+    "viewNoteTitle": "View the admin note",
+    "addNoteTitle": "Add a note",
+    "addMessageTitle": "Add a message"
   },
   "payments": {
     "readOnly": "Read-only",
@@ -673,7 +717,11 @@
     "noCourse": "Select a club and course to access scorecards",
     "noCourseReadOnly": "No course has been set for this event",
     "whatsapp": "WhatsApp",
-    "manageCourses": "Manage clubs and courses"
+    "manageCourses": "Manage clubs and courses",
+    "noCourseBanner": "No course set for this event —",
+    "editEventLink": "edit the event",
+    "orSeparator": "or",
+    "manageClubsLink": "manage clubs"
   },
   "eventOverview": {
      "notFound": "Event not found",
@@ -820,7 +868,8 @@
     "backToMembers": "← Back to members",
     "continueToEvents": "Continue to events →",
     "alreadyMember": "This player is already in this group as {role}",
-    "importTitle": "Import players"
+    "importTitle": "Import players",
+    "importHint": "This file can also update existing players (handicap, club, etc.): only the filled-in cells are changed, nothing else is overwritten."
   },
   "addGroup": {
     "title": "New group",
@@ -853,7 +902,6 @@
   },
   "editPlayer": {
     "title": "Edit player profile",
-    "importHint": "This file can also update existing players (handicap, club, etc.): only the filled-in cells are changed, nothing else is overwritten.",
     "bulkEditHint": "Need to change several players at once (handicap, club...)? Use the Excel import from \"Add members\" →",
     "notFound": "Player not found",
     "firstName": "First name *",
@@ -898,7 +946,16 @@
     "sendError": "Error sending",
     "myFlight": "My flight",
     "me": "Me",
-    "myScorecard": "My scorecard"
+    "myScorecard": "My scorecard",
+    "noFlightsForEvent": "No flight for this event",
+    "allScorecards": "All scorecards",
+    "confirmedCount": "{count, plural, one {# confirmed participant} other {# confirmed participants}}",
+    "endOfRoundHint": "Click here at the end of the round",
+    "signAndFinish": "Sign the scorecard and finish the round",
+    "signed": "The scorecard has been signed and sent to the leaderboard.",
+    "retryError": "Error — please try again",
+    "bulkSent": "{count, plural, one {# scorecard sent} other {# scorecards sent}}",
+    "bulkSkipped": " · {count} skipped"
   },
   "settings": {
     "title": "Settings",
@@ -1036,7 +1093,17 @@
     "cancel": "Cancel",
     "errorUnexpected": "Unexpected error",
     "adminOnly": "You must be an admin to use this feature",
-    "clubCourseRequired": "Club and course are required"
+    "clubCourseRequired": "Club and course are required",
+    "extraActivity": "Side activity",
+    "extraActivityPlaceholder": "E.g.: Clubhouse meal — 7 pm",
+    "scorecardNotes": "Scorecard notes",
+    "scorecardNotesPlaceholder": "Specific rules, local info, instructions...",
+    "scorecardNotesHint": "Printed under each scorecard.",
+    "hcpPercent": "% HCP applied to the team",
+    "hcpDefault": "default {value}%",
+    "feePlaceholder": "E.g.: 35",
+    "maxPlaceholder": "E.g.: 24",
+    "extraActivityHint": "If filled in, each participant can answer yes/no to this activity in addition to their golf answer."
   },
   "events": {
     "title": "Events",
@@ -1078,7 +1145,10 @@
     "teesUpdated": "tees updated",
     "errorNoRows": "The file appears empty — no data rows found below the header.",
     "errorAllSkipped": "{count} row(s) read, but none could be imported — check that the Tee and Slope columns are filled in.",
-    "clubOnlyRow": "Club only — courses/tees to be added later"
+    "clubOnlyRow": "Club only — courses/tees to be added later",
+    "templateHint": "For convenience, first download the Excel template above, fill it in, then import it below.",
+    "chooseFile": "Choose a file",
+    "noFile": "No file chosen"
   },
   "partners": {
     "title": "My partners",
@@ -1287,5 +1357,34 @@
     "importAllCards": "Import all scorecards",
     "imported": "Imported",
     "viewClub": "View club"
+  },
+
+  "scoring": {
+    "hole": "Hole",
+    "gross": "Gross",
+    "net": "Net",
+    "pts": "Pts",
+    "received": "Recv",
+    "bestBall": "Best ball",
+    "unassigned": "No flight",
+    "markerSignature": "Marker signature",
+    "playerSignature": "Player signature",
+    "print": "Print",
+    "printCards": "Print the scorecards",
+    "preview": "Preview",
+    "email": "Email",
+    "format": {
+      "stroke": "Stroke play",
+      "stableford": "Stableford"
+    }
+  },
+
+  "push": {
+    "denied": "Permission denied — enable notifications in your browser settings",
+    "activationError": "Error while enabling notifications",
+    "activated": "Notifications enabled on this device",
+    "enable": "Enable withdrawal notifications",
+    "enabled": "Notifications enabled",
+    "enabling": "Enabling…"
   }
 }
