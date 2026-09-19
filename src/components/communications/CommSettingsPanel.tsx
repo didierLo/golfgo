@@ -78,7 +78,7 @@ export default function CommSettingsPanel({
             {groupTemplate.template_logo_url
               ? <img src={groupTemplate.template_logo_url} alt="Logo" className="h-6 object-contain" />
               : <><span className="text-[15px] font-black text-white">Golf</span><span className="text-[15px] font-black" style={{ color: '#4CAF1A' }}>Go</span></>}
-            <span className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">Aperçu</span>
+            <span className="text-[10px] text-white/70 uppercase tracking-wider font-semibold">{t('scoring.preview')}</span>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export default function CommSettingsPanel({
         {groupTemplate.template_bg_image_url ? (
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={groupTemplate.template_bg_image_url} alt="Fond" className="h-16 w-32 object-cover rounded-xl border border-white/50" />
+            <img src={groupTemplate.template_bg_image_url} alt={t('communications.templates.bgImage')} className="h-16 w-32 object-cover rounded-xl border border-white/50" />
             <div className="flex flex-col gap-1">
               <button onClick={() => bgFileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
               <button onClick={onBgDelete} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>

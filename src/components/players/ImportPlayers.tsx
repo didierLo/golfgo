@@ -3,6 +3,7 @@
 import * as XLSX from 'xlsx'
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
@@ -13,9 +14,9 @@ type PlayerPreview = {
 }
 
 const STATUS_STYLE = {
-  NEW:    { label: 'Nouveau',     bg: '#EAF3DE', text: '#3B6D11' },
-  UPDATE: { label: 'Mise à jour', bg: '#FAEEDA', text: '#854F0B' },
-  EXISTS: { label: 'Existant',    bg: '#F1F5F9', text: '#64748B' },
+  NEW:    { labelKey: 'playersImport.statusNew',    bg: '#EAF3DE', text: '#3B6D11' },
+  UPDATE: { labelKey: 'playersImport.statusUpdate', bg: '#FAEEDA', text: '#854F0B' },
+  EXISTS: { labelKey: 'playersImport.statusExists', bg: '#F1F5F9', text: '#64748B' },
 }
 
 // ─── Template download ─────────────────────────────────────────────────────────
@@ -51,6 +52,8 @@ function cleanPhone(p: any) { if (!p) return null; return String(p).replace(/[^0
 function cleanWHS(v: any) { if (!v) return null; const n = Number(String(v).replace(',', '.')); return isNaN(n) ? null : n }
 
 export default function ImportPlayers() {
+  const t = useTranslations()
+  const [fileName, setFileName] = useState('')
   const [preview, setPreview]   = useState<PlayerPreview[]>([])
   const [loading, setLoading]   = useState(false)
   const [groups, setGroups]     = useState<{ id: string; name: string }[]>([])
@@ -66,6 +69,7 @@ export default function ImportPlayers() {
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
+    if (file) setFileName(file.name)
     if (!file) return
     const buffer = await file.arrayBuffer()
     const workbook = XLSX.read(buffer)
@@ -154,7 +158,7 @@ export default function ImportPlayers() {
       if (newMembers.length > 0) await supabase.from('groups_players').insert(newMembers.map(id => ({ group_id: groupId, player_id: id, role: 'member' })))
     }
 
-    alert(`${newRows.length} nouveau(x), ${updateRows.length} mis à jour`)
+    alert(t('playersImport.resultAlert', { added: newRows.length, updated: updateRows.length }))
     setPreview([]); setLoading(false)
   }
 
@@ -171,7 +175,7 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
     {/* Template download */}
     <div className="flex items-center justify-between">
       <p className="text-[12px] text-slate-500">
-        Fédération belge ou fichier custom — télécharge le template si besoin.
+        {t('playersImport.templateHint')}
       </p>
       <button
         type="button"
@@ -181,21 +185,25 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
           <path d="M8 2v8M5 7l3 3 3-3M3 13h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        Template Excel
+        {t('importClubs.templateBtn')}
       </button>
     </div>
 
       <div>
-        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Fichier CSV / XLS / XLSX</label>
-        <input type="file" accept=".csv,.xls,.xlsx" onChange={handleFile}
-          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-[13px] text-slate-600 file:mr-3 file:border-0 file:bg-[#EBF3FC] file:text-[#185FA5] file:text-[12px] file:font-semibold file:px-3 file:py-1 file:rounded-lg cursor-pointer" />
+        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('playersImport.fileLabel')}</label>
+        {/* Bouton personnalisé : le texte natif du champ fichier dépend de la langue du navigateur, pas de celle de l'app */}
+        <label className="flex items-center gap-3 w-full border border-slate-200 rounded-xl px-3 py-2 text-[13px] text-slate-600 cursor-pointer focus-within:ring-2 focus-within:ring-[#185FA5]/30">
+          <span className="bg-[#EBF3FC] text-[#185FA5] text-[12px] font-semibold px-3 py-1 rounded-lg whitespace-nowrap">{t('importClubs.chooseFile')}</span>
+          <span className="truncate">{fileName || t('importClubs.noFile')}</span>
+          <input type="file" accept=".csv,.xls,.xlsx" onChange={handleFile} className="sr-only" />
+        </label>
       </div>
 
       <div>
-        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">Ajouter au groupe (optionnel)</label>
+        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('playersImport.addToGroup')}</label>
         <select value={groupId} onChange={e => setGroupId(e.target.value)}
           className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
-          <option value="">Sans groupe</option>
+          <option value="">{t('playersImport.noGroup')}</option>
           {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
         </select>
       </div>
@@ -203,9 +211,9 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
       {preview.length > 0 && (
         <>
           <div className="flex gap-2 flex-wrap">
-            {[{ n: newCount, ...STATUS_STYLE.NEW }, { n: updateCount, ...STATUS_STYLE.UPDATE }, { n: existsCount, ...STATUS_STYLE.EXISTS }].map(({ n, label, bg, text }) => (
-              <div key={label} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold" style={{ background: bg, color: text }}>
-                <span className="font-black">{n}</span> {label}
+            {[{ n: newCount, ...STATUS_STYLE.NEW }, { n: updateCount, ...STATUS_STYLE.UPDATE }, { n: existsCount, ...STATUS_STYLE.EXISTS }].map(({ n, labelKey, bg, text }) => (
+              <div key={labelKey} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold" style={{ background: bg, color: text }}>
+                <span className="font-black">{n}</span> {t(labelKey)}
               </div>
             ))}
           </div>
@@ -214,7 +222,7 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
             {(['insert', 'update'] as const).map(m => (
               <label key={m} className="flex items-center gap-2 text-[12px] font-medium text-slate-700 cursor-pointer">
                 <input type="radio" value={m} checked={mode === m} onChange={() => setMode(m)} className="accent-[#185FA5]" />
-                {m === 'insert' ? 'Nouveaux seulement' : 'Nouveaux + mises à jour'}
+                {m === 'insert' ? t('playersImport.modeInsert') : t('playersImport.modeUpdate')}
               </label>
             ))}
           </div>
@@ -227,7 +235,7 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
                   <span className="font-medium text-slate-800">{p.first_name} {p.surname}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-slate-400 font-mono">{p.federal_no}</span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: s.bg, color: s.text }}>{s.label}</span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: s.bg, color: s.text }}>{t(s.labelKey)}</span>
                   </div>
                 </div>
               )
@@ -237,7 +245,7 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
           <button onClick={importPlayers} disabled={loading}
             className="flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
             {loading && <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-            {loading ? 'Import en cours…' : `Importer ${mode === 'insert' ? newCount : newCount + updateCount} joueur(s)`}
+            {loading ? t('playersImport.importing') : t('playersImport.importCount', { count: mode === 'insert' ? newCount : newCount + updateCount })}
           </button>
         </>
       )}

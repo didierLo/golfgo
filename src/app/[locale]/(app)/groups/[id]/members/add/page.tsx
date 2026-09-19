@@ -200,7 +200,7 @@ export default function AddMemberPage() {
                       <div className="flex-1 min-w-0">
                         <div className="text-[13px] font-semibold text-slate-900">{p.first_name} {p.surname}</div>
                         <div className="text-[11px] text-slate-500">
-                          {p.federal_no && `Fédéral ${p.federal_no}`}{p.whs != null && ` · WHS ${p.whs}`}
+                          {p.federal_no && t('addMember.federalLabel', { no: p.federal_no })}{p.whs != null && ` · WHS ${p.whs}`}
                         </div>
                       </div>
                       {addedRole ? (

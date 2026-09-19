@@ -252,7 +252,7 @@ function InviteYesContent() {
             {extraActivityLabel && (
               <div className="border-t border-slate-100 pt-5 mb-5 text-left">
                 <p className="text-[13px] font-semibold text-slate-700 mb-3">
-                  🍽️ Combien serez-vous (toi compris) pour : {extraActivityLabel} ?
+                  {t('inviteExtra.question', { activity: extraActivityLabel })}
                 </p>
 
                 {extraEditing ? (
@@ -275,32 +275,32 @@ function InviteYesContent() {
                       </button>
                     </div>
                     <p className="text-[11px] text-slate-400 text-center mb-3">
-                      0 = personne, sinon indique le nombre total (toi inclus)
+                      {t('inviteExtra.hint')}
                     </p>
                     <button
                       type="button"
                       onClick={() => saveExtraActivity(extraDraft)}
                       disabled={extraSaving}
                       className="w-full bg-[#185FA5] text-white font-semibold text-[13px] py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
-                      {extraSaving ? 'Enregistrement…' : 'Confirmer'}
+                      {extraSaving ? t('common.saving') : t('common.confirm')}
                     </button>
                   </>
                 ) : (
                   <div className="flex items-center justify-between bg-[#EAF3DE] rounded-xl px-4 py-3">
                     <span className="text-[13px] font-semibold text-[#3B6D11]">
-                      ✓ {extraActivityCount} personne{(extraActivityCount ?? 0) > 1 ? 's' : ''} inscrite{(extraActivityCount ?? 0) > 1 ? 's' : ''}
+                      {t('inviteExtra.registered', { count: extraActivityCount ?? 0 })}
                     </span>
                     <button
                       type="button"
                       onClick={() => { setExtraDraft(extraActivityCount ?? 1); setExtraEditing(true) }}
                       className="text-[12px] font-semibold text-[#3B6D11] underline underline-offset-2">
-                      Modifier
+                      {t('common.edit')}
                     </button>
                   </div>
                 )}
 
                 {!extraEditing && extraError && (
-                  <p className="text-[12px] text-[#A32D2D] mt-2">⚠ Non enregistré, réessaie</p>
+                  <p className="text-[12px] text-[#A32D2D] mt-2">{t('inviteExtra.saveError')}</p>
                 )}
               </div>
             )}
@@ -308,17 +308,17 @@ function InviteYesContent() {
             {/* ── Bloc message ── */}
             <div className="border-t border-slate-100 pt-5 mb-5 text-left">
               <p className="text-[13px] font-semibold text-slate-700 mb-0.5">
-                Un message pour l'organisateur ?
-                <span className="font-normal text-slate-400 ml-1">(optionnel)</span>
+                {t('inviteExtra.messageTitle')}
+                <span className="font-normal text-slate-400 ml-1">({t('addEvent.emailOptional')})</span>
               </p>
-              <p className="text-[11px] text-slate-400 mb-3">Max 3 lignes · visible uniquement par l'admin</p>
+              <p className="text-[11px] text-slate-400 mb-3">{t('inviteExtra.messageHint')}</p>
 
               {msgSaved ? (
                 <div className="flex items-center gap-2 justify-center py-3 bg-[#EAF3DE] rounded-xl">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M5 13l4 4L19 7" stroke="#3B6D11" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span className="text-[13px] font-semibold text-[#3B6D11]">Message transmis ✓</span>
+                  <span className="text-[13px] font-semibold text-[#3B6D11]">{t('inviteExtra.messageSent')}</span>
                 </div>
               ) : (
                 <>
@@ -330,7 +330,7 @@ function InviteYesContent() {
                     }}
                     maxLength={300}
                     rows={3}
-                    placeholder="Ex : Je serai là vers 9h, prévenez-moi si changement…"
+                    placeholder={t('inviteExtra.placeholderYes')}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 resize-none mb-2"
                   />
                   <div className="flex items-center justify-between">
@@ -340,7 +340,7 @@ function InviteYesContent() {
                       disabled={!message.trim() || msgSaving}
                       className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-40 transition-colors"
                     >
-                      {msgSaving ? 'Envoi…' : 'Envoyer'}
+                      {msgSaving ? t('scorecard.sending') : t('communications.message.send')}
                     </button>
                   </div>
                 </>
@@ -349,13 +349,13 @@ function InviteYesContent() {
 
          <div className="border-t border-slate-100 pt-4 flex flex-col items-center gap-3">
               <p className="text-[12px] text-slate-400 text-center">
-                Tu peux fermer cette page ou te connecter pour voir l'événement.
+                {t('inviteExtra.closeHint')}
               </p>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => window.location.href = '/login'}
                   className="text-[13px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
-                  Fermer
+                  {t('nav.close')}
                 </button>
                 <a href="/login"
                   className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#185FA5] hover:text-[#0C447C] transition-colors">

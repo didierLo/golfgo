@@ -36,7 +36,8 @@
     "confirmDelete": "Bevestigen",
     "cancel": "Annuleren",
     "close": "Sluiten",
-    "emailQueue": "E-mailwachtrij"
+    "emailQueue": "E-mailwachtrij",
+    "language": "Taal"
   },
   "myEvents": {
     "title": "Mijn evenementen",
@@ -84,7 +85,8 @@
     "empty": "Geen foto's",
     "deleteConfirm": "Deze foto verwijderen?",
     "count": "{count} foto's"
-    }
+    },
+    "paymentReceived": "Betaling ontvangen! Bedankt 🎉"
   },
   "status": {
     "GOING": "Ingeschreven",
@@ -119,7 +121,11 @@
     "reorderSaving": " · opslaan…",
     "dragHandleTitle": "Slepen om te herordenen",
     "editTimeTitle": "Dit vertrektijdstip wijzigen",
-    "resetTimeTitle": "Terug naar automatische tijd"
+    "resetTimeTitle": "Terug naar automatische tijd",
+    "errorSaveTime": "Fout bij het opslaan van de tijd — probeer het opnieuw",
+    "errorResetTime": "Fout bij het terugzetten van de tijd — probeer het opnieuw",
+    "errorSaveOrder": "Fout bij het opslaan van de volgorde — {detail}",
+    "tryAgain": "probeer het opnieuw"
   },
   "calendar": {
     "months": [
@@ -153,7 +159,12 @@
     "back": "Terug",
     "popupBlocked": "Pop-up geblokkeerd — sta pop-ups toe om door te gaan",
     "quotaExceeded": "Dagelijks quotum overschreden — {count} e-mail(s) in de wachtrij geplaatst, ze worden automatisch verzonden.",
-    "errorsList": "Fouten: {errors}"
+    "errorsList": "Fouten: {errors}",
+    "edit": "Bewerken",
+    "confirm": "Bevestigen",
+    "saving": "Opslaan…",
+    "home": "Home",
+    "skippedSuffix": " · {count} overgeslagen"
   },
   "errors": {
     "generic": "Er is een fout opgetreden",
@@ -215,7 +226,10 @@
     "deleteFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support.",
     "confirmDeleteRequest": "Aanvraag verzenden",
     "sendingRequest": "Verzenden…",
-    "deleteRequestSent": "Aanvraag verzonden — de beheerder verwerkt ze."
+    "deleteRequestSent": "Aanvraag verzonden — de beheerder verwerkt ze.",
+    "errorHoles": "Fout bij de holes: {message}",
+    "errorWithMessage": "Fout: {message}",
+    "unknownError": "onbekend"
   },
   "communications": {
     "title": "Communicatie",
@@ -371,6 +385,22 @@
       "installTitle": "App installeren",
       "installIphone": "iPhone / Safari — Deelicoon ↑ → Meer → Voeg toe aan beginscherm",
       "installAndroid": "Android / Chrome — Menu ⋮ rechtsboven → Voeg toe aan beginscherm"
+    },
+    "msgTypeScorecards": "🖨 Scorekaarten",
+    "scorecardsPrintTitle": "🖨 Scorekaarten afdrukken",
+    "scorecardsPrintHint": "Selecteer de spelers die voor het evenement zijn ingeschreven in het paneel Ontvangers en klik dan op 🖨 om de scorekaarten als PDF te genereren.",
+    "teesheetFor": "📅 Startlijst voor: {label}",
+    "teesheetSendTitle": "📋 Startlijst verzenden",
+    "teesheetSendHint": "De startlijst van het bovenstaande evenement wordt naar elke geselecteerde speler gestuurd, met zijn flight gemarkeerd. Selecteer de ontvangers en klik dan op 📤.",
+    "selectEventForTeesheet": "Selecteer een evenement voor de startlijst",
+    "templateNotSaved": "Sjabloon niet opgeslagen: {error}",
+    "noLinkedCourse": "Geen parcours gekoppeld",
+    "sentToast": "{count, plural, one {# e-mail verzonden} other {# e-mails verzonden}}",
+    "emailPreview": {
+      "title": "E-mailvoorbeeld",
+      "subject": "Onderwerp:",
+      "disclaimer": "Voorbeeld met fictieve gegevens · links werken niet",
+      "error": "Fout bij voorbeeld"
     }
   },
   "constraints": {
@@ -562,7 +592,13 @@
     "noEvents": "Geen events in de geselecteerde periode",
     "noEventsHint": "Wijzig de periode en klik op Vernieuwen",
     "fromBench": "Bank →",
-    "fromFlight": "Flight {no} →"
+    "fromFlight": "Flight {no} →",
+    "matrix": "Matrix",
+    "constraints": "Beperkingen",
+    "days30": "30 dagen",
+    "months3": "3 maanden",
+    "months6": "6 maanden",
+    "year1": "1 jaar"
   },
   "leaderboard": {
     "noScorecard": "Geen scorekaart gevonden voor dit evenement",
@@ -867,7 +903,8 @@
     "continueToEvents": "Doorgaan naar evenementen →",
     "alreadyMember": "Deze speler maakt al deel uit van deze groep als {role}",
     "importTitle": "Spelers importeren",
-    "importHint": "Dit bestand kan ook bestaande spelers bijwerken (handicap, club, ...): alleen ingevulde cellen worden gewijzigd, de rest wordt nooit overschreven."
+    "importHint": "Dit bestand kan ook bestaande spelers bijwerken (handicap, club, ...): alleen ingevulde cellen worden gewijzigd, de rest wordt nooit overschreven.",
+    "federalLabel": "Federatienr. {no}"
   },
   "addGroup": {
     "title": "Nieuwe groep",
@@ -1027,7 +1064,9 @@
       "resendSent": "E-mail opnieuw verzonden ✓",
       "resendRetryIn": "(opnieuw proberen over {seconds}s)",
       "resendError": "Verzenden mislukt, probeer opnieuw."
-    }
+    },
+    "emailPlaceholder": "jouw@email.com",
+    "namePlaceholder": "Voornaam Achternaam"
   },
   "inviteYes": {
     "title": "U doet mee!",
@@ -1114,7 +1153,9 @@
     "going": "{count} ingeschreven",
     "goingMax": "{count} / {max} ingeschreven",
     "deleteConfirm": "Dit evenement verwijderen?",
-    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken"
+    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
+    "noEventYetTitle": "Nog geen evenementen",
+    "noEventYetDesc": "Dit onderdeel is beschikbaar zodra er een evenement voor deze groep is aangemaakt."
   },
   "holes": {
     "18": "18",
@@ -1383,5 +1424,49 @@
     "enable": "Meldingen bij afmeldingen inschakelen",
     "enabled": "Meldingen ingeschakeld",
     "enabling": "Activeren…"
+  },
+
+  "inviteExtra": {
+    "question": "🍽️ Met hoeveel personen komen jullie (jezelf inbegrepen) voor: {activity}?",
+    "hint": "0 = niemand, geef anders het totale aantal op (jezelf inbegrepen)",
+    "registered": "✓ {count, plural, one {# persoon ingeschreven} other {# personen ingeschreven}}",
+    "saveError": "⚠ Niet opgeslagen, probeer het opnieuw",
+    "messageTitle": "Een bericht voor de organisator?",
+    "messageHint": "Max. 3 regels · alleen zichtbaar voor de beheerder",
+    "messageSent": "Bericht verzonden ✓",
+    "placeholderYes": "Bijv.: Ik ben er rond 9u, laat het me weten als er iets verandert…",
+    "placeholderNo": "Bijv.: Ik kom misschien toch naar de maaltijd…",
+    "closeHint": "Je kunt deze pagina sluiten of inloggen om het evenement te bekijken."
+  },
+
+  "notFound": {
+    "title": "Out of bounds",
+    "desc": "Deze pagina bestaat niet of is verplaatst. Terug naar de tee!"
+  },
+
+  "playersImport": {
+    "statusNew": "Nieuw",
+    "statusUpdate": "Bijwerken",
+    "statusExists": "Bestaand",
+    "templateHint": "Belgische federatie of eigen bestand — download indien nodig de sjabloon.",
+    "fileLabel": "CSV-/XLS-/XLSX-bestand",
+    "addToGroup": "Aan groep toevoegen (optioneel)",
+    "noGroup": "Zonder groep",
+    "modeInsert": "Alleen nieuwe",
+    "modeUpdate": "Nieuwe + wijzigingen",
+    "importing": "Importeren…",
+    "importCount": "{count, plural, one {# speler} other {# spelers}} importeren",
+    "resultAlert": "{added} nieuw, {updated} bijgewerkt",
+    "bulkTitle": "Toevoegen vanuit een lijst",
+    "bulkHint": "Vul de rijen in en klik op \"Toevoegen\"",
+    "colSurname": "Achternaam *",
+    "colFirstName": "Voornaam *",
+    "colFederalNo": "Federatienr.",
+    "colPhone": "Telefoon",
+    "addRow": "+ Rij toevoegen",
+    "adding": "Toevoegen…",
+    "addCount": "{count, plural, one {# speler} other {# spelers}} toevoegen",
+    "noValid": "Geen geldige speler",
+    "added": "{count, plural, one {# speler toegevoegd} other {# spelers toegevoegd}}"
   }
 }

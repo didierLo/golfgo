@@ -72,7 +72,7 @@ function EventCard({ event, groupId, goingCount, onDelete, isOwner, onNotOwner, 
               className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
                 isOwner ? 'text-slate-600 border-slate-200 hover:bg-slate-50' : 'text-slate-300 border-slate-100 cursor-not-allowed'
               }`}>
-              Edit
+              {t('common.edit')}
             </a>
             <button onClick={() => isOwner ? onDelete(event.id) : onNotOwner()}
               className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${

@@ -36,8 +36,9 @@
     "confirmDelete": "Confirm",
     "cancel": "Cancel",
     "close": "Close",
-    "emailQueue": "Email queue"
+    "emailQueue": "Email queue",
 
+    "language": "Language"
   },
   "myEvents": {
     "title": "My events",
@@ -86,7 +87,8 @@
     "empty": "No photos",
     "deleteConfirm": "Delete this photo?",
     "count": "{count} photos"
-    }
+    },
+    "paymentReceived": "Payment received! Thank you 🎉"
   },
   "status": {
     "GOING": "Going",
@@ -121,7 +123,11 @@
     "reorderSaving": " · saving…",
     "dragHandleTitle": "Drag to reorder",
     "editTimeTitle": "Edit this tee time",
-    "resetTimeTitle": "Revert to automatic time"
+    "resetTimeTitle": "Revert to automatic time",
+    "errorSaveTime": "Error saving the time — please try again",
+    "errorResetTime": "Error resetting the time — please try again",
+    "errorSaveOrder": "Error saving the order — {detail}",
+    "tryAgain": "please try again"
   },
   "calendar": {
     "months": [
@@ -155,7 +161,12 @@
     "back": "Back",
     "popupBlocked": "Pop-up blocked — allow pop-ups to continue",
     "quotaExceeded": "Daily quota exceeded — {count} email(s) queued, they will be sent automatically.",
-    "errorsList": "Errors: {errors}"
+    "errorsList": "Errors: {errors}",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "saving": "Saving…",
+    "home": "Home",
+    "skippedSuffix": " · {count} skipped"
   },
   "errors": {
     "generic": "An error occurred",
@@ -217,7 +228,10 @@
     "deleteFailed": "Deletion did not go through (insufficient permissions?). Try again or contact support.",
     "confirmDeleteRequest": "Send request",
     "sendingRequest": "Sending…",
-    "deleteRequestSent": "Request sent — the administrator will process it."
+    "deleteRequestSent": "Request sent — the administrator will process it.",
+    "errorHoles": "Holes error: {message}",
+    "errorWithMessage": "Error: {message}",
+    "unknownError": "unknown"
   },
   "communications": {
     "title": "Communications",
@@ -373,6 +387,22 @@
       "installTitle": "Install the app",
       "installIphone": "iPhone / Safari — Share icon ↑ → More → Add to Home Screen",
       "installAndroid": "Android / Chrome — Menu ⋮ top right → Add to Home Screen"
+    },
+    "msgTypeScorecards": "🖨 Scorecards",
+    "scorecardsPrintTitle": "🖨 Printing scorecards",
+    "scorecardsPrintHint": "Select the players registered for the event in the Recipients panel, then click 🖨 to generate the scorecards as PDF.",
+    "teesheetFor": "📅 Tee sheet for: {label}",
+    "teesheetSendTitle": "📋 Sending the tee sheet",
+    "teesheetSendHint": "The tee sheet for the event above will be sent to each selected player with their flight highlighted. Select the recipients then click 📤.",
+    "selectEventForTeesheet": "Select an event for the tee sheet",
+    "templateNotSaved": "Template not saved: {error}",
+    "noLinkedCourse": "No course linked",
+    "sentToast": "{count, plural, one {# email sent} other {# emails sent}}",
+    "emailPreview": {
+      "title": "Email preview",
+      "subject": "Subject:",
+      "disclaimer": "Preview with sample data · links do not work",
+      "error": "Preview error"
     }
   },
   "constraints": {
@@ -564,7 +594,13 @@
     "noEvents": "No events in the selected period",
     "noEventsHint": "Change the period and click Refresh",
     "fromBench": "Bench →",
-    "fromFlight": "Flight {no} →"
+    "fromFlight": "Flight {no} →",
+    "matrix": "Matrix",
+    "constraints": "Constraints",
+    "days30": "30 days",
+    "months3": "3 months",
+    "months6": "6 months",
+    "year1": "1 year"
   },
   "leaderboard": {
     "noScorecard": "No scorecard found for this event",
@@ -869,7 +905,8 @@
     "continueToEvents": "Continue to events →",
     "alreadyMember": "This player is already in this group as {role}",
     "importTitle": "Import players",
-    "importHint": "This file can also update existing players (handicap, club, etc.): only the filled-in cells are changed, nothing else is overwritten."
+    "importHint": "This file can also update existing players (handicap, club, etc.): only the filled-in cells are changed, nothing else is overwritten.",
+    "federalLabel": "Federal no. {no}"
   },
   "addGroup": {
     "title": "New group",
@@ -1029,7 +1066,9 @@
       "resendSent": "Email resent ✓",
       "resendRetryIn": "(retry in {seconds}s)",
       "resendError": "Failed to send, please try again."
-    }
+    },
+    "emailPlaceholder": "you@example.com",
+    "namePlaceholder": "First name Last name"
   },
   "inviteYes": {
     "title": "You're joining!",
@@ -1116,7 +1155,9 @@
     "going": "{count} registered",
     "goingMax": "{count} / {max} registered",
     "deleteConfirm": "Delete this event?",
-    "adminOnly": "You must be an admin to use this feature"
+    "adminOnly": "You must be an admin to use this feature",
+    "noEventYetTitle": "No events yet",
+    "noEventYetDesc": "This section will be available as soon as an event is created for this group."
   },
   "holes": {
     "18": "18",
@@ -1386,5 +1427,49 @@
     "enable": "Enable withdrawal notifications",
     "enabled": "Notifications enabled",
     "enabling": "Enabling…"
+  },
+
+  "inviteExtra": {
+    "question": "🍽️ How many of you will come (yourself included) for: {activity}?",
+    "hint": "0 = nobody, otherwise enter the total number (yourself included)",
+    "registered": "✓ {count, plural, one {# person registered} other {# people registered}}",
+    "saveError": "⚠ Not saved, please try again",
+    "messageTitle": "A message for the organiser?",
+    "messageHint": "Max 3 lines · visible to the admin only",
+    "messageSent": "Message sent ✓",
+    "placeholderYes": "E.g.: I'll be there around 9am, let me know if anything changes…",
+    "placeholderNo": "E.g.: I might still come to the meal after all…",
+    "closeHint": "You can close this page or log in to see the event."
+  },
+
+  "notFound": {
+    "title": "Ball out of bounds",
+    "desc": "This page doesn't exist or has been moved. Head back to the tee!"
+  },
+
+  "playersImport": {
+    "statusNew": "New",
+    "statusUpdate": "Update",
+    "statusExists": "Existing",
+    "templateHint": "Belgian federation or custom file — download the template if needed.",
+    "fileLabel": "CSV / XLS / XLSX file",
+    "addToGroup": "Add to group (optional)",
+    "noGroup": "No group",
+    "modeInsert": "New only",
+    "modeUpdate": "New + updates",
+    "importing": "Importing…",
+    "importCount": "Import {count, plural, one {# player} other {# players}}",
+    "resultAlert": "{added} new, {updated} updated",
+    "bulkTitle": "Add from a list",
+    "bulkHint": "Fill in the rows then click \"Add\"",
+    "colSurname": "Surname *",
+    "colFirstName": "First name *",
+    "colFederalNo": "Federal no.",
+    "colPhone": "Phone",
+    "addRow": "+ Add a row",
+    "adding": "Adding…",
+    "addCount": "Add {count, plural, one {# player} other {# players}}",
+    "noValid": "No valid player",
+    "added": "{count, plural, one {# player added} other {# players added}}"
   }
 }

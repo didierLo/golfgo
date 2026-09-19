@@ -251,15 +251,15 @@ export default function ClubEditor({ clubId }: { clubId: string }) {
       )
       if (holesError) {
         console.error('[handleSave] course_holes upsert error:', holesError)
-        setSaveMsg('Erreur trous: ' + holesError.message)
+        setSaveMsg(t('clubs.errorHoles', { message: holesError.message }))
       } else {
-        setSaveMsg('✓ Sauvegardé')
+        setSaveMsg('✓ ' + t('scorecards.saved'))
       }
       await loadHoles(courseId)
       await checkCompleteness(courses)
     } catch (e: any) {
       console.error('[handleSave] catch:', e)
-      setSaveMsg('Erreur: ' + (e.message ?? 'inconnue'))
+      setSaveMsg(t('clubs.errorWithMessage', { message: e.message ?? t('clubs.unknownError') }))
     } finally {
       setSaving(false)
       setTimeout(() => setSaveMsg(''), 3000)

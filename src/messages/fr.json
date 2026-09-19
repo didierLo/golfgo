@@ -36,7 +36,8 @@
     "confirmDelete": "Confirmer",
     "cancel": "Annuler",
     "close": "Fermer",
-    "emailQueue": "File email"
+    "emailQueue": "File email",
+    "language": "Langue"
   },
   "myEvents": {
     "title": "Mes événements",
@@ -86,7 +87,8 @@
       "empty": "Aucune photo",
       "deleteConfirm": "Supprimer cette photo ?",
       "count": "{count} photos"
-    }
+    },
+    "paymentReceived": "Paiement reçu ! Merci 🎉"
   },
   "status": {
     "GOING": "Inscrit",
@@ -121,7 +123,11 @@
     "reorderSaving": " · enregistrement…",
     "dragHandleTitle": "Glisser pour réorganiser",
     "editTimeTitle": "Modifier l'heure de ce départ",
-    "resetTimeTitle": "Revenir à l'heure automatique"
+    "resetTimeTitle": "Revenir à l'heure automatique",
+    "errorSaveTime": "Erreur lors de l'enregistrement de l'heure — réessaie",
+    "errorResetTime": "Erreur lors de la réinitialisation de l'heure — réessaie",
+    "errorSaveOrder": "Erreur lors de l'enregistrement de l'ordre — {detail}",
+    "tryAgain": "réessaie"
   },
   "calendar": {
     "months": [
@@ -155,7 +161,12 @@
     "back": "Retour",
     "popupBlocked": "Pop-up bloquée — autorisez les pop-ups pour continuer",
     "quotaExceeded": "Quota journalier dépassé — {count} email(s) mis en file d'attente, ils partiront automatiquement.",
-    "errorsList": "Erreurs : {errors}"
+    "errorsList": "Erreurs : {errors}",
+    "edit": "Modifier",
+    "confirm": "Confirmer",
+    "saving": "Enregistrement…",
+    "home": "Accueil",
+    "skippedSuffix": " · {count} ignoré(s)"
   },
   "errors": {
     "generic": "Une erreur est survenue",
@@ -217,7 +228,10 @@
     "deleteFailed": "La suppression n'a pas été effectuée (droits insuffisants ?). Réessaie ou contacte le support.",
     "confirmDeleteRequest": "Envoyer la demande",
     "sendingRequest": "Envoi…",
-    "deleteRequestSent": "Demande envoyée — l'administrateur va la traiter."
+    "deleteRequestSent": "Demande envoyée — l'administrateur va la traiter.",
+    "errorHoles": "Erreur trous : {message}",
+    "errorWithMessage": "Erreur : {message}",
+    "unknownError": "inconnue"
   },
   "communications": {
     "title": "Communications",
@@ -373,6 +387,22 @@
       "installTitle": "Installer l'application",
       "installIphone": "iPhone / Safari — Icône Partager ↑ → En voir plus → Ajouter à l'écran d'accueil",
       "installAndroid": "Android / Chrome — Menu ⋮ en haut à droite → Ajouter à l'écran d'accueil"
+    },
+    "msgTypeScorecards": "🖨 Cartes de score",
+    "scorecardsPrintTitle": "🖨 Impression des cartes de score",
+    "scorecardsPrintHint": "Sélectionnez les joueurs inscrits à l'événement dans le panneau Destinataires, puis cliquez sur 🖨 pour générer les cartes en PDF.",
+    "teesheetFor": "📅 Tee sheet pour : {label}",
+    "teesheetSendTitle": "📋 Envoi du Tee Sheet",
+    "teesheetSendHint": "Le tee sheet de l'événement ci-dessus sera envoyé à chaque joueur sélectionné avec son flight mis en évidence. Sélectionnez les destinataires puis cliquez sur 📤.",
+    "selectEventForTeesheet": "Sélectionnez un événement pour le tee sheet",
+    "templateNotSaved": "Template non sauvegardé : {error}",
+    "noLinkedCourse": "Aucun parcours lié",
+    "sentToast": "{count, plural, one {# email envoyé} other {# emails envoyés}}",
+    "emailPreview": {
+      "title": "Aperçu de l'email",
+      "subject": "Objet :",
+      "disclaimer": "Aperçu avec données fictives · les liens ne fonctionnent pas",
+      "error": "Erreur aperçu"
     }
   },
   "constraints": {
@@ -564,7 +594,13 @@
     "noEvents": "Aucun event dans la période sélectionnée",
     "noEventsHint": "Modifiez la période et cliquez sur Actualiser",
     "fromBench": "Bench →",
-    "fromFlight": "Flight {no} →"
+    "fromFlight": "Flight {no} →",
+    "matrix": "Matrice",
+    "constraints": "Contraintes",
+    "days30": "30 jours",
+    "months3": "3 mois",
+    "months6": "6 mois",
+    "year1": "1 an"
   },
   "leaderboard": {
     "noScorecard": "Aucune feuille de score n'a été trouvée pour cet événement",
@@ -869,7 +905,8 @@
     "continueToEvents": "Continuer vers les événements →",
     "alreadyMember": "Ce joueur fait déjà partie de ce groupe sous le nom d'{role}",
     "importTitle": "Importer des joueurs",
-    "importHint": "Ce fichier sert aussi à mettre à jour des joueurs existants (handicap, club, etc.) : seules les cellules remplies sont modifiées (N°fédéral obligatoire), le reste n'est jamais écrasé."
+    "importHint": "Ce fichier sert aussi à mettre à jour des joueurs existants (handicap, club, etc.) : seules les cellules remplies sont modifiées (N°fédéral obligatoire), le reste n'est jamais écrasé.",
+    "federalLabel": "Fédéral {no}"
   },
   "addGroup": {
     "title": "Nouveau groupe",
@@ -1029,7 +1066,9 @@
       "resendSent": "Email renvoyé ✓",
       "resendRetryIn": "(réessayer dans {seconds}s)",
       "resendError": "Échec de l'envoi, réessayez."
-    }
+    },
+    "emailPlaceholder": "votre@email.com",
+    "namePlaceholder": "Prénom Nom"
   },
   "inviteYes": {
     "title": "Vous nous rejoignez !",
@@ -1116,7 +1155,9 @@
     "going": "{count} inscrits",
     "goingMax": "{count} / {max} inscrits",
     "deleteConfirm": "Supprimer cet événement ?",
-    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
+    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité",
+    "noEventYetTitle": "Aucun événement pour l'instant",
+    "noEventYetDesc": "Cette section sera disponible dès qu'un événement sera créé pour ce groupe."
   },
   "holes": {
     "18": "18",
@@ -1384,5 +1425,49 @@
     "enable": "Activer les notifications de désistement",
     "enabled": "Notifications activées",
     "enabling": "Activation…"
+  },
+
+  "inviteExtra": {
+    "question": "🍽️ Combien serez-vous (toi compris) pour : {activity} ?",
+    "hint": "0 = personne, sinon indique le nombre total (toi inclus)",
+    "registered": "✓ {count, plural, one {# personne inscrite} other {# personnes inscrites}}",
+    "saveError": "⚠ Non enregistré, réessaie",
+    "messageTitle": "Un message pour l'organisateur ?",
+    "messageHint": "Max 3 lignes · visible uniquement par l'admin",
+    "messageSent": "Message transmis ✓",
+    "placeholderYes": "Ex : Je serai là vers 9h, prévenez-moi si changement…",
+    "placeholderNo": "Ex : Je viendrai peut-être au repas malgré tout…",
+    "closeHint": "Tu peux fermer cette page ou te connecter pour voir l'événement."
+  },
+
+  "notFound": {
+    "title": "Balle hors limites",
+    "desc": "Cette page n'existe pas ou a été déplacée. Retournez au départ !"
+  },
+
+  "playersImport": {
+    "statusNew": "Nouveau",
+    "statusUpdate": "Mise à jour",
+    "statusExists": "Existant",
+    "templateHint": "Fédération belge ou fichier custom — télécharge le template si besoin.",
+    "fileLabel": "Fichier CSV / XLS / XLSX",
+    "addToGroup": "Ajouter au groupe (optionnel)",
+    "noGroup": "Sans groupe",
+    "modeInsert": "Nouveaux seulement",
+    "modeUpdate": "Nouveaux + mises à jour",
+    "importing": "Import en cours…",
+    "importCount": "Importer {count, plural, one {# joueur} other {# joueurs}}",
+    "resultAlert": "{added} nouveau(x), {updated} mis à jour",
+    "bulkTitle": "Ajouter depuis une liste",
+    "bulkHint": "Remplis les lignes puis clique sur \"Ajouter\"",
+    "colSurname": "Nom *",
+    "colFirstName": "Prénom *",
+    "colFederalNo": "N° fédéral",
+    "colPhone": "Téléphone",
+    "addRow": "+ Ajouter une ligne",
+    "adding": "Ajout…",
+    "addCount": "Ajouter {count, plural, one {# joueur} other {# joueurs}}",
+    "noValid": "Aucun joueur valide",
+    "added": "{count, plural, one {# joueur ajouté} other {# joueurs ajoutés}}"
   }
 }

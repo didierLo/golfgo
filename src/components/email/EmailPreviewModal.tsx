@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   onClose: () => void
@@ -10,7 +11,8 @@ type Props = {
   fetchPreview: () => Promise<{ html: string; subject: string }>
 }
 
-export default function EmailPreviewModal({ onClose, onConfirm, confirmLabel = 'Envoyer', loading = false, fetchPreview }: Props) {
+export default function EmailPreviewModal({ onClose, onConfirm, confirmLabel, loading = false, fetchPreview }: Props) {
+  const t = useTranslations()
   const [html,    setHtml]    = useState<string | null>(null)
   const [subject, setSubject] = useState('')
   const [error,   setError]   = useState('')
@@ -19,7 +21,7 @@ export default function EmailPreviewModal({ onClose, onConfirm, confirmLabel = '
   useEffect(() => {
     fetchPreview()
       .then(({ html, subject }) => { setHtml(html); setSubject(subject) })
-      .catch(e => setError(e.message ?? 'Erreur aperçu'))
+      .catch(e => setError(e.message ?? t('communications.emailPreview.error')))
   }, [])
 
   useEffect(() => {
@@ -36,8 +38,8 @@ export default function EmailPreviewModal({ onClose, onConfirm, confirmLabel = '
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div>
-            <p className="text-[15px] font-black text-slate-900">Aperçu de l'email</p>
-            {subject && <p className="text-[12px] text-slate-500 mt-0.5">Sujet : <span className="font-semibold text-slate-700">{subject}</span></p>}
+            <p className="text-[15px] font-black text-slate-900">{t('communications.emailPreview.title')}</p>
+            {subject && <p className="text-[12px] text-slate-500 mt-0.5">{t('communications.emailPreview.subject')} <span className="font-semibold text-slate-700">{subject}</span></p>}
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors p-1">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -62,23 +64,23 @@ export default function EmailPreviewModal({ onClose, onConfirm, confirmLabel = '
               className="w-full h-full border-0"
               style={{ minHeight: '500px' }}
               sandbox="allow-same-origin"
-              title="Aperçu email"
+              title={t('communications.emailPreview.title')}
             />
           )}
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100 bg-white rounded-b-2xl">
-          <p className="text-[11px] text-slate-400">Aperçu avec données fictives · les liens ne fonctionnent pas</p>
+          <p className="text-[11px] text-slate-400">{t('communications.emailPreview.disclaimer')}</p>
           <div className="flex gap-2">
             <button onClick={onClose}
               className="text-[13px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-              Annuler
+              {t('nav.cancel')}
             </button>
             <button onClick={onConfirm} disabled={loading}
               className="text-[13px] font-semibold px-5 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-50 transition-colors flex items-center gap-2">
               {loading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              {loading ? 'Envoi…' : confirmLabel}
+              {loading ? t('communications.message.sending') : (confirmLabel ?? t('communications.message.send'))}
             </button>
           </div>
         </div>

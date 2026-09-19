@@ -122,7 +122,7 @@ export default function MyPartnersPage() {
   )
 
   if (!me) return (
-    <div className="p-6 text-[13px] text-slate-500">Joueur introuvable.</div>
+    <div className="p-6 text-[13px] text-slate-500">{t('editPlayer.notFound')}</div>
   )
 
   return (

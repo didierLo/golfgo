@@ -20,10 +20,10 @@ export default function NoEventPage() {
         </svg>
       </div>
       <h2 className="text-[17px] font-bold text-slate-800 mb-2">
-        Aucun événement pour l'instant
+        {t('events.noEventYetTitle')}
       </h2>
       <p className="text-[13px] text-slate-500 mb-6 max-w-xs leading-relaxed">
-        Cette section sera disponible dès qu'un événement sera créé pour ce groupe.
+        {t('events.noEventYetDesc')}
       </p>
 
     </div>

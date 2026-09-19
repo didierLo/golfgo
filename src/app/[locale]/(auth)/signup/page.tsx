@@ -78,7 +78,7 @@ export default function SignupPage() {
           label={t('auth.signup.fullName')}
           value={fullName}
           onChange={setFullName}
-          placeholder="Prénom Nom"
+          placeholder={t('auth.namePlaceholder')}
           required
           autoComplete="name"
         />
@@ -87,7 +87,7 @@ export default function SignupPage() {
           type="email"
           value={email}
           onChange={setEmail}
-          placeholder="votre@email.com"
+          placeholder={t('auth.emailPlaceholder')}
           required
           autoComplete="email"
         />

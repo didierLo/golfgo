@@ -379,7 +379,7 @@ export default function MembersPage() {
                   className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
                     userRole === 'owner' ? 'text-slate-600 border-white/50 hover:bg-white/30' : 'text-slate-300 border-slate-100 cursor-not-allowed'
                   }`}>
-                  Edit
+                  {t('common.edit')}
                 </button>
                 <button onClick={() => {
                     if (userRole !== 'owner') { showToast(t('members.adminOnly')); return }

@@ -156,7 +156,7 @@ function ForgotPasswordContent() {
           type="email"
           value={email}
           onChange={setEmail}
-          placeholder="votre@email.com"
+          placeholder={t('auth.emailPlaceholder')}
           required
           autoComplete="email"
         />

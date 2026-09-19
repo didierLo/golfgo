@@ -444,12 +444,12 @@ export default function Challenge4BBBTab({
               <a href={`/groups/${groupId}/events/${events[0]?.eventId ?? ''}/flights/history`}
                 className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors flex items-center gap-1">
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 5h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
-                Matrice
+                {t('matrix')}
               </a>
               <span className="text-slate-200 text-[10px]">·</span>
               <a href={`/groups/${groupId}/constraints`}
                 className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors">
-                Contraintes
+                {t('constraints')}
               </a>
             </div>
           </div>
@@ -460,10 +460,10 @@ export default function Challenge4BBBTab({
             <select value={historyWindow} onChange={e => setHistoryWindow(Number(e.target.value))}
               disabled={!isOwner}
               className="border border-slate-200 rounded-xl px-3 py-2 text-[13px] bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/20">
-              <option value={30}>30 jours</option>
-              <option value={90}>3 mois</option>
-              <option value={180}>6 mois</option>
-              <option value={365}>1 an</option>
+              <option value={30}>{t('days30')}</option>
+              <option value={90}>{t('months3')}</option>
+              <option value={180}>{t('months6')}</option>
+              <option value={365}>{t('year1')}</option>
             </select>
           </div>
 

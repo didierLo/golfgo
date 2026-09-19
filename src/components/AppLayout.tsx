@@ -394,7 +394,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </Link>
                     )}
                     <div className="px-4 py-2.5">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Language</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t('nav.language')}</p>
                       <div className="flex gap-1">
                         {[
                           { code: 'fr', label: '🇫🇷 FR' },

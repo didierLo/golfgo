@@ -181,7 +181,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
           {e.events.fee_per_person && !past && (
             e.payment_status === 'PAID' ? (
               <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#EAF3DE] text-[#3B6D11]">
-                ✓ Payé
+                ✓ {t('payments.paid')}
               </span>
             ) : e.status === 'GOING' && (
               <button
@@ -445,7 +445,7 @@ function PhotoModal({ eventId, onClose, onUploaded }: { eventId: string; onClose
   }}
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-3">
-          <span className="font-bold text-slate-900">Photos</span>
+          <span className="font-bold text-slate-900">{t('editEvent.photosLabel')}</span>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-700 text-xl leading-none">×</button>
         </div>
 
@@ -576,7 +576,7 @@ export default function MyEventsPage() {
 
  useEffect(() => {
   if (searchParams.get('payment') === 'success') {
-    toast.success('Paiement reçu ! Merci 🎉')
+    toast.success(t('myEvents.paymentReceived'))
   }
   loadData()
 }, [])

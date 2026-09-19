@@ -73,8 +73,8 @@ if (messageType === 'scorecards') {
           ))}
         </div>
         <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
-          <p className="text-[13px] font-semibold text-slate-700 mb-1">🖨 Impression des scorecards</p>
-          <p className="text-[12px] text-slate-500">Sélectionnez les joueurs inscrits à l'événement dans le panneau Destinataires, puis cliquez sur 🖨 pour générer les cartes en PDF.</p>
+          <p className="text-[13px] font-semibold text-slate-700 mb-1">{t('communications.scorecardsPrintTitle')}</p>
+          <p className="text-[12px] text-slate-500">{t('communications.scorecardsPrintHint')}</p>
         </div>
       </div>
     )
@@ -103,13 +103,13 @@ if (messageType === 'scorecards') {
 
         <div className="px-4 py-3 bg-[#EBF3FC] border border-[#B5D4F4] rounded-xl mb-3">
           <p className="text-[12px] font-semibold text-[#0C447C]">
-            📅 Tee sheet pour : {activeEvent ? `${activeEvent.title} — ${formatDate(activeEvent.starts_at, locale)}` : '—'}
+            {t('communications.teesheetFor', { label: activeEvent ? `${activeEvent.title} — ${formatDate(activeEvent.starts_at, locale)}` : '—' })}
           </p>
         </div>
 
         <div className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
-          <p className="text-[13px] font-semibold text-slate-700 mb-1">📋 Envoi du Tee Sheet</p>
-          <p className="text-[12px] text-slate-500">Le tee sheet de l'événement ci-dessus sera envoyé à chaque joueur sélectionné avec son flight mis en évidence. Sélectionnez les destinataires puis cliquez sur 📤.</p>
+          <p className="text-[13px] font-semibold text-slate-700 mb-1">{t('communications.teesheetSendTitle')}</p>
+          <p className="text-[12px] text-slate-500">{t('communications.teesheetSendHint')}</p>
         </div>
       </div>
     )

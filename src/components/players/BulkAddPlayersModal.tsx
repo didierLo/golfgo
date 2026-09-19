@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
+import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
 
@@ -13,6 +14,7 @@ const emptyRow: PlayerRow = { surname: '', first_name: '', whs: '', federal_no: 
 const cellClass = "w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
 
 export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
+  const t = useTranslations()
   const [listRows, setListRows] = useState<PlayerRow[]>([{ ...emptyRow }])
   const [loading, setLoading] = useState(false)
 
@@ -40,14 +42,14 @@ export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
           phone:      row.phone.trim() || null,
           home_club:  row.home_club.trim() || null,
         }))
-      if (players.length === 0) { toast.error('Aucun joueur valide'); setLoading(false); return }
+      if (players.length === 0) { toast.error(t('playersImport.noValid')); setLoading(false); return }
       const { error } = await supabase.from('players').upsert(players, { onConflict: 'federal_no' })
       if (error) { toast.error(error.message); setLoading(false); return }
-      toast.success(`${players.length} joueur(s) ajouté(s)`)
+      toast.success(t('playersImport.added', { count: players.length }))
       setListRows([{ ...emptyRow }])
       onClose()
       window.location.reload()
-    } catch { toast.error('Erreur inattendue') }
+    } catch { toast.error(t('errors.unexpected')) }
     setLoading(false)
   }
 
@@ -59,8 +61,8 @@ export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
 
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-[16px] font-black text-slate-900">Ajouter depuis une liste</h2>
-            <p className="text-[12px] text-slate-500 mt-0.5">Remplis les lignes puis clique sur "Ajouter"</p>
+            <h2 className="text-[16px] font-black text-slate-900">{t('playersImport.bulkTitle')}</h2>
+            <p className="text-[12px] text-slate-500 mt-0.5">{t('playersImport.bulkHint')}</p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -73,7 +75,7 @@ export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
           <table className="w-full text-[12px]" style={{ tableLayout: 'fixed' }}>
             <thead>
               <tr className="border-b border-slate-100">
-                {['Nom *', 'Prénom *', 'N° fédéral', 'WHS', 'Email', 'Téléphone', 'Club', ''].map((h, i) => (
+                {[t('playersImport.colSurname'), t('playersImport.colFirstName'), t('playersImport.colFederalNo'), 'WHS', t('scoring.email'), t('playersImport.colPhone'), t('scorecards.club'), ''].map((h, i) => (
                   <th key={i} className="px-2 py-2 text-left text-[11px] font-semibold text-slate-500"
                     style={{ width: i === 7 ? '32px' : 'auto' }}>{h}</th>
                 ))}
@@ -101,16 +103,16 @@ export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
         <div className="flex items-center justify-between">
           <button onClick={addRow}
             className="text-[12px] font-semibold px-3 py-1.5 rounded-xl border border-dashed border-slate-300 text-slate-500 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
-            + Ajouter une ligne
+            {t('playersImport.addRow')}
           </button>
           <div className="flex gap-2">
             <button onClick={onClose}
               className="text-[12px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-              Annuler
+              {t('nav.cancel')}
             </button>
             <button onClick={handleBulkInsert} disabled={loading}
               className="text-[12px] font-semibold px-4 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
-              {loading ? 'Ajout…' : `Ajouter ${validCount} joueur(s)`}
+              {loading ? t('playersImport.adding') : t('playersImport.addCount', { count: validCount })}
             </button>
           </div>
         </div>

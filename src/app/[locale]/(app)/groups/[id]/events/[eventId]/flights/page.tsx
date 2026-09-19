@@ -337,13 +337,13 @@ const flightGroups = useMemo(() =>
           className={`px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
             activeTab === 'standard' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'
           }`}>
-          Flights
+          {t('flights.tabStandard')}
         </button>
         <button onClick={() => setActiveTab('4bbb')}
           className={`px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
             activeTab === '4bbb' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'
           }`}>
-          Challenge 4BBB
+          {t('flights.tab4bbb')}
         </button>
       </div>
 

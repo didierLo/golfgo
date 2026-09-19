@@ -278,7 +278,7 @@ export default function InvitationsPage() {
         const sendResult = await res.json()
         toast.success(t('invitations.invitationsSent', { count: toInvite.length }))
         if (sendResult.queued > 0) {
-          toast.error(`Quota journalier dépassé — ${sendResult.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+          toast.error(t('common.quotaExceeded', { count: sendResult.queued }), { duration: 6000 })
         }
       } else {
         const nb9T = toInvite.filter(id => holesMap[id]?.holes === 9).length
@@ -308,7 +308,7 @@ export default function InvitationsPage() {
       const resendResult = await res.json()
       toast.success(t('invitations.resendSuccess', { count: selectedPlayers.length }))
       if (resendResult.queued > 0) {
-        toast.error(`Quota journalier dépassé — ${resendResult.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+        toast.error(t('common.quotaExceeded', { count: resendResult.queued }), { duration: 6000 })
       }
       setSelectedPlayers([])
       setResendMode(false)

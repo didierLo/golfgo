@@ -214,7 +214,7 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
   { id: 'reminder',   label: t('communications.msgTypes.reminder') },
   { id: 'teesheet',   label: t('communications.msgTypes.teesheet') },
   { id: 'newmember',  label: t('communications.msgTypes.newmember') },
-  { id: 'scorecards', label: '🖨 Scorecards' },
+  { id: 'scorecards', label: t('communications.msgTypeScorecards') },
   { id: 'free',       label: t('communications.msgTypes.free') },
 ]
 
@@ -412,7 +412,7 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
       .select('id, template_reminder_subject, template_reminder_body')
     if (tplError) {
       console.error('Erreur sauvegarde template:', tplError)
-      toast.error('Template non sauvegardé : ' + tplError.message)
+      toast.error(t('communications.templateNotSaved', { error: tplError.message }))
     } else {
       console.log('Template sauvegardé:', tplData)
     }
@@ -425,7 +425,7 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
     let res: Response
       if (messageType === 'teesheet') {
         const eventId = selectedEventId || ''
-        if (!eventId) { toast.error('Sélectionnez un événement pour le tee sheet'); setSending(false); return }
+        if (!eventId) { toast.error(t('communications.selectEventForTeesheet')); setSending(false); return }
         const activeEvent = events.find(e => e.id === eventId)
 
         const { data: flightsData } = await supabase
@@ -480,12 +480,12 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
       }
       
       const json = await res.json()
-      if (json.success) toast.success(`${json.sent} email${json.sent > 1 ? 's' : ''} envoyé${json.sent > 1 ? 's' : ''}${json.skipped ? ` · ${json.skipped} ignoré(s)` : ''}`)
+      if (json.success) toast.success(t('communications.sentToast', { count: json.sent }) + (json.skipped ? t('common.skippedSuffix', { count: json.skipped }) : ''))
       else toast.error(json.error ?? t('common.error'))
       if (json.queued > 0) {
-        toast.error(`Quota journalier dépassé — ${json.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+        toast.error(t('common.quotaExceeded', { count: json.queued }), { duration: 6000 })
       }
-      if (json.errors?.length) toast.error(`Erreurs : ${json.errors.join(', ')}`)
+      if (json.errors?.length) toast.error(t('common.errorsList', { errors: json.errors.join(', ') }))
     } catch (e: any) { toast.error(e.message) }
     finally { setSending(false) }
   }
@@ -577,8 +577,8 @@ function handleFilterEventChange(eventId: string) {
           <IconBtn
   onClick={() => {
     if (messageType === 'scorecards') {
-      if (printHoles.length === 0) { toast.error('Aucun parcours lié'); return }
-      if (printFlights.length === 0) { toast.error('Aucun flight pour cet événement'); return }
+      if (printHoles.length === 0) { toast.error(t('communications.noLinkedCourse')); return }
+      if (printFlights.length === 0) { toast.error(t('scorecard.noFlightsForEvent')); return }
       const activeEvent = events.find(e => e.id === filterEventId)
       const eventDate = activeEvent ? new Date(activeEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
 
@@ -606,7 +606,7 @@ printFormatName, printScorecardNotes
       const url  = URL.createObjectURL(blob)
       const win  = window.open(url, '_blank')
       if (!win) {
-        toast.error('Pop-up bloquée — autorisez les pop-ups pour imprimer')
+        toast.error(t('common.popupBlocked'))
         URL.revokeObjectURL(url)
       } else {
         setTimeout(() => URL.revokeObjectURL(url), 300000)
@@ -616,7 +616,7 @@ printFormatName, printScorecardNotes
     }
   }}
   disabled={messageType === 'teesheet'}
-  title="Imprimer">🖨
+  title={t('scoring.print')}>🖨
 </IconBtn>     
 
          <IconBtn onClick={() => setShowPreview(true)} disabled={isTeesheet || !hasMsg || selectedIds.size === 0 || !isOwner} title={t('communications.message.preview')}>👁</IconBtn>

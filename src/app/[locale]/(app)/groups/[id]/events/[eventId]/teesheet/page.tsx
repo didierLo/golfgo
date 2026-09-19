@@ -212,7 +212,7 @@ useEffect(() => {
     const { error } = await supabase.from('flights').update({ manual_start_at: iso }).eq('id', flight.id)
     setSavingTime(false)
     if (error) {
-      toast.error("Erreur lors de l'enregistrement de l'heure — réessaie")
+      toast.error(t('teesheet.errorSaveTime'))
       setFlights(prevFlights)
     }
   }
@@ -226,7 +226,7 @@ useEffect(() => {
     const { error } = await supabase.from('flights').update({ manual_start_at: null }).eq('id', flight.id)
     setSavingTime(false)
     if (error) {
-      toast.error("Erreur lors de la réinitialisation de l'heure — réessaie")
+      toast.error(t('teesheet.errorResetTime'))
       setFlights(prevFlights)
     }
   }
@@ -260,7 +260,7 @@ useEffect(() => {
       const firstError = results.find(r => r.error)?.error
       if (firstError) throw firstError
     } catch (e: any) {
-      toast.error("Erreur lors de l'enregistrement de l'ordre — " + (e.message ?? 'réessaie'))
+      toast.error(t('teesheet.errorSaveOrder', { detail: e.message ?? t('teesheet.tryAgain') }))
       loadData(selectedEventId) // resynchronise avec la base en cas d'échec partiel
     } finally {
       setReordering(false)
@@ -336,7 +336,7 @@ useEffect(() => {
       const skippedStr = result.skipped > 0 ? t('teesheet.email.skippedSuffix', { count: result.skipped }) : ''
       toast.success(t('teesheet.email.successToast', { sent: result.sent, skipped: skippedStr }))
       if (result.queued > 0) {
-        toast.error(`Quota journalier dépassé — ${result.queued} email(s) mis en file d'attente, ils partiront automatiquement.`, { duration: 6000 })
+        toast.error(t('common.quotaExceeded', { count: result.queued }), { duration: 6000 })
       }
     } catch (e: any) {
       toast.error(e.message ?? t('common.error'))
@@ -357,7 +357,7 @@ useEffect(() => {
     const url  = URL.createObjectURL(blob)
     const win  = window.open(url, '_blank')
     if (!win) {
-      toast.error('Pop-up bloquée — autorisez les pop-ups pour continuer')
+      toast.error(t('common.popupBlocked'))
       URL.revokeObjectURL(url)
     } else {
       setTimeout(() => URL.revokeObjectURL(url), 10000)
