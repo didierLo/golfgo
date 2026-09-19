@@ -2,9 +2,9 @@ const fs = require('fs')
 const path = require('path')
 
 // La clé DeepL ne doit JAMAIS être écrite dans le code (le dépôt est public).
-// Elle est lue dans la variable d'environnement DEEPL_API_KEY :
+// Elle est lue dans la variable d'environnement DEEPL_API_KEY, à fournir au lancement :
 //   DEEPL_API_KEY=xxxx node scripts/translate.cjs
-// (ou dans .env.local, déjà ignoré par Git via .gitignore)
+// (ce script ne lit PAS .env.local : la clé n'est ainsi jamais stockée dans un fichier du projet)
 const DEEPL_API_KEY = process.env.DEEPL_API_KEY
 if (!DEEPL_API_KEY) {
   console.error('DEEPL_API_KEY manquante. Lance : DEEPL_API_KEY=xxxx node scripts/translate.cjs')
