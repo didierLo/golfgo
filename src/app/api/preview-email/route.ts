@@ -1,13 +1,14 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
+import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('fr-BE', {
+function formatDate(dateStr: string, loc: string) {
+  return new Date(dateStr).toLocaleDateString(loc, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 }
-function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('fr-BE', {
+function formatTime(dateStr: string, loc: string) {
+  return new Date(dateStr).toLocaleTimeString(loc, {
     hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
   })
 }
@@ -17,7 +18,7 @@ function applyVars(text: string, vars: Record<string, string>): string {
   )
 }
 
-function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true) {
+function buildYesButtons(t: EmailT, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true) {
   if (!isGolf) {
     return `
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr><td>
@@ -25,7 +26,7 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="font-size:22px;width:36px;">🙋</td>
       <td style="padding-left:12px;">
-        <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
+        <div style="font-size:15px;font-weight:700;color:#15803D;">${t('email.respond.yes')}</div>
       </td>
       <td align="right" style="font-size:20px;">→</td>
     </tr></table>
@@ -35,7 +36,7 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
   <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="font-size:22px;width:36px;">😔</td>
-      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">${t('email.respond.no')}</td>
       <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
     </tr></table>
   </a>
@@ -48,8 +49,8 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="font-size:22px;width:36px;">⛳</td>
       <td style="padding-left:12px;">
-        <div style="font-size:15px;font-weight:700;color:#15803D;">Je participe</div>
-        <div style="font-size:12px;color:#16A34A;margin-top:2px;">18 trous · Parcours complet</div>
+        <div style="font-size:15px;font-weight:700;color:#15803D;">${t('email.respond.yes')}</div>
+        <div style="font-size:12px;color:#16A34A;margin-top:2px;">${t('email.respond.h18') + ' · ' + t('email.respond.h18Sub')}</div>
       </td>
       <td align="right" style="font-size:20px;">→</td>
     </tr></table>
@@ -60,8 +61,8 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="font-size:22px;width:36px;">🏌️</td>
       <td style="padding-left:12px;">
-        <div style="font-size:15px;font-weight:700;color:#92400E;">Je participe</div>
-        <div style="font-size:12px;color:#B45309;margin-top:2px;">9 trous Front · Trous 1–9</div>
+        <div style="font-size:15px;font-weight:700;color:#92400E;">${t('email.respond.yes')}</div>
+        <div style="font-size:12px;color:#B45309;margin-top:2px;">${t('email.respond.h9front') + ' · ' + t('email.respond.h9frontSub')}</div>
       </td>
       <td align="right" style="font-size:20px;">→</td>
     </tr></table>
@@ -72,8 +73,8 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="font-size:22px;width:36px;">🏌️‍♀️</td>
       <td style="padding-left:12px;">
-        <div style="font-size:15px;font-weight:700;color:#9A3412;">Je participe</div>
-        <div style="font-size:12px;color:#C2410C;margin-top:2px;">9 trous Back · Trous 10–18</div>
+        <div style="font-size:15px;font-weight:700;color:#9A3412;">${t('email.respond.yes')}</div>
+        <div style="font-size:12px;color:#C2410C;margin-top:2px;">${t('email.respond.h9back') + ' · ' + t('email.respond.h9backSub')}</div>
       </td>
       <td align="right" style="font-size:20px;">→</td>
     </tr></table>
@@ -83,20 +84,21 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
   <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="font-size:22px;width:36px;">😔</td>
-      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+      <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">${t('email.respond.no')}</td>
       <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
     </tr></table>
   </a>
 </td></tr></table>`
 }
 
-function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, eventMessage, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl }: {
+function buildInvitationHtml({ t, lang, eventTitle, eventDate, eventTime, eventLocation, eventMessage, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, eventLink, logoUrl }: {
+  t: EmailT; lang: string
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string
   noLink: string; eventLink: string; logoUrl: string | null
 }) {
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Invitation — ${eventTitle}</title></head>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8"/><title>${t('email.invitation.docTitle', { title: eventTitle })}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
 <tr><td align="center">
@@ -105,13 +107,13 @@ function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, 
   ${buildEmailLogoHeader(logoUrl)}
 </td></tr>
 <tr><td style="background:#ffffff;padding:36px 32px;">
-  <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;">Invitation</h1>
+  <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;">${t('email.invitation.title')}</h1>
   <p style="margin:0 0 28px;font-size:16px;font-weight:600;color:#185FA5;">${eventTitle}</p>
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
     <tr><td style="padding:16px 20px;">
       <table cellpadding="0" cellspacing="0">
         <tr><td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
-            <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td></tr>
+            <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${t('email.common.atTime', { date: eventDate, time: eventTime })}</td></tr>
         ${eventLocation ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td>
             <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td></tr>` : ''}
       </table>
@@ -119,20 +121,21 @@ function buildInvitationHtml({ eventTitle, eventDate, eventTime, eventLocation, 
   </table>
   ${eventMessage ? `<div style="margin-bottom:28px;"><p style="margin:0;font-size:14px;color:#334155;line-height:1.9;">${eventMessage.replace(/\n/g, '<br/>')}</p></div>` : ''}
   <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
-  <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}
+  <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">${t('email.common.yourResponse')}</p>
+  ${buildYesButtons(t, yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}
   <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
-    Ou <a href="${eventLink}" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
+    ${t('email.common.or')} <a href="${eventLink}" style="color:#185FA5;text-decoration:none;font-weight:500;">${t('email.common.viewInApp')}</a>
   </p>
 </td></tr>
 <tr><td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
-  <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Envoyé via GolfGo · golfgo.be</p>
+  <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">${t('email.common.sentViaShort') + ' · golfgo.be'}</p>
 </td></tr>
 </table></td></tr></table>
 </body></html>`
 }
 
-function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights, logoUrl }: {
+function buildTeesheetHtml({ t, lang, playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights, logoUrl }: {
+  t: EmailT; lang: string
   playerName: string; playerFlightNumber: number; eventTitle: string
   eventDate: string; eventLocation: string | null
   flights: { flight_number: number; start_time: string; players: { first_name: string; surname: string; whs: number | null }[] }[]
@@ -150,7 +153,7 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
         : ''
       return `<tr style="border-bottom:1px solid #F3F4F6;">
         <td style="padding:10px 16px;font-size:13px;color:${isMe ? '#185FA5' : '#374151'};font-weight:${isMe ? '600' : '400'};">
-          ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}${badge9T}
+          ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ' + t('email.teesheet.you') : ''}${badge9T}
         </td>
         <td style="padding:10px 16px;font-size:12px;color:#9CA3AF;text-align:right;">${p.whs !== null ? `WHS ${p.whs}` : ''}</td>
       </tr>`
@@ -159,7 +162,7 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr style="background:${headerBg};">
           <td style="padding:10px 16px;font-size:13px;font-weight:600;color:${headerText};">
-            Flight ${flight.flight_number}${isMyFlight ? ' — Votre flight' : ''}
+            Flight ${flight.flight_number}${isMyFlight ? ' — ' + t('email.teesheet.yourFlight') : ''}
           </td>
           <td style="padding:10px 16px;font-size:14px;font-weight:700;color:${isMyFlight ? '#97C459' : '#185FA5'};text-align:right;">${flight.start_time}</td>
         </tr>
@@ -168,7 +171,7 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
     </div>`
   }).join('')
 
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Tee Sheet — ${eventTitle}</title></head>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8"/><title>${t('email.teesheet.docTitle', { title: eventTitle })}</title></head>
 <body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;padding:32px 16px;">
 <tr><td align="center">
@@ -177,7 +180,7 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
   <table width="100%" cellpadding="0" cellspacing="0"><tr>
     <td style="vertical-align:middle;">${buildEmailLogoHeader(logoUrl)}</td>
     <td style="text-align:right;vertical-align:middle;">
-      <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;">Tee Sheet</span>
+      <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;">${t('email.teesheet.heading')}</span>
     </td>
   </tr></table>
 </td></tr>
@@ -186,29 +189,30 @@ function buildTeesheetHtml({ playerName, playerFlightNumber, eventTitle, eventDa
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;margin-bottom:24px;">
     <tr><td style="padding:14px 20px;">
       <table cellpadding="0" cellspacing="0">
-        <tr><td style="padding:3px 0;font-size:13px;color:#6B7280;width:70px;">📅 Date</td>
+        <tr><td style="padding:3px 0;font-size:13px;color:#6B7280;width:70px;">${t('email.teesheet.dateLabel')}</td>
             <td style="padding:3px 0;font-size:13px;color:#111827;font-weight:500;">${eventDate}</td></tr>
-        ${eventLocation ? `<tr><td style="padding:3px 0;font-size:13px;color:#6B7280;">📍 Lieu</td>
+        ${eventLocation ? `<tr><td style="padding:3px 0;font-size:13px;color:#6B7280;">${t('email.teesheet.placeLabel')}</td>
             <td style="padding:3px 0;font-size:13px;color:#111827;font-weight:500;">${eventLocation}</td></tr>` : ''}
       </table>
     </td></tr>
   </table>
-  <p style="margin:0 0 14px;font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">Ordre de départ</p>
+  <p style="margin:0 0 14px;font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">${t('email.teesheet.order')}</p>
   ${flightsHtml}
 </td></tr>
 <tr><td style="background:#F9FAFB;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 12px 12px;padding:16px 32px;">
-  <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;">Organisé avec GolfGo · golfgo.be</p>
+  <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;">${t('email.teesheet.footer') + ' · golfgo.be'}</p>
 </td></tr>
 </table></td></tr></table>
 </body></html>`
 }
 
-function buildCommHtml({ subject, body, eventTitle, hasButtons, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl }: {
+function buildCommHtml({ t, lang, subject, body, eventTitle, hasButtons, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl }: {
+  t: EmailT; lang: string
   subject: string; body: string; eventTitle?: string
   hasButtons: boolean; isGolf: boolean; yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string
   logoUrl: string | null
 }) {
-  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>${subject}</title></head>
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8"/><title>${subject}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
 <tr><td align="center">
@@ -221,11 +225,11 @@ function buildCommHtml({ subject, body, eventTitle, hasButtons, isGolf, yes18Lin
   <div style="font-size:14px;color:#334155;line-height:1.9;margin-bottom:${hasButtons ? '28px' : '0'};">${body.replace(/\n/g, '<br/>')}</div>
   ${hasButtons ? `
   <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
-  <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
-  ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}` : ''}
+  <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">${t('email.common.yourResponse')}</p>
+  ${buildYesButtons(t, yes18Link, yes9frontLink, yes9backLink, noLink, isGolf)}` : ''}
 </td></tr>
 <tr><td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
-  <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Envoyé via GolfGo · golfgo.be</p>
+  <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">${t('email.common.sentViaShort') + ' · golfgo.be'}</p>
 </td></tr>
 </table></td></tr></table>
 </body></html>`
@@ -244,36 +248,40 @@ export async function POST(req: Request) {
       const { data: event } = await supabase.from('events')
         .select('id, title, location, starts_at, group_id, email_message, is_golf').eq('id', eventId).single()
       if (!event) return Response.json({ error: 'Event introuvable' }, { status: 404 })
+      const gl: Locale = await getGroupLocale(supabase, event.group_id)
+      const t  = serverT(gl)
+      const dl = DATE_LOCALE[gl]
 
       const { data: groupData } = await supabase.from('groups')
         .select('template_invitation_subject, template_invitation_body, template_logo_url, owner:groups_players(players(first_name, surname))')
         .eq('id', event.group_id).eq('groups_players.role', 'owner').single()
 
       const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-      const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : "L'organisateur"
-      const eventDate   = formatDate(event.starts_at)
-      const eventTime   = formatTime(event.starts_at)
-      const bodyTemplate = groupData?.template_invitation_body ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\n\nAu plaisir de te revoir,\n{{owner_name}}"
+      const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : t('email.common.organiser')
+      const eventDate   = formatDate(event.starts_at, dl)
+      const eventTime   = formatTime(event.starts_at, dl)
+      const bodyTemplate = groupData?.template_invitation_body ?? t.raw('email.defaults.invitationBody')
       const logoUrl = groupData?.template_logo_url ?? null
 
       const vars: Record<string, string> = {
-        first_name: 'Prénom', player_name: 'Prénom Nom', player_surname: 'Nom',
+        first_name: t('email.preview.firstName'), player_name: t('email.preview.fullName'), player_surname: t('email.preview.surname'),
         event_title: event.title, event_date: eventDate, event_time: eventTime, owner_name: ownerName,
       }
 
       const resolvedBody = applyVars(event.email_message ?? bodyTemplate, vars)
       const html = buildInvitationHtml({
+        t, lang: gl,
         eventTitle: event.title, eventDate, eventTime,
         eventLocation: event.location, eventMessage: resolvedBody,
         isGolf: event.is_golf ?? true,
-        yes18Link:    `${appUrl}/invite/yes?token=PREVIEW&holes=18`,
-        yes9frontLink: `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=out`,
-        yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,
-        noLink:        `${appUrl}/invite/no?token=PREVIEW`,
+        yes18Link:    `${appUrl}/${gl}/invite/yes?token=PREVIEW&holes=18`,
+        yes9frontLink: `${appUrl}/${gl}/invite/yes?token=PREVIEW&holes=9&section=out`,
+        yes9backLink:  `${appUrl}/${gl}/invite/yes?token=PREVIEW&holes=9&section=in`,
+        noLink:        `${appUrl}/${gl}/invite/no?token=PREVIEW`,
         eventLink:     `${appUrl}/groups/${event.group_id}/events/${eventId}`,
         logoUrl,
       })
-      return Response.json({ html, subject: applyVars(groupData?.template_invitation_subject ?? 'Invitation : {{event_title}}', vars) })
+      return Response.json({ html, subject: applyVars(groupData?.template_invitation_subject ?? t.raw('email.defaults.invitationSubject'), vars) })
     }
 
     // ── Teesheet preview ────────────────────────────────────────────────────
@@ -282,29 +290,36 @@ export async function POST(req: Request) {
       const { data: event } = await supabase.from('events')
         .select('title, starts_at, location, group_id').eq('id', eventId).single()
       if (!event) return Response.json({ error: 'Event introuvable' }, { status: 404 })
+      const gl: Locale = await getGroupLocale(supabase, event.group_id)
+      const t  = serverT(gl)
+      const dl = DATE_LOCALE[gl]
 
       const { data: groupData } = await supabase.from('groups')
         .select('template_logo_url').eq('id', event.group_id).single()
       const logoUrl = groupData?.template_logo_url ?? null
 
-      const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
+      const eventDate = new Date(event.starts_at).toLocaleDateString(dl, {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
       })
       const firstFlight   = flights?.[0]
       const previewPlayer = firstFlight?.players?.[0]
-      const playerName    = previewPlayer ? `${previewPlayer.first_name} ${previewPlayer.surname}` : 'Joueur'
+      const playerName    = previewPlayer ? `${previewPlayer.first_name} ${previewPlayer.surname}` : t('email.preview.player')
 
       const html = buildTeesheetHtml({
+        t, lang: gl,
         playerName, playerFlightNumber: firstFlight?.flight_number ?? 1,
         eventTitle: event.title, eventDate, eventLocation: event.location, flights,
         logoUrl,
       })
-      return Response.json({ html, subject: `Tee Sheet — ${event.title}` })
+      return Response.json({ html, subject: t('email.teesheet.docTitle', { title: event.title }) })
     }
 
     // ── Communication preview ───────────────────────────────────────────────
     if (type === 'communication') {
       const { subject, body: commBody, groupId, eventId } = body
+      const gl: Locale = await getGroupLocale(supabase, groupId)
+      const t  = serverT(gl)
+      const dl = DATE_LOCALE[gl]
      const [{ data: group }, eventResult] = await Promise.all([
   supabase.from('groups').select('name, template_logo_url').eq('id', groupId).single(),
   eventId
@@ -313,8 +328,8 @@ export async function POST(req: Request) {
 ])
 
 const eventTitle = eventResult.data?.title
-const eventDate  = eventResult.data ? formatDate(eventResult.data.starts_at) : ''
-const eventTime  = eventResult.data ? formatTime(eventResult.data.starts_at) : ''
+const eventDate  = eventResult.data ? formatDate(eventResult.data.starts_at, dl) : ''
+const eventTime  = eventResult.data ? formatTime(eventResult.data.starts_at, dl) : ''
 const eventIsGolf = (eventResult.data as any)?.is_golf ?? true
 const logoUrl    = (group as any)?.template_logo_url ?? null
 
@@ -322,8 +337,8 @@ const logoUrl    = (group as any)?.template_logo_url ?? null
       const hasButtons = commBody.includes('{{yes_button}}')
 
       const vars: Record<string, string> = {
-        first_name: 'Prénom', surname: 'Nom', player_name: 'Prénom Nom',
-        group_name: group?.name ?? 'Mon groupe', owner_name: "L'organisateur",
+        first_name: t('email.preview.firstName'), surname: t('email.preview.surname'), player_name: t('email.preview.fullName'),
+        group_name: group?.name ?? t('email.preview.myGroup'), owner_name: t('email.common.organiser'),
         places_restantes: '5', event_title: eventTitle ?? '',
         event_date: eventDate, event_time: eventTime, start_time: eventTime,
         yes_button: '',
@@ -333,12 +348,13 @@ const logoUrl    = (group as any)?.template_logo_url ?? null
       const resolvedBody    = applyVars(commBody.replace('{{yes_button}}', ''), vars).trim()
 
       const html = buildCommHtml({
+        t, lang: gl,
         subject: resolvedSubject, body: resolvedBody, eventTitle,
         hasButtons, isGolf: eventIsGolf,
-        yes18Link:     `${appUrl}/invite/yes?token=PREVIEW&holes=18`,
-        yes9frontLink: `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=out`,
-        yes9backLink:  `${appUrl}/invite/yes?token=PREVIEW&holes=9&section=in`,
-        noLink:        `${appUrl}/invite/no?token=PREVIEW`,
+        yes18Link:     `${appUrl}/${gl}/invite/yes?token=PREVIEW&holes=18`,
+        yes9frontLink: `${appUrl}/${gl}/invite/yes?token=PREVIEW&holes=9&section=out`,
+        yes9backLink:  `${appUrl}/${gl}/invite/yes?token=PREVIEW&holes=9&section=in`,
+        noLink:        `${appUrl}/${gl}/invite/no?token=PREVIEW`,
         logoUrl,
       })
       return Response.json({ html, subject: resolvedSubject })

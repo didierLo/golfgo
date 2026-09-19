@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildTeesheetHtml, type TeesheetFlight } from '@/lib/email/buildTeesheetHtml'
+import { getGroupLocale, serverT, DATE_LOCALE, type Locale } from '@/lib/i18n/server'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { geocodeEventLocation, fetchHourlyWindow } from '@/lib/weather'
 
@@ -57,6 +58,8 @@ export async function POST(req: Request) {
       .eq('id', event.group_id)
       .single()
     const logoUrl = groupData?.template_logo_url ?? null
+    const gl: Locale = await getGroupLocale(supabase, event.group_id)   // langue du groupe
+    const t  = serverT(gl)
 
     // ── Météo — calculée une seule fois pour l'événement, partagée par tous les emails ──
     let hourlyForecast: Awaited<ReturnType<typeof fetchHourlyWindow>> = null
@@ -77,7 +80,7 @@ export async function POST(req: Request) {
 
     const optOutSet = new Set((optOuts || []).filter(o => o.email_opt_out).map(o => o.player_id))
 
-    const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
+    const eventDate = new Date(event.starts_at).toLocaleDateString(DATE_LOCALE[gl], {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     })
 
@@ -99,6 +102,7 @@ export async function POST(req: Request) {
       }
 
       const html = buildTeesheetHtml({
+        t, lang: gl,
         playerName,
         playerFlightNumber: playerFlight.flight_number,
         eventTitle:    event.title,
@@ -119,7 +123,7 @@ export async function POST(req: Request) {
         from:     'GolfGo <noreply@golfgo.be>',
         replyTo:  'info@golfgo.be',
         to:       player.email,
-        subject:  `Tee Sheet — ${event.title}`,
+        subject:  t('email.teesheet.docTitle', { title: event.title }),
         html,
         headers: {
           'List-Unsubscribe': `<${unsubscribeUrl}>`,

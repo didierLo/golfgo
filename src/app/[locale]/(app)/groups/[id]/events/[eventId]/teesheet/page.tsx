@@ -349,6 +349,7 @@ useEffect(() => {
       flight_number: f.flight_number, start_time: flightTimes[index].label, players: f.players,
     }))
     const html = buildTeesheetHtml({
+      t, lang: locale,
       playerName: null, playerFlightNumber: null,
       eventTitle, eventDate, eventLocation: null,
       flights: teesheetFlights, logoUrl, autoPrint: true,

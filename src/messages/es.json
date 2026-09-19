@@ -495,7 +495,9 @@
     "autoTeesheetLabel": "Hoja de salida automática D-1",
     "autoTeesheetDesc": "Envía la hoja de salida el día anterior si los flights están generados, sino notifica al organizador",
     "autoInvitationLabel": "Invitación automática 14 días antes del evento",
-    "autoInvitationDesc": "Envía una invitación a todos los miembros 14 días antes del evento"
+    "autoInvitationDesc": "Envía una invitación a todos los miembros 14 días antes del evento",
+    "languageLabel": "Idioma del grupo",
+    "languageHint": "Idioma de los correos enviados a los jugadores de este grupo."
   },
   "flightHistory": {
     "title": "Historial de flights",
@@ -1470,5 +1472,94 @@
     "addCount": "Añadir {count, plural, one {# jugador} other {# jugadores}}",
     "noValid": "Ningún jugador válido",
     "added": "{count, plural, one {# jugador añadido} other {# jugadores añadidos}}"
+  },
+
+  "email": {
+    "respond": {
+      "yes": "Participo",
+      "waitlist": "Apuntarme a la lista de espera",
+      "no": "No puedo participar",
+      "h18": "18 hoyos",
+      "h18Sub": "Campo completo",
+      "h9front": "9 hoyos Front",
+      "h9frontSub": "Hoyos 1–9",
+      "h9back": "9 hoyos Back",
+      "h9backSub": "Hoyos 10–18"
+    },
+    "common": {
+      "atTime": "{date} a las {time}",
+      "or": "O",
+      "viewInApp": "ver los detalles en la app",
+      "sentViaGolfgo": "Este correo te ha sido enviado a través de GolfGo",
+      "sentViaShort": "Enviado a través de GolfGo",
+      "yourResponse": "Tu respuesta",
+      "confirmPresence": "Confirma tu asistencia",
+      "fullNotice": "⚠️ Evento completo — si confirmas, pasarás a la lista de espera.",
+      "greeting": "Hola {name},",
+      "alreadyAnswered": "Si ya has respondido a través de GolfGo, ignora este correo.",
+      "organiser": "El organizador",
+      "unsubscribeSubject": "Baja"
+    },
+    "invitation": {
+      "title": "Invitación",
+      "docTitle": "Invitación — {title}",
+      "footer": "Invitación automática de GolfGo"
+    },
+    "reminder": {
+      "docTitle": "Recordatorio — {title}",
+      "footer": "Recordatorio automático de GolfGo"
+    },
+    "owner": {
+      "docTitle": "Acción requerida — {title}",
+      "heading": "⚠️ Faltan los flights — mañana",
+      "body": "No se ha generado ningún flight para este evento. Los participantes no recibirán la lista de salidas automática.",
+      "cta": "Generar los flights →",
+      "footer": "Notificación automática de GolfGo",
+      "subject": "⚠️ Faltan flights — {title} mañana"
+    },
+    "teesheet": {
+      "docTitle": "Lista de salidas — {title}",
+      "heading": "Lista de salidas",
+      "dateLabel": "📅 Fecha",
+      "placeLabel": "📍 Lugar",
+      "order": "Orden de salida",
+      "you": "← tú",
+      "yourFlight": "Tu flight",
+      "footer": "Organizado con GolfGo"
+    },
+    "scorecard": {
+      "subject": "Tu tarjeta de puntuación — {title}"
+    },
+    "groupInvite": {
+      "subject": "Invitación para unirte a {group} en GolfGo",
+      "docTitle": "Invitación — {group}",
+      "heading": "¡Únete a nuestro grupo!",
+      "intro": "{sender} te invita a unirte al grupo {group} en GolfGo, la aplicación para organizar salidas de golf entre amigos.",
+      "cta": "Unirme al grupo →",
+      "orScan": "O escanea el código QR",
+      "install": "Instalar la aplicación",
+      "iphoneSteps": "Pulsa el icono {bo}Compartir{bc} ↑ → {eo}Ver más{ec} → {eo}Añadir a pantalla de inicio{ec}",
+      "androidSteps": "Pulsa el {bo}menú ⋮{bc} arriba a la derecha → {eo}Añadir a pantalla de inicio{ec}",
+      "footer": "Este correo se ha enviado a través de GolfGo"
+    },
+    "install": {
+      "iphone": "Abre el enlace en Safari → icono Compartir → «Añadir a pantalla de inicio»",
+      "android": "Abre el enlace en Chrome → menú ⋮ → «Añadir a pantalla de inicio»"
+    },
+    "preview": {
+      "firstName": "Nombre",
+      "surname": "Apellido",
+      "fullName": "Nombre Apellido",
+      "player": "Jugador",
+      "myGroup": "Mi grupo"
+    },
+    "defaults": {
+      "reminderSubject": "⏰ Recordatorio — {{event_title}} en 3 días",
+      "reminderBody": "Hola {{first_name}},\n\nRecordatorio de {{event_title}}, que tendrá lugar dentro de 3 días.\n\nHasta pronto,\n{{owner_name}}",
+      "invitationSubject": "Invitación: {{event_title}}",
+      "invitationBody": "Hola {{first_name}},\n\nTengo el placer de invitarte a nuestro próximo encuentro.\n¿Podrás acompañarnos?\n\nEspero volver a verte,\n{{owner_name}}",
+      "teesheetSubject": "Lista de salidas — {{event_title}}",
+      "teesheetBody": "Hola {{first_name}},\n\nEste es el orden de salida de {{event_title}}.\n\n{{teesheet}}"
+    }
   }
 }

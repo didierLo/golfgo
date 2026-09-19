@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 const supabase = createClient()
 
@@ -17,6 +17,7 @@ const inputClass = "w-full border border-white/60 rounded-xl px-3 py-2.5 text-[1
 export default function AddGroupPage() {
   const router = useRouter()
   const t      = useTranslations()
+  const locale = useLocale()
 
   const [name, setName]               = useState('')
   const [description, setDescription] = useState('')
@@ -52,6 +53,10 @@ if (player) {
     user_id:   user.id,
   })
 }
+
+// Langue du nouveau groupe = langue de l'interface du créateur (modifiable ensuite dans les réglages du groupe).
+// Sans effet tant que la colonne `locale` n'existe pas : le groupe garde alors la langue par défaut.
+await supabase.from('groups').update({ locale }).eq('id', group.id)
 
 window.location.href = `/groups/${group.id}/members`
   }

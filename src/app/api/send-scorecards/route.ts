@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
+import { getGroupLocale, serverT, DATE_LOCALE, type Locale } from '@/lib/i18n/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { computePhcp } from '@/components/scorecards/scorecard-types'
@@ -22,6 +23,8 @@ export async function POST(req: Request) {
     if (!event) return Response.json({ success: false, error: 'Événement introuvable' }, { status: 404 })
     if (!event.course_id) return Response.json({ success: false, error: 'Aucun parcours lié à cet événement' }, { status: 400 })
 
+    const gl: Locale = await getGroupLocale(supabase, event.group_id)   // langue du groupe
+    const t  = serverT(gl)
     const clubName   = (event as any).courses?.clubs?.name ?? ''
     const courseName = (event as any).courses?.course_name ?? ''
 
@@ -47,7 +50,7 @@ export async function POST(req: Request) {
       .in('player_id', participantIds)
     const optOutSet = new Set((optOuts || []).filter(o => o.email_opt_out).map(o => o.player_id))
 
-    const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
+    const eventDate = new Date(event.starts_at).toLocaleDateString(DATE_LOCALE[gl], {
       day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     })
 
@@ -80,7 +83,7 @@ export async function POST(req: Request) {
         from:     'GolfGo <noreply@golfgo.be>',
         replyTo:  'info@golfgo.be',
         to:       player.email,
-        subject:  `Ta carte de score — ${event.title}`,
+        subject:  t('email.scorecard.subject', { title: event.title }),
         html,
       })
 

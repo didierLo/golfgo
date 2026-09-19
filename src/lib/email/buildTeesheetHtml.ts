@@ -1,5 +1,6 @@
 import { buildEmailLogoHeader } from './logo'
 import { weatherCodeInfo, type HourlyPoint } from '@/lib/weather'
+import type { EmailT } from '@/lib/i18n/types'
 
 function buildHourlyWeatherHtml(points: HourlyPoint[]): string {
   const cells = points.map(p => {
@@ -42,8 +43,10 @@ function holesLabel(p: TeesheetFlightPlayer): string | null {
 }
 
 export function buildTeesheetHtml({
-  playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights, logoUrl, autoPrint = false, hourlyForecast = null,
+  t, lang = 'fr', playerName, playerFlightNumber, eventTitle, eventDate, eventLocation, flights, logoUrl, autoPrint = false, hourlyForecast = null,
 }: {
+  t: EmailT
+  lang?: string
   playerName: string | null
   playerFlightNumber: number | null
   eventTitle: string
@@ -73,7 +76,7 @@ export function buildTeesheetHtml({
       return `
         <tr style="border-bottom: 1px solid #F3F4F6;">
           <td style="padding: 10px 16px; font-size: 13px; color: ${isMe ? '#185FA5' : '#374151'}; font-weight: ${isMe ? '600' : '400'};">
-            ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ← vous' : ''}${badge9}
+            ${i + 1}. ${p.first_name} ${p.surname}${isMe ? ' ' + t('email.teesheet.you') : ''}${badge9}
           </td>
           <td style="padding: 10px 16px; font-size: 12px; color: #9CA3AF; text-align: right;">
             ${p.whs !== null ? `WHS ${p.whs}` : ''}
@@ -87,7 +90,7 @@ export function buildTeesheetHtml({
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr style="background: ${headerBg};">
             <td style="padding: 10px 16px; font-size: 13px; font-weight: 600; color: ${headerText};">
-              Flight ${flight.flight_number}${isMyFlight ? ' — Votre flight' : ''}
+              Flight ${flight.flight_number}${isMyFlight ? ' — ' + t('email.teesheet.yourFlight') : ''}
             </td>
             <td style="padding: 10px 16px; font-size: 14px; font-weight: 700; color: ${isMyFlight ? '#97C459' : '#185FA5'}; text-align: right;">
               ${flight.start_time}
@@ -101,11 +104,11 @@ export function buildTeesheetHtml({
 
   return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tee Sheet — ${eventTitle}</title>
+  <title>${t('email.teesheet.docTitle', { title: eventTitle })}</title>
 </head>
 <body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F5;padding:32px 16px;">
@@ -121,7 +124,7 @@ export function buildTeesheetHtml({
                     ${buildEmailLogoHeader(logoUrl)}
                   </td>
                   <td style="text-align:right;">
-                    <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;">Tee Sheet</span>
+                    <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:1px;">${t('email.teesheet.heading')}</span>
                   </td>
                 </tr>
               </table>
@@ -138,12 +141,12 @@ export function buildTeesheetHtml({
                   <td style="padding:14px 20px;">
                     <table cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding:3px 0;font-size:13px;color:#6B7280;width:70px;">📅 Date</td>
+                        <td style="padding:3px 0;font-size:13px;color:#6B7280;width:70px;">${t('email.teesheet.dateLabel')}</td>
                         <td style="padding:3px 0;font-size:13px;color:#111827;font-weight:500;">${eventDate}</td>
                       </tr>
                       ${eventLocation ? `
                       <tr>
-                        <td style="padding:3px 0;font-size:13px;color:#6B7280;">📍 Lieu</td>
+                        <td style="padding:3px 0;font-size:13px;color:#6B7280;">${t('email.teesheet.placeLabel')}</td>
                         <td style="padding:3px 0;font-size:13px;color:#111827;font-weight:500;">${eventLocation}</td>
                       </tr>` : ''}
                     </table>
@@ -152,7 +155,7 @@ export function buildTeesheetHtml({
               </table>
                           ${hourlyForecast?.length ? buildHourlyWeatherHtml(hourlyForecast) : ''}
               <p style="margin:0 0 14px;font-size:13px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">
-                Ordre de départ
+                ${t('email.teesheet.order')}
               </p>
               ${flightsHtml}
             </td>
@@ -161,7 +164,7 @@ export function buildTeesheetHtml({
           <tr>
             <td style="background:#F9FAFB;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 12px 12px;padding:16px 32px;">
               <p style="margin:0;font-size:12px;color:#9CA3AF;text-align:center;">
-                Organisé avec GolfGo · golfgo.be
+                ${t('email.teesheet.footer') + ' · golfgo.be'}
               </p>
             </td>
           </tr>

@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
+import { getGroupLocale, serverT, type Locale, type EmailT } from '@/lib/i18n/server'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -8,12 +9,14 @@ const BATCH_SIZE = 10
 const BATCH_DELAY_MS = 2000
 
 function buildGroupInviteHtml({
-  groupName,
+  t, lang, groupName,
   inviteUrl,
   qrUrl,
   senderName,
   logoUrl,
 }: {
+  t: EmailT
+  lang: string
   groupName: string
   inviteUrl: string
   qrUrl: string
@@ -22,11 +25,11 @@ function buildGroupInviteHtml({
 }) {
   return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invitation — ${groupName}</title>
+  <title>${t('email.groupInvite.docTitle', { group: groupName })}</title>
 </head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
@@ -45,21 +48,21 @@ function buildGroupInviteHtml({
           <td style="background:#ffffff;padding:36px 32px;">
 
             <h1 style="margin:0 0 6px;font-size:20px;font-weight:700;color:#0F172A;">
-              Rejoignez notre groupe !
+              ${t('email.groupInvite.heading')}
             </h1>
             <p style="margin:0 0 28px;font-size:16px;font-weight:600;color:#185FA5;">
               ${groupName}
             </p>
 
             <p style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.7;">
-              ${senderName} vous invite à rejoindre le groupe <strong>${groupName}</strong> sur GolfGo, l'application de gestion de sorties golf entre amis.
+              ${t('email.groupInvite.intro', { sender: senderName, group: `<strong>${groupName}</strong>` })}
             </p>
 
             <!-- CTA -->
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
               <tr><td align="center">
                 <a href="${inviteUrl}" style="display:inline-block;background:#185FA5;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
-                  Rejoindre le groupe →
+                  ${t('email.groupInvite.cta')}
                 </a>
               </td></tr>
             </table>
@@ -67,7 +70,7 @@ function buildGroupInviteHtml({
             <!-- QR Code -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:28px;">
               <tr><td style="padding:24px;text-align:center;">
-                <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ou scannez le QR code</p>
+                <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">${t('email.groupInvite.orScan')}</p>
                 <img src="${qrUrl}" width="140" height="140" style="border-radius:8px;" />
               </td></tr>
             </table>
@@ -76,7 +79,7 @@ function buildGroupInviteHtml({
 
             <!-- Instructions PWA -->
             <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">
-              Installer l'application
+              ${t('email.groupInvite.install')}
             </p>
 
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
@@ -85,7 +88,7 @@ function buildGroupInviteHtml({
                 <td style="padding-left:10px;">
                   <p style="margin:0;font-size:13px;font-weight:600;color:#0F172A;">iPhone / Safari</p>
                   <p style="margin:4px 0 0;font-size:12px;color:#64748B;line-height:1.6;">
-                    Clique sur l'icône <strong>Partager</strong> ↑ → <em>En voir plus</em> → <em>Ajouter à l'écran d'accueil</em>
+                    ${t('email.groupInvite.iphoneSteps', { bo: '<strong>', bc: '</strong>', eo: '<em>', ec: '</em>' })}
                   </p>
                 </td>
               </tr>
@@ -97,7 +100,7 @@ function buildGroupInviteHtml({
                 <td style="padding-left:10px;">
                   <p style="margin:0;font-size:13px;font-weight:600;color:#0F172A;">Android / Chrome</p>
                   <p style="margin:4px 0 0;font-size:12px;color:#64748B;line-height:1.6;">
-                    Clique sur le <strong>menu ⋮</strong> en haut à droite → <em>Ajouter à l'écran d'accueil</em>
+                    ${t('email.groupInvite.androidSteps', { bo: '<strong>', bc: '</strong>', eo: '<em>', ec: '</em>' })}
                   </p>
                 </td>
               </tr>
@@ -110,7 +113,7 @@ function buildGroupInviteHtml({
         <tr>
           <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
             <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">
-              Cet email a été envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a>
+              ${t('email.groupInvite.footer')} · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a>
             </p>
           </td>
         </tr>
@@ -124,13 +127,17 @@ function buildGroupInviteHtml({
 
 export async function POST(req: Request) {
   try {
-    const { groupId, emails, locale = 'fr' } = await req.json()
+    const { groupId, emails } = await req.json()
 
     if (!groupId || !emails?.length) {
       return Response.json({ success: false, error: 'groupId et emails requis' }, { status: 400 })
     }
 
     const supabase = await createServerClient()
+
+    // Langue du groupe : texte de l'email ET langue de la page d'arrivée du lien d'invitation
+    const locale: Locale = await getGroupLocale(supabase, groupId)
+    const t = serverT(locale)
 
     // Récupérer le groupe et l'owner
     const { data: group } = await supabase
@@ -175,12 +182,12 @@ export async function POST(req: Request) {
     const qrUrl     = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(inviteUrl)}`
 
     const ownerPlayer   = (group.owner as any)?.[0]?.players
-    const senderName    = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : 'L\'organisateur'
+    const senderName    = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : t('email.common.organiser')
     const groupName     = group.name
     const logoUrl       = (group as any).template_logo_url ?? null
-    const subject       = `Invitation à rejoindre ${groupName} sur GolfGo`
+    const subject       = t('email.groupInvite.subject', { group: groupName })
 
-    const html = buildGroupInviteHtml({ groupName, inviteUrl, qrUrl, senderName, logoUrl })
+    const html = buildGroupInviteHtml({ t, lang: locale, groupName, inviteUrl, qrUrl, senderName, logoUrl })
 
     let sent = 0, skipped = 0, queued = 0
     const errors: string[] = []
@@ -209,7 +216,7 @@ export async function POST(req: Request) {
           subject,
           html,
           headers: {
-            'List-Unsubscribe': '<mailto:info@golfgo.be?subject=Désinscription>',
+            'List-Unsubscribe': `<mailto:info@golfgo.be?subject=${encodeURIComponent(t('email.common.unsubscribeSubject'))}>`,
           },
         })
         if (!result.sent && !result.queued) { errors.push(`${email}: ${result.error}`); skipped++ }

@@ -3,16 +3,17 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { randomUUID } from 'crypto'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
+import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('fr-BE', {
+function formatDate(dateStr: string, loc: string) {
+  return new Date(dateStr).toLocaleDateString(loc, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 }
-function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('fr-BE', {
+function formatTime(dateStr: string, loc: string) {
+  return new Date(dateStr).toLocaleTimeString(loc, {
     hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
   })
 }
@@ -23,7 +24,7 @@ function applyTemplateVariables(text: string, vars: Record<string, string>): str
   )
 }
 
-function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true, isFull: boolean = false) {
+function buildYesButtons(t: EmailT, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isGolf: boolean = true, isFull: boolean = false) {
   const waitBg = '#FEF3C7', waitBorder = '#D97706', waitTitle = '#92400E', waitSub = '#B45309'
 
   if (!isGolf) {
@@ -34,7 +35,7 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🙋'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -46,7 +47,7 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
     <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-size:22px;width:36px;">😔</td>
-        <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+        <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">${t('email.respond.no')}</td>
         <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
       </tr></table>
     </a>
@@ -61,8 +62,8 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '⛳'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
-          <div style="font-size:12px;color:${isFull ? waitSub : '#16A34A'};margin-top:2px;">18 trous · Parcours complet</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div>
+          <div style="font-size:12px;color:${isFull ? waitSub : '#16A34A'};margin-top:2px;">${t('email.respond.h18') + ' · ' + t('email.respond.h18Sub')}</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -75,8 +76,8 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🏌️'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#92400E'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
-          <div style="font-size:12px;color:${isFull ? waitSub : '#B45309'};margin-top:2px;">9 trous Front · Trous 1–9</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#92400E'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div>
+          <div style="font-size:12px;color:${isFull ? waitSub : '#B45309'};margin-top:2px;">${t('email.respond.h9front') + ' · ' + t('email.respond.h9frontSub')}</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -89,8 +90,8 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🏌️‍♀️'}</td>
         <td style="padding-left:12px;">
-          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#9A3412'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div>
-          <div style="font-size:12px;color:${isFull ? waitSub : '#C2410C'};margin-top:2px;">9 trous Back · Trous 10–18</div>
+          <div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#9A3412'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div>
+          <div style="font-size:12px;color:${isFull ? waitSub : '#C2410C'};margin-top:2px;">${t('email.respond.h9back') + ' · ' + t('email.respond.h9backSub')}</div>
         </td>
         <td align="right" style="font-size:20px;">→</td>
       </tr></table>
@@ -102,7 +103,7 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
     <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td style="font-size:22px;width:36px;">😔</td>
-        <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+        <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">${t('email.respond.no')}</td>
         <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
       </tr></table>
     </a>
@@ -111,9 +112,10 @@ function buildYesButtons(yes18Link: string, yes9frontLink: string, yes9backLink:
 }
 
 function buildEmailHtml({
-  eventTitle, eventDate, eventTime, eventLocation, eventMessage, eventLink, isGolf,
+  t, lang, eventTitle, eventDate, eventTime, eventLocation, eventMessage, eventLink, isGolf,
   yes18Link, yes9frontLink, yes9backLink, noLink, hasButtons, logoUrl, placesRestantes,
 }: {
+  t: EmailT; lang: string
   eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; eventMessage: string | null; eventLink: string; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string
@@ -122,7 +124,7 @@ function buildEmailHtml({
   const isFull = placesRestantes !== null && placesRestantes <= 0
   return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -150,7 +152,7 @@ function buildEmailHtml({
                 <table cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
-                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${t('email.common.atTime', { date: eventDate, time: eventTime })}</td>
                   </tr>
                   ${eventLocation ? `
                   <tr>
@@ -168,15 +170,15 @@ function buildEmailHtml({
 
             ${hasButtons ? `
             <div style="height:1px;background:#F1F5F9;margin-bottom:24px;"></div>
-            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">${t('email.common.yourResponse')}</p>
             ${isFull ? `
             <div style="background:#FEF3C7;border:1px solid #D97706;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
-              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">⚠️ Événement complet — tu seras placé(e) en liste d'attente si tu confirmes.</p>
+              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">${t('email.common.fullNotice')}</p>
             </div>` : ''}
-            ${buildYesButtons(yes18Link, yes9frontLink, yes9backLink, noLink, isGolf, isFull)}` : ''}
+            ${buildYesButtons(t, yes18Link, yes9frontLink, yes9backLink, noLink, isGolf, isFull)}` : ''}
 
             <p style="margin:0;font-size:13px;color:#94A3B8;text-align:center;">
-               Ou <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" style="color:#185FA5;text-decoration:none;font-weight:500;">voir les détails dans l'app</a>
+               ${t('email.common.or')} <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" style="color:#185FA5;text-decoration:none;font-weight:500;">${t('email.common.viewInApp')}</a>
             </p>
 
           </td>
@@ -185,7 +187,7 @@ function buildEmailHtml({
         <tr>
           <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
             <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">
-              Cet email t'a été envoyé via GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a>
+              ${t('email.common.sentViaGolfgo')} · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a>
             </p>
           </td>
         </tr>
@@ -208,6 +210,9 @@ export async function POST(req: Request) {
     }
 
     const supabase = await createServerClient()
+    const gl: Locale = await getGroupLocale(supabase, groupId)   // langue du groupe
+    const t  = serverT(gl)
+    const dl = DATE_LOCALE[gl]
 
     // Charger le groupe + owner
 const [{ data: groupData }, eventResult] = await Promise.all([
@@ -229,8 +234,8 @@ const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surna
 const groupName   = (groupData as any)?.name ?? ''
 const logoUrl     = (groupData as any)?.template_logo_url ?? null
 
-    const eventDate = event ? formatDate(event.starts_at) : ''
-    const eventTime = event ? formatTime(event.starts_at) : ''
+    const eventDate = event ? formatDate(event.starts_at, dl) : ''
+    const eventTime = event ? formatTime(event.starts_at, dl) : ''
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const eventLink = event
       ? `${appUrl}/groups/${event.group_id}/events/${event.id}`
@@ -337,10 +342,10 @@ if (eventId) {
       if (optOutSet.has(player.id)) { skipped++; continue }
 
       const token         = participantTokens[player.id]
-      const yes18Link     = token ? `${appUrl}/invite/yes?token=${token}&holes=18` : eventLink
-      const yes9frontLink = token ? `${appUrl}/invite/yes?token=${token}&holes=9&section=out` : eventLink
-      const yes9backLink  = token ? `${appUrl}/invite/yes?token=${token}&holes=9&section=in` : eventLink
-      const noLink        = token ? `${appUrl}/invite/no?token=${token}` : eventLink
+      const yes18Link     = token ? `${appUrl}/${gl}/invite/yes?token=${token}&holes=18` : eventLink
+      const yes9frontLink = token ? `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=out` : eventLink
+      const yes9backLink  = token ? `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=in` : eventLink
+      const noLink        = token ? `${appUrl}/${gl}/invite/no?token=${token}` : eventLink
 
      const templateVars: Record<string, string> = {
       first_name:       player.first_name,
@@ -357,8 +362,8 @@ if (eventId) {
       yes_button:       '',
       app_url:          appUrl,
       qr_code:          `<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(appUrl)}" width="120" height="120" style="border-radius:8px;border:1px solid #E2E8F0;" />`,
-      install_iphone:   "Ouvre le lien dans Safari → icône Partager → « Sur l'écran d'accueil »",
-      install_android:  "Ouvre le lien dans Chrome → menu ⋮ → « Ajouter à l'écran d'accueil »",
+      install_iphone:   t('email.install.iphone'),
+      install_android:  t('email.install.android'),
     }
 
       const resolvedSubject = applyTemplateVariables(commSubject, templateVars)
@@ -372,6 +377,7 @@ if (eventId) {
       }
 
       const html = buildEmailHtml({
+        t, lang: gl,
         eventTitle:    event?.title ?? groupName,
         eventDate,
         eventTime,

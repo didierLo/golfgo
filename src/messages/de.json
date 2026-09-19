@@ -495,7 +495,9 @@
     "autoTeesheetLabel": "Automatisches Abschlagblatt T-1",
     "autoTeesheetDesc": "Sendet das Abschlagblatt am Vortag, wenn Flights generiert wurden, sonst wird der Organisator benachrichtigt",
     "autoInvitationLabel": "Automatische Einladung 14 Tage vor der Veranstaltung",
-    "autoInvitationDesc": "Sendet 14 Tage vor der Veranstaltung eine Einladung an alle Mitglieder."
+    "autoInvitationDesc": "Sendet 14 Tage vor der Veranstaltung eine Einladung an alle Mitglieder.",
+    "languageLabel": "Sprache der Gruppe",
+    "languageHint": "Sprache der E-Mails, die an die Spieler dieser Gruppe gesendet werden."
   },
   "flightHistory": {
     "title": "Flight-Verlauf",
@@ -1471,5 +1473,94 @@
     "addCount": "{count, plural, one {# Spieler} other {# Spieler}} hinzufügen",
     "noValid": "Kein gültiger Spieler",
     "added": "{count, plural, one {# Spieler hinzugefügt} other {# Spieler hinzugefügt}}"
+  },
+
+  "email": {
+    "respond": {
+      "yes": "Ich mache mit",
+      "waitlist": "Auf die Warteliste setzen",
+      "no": "Ich kann nicht teilnehmen",
+      "h18": "18 Löcher",
+      "h18Sub": "Kompletter Platz",
+      "h9front": "9 Löcher Front",
+      "h9frontSub": "Löcher 1–9",
+      "h9back": "9 Löcher Back",
+      "h9backSub": "Löcher 10–18"
+    },
+    "common": {
+      "atTime": "{date} um {time}",
+      "or": "Oder",
+      "viewInApp": "Details in der App ansehen",
+      "sentViaGolfgo": "Diese E-Mail wurde Ihnen über GolfGo gesendet",
+      "sentViaShort": "Gesendet über GolfGo",
+      "yourResponse": "Ihre Antwort",
+      "confirmPresence": "Bestätigen Sie Ihre Teilnahme",
+      "fullNotice": "⚠️ Veranstaltung ausgebucht — wenn Sie bestätigen, kommen Sie auf die Warteliste.",
+      "greeting": "Hallo {name},",
+      "alreadyAnswered": "Wenn Sie bereits über GolfGo geantwortet haben, ignorieren Sie diese E-Mail bitte.",
+      "organiser": "Der Organisator",
+      "unsubscribeSubject": "Abmeldung"
+    },
+    "invitation": {
+      "title": "Einladung",
+      "docTitle": "Einladung — {title}",
+      "footer": "Automatische GolfGo-Einladung"
+    },
+    "reminder": {
+      "docTitle": "Erinnerung — {title}",
+      "footer": "Automatische GolfGo-Erinnerung"
+    },
+    "owner": {
+      "docTitle": "Handlung erforderlich — {title}",
+      "heading": "⚠️ Fehlende Flights — morgen",
+      "body": "Für diese Veranstaltung wurde kein Flight erstellt. Die Teilnehmer erhalten keine automatische Startliste.",
+      "cta": "Flights erstellen →",
+      "footer": "Automatische GolfGo-Benachrichtigung",
+      "subject": "⚠️ Fehlende Flights — {title} morgen"
+    },
+    "teesheet": {
+      "docTitle": "Startliste — {title}",
+      "heading": "Startliste",
+      "dateLabel": "📅 Datum",
+      "placeLabel": "📍 Ort",
+      "order": "Startreihenfolge",
+      "you": "← Sie",
+      "yourFlight": "Ihr Flight",
+      "footer": "Organisiert mit GolfGo"
+    },
+    "scorecard": {
+      "subject": "Ihre Scorekarte — {title}"
+    },
+    "groupInvite": {
+      "subject": "Einladung, {group} auf GolfGo beizutreten",
+      "docTitle": "Einladung — {group}",
+      "heading": "Treten Sie unserer Gruppe bei!",
+      "intro": "{sender} lädt Sie ein, der Gruppe {group} auf GolfGo beizutreten, der App zur Organisation von Golfausflügen unter Freunden.",
+      "cta": "Der Gruppe beitreten →",
+      "orScan": "Oder scannen Sie den QR-Code",
+      "install": "App installieren",
+      "iphoneSteps": "Tippen Sie auf das Symbol {bo}Teilen{bc} ↑ → {eo}Mehr{ec} → {eo}Zum Home-Bildschirm{ec}",
+      "androidSteps": "Tippen Sie oben rechts auf das {bo}Menü ⋮{bc} → {eo}Zum Startbildschirm hinzufügen{ec}",
+      "footer": "Diese E-Mail wurde über GolfGo gesendet"
+    },
+    "install": {
+      "iphone": "Öffnen Sie den Link in Safari → Teilen-Symbol → «Zum Home-Bildschirm»",
+      "android": "Öffnen Sie den Link in Chrome → Menü ⋮ → «Zum Startbildschirm hinzufügen»"
+    },
+    "preview": {
+      "firstName": "Vorname",
+      "surname": "Nachname",
+      "fullName": "Vorname Nachname",
+      "player": "Spieler",
+      "myGroup": "Meine Gruppe"
+    },
+    "defaults": {
+      "reminderSubject": "⏰ Erinnerung — {{event_title}} in 3 Tagen",
+      "reminderBody": "Hallo {{first_name}},\n\nErinnerung an {{event_title}}, das in 3 Tagen stattfindet.\n\nBis bald,\n{{owner_name}}",
+      "invitationSubject": "Einladung: {{event_title}}",
+      "invitationBody": "Hallo {{first_name}},\n\nich freue mich, Sie zu unserem nächsten Treffen einzuladen.\nSind Sie dabei?\n\nIch freue mich darauf, Sie wiederzusehen,\n{{owner_name}}",
+      "teesheetSubject": "Startliste — {{event_title}}",
+      "teesheetBody": "Hallo {{first_name}},\n\nhier ist die Startreihenfolge für {{event_title}}.\n\n{{teesheet}}"
+    }
   }
 }

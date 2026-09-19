@@ -494,7 +494,9 @@
     "autoTeesheetLabel": "Automatische startlijst D-1",
     "autoTeesheetDesc": "Stuurt de startlijst de dag ervoor als flights gegenereerd zijn, anders wordt de organisator gewaarschuwd",
     "autoInvitationLabel": "Automatische uitnodiging 14 dagen voor het evenement",
-    "autoInvitationDesc": "Verstuurt een uitnodiging naar alle leden 14 dagen voor het evenement"
+    "autoInvitationDesc": "Verstuurt een uitnodiging naar alle leden 14 dagen voor het evenement",
+    "languageLabel": "Taal van de groep",
+    "languageHint": "Taal van de e-mails die naar de spelers van deze groep worden gestuurd."
   },
   "flightHistory": {
     "title": "Flightgeschiedenis",
@@ -1468,5 +1470,94 @@
     "addCount": "{count, plural, one {# speler} other {# spelers}} toevoegen",
     "noValid": "Geen geldige speler",
     "added": "{count, plural, one {# speler toegevoegd} other {# spelers toegevoegd}}"
+  },
+
+  "email": {
+    "respond": {
+      "yes": "Ik doe mee",
+      "waitlist": "Op de wachtlijst plaatsen",
+      "no": "Ik kan niet meedoen",
+      "h18": "18 holes",
+      "h18Sub": "Volledig parcours",
+      "h9front": "9 holes Front",
+      "h9frontSub": "Holes 1–9",
+      "h9back": "9 holes Back",
+      "h9backSub": "Holes 10–18"
+    },
+    "common": {
+      "atTime": "{date} om {time}",
+      "or": "Of",
+      "viewInApp": "bekijk de details in de app",
+      "sentViaGolfgo": "Deze e-mail is naar je verstuurd via GolfGo",
+      "sentViaShort": "Verstuurd via GolfGo",
+      "yourResponse": "Jouw antwoord",
+      "confirmPresence": "Bevestig je aanwezigheid",
+      "fullNotice": "⚠️ Evenement vol — je komt op de wachtlijst als je bevestigt.",
+      "greeting": "Hallo {name},",
+      "alreadyAnswered": "Heb je al geantwoord via GolfGo? Dan kun je deze e-mail negeren.",
+      "organiser": "De organisator",
+      "unsubscribeSubject": "Afmelden"
+    },
+    "invitation": {
+      "title": "Uitnodiging",
+      "docTitle": "Uitnodiging — {title}",
+      "footer": "Automatische GolfGo-uitnodiging"
+    },
+    "reminder": {
+      "docTitle": "Herinnering — {title}",
+      "footer": "Automatische GolfGo-herinnering"
+    },
+    "owner": {
+      "docTitle": "Actie vereist — {title}",
+      "heading": "⚠️ Ontbrekende flights — morgen",
+      "body": "Er is geen flight aangemaakt voor dit evenement. De deelnemers ontvangen geen automatische startlijst.",
+      "cta": "Flights aanmaken →",
+      "footer": "Automatische GolfGo-melding",
+      "subject": "⚠️ Ontbrekende flights — {title} morgen"
+    },
+    "teesheet": {
+      "docTitle": "Startlijst — {title}",
+      "heading": "Startlijst",
+      "dateLabel": "📅 Datum",
+      "placeLabel": "📍 Plaats",
+      "order": "Startvolgorde",
+      "you": "← jij",
+      "yourFlight": "Jouw flight",
+      "footer": "Georganiseerd met GolfGo"
+    },
+    "scorecard": {
+      "subject": "Je scorekaart — {title}"
+    },
+    "groupInvite": {
+      "subject": "Uitnodiging om lid te worden van {group} op GolfGo",
+      "docTitle": "Uitnodiging — {group}",
+      "heading": "Word lid van onze groep!",
+      "intro": "{sender} nodigt je uit om lid te worden van de groep {group} op GolfGo, de app voor het organiseren van golfuitjes met vrienden.",
+      "cta": "Lid worden van de groep →",
+      "orScan": "Of scan de QR-code",
+      "install": "De app installeren",
+      "iphoneSteps": "Tik op het pictogram {bo}Delen{bc} ↑ → {eo}Meer{ec} → {eo}Zet op beginscherm{ec}",
+      "androidSteps": "Tik op het {bo}menu ⋮{bc} rechtsboven → {eo}Toevoegen aan startscherm{ec}",
+      "footer": "Deze e-mail is verstuurd via GolfGo"
+    },
+    "install": {
+      "iphone": "Open de link in Safari → deelpictogram → «Zet op beginscherm»",
+      "android": "Open de link in Chrome → menu ⋮ → «Toevoegen aan startscherm»"
+    },
+    "preview": {
+      "firstName": "Voornaam",
+      "surname": "Achternaam",
+      "fullName": "Voornaam Achternaam",
+      "player": "Speler",
+      "myGroup": "Mijn groep"
+    },
+    "defaults": {
+      "reminderSubject": "⏰ Herinnering — {{event_title}} over 3 dagen",
+      "reminderBody": "Hallo {{first_name}},\n\nHerinnering voor {{event_title}}, dat over 3 dagen plaatsvindt.\n\nTot snel,\n{{owner_name}}",
+      "invitationSubject": "Uitnodiging: {{event_title}}",
+      "invitationBody": "Hallo {{first_name}},\n\nMet plezier nodig ik je uit voor onze volgende bijeenkomst.\nKun je erbij zijn?\n\nIk hoop je snel weer te zien,\n{{owner_name}}",
+      "teesheetSubject": "Startlijst — {{event_title}}",
+      "teesheetBody": "Hallo {{first_name}},\n\nHier is de startvolgorde voor {{event_title}}.\n\n{{teesheet}}"
+    }
   }
 }

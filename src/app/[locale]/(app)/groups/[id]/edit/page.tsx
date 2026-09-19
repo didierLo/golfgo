@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
+import { LOCALES, LOCALE_NAMES, normalizeLocale, type Locale } from '@/lib/i18n/types'
 
 const supabase = createClient()
 
@@ -48,6 +49,8 @@ export default function EditGroupPage() {
   const [saving,         setSaving]         = useState(false)
 
 const [autoInvitation,   setAutoInvitation] = useState(false)
+  const [groupLocale,     setGroupLocale]    = useState<Locale>('fr')
+  const [initialLocale,   setInitialLocale]  = useState<Locale>('fr')
 
   useEffect(() => { fetchGroup() }, [])
 
@@ -64,6 +67,11 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
     setAutoTeesheet(data.auto_teesheet ?? false)
     setLoading(false)
     setAutoInvitation(data.auto_invitation ?? false)
+
+    // Langue du groupe : requête séparée, pour ne pas casser cette page si la migration SQL n'est pas encore passée
+    const { data: loc } = await supabase.from('groups').select('locale').eq('id', id).maybeSingle()
+    const l = normalizeLocale(loc?.locale)
+    setGroupLocale(l); setInitialLocale(l)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -82,6 +90,12 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
       })
       .eq('id', id)
     if (error) { alert(error.message); setSaving(false); return }
+
+    // Langue du groupe : enregistrée seulement si elle a changé
+    if (groupLocale !== initialLocale) {
+      const { error: localeError } = await supabase.from('groups').update({ locale: groupLocale }).eq('id', id)
+      if (localeError) { alert(localeError.message); setSaving(false); return }
+    }
     router.push('/groups')
   }
 
@@ -119,6 +133,14 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
                 style={{ background: c, outline: color === c ? `3px solid ${c}` : 'none', outlineOffset: '2px' }} />
             ))}
           </div>
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editGroup.languageLabel')}</label>
+          <select value={groupLocale} onChange={e => setGroupLocale(e.target.value as Locale)} className={inputClass}>
+            {LOCALES.map(l => <option key={l} value={l}>{LOCALE_NAMES[l]}</option>)}
+          </select>
+          <p className="text-[11px] text-slate-500 mt-1">{t('editGroup.languageHint')}</p>
         </div>
 
         {/* ── Automatisations ── */}

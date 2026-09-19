@@ -1,7 +1,15 @@
 const fs = require('fs')
 const path = require('path')
 
-const DEEPL_API_KEY = 'c6530145-8f2d-4e89-9ece-5905b695fdfd:fx'
+// La clé DeepL ne doit JAMAIS être écrite dans le code (le dépôt est public).
+// Elle est lue dans la variable d'environnement DEEPL_API_KEY :
+//   DEEPL_API_KEY=xxxx node scripts/translate.cjs
+// (ou dans .env.local, déjà ignoré par Git via .gitignore)
+const DEEPL_API_KEY = process.env.DEEPL_API_KEY
+if (!DEEPL_API_KEY) {
+  console.error('DEEPL_API_KEY manquante. Lance : DEEPL_API_KEY=xxxx node scripts/translate.cjs')
+  process.exit(1)
+}
 const DEEPL_URL = 'https://api-free.deepl.com/v2/translate'
 
 const SKIP_KEYS = [

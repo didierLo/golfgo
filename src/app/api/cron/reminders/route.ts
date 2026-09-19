@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { generateICS } from '@/lib/ics'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail, drainEmailQueue } from '@/lib/email/queueEmail'
+import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -11,14 +12,14 @@ const CRON_SECRET   = process.env.CRON_SECRET
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('fr-BE', {
+function formatDate(dateStr: string, loc: string) {
+  return new Date(dateStr).toLocaleDateString(loc, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
   })
 }
 
-function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString('fr-BE', {
+function formatTime(dateStr: string, loc: string) {
+  return new Date(dateStr).toLocaleTimeString(loc, {
     hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
   })
 }
@@ -40,7 +41,7 @@ function applyTemplateVars(text: string, vars: Record<string, string>): string {
 
 // ── Boutons de réponse (golf vs event non-golf) ────────────────────────────────
 
-function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isFull: boolean = false): string {
+function buildResponseButtons(t: EmailT, isGolf: boolean, yes18Link: string, yes9frontLink: string, yes9backLink: string, noLink: string, isFull: boolean = false): string {
   // Styles "liste d'attente" (ambre) utilisés à la place du vert/jaune/orange habituel quand l'événement est complet
   const waitBg = '#FEF3C7', waitBorder = '#D97706', waitTitle = '#92400E', waitSub = '#B45309'
 
@@ -51,7 +52,7 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
                 <a href="${yes18Link}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#DCFCE7'};border:2px solid ${isFull ? waitBorder : '#16A34A'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
                     <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🙋'}</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div></td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -62,7 +63,7 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
                 <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
                     <td style="font-size:22px;width:36px;">😔</td>
-                    <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+                    <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">${t('email.respond.no')}</td>
                     <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
                   </tr></table>
                 </a>
@@ -76,7 +77,7 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
                 <a href="${yes18Link}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#DCFCE7'};border:2px solid ${isFull ? waitBorder : '#16A34A'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
                     <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '⛳'}</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div><div style="font-size:12px;color:${isFull ? waitSub : '#16A34A'};margin-top:2px;">18 trous</div></td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#15803D'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div><div style="font-size:12px;color:${isFull ? waitSub : '#16A34A'};margin-top:2px;">${t('email.respond.h18')}</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -87,7 +88,7 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
                 <a href="${yes9frontLink}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#FEF9C3'};border:2px solid ${isFull ? waitBorder : '#CA8A04'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
                     <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🌅'}</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#92400E'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div><div style="font-size:12px;color:${isFull ? waitSub : '#B45309'};margin-top:2px;">9 trous Front</div></td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#92400E'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div><div style="font-size:12px;color:${isFull ? waitSub : '#B45309'};margin-top:2px;">${t('email.respond.h9front')}</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -98,7 +99,7 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
                 <a href="${yes9backLink}" style="display:block;text-decoration:none;background:${isFull ? waitBg : '#FFEDD5'};border:2px solid ${isFull ? waitBorder : '#EA580C'};border-radius:12px;padding:16px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
                     <td style="font-size:22px;width:36px;">${isFull ? '⏳' : '🌇'}</td>
-                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#9A3412'};">${isFull ? "Rejoindre la liste d'attente" : 'Je participe'}</div><div style="font-size:12px;color:${isFull ? waitSub : '#C2410C'};margin-top:2px;">9 trous Back</div></td>
+                    <td style="padding-left:12px;"><div style="font-size:15px;font-weight:700;color:${isFull ? waitTitle : '#9A3412'};">${isFull ? t('email.respond.waitlist') : t('email.respond.yes')}</div><div style="font-size:12px;color:${isFull ? waitSub : '#C2410C'};margin-top:2px;">${t('email.respond.h9back')}</div></td>
                     <td align="right" style="font-size:20px;">→</td>
                   </tr></table>
                 </a>
@@ -109,7 +110,7 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
                 <a href="${noLink}" style="display:block;text-decoration:none;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 20px;">
                   <table width="100%" cellpadding="0" cellspacing="0"><tr>
                     <td style="font-size:22px;width:36px;">😔</td>
-                    <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">Je ne peux pas participer</td>
+                    <td style="padding-left:12px;font-size:14px;font-weight:500;color:#94A3B8;">${t('email.respond.no')}</td>
                     <td align="right" style="font-size:16px;color:#CBD5E1;">✕</td>
                   </tr></table>
                 </a>
@@ -120,9 +121,10 @@ function buildResponseButtons(isGolf: boolean, yes18Link: string, yes9frontLink:
 // ── Email rappel J-3 ─────────────────────────────────────────────────────────
 
 function buildReminderHtml({
-  firstName, eventTitle, eventDate, eventTime, eventLocation, bodyText, isGolf,
+  t, lang, firstName, eventTitle, eventDate, eventTime, eventLocation, bodyText, isGolf,
   yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl, placesRestantes,
 }: {
+  t: EmailT; lang: string
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; bodyText: string; isGolf: boolean; yes18Link: string; yes9frontLink: string
   yes9backLink: string; noLink: string; logoUrl: string | null; placesRestantes: number | null
@@ -132,9 +134,9 @@ function buildReminderHtml({
 
   return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${lang}">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Rappel — ${eventTitle}</title></head>
+<title>${t('email.reminder.docTitle', { title: eventTitle })}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
     <tr><td align="center">
@@ -152,23 +154,23 @@ function buildReminderHtml({
                 <table cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
-                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${t('email.common.atTime', { date: eventDate, time: eventTime })}</td>
                   </tr>
                   ${eventLocation ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td><td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td></tr>` : ''}
                 </table>
               </td></tr>
             </table>
-            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Confirmez votre présence</p>
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">${t('email.common.confirmPresence')}</p>
             ${isFull ? `
             <div style="background:#FEF3C7;border:1px solid #D97706;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
-              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">⚠️ Événement complet — tu seras placé(e) en liste d'attente si tu confirmes.</p>
+              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">${t('email.common.fullNotice')}</p>
             </div>` : ''}
-            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, isFull)}
+            ${buildResponseButtons(t, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, isFull)}
           </td>
         </tr>
         <tr>
           <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
-            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Rappel automatique GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a></p>
+            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">${t('email.reminder.footer')} · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a></p>
           </td>
         </tr>
       </table>
@@ -180,14 +182,15 @@ function buildReminderHtml({
 // ── Email avertissement owner (pas de teesheet) ───────────────────────────────
 
 function buildNoTeesheetHtml({
-  ownerFirstName, eventTitle, eventDate, eventUrl, logoUrl,
+  t, lang, ownerFirstName, eventTitle, eventDate, eventUrl, logoUrl,
 }: {
+  t: EmailT; lang: string
   ownerFirstName: string; eventTitle: string; eventDate: string; eventUrl: string; logoUrl: string | null
 }) {
   return `
 <!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8"/><title>Action requise — ${eventTitle}</title></head>
+<html lang="${lang}">
+<head><meta charset="UTF-8"/><title>${t('email.owner.docTitle', { title: eventTitle })}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
     <tr><td align="center">
@@ -199,8 +202,8 @@ function buildNoTeesheetHtml({
         </tr>
         <tr>
           <td style="background:#ffffff;padding:36px 32px;">
-            <p style="margin:0 0 6px;font-size:14px;color:#64748B;">Bonjour ${ownerFirstName},</p>
-            <h1 style="margin:0 0 16px;font-size:20px;font-weight:700;color:#0F172A;">⚠️ Flights manquants — demain</h1>
+            <p style="margin:0 0 6px;font-size:14px;color:#64748B;">${t('email.common.greeting', { name: ownerFirstName })}</p>
+            <h1 style="margin:0 0 16px;font-size:20px;font-weight:700;color:#0F172A;">${t('email.owner.heading')}</h1>
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#FEF9C3;border:1px solid #CA8A04;border-radius:10px;margin-bottom:24px;">
               <tr><td style="padding:16px 20px;">
                 <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#92400E;">${eventTitle}</p>
@@ -208,12 +211,12 @@ function buildNoTeesheetHtml({
               </td></tr>
             </table>
             <p style="margin:0 0 24px;font-size:14px;color:#334155;line-height:1.7;">
-              Aucun flight n'a été généré pour cet événement. Les participants ne recevront pas de feuille de départ automatique.
+              ${t('email.owner.body')}
             </p>
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr><td align="center">
                 <a href="${eventUrl}" style="display:inline-block;background:#185FA5;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
-                  Générer les flights →
+                  ${t('email.owner.cta')}
                 </a>
               </td></tr>
             </table>
@@ -221,7 +224,7 @@ function buildNoTeesheetHtml({
         </tr>
         <tr>
           <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
-            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Notification automatique GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a></p>
+            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">${t('email.owner.footer')} · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a></p>
           </td>
         </tr>
       </table>
@@ -230,9 +233,10 @@ function buildNoTeesheetHtml({
 </body></html>`.trim()
 }
 function buildInvitationHtml({
-  firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName, bodyText, isGolf,
+  t, lang, firstName, eventTitle, eventDate, eventTime, eventLocation, ownerName, bodyText, isGolf,
   yes18Link, yes9frontLink, yes9backLink, noLink, logoUrl, placesRestantes,
 }: {
+  t: EmailT; lang: string
   firstName: string; eventTitle: string; eventDate: string; eventTime: string
   eventLocation: string | null; ownerName: string; bodyText: string; isGolf: boolean
   yes18Link: string; yes9frontLink: string; yes9backLink: string; noLink: string; logoUrl: string | null
@@ -243,9 +247,9 @@ function buildInvitationHtml({
 
   return `
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="${lang}">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Invitation — ${eventTitle}</title></head>
+<title>${t('email.invitation.docTitle', { title: eventTitle })}</title></head>
 <body style="margin:0;padding:0;background:#F3F4F6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:32px 16px;">
     <tr><td align="center">
@@ -263,29 +267,29 @@ function buildInvitationHtml({
                 <table cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding:5px 0;font-size:13px;color:#64748B;width:24px;">📅</td>
-                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventDate} à ${eventTime}</td>
+                    <td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${t('email.common.atTime', { date: eventDate, time: eventTime })}</td>
                   </tr>
                   ${eventLocation ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748B;">📍</td><td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${eventLocation}</td></tr>` : ''}
                   ${ownerName ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748B;">👤</td><td style="padding:5px 0;font-size:13px;color:#0F172A;font-weight:500;">${ownerName}</td></tr>` : ''}
                 </table>
               </td></tr>
             </table>
-            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">Ta réponse</p>
+            <p style="margin:0 0 16px;font-size:12px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">${t('email.common.yourResponse')}</p>
             ${isFull ? `
             <div style="background:#FEF3C7;border:1px solid #D97706;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
-              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">⚠️ Événement complet — tu seras placé(e) en liste d'attente si tu confirmes.</p>
+              <p style="margin:0;font-size:13px;color:#92400E;font-weight:600;">${t('email.common.fullNotice')}</p>
             </div>` : ''}
-            ${buildResponseButtons(isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, isFull)}
+            ${buildResponseButtons(t, isGolf, yes18Link, yes9frontLink, yes9backLink, noLink, isFull)}
             <div style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;">
               <p style="margin:0;font-size:12px;color:#92400E;font-style:italic;">
-                Si tu as déjà répondu via GolfGo, ne tiens pas compte de cet email.
+                ${t('email.common.alreadyAnswered')}
               </p>
             </div>
           </td>
         </tr>
         <tr>
           <td style="background:#F8FAFC;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 12px 12px;padding:14px 32px;">
-            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">Invitation automatique GolfGo · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a></p>
+            <p style="margin:0;font-size:12px;color:#CBD5E1;text-align:center;">${t('email.invitation.footer')} · <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color:#CBD5E1;text-decoration:none;">golfgo.be</a></p>
           </td>
         </tr>
       </table>
@@ -350,6 +354,10 @@ for (const event of (events || []) as any[]) {
   const group       = event.groups as any
   const ownerPlayer = group?.owner?.find((o: any) => o.role === 'owner')?.player
   const logoUrl     = group?.template_logo_url ?? null
+  // Langue du groupe : tous les textes envoyés aux joueurs (et à l'organisateur) suivent cette langue
+  const gl: Locale = await getGroupLocale(supabase, event.group_id)
+  const t  = serverT(gl)
+  const dl = DATE_LOCALE[gl]
 
 
     // ── J-3 : Rappel à tous les participants ─────────────────────────────────
@@ -359,9 +367,9 @@ if (days === 3 && group?.auto_reminders) {
         .select('player_id, invite_token, players(first_name, surname, email)')
         .eq('event_id', event.id)
 
-      const reminderSubjectTpl = group?.template_reminder_subject ?? '⏰ Rappel — {{event_title}} dans 3 jours'
+      const reminderSubjectTpl = group?.template_reminder_subject ?? t.raw('email.defaults.reminderSubject')
       const reminderBodyTpl    = group?.template_reminder_body
-        ?? "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}"
+        ?? t.raw('email.defaults.reminderBody')
 
       const ownerName = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
 
@@ -372,10 +380,10 @@ if (days === 3 && group?.auto_reminders) {
         const token = ep.invite_token
         if (!token) { results.reminders.skipped++; continue }
 
-        const yes18Link    = `${appUrl}/invite/yes?token=${token}&holes=18`
-        const yes9frontLink = `${appUrl}/invite/yes?token=${token}&holes=9&section=out`
-        const yes9backLink  = `${appUrl}/invite/yes?token=${token}&holes=9&section=in`
-        const noLink       = `${appUrl}/invite/no?token=${token}`
+        const yes18Link    = `${appUrl}/${gl}/invite/yes?token=${token}&holes=18`
+        const yes9frontLink = `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=out`
+        const yes9backLink  = `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=in`
+        const noLink       = `${appUrl}/${gl}/invite/no?token=${token}`
 
         if (!EMAIL_ENABLED) { results.reminders.sent++; continue }
 
@@ -398,8 +406,8 @@ if (days === 3 && group?.auto_reminders) {
           group_name:  group?.name ?? '',
           owner_name:  ownerName,
           event_title: event.title,
-          event_date:  formatDate(event.starts_at),
-          event_time:  formatTime(event.starts_at),
+          event_date:  formatDate(event.starts_at, dl),
+          event_time:  formatTime(event.starts_at, dl),
           places_restantes: placesRestantes != null ? String(placesRestantes) : '',  // ← ajout
           yes_button:       '',     
         }
@@ -408,10 +416,11 @@ if (days === 3 && group?.auto_reminders) {
         const bodyText = applyTemplateVars(reminderBodyTpl, vars)
 
         const html = buildReminderHtml({
+          t, lang: gl,
           firstName:    player.first_name,
           eventTitle:   event.title,
-          eventDate:    formatDate(event.starts_at),
-          eventTime:    formatTime(event.starts_at),
+          eventDate:    formatDate(event.starts_at, dl),
+          eventTime:    formatTime(event.starts_at, dl),
           eventLocation: event.location,
           bodyText,
           isGolf: event.is_golf ?? true,
@@ -464,9 +473,9 @@ if (days === 3 && group?.auto_reminders) {
         .select('player_id, email_opt_out, players(id, first_name, surname, email)')
         .eq('group_id', event.group_id)
 
-      const invitationSubjectTpl = group?.template_invitation_subject ?? 'Invitation : {{event_title}}'
+      const invitationSubjectTpl = group?.template_invitation_subject ?? t.raw('email.defaults.invitationSubject')
       const invitationBodyTpl    = group?.template_invitation_body
-        ?? "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
+        ?? t.raw('email.defaults.invitationBody')
 
      for (const member of members || []) {
 
@@ -506,10 +515,10 @@ if (days === 3 && group?.auto_reminders) {
         if (!token) { results.invitations.skipped++; continue }
 
         const unsubscribeUrl = `${appUrl}/api/unsubscribe?pid=${member.player_id}&gid=${event.group_id}`
-        const yes18Link     = `${appUrl}/invite/yes?token=${token}&holes=18`
-        const yes9frontLink = `${appUrl}/invite/yes?token=${token}&holes=9&section=out`
-        const yes9backLink  = `${appUrl}/invite/yes?token=${token}&holes=9&section=in`
-        const noLink        = `${appUrl}/invite/no?token=${token}`
+        const yes18Link     = `${appUrl}/${gl}/invite/yes?token=${token}&holes=18`
+        const yes9frontLink = `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=out`
+        const yes9backLink  = `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=in`
+        const noLink        = `${appUrl}/${gl}/invite/no?token=${token}`
 
 if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
 
@@ -534,18 +543,19 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           group_name:  group?.name ?? '',
           owner_name:  ownerName,
           event_title: event.title,
-          event_date:  formatDate(event.starts_at),
-          event_time:  formatTime(event.starts_at),
+          event_date:  formatDate(event.starts_at, dl),
+          event_time:  formatTime(event.starts_at, dl),
         }
 
         const subject  = applyTemplateVars(invitationSubjectTpl, vars)
         const bodyText = applyTemplateVars(invitationBodyTpl, vars)
 
         const html = buildInvitationHtml({
+          t, lang: gl,
           firstName:     player.first_name,
           eventTitle:    event.title,
-          eventDate:     formatDate(event.starts_at),
-          eventTime:     formatTime(event.starts_at),
+          eventDate:     formatDate(event.starts_at, dl),
+          eventTime:     formatTime(event.starts_at, dl),
           eventLocation: event.location,
           ownerName,
           bodyText,
@@ -614,14 +624,15 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         // Pas de flights → email d'avertissement à l'owner
         if (!ownerPlayer?.email) continue
 
-        const eventUrl = `${appUrl}/fr/groups/${event.group_id}/events/${event.id}/flights`
+        const eventUrl = `${appUrl}/${gl}/groups/${event.group_id}/events/${event.id}/flights`
 
         if (!EMAIL_ENABLED) { results.noTeesheet.sent++; continue }
 
         const html = buildNoTeesheetHtml({
+          t, lang: gl,
           ownerFirstName: ownerPlayer.first_name,
           eventTitle:     event.title,
-          eventDate:      formatDate(event.starts_at),
+          eventDate:      formatDate(event.starts_at, dl),
           eventUrl,
           logoUrl,
         })
@@ -632,7 +643,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           eventId:  event.id,
           from:     'GolfGo <info@golfgo.be>',
           to:       ownerPlayer.email,
-          subject:  `⚠️ Flights manquants — ${event.title} demain`,
+          subject:  t('email.owner.subject', { title: event.title }),
           html,
         })
 
@@ -666,7 +677,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
       const flights = flightsMapped.map((f: any, index: number) => {
         const thisMs = f.manual_start_at ? new Date(f.manual_start_at).getTime() : cursorMs
         cursorMs = thisMs + teeInterval * 60 * 1000
-        const startTime = new Date(thisMs).toLocaleTimeString('fr-BE', {
+        const startTime = new Date(thisMs).toLocaleTimeString(dl, {
           hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
         })
         return {
@@ -677,9 +688,9 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
       })
 
     // Template teesheet personnalisé
-        const teesheetSubjectTpl = group?.template_teesheet_subject ?? 'Tee Sheet — {{event_title}}'
+        const teesheetSubjectTpl = group?.template_teesheet_subject ?? t.raw('email.defaults.teesheetSubject')
         const teesheetBodyTpl    = group?.template_teesheet_body
-          ?? "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\n{{teesheet}}"
+          ?? t.raw('email.defaults.teesheetBody')
 
         const ownerName = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
 
@@ -699,8 +710,8 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
               group_name:  group?.name ?? '',
               owner_name:  ownerName,
               event_title: event.title,
-              event_date:  formatDate(event.starts_at),
-              event_time:  formatTime(event.starts_at),
+              event_date:  formatDate(event.starts_at, dl),
+              event_time:  formatTime(event.starts_at, dl),
             },
           }),
         })
