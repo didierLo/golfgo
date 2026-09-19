@@ -106,7 +106,6 @@
     "empty": "Aucun flight généré. Génère les flights d'abord dans l'onglet Flights",
     "email": {
       "label": "Envoyer la liste des départs par email",
-      "description": " ",
       "preview": "👁 Aperçu",
       "send": "✉ Envoyer",
       "sending": "Envoi…",
@@ -686,7 +685,6 @@
     "total": "total",
     "player": "Joueur",
     "status": "Statut",
-    "éditers": "Modifier",
     "noParticipants": "Aucun participant confirmé",
     "actions": "Actions",
     "statuses": {

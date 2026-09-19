@@ -104,7 +104,6 @@
     "empty": "Geen flights gegenereerd. Genereer eerst flights in het tabblad Flights",
     "email": {
       "label": "Startlijst per e-mail verzenden",
-      "description": " ",
       "preview": "👁 Voorbeeld",
       "send": "✉ Verzenden",
       "sending": "Verzenden…",
@@ -684,7 +683,6 @@
     "total": "totaal",
     "player": "Speler",
     "status": "Status",
-    "éditers": "Bewerken",
     "noParticipants": "Geen bevestigde deelnemers",
     "actions": "Acties",
     "statuses": {

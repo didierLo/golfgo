@@ -20,6 +20,7 @@ export function buildScorecardCardsHtml(
   clubName: string, courseName: string, logoUrl: string | null = null,
   teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
   formatName: string = '', scorecardNotes: string = '',
+  cardIndex?: number,   // si fourni : n'affiche que cette carte du flight (envoi par email au joueur concerné)
 ): string {
   const { t, lang } = i18n
   const resolvedLogoUrl = logoUrl || DEFAULT_LOGO_URL
@@ -37,7 +38,9 @@ export function buildScorecardCardsHtml(
 
   const composed: ComposedCard[] = composeCards(players, teamFormat, hcpPercentage, n => t('scoring.team', { n }))
 
-  const cards = composed.map(card => {
+  const shown = cardIndex != null && composed[cardIndex] ? [composed[cardIndex]] : composed
+
+  const cards = shown.map(card => {
     const holeHeaders = [
       ...front9.map(h => `<th class="hole-cell">${h.hole_number}</th>`),
       `<th class="hole-cell sub">Out</th>`,
@@ -188,9 +191,10 @@ export function buildScorecardHtml(
   clubName: string, courseName: string, logoUrl: string | null = null,
   teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
   formatName: string = '', scorecardNotes: string = '',
+  cardIndex?: number,
 ): string {
   const { t, lang } = i18n
-  const cards = buildScorecardCardsHtml(i18n, players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage)
+  const cards = buildScorecardCardsHtml(i18n, players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage, formatName, scorecardNotes, cardIndex)
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>

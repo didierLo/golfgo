@@ -106,7 +106,6 @@
     "empty": "No flights generated. Generate flights first in the Flights tab",
     "email": {
       "label": "Send tee sheet by email",
-      "description": " ",
       "preview": "👁 Preview",
       "send": "✉ Send",
       "sending": "Sending…",
@@ -686,7 +685,6 @@
     "total": "total",
     "player": "Player",
     "status": "Status",
-    "éditers": "Edit",
     "noParticipants": "No confirmed participants",
     "actions": "Actions",
     "statuses": {
