@@ -3,6 +3,11 @@ import { execSync } from 'child_process'
 import { buildScorecardHtml, type PrintPlayer } from '../src/components/scorecards/buildScorecardHtml'
 import type { TeamFormat } from '../src/lib/golf/scorecards/composeCards'
 import type { Hole } from '../src/components/scorecards/scorecard-types'
+import { serverT, normalizeLocale } from '../src/lib/i18n/server'
+
+// Langue de test : LOCALE=en npx tsx scripts/test-scorecards.ts   (par défaut : fr)
+const lang = normalizeLocale(process.env.LOCALE ?? 'fr')
+const i18n = { t: serverT(lang), lang }
 
 function fallbackHoles(): Hole[] {
   return Array.from({ length: 18 }, (_, i) => ({
@@ -30,7 +35,7 @@ const formats: { format: TeamFormat; pct: number; label: string }[] = [
 
 for (const { format, pct, label } of formats) {
   const html = buildScorecardHtml(
-    players, fallbackHoles(), `Test — ${label}`, '31 juillet 2026',
+    i18n, players, fallbackHoles(), `Test — ${label}`, '31 juillet 2026',
     'Royal Golf Club', 'Parcours 18 trous', null, format, pct,
   )
   const path = `/tmp/scorecard-test-${label}.html`

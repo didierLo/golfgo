@@ -498,7 +498,7 @@
     "autoInvitationLabel": "Automatic invitation 14 days before the event",
     "autoInvitationDesc": "Sends an invitation to all members 14 days before the event",
     "languageLabel": "Group language",
-    "languageHint": "Language of the emails sent to this group's players."
+    "languageHint": "Language of the emails, printed documents and notifications for this group."
   },
   "flightHistory": {
     "title": "Flight history",
@@ -705,7 +705,8 @@
     "secureTitle": "🔒 100% secure payment",
     "secureDesc": "Your payment is processed by <strong>Stripe</strong>, the world leader in secure online payments. GolfGo never stores your banking details. The transaction is encrypted and compliant with PCI-DSS standards. Accepts Visa, Mastercard, Bancontact and Apple/Google Pay.",
     "paying": "Redirecting...",
-    "pay": "Pay {amount} €"
+    "pay": "Pay {amount} €",
+    "checkoutDescription": "Event registration"
   },
   "results": {
     "title": "Results",
@@ -1419,7 +1420,14 @@
     "format": {
       "stroke": "Stroke play",
       "stableford": "Stableford"
-    }
+    },
+    "marker": "Marker",
+    "markerColon": "Marker:",
+    "grossColon": "Gross:",
+    "netColon": "Net:",
+    "infoLabel": "Info",
+    "printTitle": "Scorecards — {title}",
+    "team": "Team {n}"
   },
 
   "push": {
@@ -1561,6 +1569,32 @@
       "invitationBody": "Hi {{first_name}},\n\nI'm delighted to invite you to our next get-together.\nWill you be joining us?\n\nLooking forward to seeing you again,\n{{owner_name}}",
       "teesheetSubject": "Tee Sheet — {{event_title}}",
       "teesheetBody": "Hi {{first_name}},\n\nHere is the starting order for {{event_title}}.\n\n{{teesheet}}"
+    },
+    "payment": {
+      "subject": "GolfGo payment confirmation",
+      "received": "Your payment has been received. Thank you!",
+      "seeYou": "See you soon on the course ⛳"
+    },
+    "composerDefaults": {
+      "teesheetBody": "Hi {{first_name}},\n\nHere is the starting order for {{event_title}}.\n\nYour flight is number {{flight_number}}, starting at {{start_time}}.",
+      "newmemberSubject": "Welcome to the group!",
+      "newmemberBody": "Hi {{first_name}},\n\nWelcome to our GolfGo group!\n\nTo access the app, tap the link or scan the QR code:\n{{app_url}}\n\n{{qr_code}}\n\n📱 iPhone: {{install_iphone}}\n🤖 Android: {{install_android}}\n\nSee you soon,\n{{owner_name}}"
     }
+  },
+
+  "pushNotif": {
+    "waitlistTitle": "Waiting list — {title}",
+    "confirmedTitle": "New confirmation — {title}",
+    "reviewTitle": "Flight to review — {title}",
+    "waitlistBody": "{name} is on the waiting list, event full ({date}).",
+    "confirmedBody": "{name} has confirmed their attendance ({date}).",
+    "leftBody": "{name} is no longer confirmed (now {status}) — {date}.",
+    "status": {
+      "GOING": "confirmed",
+      "DECLINED": "withdrawn",
+      "WAITLIST": "on the waiting list",
+      "INVITED": "invited"
+    },
+    "unknownPlayer": "A player"
   }
 }

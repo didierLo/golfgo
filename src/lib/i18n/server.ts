@@ -13,9 +13,7 @@ export * from './types'
 
 const MESSAGES = { en, fr, nl, de, es } as const
 
-// `raw` renvoie le texte brut, sans mise en forme ICU : indispensable pour les modèles d'emails
-// qui contiennent des variables du type {{first_name}}.
-export type ServerT = EmailT & { raw: (key: string) => string }
+export type ServerT = EmailT
 
 export function serverT(locale: Locale): ServerT {
   return createTranslator({ locale, messages: MESSAGES[locale] as any }) as unknown as ServerT

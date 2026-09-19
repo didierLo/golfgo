@@ -34,4 +34,11 @@ export function normalizeLocale(value: unknown): Locale {
 
 // Fonction de traduction minimale, compatible avec celle de next-intl (navigateur)
 // et avec celle de createTranslator (serveur).
-export type EmailT = (key: string, values?: Record<string, string | number>) => string
+// `raw` renvoie le texte brut, sans mise en forme ICU : indispensable pour les modèles d'emails
+// qui contiennent des variables du type {{first_name}}.
+export type EmailT = ((key: string, values?: Record<string, string | number>) => string) & {
+  raw: (key: string) => string
+}
+
+// Traducteur + formats de date d'UN groupe (pour les documents qui lui sont destinés).
+export type GroupI18n = { t: EmailT; lang: Locale; dateLocale: string }

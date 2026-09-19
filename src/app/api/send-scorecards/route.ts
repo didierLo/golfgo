@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
       if (!EMAIL_ENABLED) { sent++; continue }
 
-      const html = buildScorecardHtml([printPlayer], holes, event.title, eventDate, clubName, courseName, logoUrl)
+      const html = buildScorecardHtml({ t, lang: gl }, [printPlayer], holes, event.title, eventDate, clubName, courseName, logoUrl)
 
       const result = await sendOrQueueEmail({
         category: 'scorecard',

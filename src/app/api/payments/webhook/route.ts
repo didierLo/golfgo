@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
+import { getGroupLocale, serverT } from '@/lib/i18n/server'
 
 const stripe   = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -31,15 +32,18 @@ export async function POST(req: Request) {
     ])
 
     if (player && email) {
+      // Langue du groupe de l'événement (par défaut : français)
+      const { data: ev } = await supabase.from('events').select('group_id').eq('id', eventId).maybeSingle()
+      const t = serverT(await getGroupLocale(supabase, ev?.group_id))
       await sendOrQueueEmail({
         category: 'other',
         eventId:  eventId,
         from:     'GolfGo <info@golfgo.be>',
         to:       email,
-        subject:  'Confirmation de paiement GolfGo',
-        html: `<p>Bonjour ${player.first_name},</p>
-               <p>Votre paiement a bien été reçu. Merci !</p>
-               <p>À bientôt sur le parcours ⛳</p>`,
+        subject:  t('email.payment.subject'),
+        html: `<p>${t('email.common.greeting', { name: player.first_name })}</p>
+               <p>${t('email.payment.received')}</p>
+               <p>${t('email.payment.seeYou')}</p>`,
       })
     }
   }

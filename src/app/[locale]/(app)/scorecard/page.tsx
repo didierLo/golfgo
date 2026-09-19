@@ -7,6 +7,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import { useGroupDocI18n } from '@/lib/i18n/client'
 import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
 import { getTeamGroups, playingHcp, teamPhcp, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
 import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
@@ -57,6 +58,7 @@ export default function MyScorecardPage() {
 
   const [playerId, setPlayerId]                 = useState<string | null>(null)
   const [groupId, setGroupId]                   = useState<string | null>(null)
+  const doc = useGroupDocI18n(groupId)   // langue du GROUPE pour les documents imprimés
   const [loading, setLoading]                   = useState(true)
   const [scorecardLoading, setScorecardLoading] = useState(false)
   const [error, setError]                       = useState<string | null>(null)
@@ -371,22 +373,22 @@ useEffect(() => {
     if (holes.length === 0) { toast.error(t('scorecard.noCourse')); return }
 
     const eventDate = eventStartsAt
-      ? new Date(eventStartsAt).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+      ? new Date(eventStartsAt).toLocaleDateString(doc.dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
       : ''
 
   
 
     const htmlBody = allFlights
       .map(flightPlayers => buildScorecardCardsHtml(
-       flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage, formatName, scorecardNotes
+       doc, flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage, formatName, scorecardNotes
       ))
       .join('')
 
     const html = `<!DOCTYPE html>
-    <html>
+    <html lang="${doc.lang}">
     <head>
     <meta charset="UTF-8"/>
-    <title>Scorecards — ${eventTitle}</title>
+    <title>${doc.t('scoring.printTitle', { title: eventTitle })}</title>
     <style>${SCORECARD_PRINT_STYLES}</style>
     </head>
     <body>

@@ -94,7 +94,7 @@ setLoading(false)
         groupId,
         playerId,
         amount,
-        description: `Inscription événement`,
+        description: t('payments.checkoutDescription'),
         locale: params.locale as string,
       }),
     })

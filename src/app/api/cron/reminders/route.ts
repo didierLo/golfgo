@@ -347,7 +347,6 @@ export async function GET(req: Request) {
 
 console.log('events count:', events?.length ?? 0)
 console.log('events error:', JSON.stringify(eventsError))
-console.log('events data:', JSON.stringify(events?.slice(0, 2)))
 
 for (const event of (events || []) as any[]) {
   const days        = daysDiff(event.starts_at)

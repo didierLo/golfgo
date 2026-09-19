@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useRef} from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import { useGroupDocI18n } from '@/lib/i18n/client'
 import EventPillSelector, { useNearestEvent } from '@/components/events/EventPillSelector'
 import toast from 'react-hot-toast'
 import EmailPreviewModal from '@/components/email/EmailPreviewModal'
@@ -58,6 +59,7 @@ export default function TeeSheetPage() {
   const eventIdFromRoute = params.eventId as string
   const t                = useTranslations()
   const locale           = useLocale()
+  const doc              = useGroupDocI18n(groupId)   // langue du GROUPE pour le document imprimé
 
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
@@ -348,10 +350,13 @@ useEffect(() => {
     const teesheetFlights = flights.map((f, index) => ({
       flight_number: f.flight_number, start_time: flightTimes[index].label, players: f.players,
     }))
+    const printDate = startsAt
+      ? new Date(startsAt).toLocaleDateString(doc.dateLocale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+      : eventDate
     const html = buildTeesheetHtml({
-      t, lang: locale,
+      t: doc.t, lang: doc.lang,
       playerName: null, playerFlightNumber: null,
-      eventTitle, eventDate, eventLocation: null,
+      eventTitle, eventDate: printDate, eventLocation: null,
       flights: teesheetFlights, logoUrl, autoPrint: true,
     })
     const blob = new Blob([html], { type: 'text/html' })

@@ -498,7 +498,7 @@
     "autoInvitationLabel": "Invitation automatique J-14",
     "autoInvitationDesc": "Envoie une invitation à tous les membres 14 jours avant l'événement",
     "languageLabel": "Langue du groupe",
-    "languageHint": "Langue des emails envoyés aux joueurs de ce groupe."
+    "languageHint": "Langue des emails, des documents imprimés et des notifications de ce groupe."
   },
   "flightHistory": {
     "title": "Historique des flights",
@@ -705,7 +705,8 @@
     "secureTitle": "🔒 Paiement 100% sécurisé",
     "secureDesc": "Votre paiement est traité par <strong>Stripe</strong>, leader mondial du paiement en ligne sécurisé. GolfGo ne stocke jamais vos données bancaires. La transaction est chiffrée et conforme aux normes PCI-DSS. Accepte les cartes Visa, Mastercard, Bancontact et Apple/Google Pay.",
     "paying": "Redirection...",
-    "pay": "Payer {amount} €"
+    "pay": "Payer {amount} €",
+    "checkoutDescription": "Inscription événement"
   },
   "results": {
     "title": "Résultats",
@@ -1417,7 +1418,14 @@
     "format": {
       "stroke": "Stroke play",
       "stableford": "Stableford"
-    }
+    },
+    "marker": "Marqueur",
+    "markerColon": "Marqueur :",
+    "grossColon": "Brut :",
+    "netColon": "Net :",
+    "infoLabel": "Infos",
+    "printTitle": "Cartes de score — {title}",
+    "team": "Équipe {n}"
   },
 
   "push": {
@@ -1559,6 +1567,32 @@
       "invitationBody": "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}",
       "teesheetSubject": "Tee Sheet — {{event_title}}",
       "teesheetBody": "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\n{{teesheet}}"
+    },
+    "payment": {
+      "subject": "Confirmation de paiement GolfGo",
+      "received": "Votre paiement a bien été reçu. Merci !",
+      "seeYou": "À bientôt sur le parcours ⛳"
+    },
+    "composerDefaults": {
+      "teesheetBody": "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
+      "newmemberSubject": "Bienvenue dans le groupe !",
+      "newmemberBody": "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nPour accéder à l'app, clique sur le lien ou scanne le QR code :\n{{app_url}}\n\n{{qr_code}}\n\n📱 iPhone : {{install_iphone}}\n🤖 Android : {{install_android}}\n\nÀ bientôt,\n{{owner_name}}"
     }
+  },
+
+  "pushNotif": {
+    "waitlistTitle": "Liste d'attente — {title}",
+    "confirmedTitle": "Nouvelle confirmation — {title}",
+    "reviewTitle": "Flight à revoir — {title}",
+    "waitlistBody": "{name} est en liste d'attente, événement complet ({date}).",
+    "confirmedBody": "{name} a confirmé sa présence ({date}).",
+    "leftBody": "{name} n'est plus confirmé(e) (désormais {status}) — {date}.",
+    "status": {
+      "GOING": "confirmé(e)",
+      "DECLINED": "désisté(e)",
+      "WAITLIST": "en liste d'attente",
+      "INVITED": "invité(e)"
+    },
+    "unknownPlayer": "Un joueur"
   }
 }

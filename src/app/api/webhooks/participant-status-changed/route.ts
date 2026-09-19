@@ -1,5 +1,6 @@
 import webpush from 'web-push'
 import { createClient } from '@supabase/supabase-js'
+import { getGroupLocale, serverT, DATE_LOCALE } from '@/lib/i18n/server'
 
 webpush.setVapidDetails(
   'mailto:info@golfgo.be',
@@ -57,24 +58,28 @@ export async function POST(req: Request) {
 
     if (!subs?.length) return Response.json({ success: true, sent: 0, note: 'Aucun abonnement push pour cet owner' })
 
-    const statusLabels: Record<string, string> = {
-      GOING: 'confirmé(e)', DECLINED: 'désisté(e)', WAITLIST: 'en liste d\'attente', INVITED: 'invité(e)',
-    }
+    // Langue du groupe : la notification à l'organisateur suit la même langue que les emails du groupe
+    const gl = await getGroupLocale(supabase, event.group_id)
+    const t  = serverT(gl)
 
-    const playerName = player ? `${player.first_name} ${player.surname}` : 'Un joueur'
-    const eventDate = new Date(event.starts_at).toLocaleDateString('fr-BE', {
+    const playerName = player ? `${player.first_name} ${player.surname}` : t('pushNotif.unknownPlayer')
+    const eventDate = new Date(event.starts_at).toLocaleDateString(DATE_LOCALE[gl], {
       weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
     })
+    // Certaines langues abrègent le mois avec un point (« oct. ») : on évite le double point en fin de phrase
+    const eventDateEnd = eventDate.replace(/\.$/, '')
+    const statusKnown = ['GOING', 'DECLINED', 'WAITLIST', 'INVITED'].includes(newStatus)
+    const newStatusLabel = statusKnown ? t(`pushNotif.status.${newStatus}`) : newStatus
     const notifPayload = JSON.stringify({
       title: isJoiningWaitlist
-        ? `Liste d'attente — ${event.title}`
-        : isJoiningGoing ? `Nouvelle confirmation — ${event.title}` : `Flight à revoir — ${event.title}`,
+        ? t('pushNotif.waitlistTitle', { title: event.title })
+        : isJoiningGoing ? t('pushNotif.confirmedTitle', { title: event.title }) : t('pushNotif.reviewTitle', { title: event.title }),
       body: isJoiningWaitlist
-        ? `${playerName} est en liste d'attente, événement complet (${eventDate}).`
+        ? t('pushNotif.waitlistBody', { name: playerName, date: eventDate })
         : isJoiningGoing
-          ? `${playerName} a confirmé sa présence (${eventDate}).`
-          : `${playerName} n'est plus confirmé(e) (désormais ${statusLabels[newStatus] ?? newStatus}) — ${eventDate}.`,
-      url: `/fr/groups/${event.group_id}/events/${event.id}`,
+          ? t('pushNotif.confirmedBody', { name: playerName, date: eventDate })
+          : t('pushNotif.leftBody', { name: playerName, status: newStatusLabel, date: eventDateEnd }),
+      url: `/${gl}/groups/${event.group_id}/events/${event.id}`,
     })
 
     let sent = 0

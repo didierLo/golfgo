@@ -51,12 +51,12 @@ function composeIndividual(players: PrintPlayer[], pct: number): ComposedCard[] 
   }))
 }
 
-function compose4BBB(players: PrintPlayer[], pct: number): ComposedCard[] {
+function compose4BBB(players: PrintPlayer[], pct: number, teamLabel: (n: number) => string): ComposedCard[] {
   const teams = [[0, 1], [2, 3]].filter(t => t.every(i => players[i]))
   return teams.map(([a, b], idx) => {
     const other = teams[1 - idx] ?? []
     return {
-      headerLabel: `Équipe ${idx + 1}`,
+      headerLabel: teamLabel(idx + 1),
       mainRows: [a, b].map(i => ({ names: [shortName(players[i])], playingHcp: playingHcp(players[i].phcp, pct) })),
       refRows: other.map(i => ({ label: shortName(players[i]) })),
     }
@@ -83,9 +83,12 @@ function composeTeam34(players: PrintPlayer[], pct: number): ComposedCard[] {
   }]
 }
 
-export function composeCards(players: PrintPlayer[], teamFormat: TeamFormat, hcpPercentage: number): ComposedCard[] {
+export function composeCards(
+  players: PrintPlayer[], teamFormat: TeamFormat, hcpPercentage: number,
+  teamLabel: (n: number) => string = n => `Équipe ${n}`,
+): ComposedCard[] {
   switch (teamFormat) {
-    case '4bbb':     return compose4BBB(players, hcpPercentage)
+    case '4bbb':     return compose4BBB(players, hcpPercentage, teamLabel)
     case 'team2':    return composeTeam2(players, hcpPercentage)
     case 'team3_4':  return composeTeam34(players, hcpPercentage)
     default:         return composeIndividual(players, hcpPercentage)

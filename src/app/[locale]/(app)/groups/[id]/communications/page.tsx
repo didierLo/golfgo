@@ -15,6 +15,8 @@ import CommSettingsPanel from '@/components/communications/CommSettingsPanel'
 import CommMessageComposer from '@/components/communications/CommMessageComposer'
 import CommRecipientsPanel from '@/components/communications/CommRecipientsPanel'
 import PushSubscribeButton from '@/components/notifications/PushSubscribeButton'
+import { loadGroupI18n, fallbackGroupI18n } from '@/lib/i18n/client'
+import type { EmailT, GroupI18n } from '@/lib/i18n/types'
 
 const supabase = createClient()
 
@@ -42,17 +44,20 @@ type MessageType = 'invitation' | 'reminder' | 'teesheet' | 'newmember' | 'score
 
 
 
-const INVITATION_BODY_DEFAULT = "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}"
-const DEFAULTS: Template = {
-  template_logo_url: null, template_header_color: '#185FA5', template_bg_image_url: null,
-  template_invitation_subject: 'Invitation : {{event_title}}',
-  template_invitation_body: INVITATION_BODY_DEFAULT,
-  template_teesheet_subject: 'Tee Sheet — {{event_title}}',
-  template_teesheet_body: "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\nTon flight est le numéro {{flight_number}} avec départ à {{start_time}}.",
-  template_reminder_subject:  '⏰ Rappel — {{event_title}} dans 3 jours',
-  template_reminder_body:     "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}",
-  template_newmember_subject: 'Bienvenue dans le groupe !',
-  template_newmember_body: "Bonjour {{first_name}},\n\nBienvenue dans notre groupe GolfGo !\n\nPour accéder à l'app, clique sur le lien ou scanne le QR code :\n{{app_url}}\n\n{{qr_code}}\n\n📱 iPhone : {{install_iphone}}\n🤖 Android : {{install_android}}\n\nÀ bientôt,\n{{owner_name}}",
+// Modèles par défaut, dans la langue du groupe (textes dans messages/*.json > email.defaults / email.composerDefaults).
+// t.raw : les {{variables}} ne doivent pas passer par le moteur de mise en forme.
+function buildDefaults(t: EmailT): Template {
+  return {
+    template_logo_url: null, template_header_color: '#185FA5', template_bg_image_url: null,
+    template_invitation_subject: t.raw('email.defaults.invitationSubject'),
+    template_invitation_body:    t.raw('email.defaults.invitationBody'),
+    template_teesheet_subject:   t.raw('email.defaults.teesheetSubject'),
+    template_teesheet_body:      t.raw('email.composerDefaults.teesheetBody'),
+    template_reminder_subject:   t.raw('email.defaults.reminderSubject'),
+    template_reminder_body:      t.raw('email.defaults.reminderBody'),
+    template_newmember_subject:  t.raw('email.composerDefaults.newmemberSubject'),
+    template_newmember_body:     t.raw('email.composerDefaults.newmemberBody'),
+  }
 }
 
 const COMM_VARS = [
@@ -177,7 +182,10 @@ export default function CommunicationsPage() {
   const [members,         setMembers]         = useState<Member[]>([])
   const [events,          setEvents]          = useState<EventRow[]>([])
   const [loading,         setLoading]         = useState(true)
-  const [groupTemplate,   setGroupTemplate]   = useState<Template>(DEFAULTS)
+  // Langue du groupe (chargée avec le groupe) : modèles par défaut + documents imprimés
+  const [docI18n,         setDocI18n]         = useState<GroupI18n>(() => fallbackGroupI18n(t, locale))
+  const [defaults,        setDefaults]        = useState<Template>(() => buildDefaults(t))
+  const [groupTemplate,   setGroupTemplate]   = useState<Template>(() => buildDefaults(t))
   const [selectedEventId, setSelectedEventId] = useState<string>('')
   const [saving,          setSaving]          = useState(false)
   const [uploading,       setUploading]       = useState(false)
@@ -231,18 +239,22 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
       supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
     ])
 
+    const gi = await loadGroupI18n(groupId, fallbackGroupI18n(t, locale))
+    const fresh = buildDefaults(gi.t)
+    setDocI18n(gi); setDefaults(fresh)
+
     if (group) setGroupTemplate({
       template_logo_url:           group.template_logo_url ?? null,
       template_header_color:       group.template_header_color ?? '#185FA5',
       template_bg_image_url:       group.template_bg_image_url ?? null,
-      template_invitation_subject: group.template_invitation_subject ?? DEFAULTS.template_invitation_subject,
-      template_invitation_body:    group.template_invitation_body ?? DEFAULTS.template_invitation_body,
-      template_teesheet_subject:   group.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject,
-      template_teesheet_body:      group.template_teesheet_body ?? DEFAULTS.template_teesheet_body,
-      template_reminder_subject:  group.template_reminder_subject  ?? DEFAULTS.template_reminder_subject,
-      template_reminder_body:     group.template_reminder_body     ?? DEFAULTS.template_reminder_body,
-      template_newmember_subject: group.template_newmember_subject ?? DEFAULTS.template_newmember_subject,
-      template_newmember_body:    group.template_newmember_body    ?? DEFAULTS.template_newmember_body,
+      template_invitation_subject: group.template_invitation_subject ?? fresh.template_invitation_subject,
+      template_invitation_body:    group.template_invitation_body ?? fresh.template_invitation_body,
+      template_teesheet_subject:   group.template_teesheet_subject ?? fresh.template_teesheet_subject,
+      template_teesheet_body:      group.template_teesheet_body ?? fresh.template_teesheet_body,
+      template_reminder_subject:  group.template_reminder_subject  ?? fresh.template_reminder_subject,
+      template_reminder_body:     group.template_reminder_body     ?? fresh.template_reminder_body,
+      template_newmember_subject: group.template_newmember_subject ?? fresh.template_newmember_subject,
+      template_newmember_body:    group.template_newmember_body    ?? fresh.template_newmember_body,
     })
 
     setEvents(evts || [])
@@ -262,20 +274,20 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
   useEffect(() => {
     switch (messageType) {
       case 'invitation':
-        setCommSubject(groupTemplate.template_invitation_subject ?? DEFAULTS.template_invitation_subject ?? '')
-        setCommBody(groupTemplate.template_invitation_body ?? DEFAULTS.template_invitation_body ?? '')
+        setCommSubject(groupTemplate.template_invitation_subject ?? defaults.template_invitation_subject ?? '')
+        setCommBody(groupTemplate.template_invitation_body ?? defaults.template_invitation_body ?? '')
         break
       case 'reminder':
-        setCommSubject(groupTemplate.template_reminder_subject ?? DEFAULTS.template_reminder_subject ?? '')
-        setCommBody(groupTemplate.template_reminder_body ?? DEFAULTS.template_reminder_body ?? '')
+        setCommSubject(groupTemplate.template_reminder_subject ?? defaults.template_reminder_subject ?? '')
+        setCommBody(groupTemplate.template_reminder_body ?? defaults.template_reminder_body ?? '')
         break
       case 'newmember':
-        setCommSubject(groupTemplate.template_newmember_subject ?? DEFAULTS.template_newmember_subject ?? '')
-        setCommBody(groupTemplate.template_newmember_body ?? DEFAULTS.template_newmember_body ?? '')
+        setCommSubject(groupTemplate.template_newmember_subject ?? defaults.template_newmember_subject ?? '')
+        setCommBody(groupTemplate.template_newmember_body ?? defaults.template_newmember_body ?? '')
         break
       case 'teesheet':
-        setCommSubject(groupTemplate.template_teesheet_subject ?? DEFAULTS.template_teesheet_subject ?? '')
-        setCommBody(groupTemplate.template_teesheet_body ?? DEFAULTS.template_teesheet_body ?? '')
+        setCommSubject(groupTemplate.template_teesheet_subject ?? defaults.template_teesheet_subject ?? '')
+        setCommBody(groupTemplate.template_teesheet_body ?? defaults.template_teesheet_body ?? '')
         break
       case 'scorecards':
         setCommSubject('')
@@ -286,6 +298,8 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
         setCommBody('')
         break
     }
+    // `defaults` ne sert que de secours si un modèle est absent ; groupTemplate en contient toujours une valeur après le chargement
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messageType, groupTemplate])
 
   useEffect(() => {
@@ -307,15 +321,15 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
   async function handleReset() {
     if (!confirm(t('communications.templates.reset'))) return
     const { error } = await supabase.from('groups').update({
-      template_invitation_subject: DEFAULTS.template_invitation_subject,
-      template_invitation_body:    DEFAULTS.template_invitation_body,
-      template_teesheet_subject:   DEFAULTS.template_teesheet_subject,
-      template_teesheet_body:      DEFAULTS.template_teesheet_body,
+      template_invitation_subject: defaults.template_invitation_subject,
+      template_invitation_body:    defaults.template_invitation_body,
+      template_teesheet_subject:   defaults.template_teesheet_subject,
+      template_teesheet_body:      defaults.template_teesheet_body,
       template_logo_url:           null,
       template_header_color:       '#185FA5',
     }).eq('id', groupId)
     if (error) { toast.error(error.message); return }
-    setGroupTemplate({ ...DEFAULTS })
+    setGroupTemplate({ ...defaults })
     toast.success(t('communications.toasts.groupReset'))
   }
 
@@ -460,7 +474,7 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
             flight_number: i + 1,
             start_time: startsAt
               ? new Date(new Date(startsAt).getTime() + i * 9 * 60 * 1000)
-                  .toLocaleTimeString('fr-BE', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+                  .toLocaleTimeString(docI18n.dateLocale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
               : '',
           }))
 
@@ -580,21 +594,21 @@ function handleFilterEventChange(eventId: string) {
       if (printHoles.length === 0) { toast.error(t('communications.noLinkedCourse')); return }
       if (printFlights.length === 0) { toast.error(t('scorecard.noFlightsForEvent')); return }
       const activeEvent = events.find(e => e.id === filterEventId)
-      const eventDate = activeEvent ? new Date(activeEvent.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+      const eventDate = activeEvent ? new Date(activeEvent.starts_at).toLocaleDateString(docI18n.dateLocale, { day: 'numeric', month: 'long', year: 'numeric' }) : ''
 
       const htmlBody = printFlights
         .map(flightPlayers => buildScorecardCardsHtml(
-          flightPlayers, printHoles, activeEvent?.title ?? '', eventDate,
+          docI18n, flightPlayers, printHoles, activeEvent?.title ?? '', eventDate,
           printClubName, printCourseName, groupTemplate.template_logo_url, printTeamFormat, printHcpPercentage,
 printFormatName, printScorecardNotes
         ))
         .join('')
 
       const html = `<!DOCTYPE html>
-        <html>
+        <html lang="${docI18n.lang}">
         <head>
         <meta charset="UTF-8"/>
-        <title>Scorecards — ${activeEvent?.title ?? ''}</title>
+        <title>${docI18n.t('scoring.printTitle', { title: activeEvent?.title ?? '' })}</title>
         <style>${SCORECARD_PRINT_STYLES}</style>
         </head>
         <body>

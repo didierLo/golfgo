@@ -496,7 +496,7 @@
     "autoInvitationLabel": "Automatische uitnodiging 14 dagen voor het evenement",
     "autoInvitationDesc": "Verstuurt een uitnodiging naar alle leden 14 dagen voor het evenement",
     "languageLabel": "Taal van de groep",
-    "languageHint": "Taal van de e-mails die naar de spelers van deze groep worden gestuurd."
+    "languageHint": "Taal van de e-mails, afgedrukte documenten en meldingen van deze groep."
   },
   "flightHistory": {
     "title": "Flightgeschiedenis",
@@ -703,7 +703,8 @@
     "secureTitle": "🔒 100% veilige betaling",
     "secureDesc": "Uw betaling wordt verwerkt door <strong>Stripe</strong>, wereldleider in veilige online betalingen. GolfGo slaat uw bankgegevens nooit op. De transactie is versleuteld en voldoet aan PCI-DSS-normen. Accepteert Visa, Mastercard, Bancontact en Apple/Google Pay.",
     "paying": "Doorverwijzen...",
-    "pay": "Betalen {amount} €"
+    "pay": "Betalen {amount} €",
+    "checkoutDescription": "Inschrijving voor het evenement"
   },
   "results": {
     "title": "Resultaten",
@@ -1416,7 +1417,14 @@
     "format": {
       "stroke": "Strokeplay",
       "stableford": "Stableford"
-    }
+    },
+    "marker": "Marker",
+    "markerColon": "Marker:",
+    "grossColon": "Bruto:",
+    "netColon": "Netto:",
+    "infoLabel": "Info",
+    "printTitle": "Scorekaarten — {title}",
+    "team": "Team {n}"
   },
 
   "push": {
@@ -1558,6 +1566,32 @@
       "invitationBody": "Hallo {{first_name}},\n\nMet plezier nodig ik je uit voor onze volgende bijeenkomst.\nKun je erbij zijn?\n\nIk hoop je snel weer te zien,\n{{owner_name}}",
       "teesheetSubject": "Startlijst — {{event_title}}",
       "teesheetBody": "Hallo {{first_name}},\n\nHier is de startvolgorde voor {{event_title}}.\n\n{{teesheet}}"
+    },
+    "payment": {
+      "subject": "Bevestiging van je GolfGo-betaling",
+      "received": "Je betaling is goed ontvangen. Bedankt!",
+      "seeYou": "Tot snel op de baan ⛳"
+    },
+    "composerDefaults": {
+      "teesheetBody": "Hallo {{first_name}},\n\nHier is de startvolgorde voor {{event_title}}.\n\nJe zit in flight nummer {{flight_number}}, met start om {{start_time}}.",
+      "newmemberSubject": "Welkom in de groep!",
+      "newmemberBody": "Hallo {{first_name}},\n\nWelkom in onze GolfGo-groep!\n\nOm de app te openen, tik je op de link of scan je de QR-code:\n{{app_url}}\n\n{{qr_code}}\n\n📱 iPhone: {{install_iphone}}\n🤖 Android: {{install_android}}\n\nTot snel,\n{{owner_name}}"
     }
+  },
+
+  "pushNotif": {
+    "waitlistTitle": "Wachtlijst — {title}",
+    "confirmedTitle": "Nieuwe bevestiging — {title}",
+    "reviewTitle": "Flight om na te kijken — {title}",
+    "waitlistBody": "{name} staat op de wachtlijst, evenement vol ({date}).",
+    "confirmedBody": "{name} heeft de aanwezigheid bevestigd ({date}).",
+    "leftBody": "{name} is niet langer bevestigd (nu {status}) — {date}.",
+    "status": {
+      "GOING": "bevestigd",
+      "DECLINED": "afgemeld",
+      "WAITLIST": "op de wachtlijst",
+      "INVITED": "uitgenodigd"
+    },
+    "unknownPlayer": "Een speler"
   }
 }

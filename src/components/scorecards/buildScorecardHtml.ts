@@ -1,4 +1,5 @@
 import type { Hole, TeeInfo } from './scorecard-types'
+import type { EmailT } from '@/lib/i18n/types'
 import { composeCards, type TeamFormat, type ComposedCard } from '@/lib/golf/scorecards/composeCards'
 import { strokesReceived } from '@/lib/golf/scoring/stableford'
 
@@ -14,11 +15,13 @@ export type PrintPlayer = {
 }
 
 export function buildScorecardCardsHtml(
+  i18n: { t: EmailT; lang: string },
   players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
   clubName: string, courseName: string, logoUrl: string | null = null,
   teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
   formatName: string = '', scorecardNotes: string = '',
 ): string {
+  const { t, lang } = i18n
   const resolvedLogoUrl = logoUrl || DEFAULT_LOGO_URL
   const eventLocation = [clubName, courseName].filter(Boolean).join(' · ')
 
@@ -32,7 +35,7 @@ export function buildScorecardCardsHtml(
     return set.reduce((s, h) => s + strokesReceived(playingHcp, h.stroke_index), 0)
   }
 
-  const composed: ComposedCard[] = composeCards(players, teamFormat, hcpPercentage)
+  const composed: ComposedCard[] = composeCards(players, teamFormat, hcpPercentage, n => t('scoring.team', { n }))
 
   const cards = composed.map(card => {
     const holeHeaders = [
@@ -95,7 +98,7 @@ export function buildScorecardCardsHtml(
         ${blankRow('score-cell')}
       </tr>
       <tr class="net-row">
-        <td class="label-col net-label">Net</td>
+        <td class="label-col net-label">${t('scoring.net')}</td>
         ${blankRow('net-cell')}
       </tr>`).join('')
 
@@ -105,7 +108,7 @@ export function buildScorecardCardsHtml(
         ${blankRow('score-cell')}
       </tr>
       <tr class="net-row">
-        <td class="label-col net-label">Net</td>
+        <td class="label-col net-label">${t('scoring.net')}</td>
         ${blankRow('net-cell')}
       </tr>`).join('')
 
@@ -123,7 +126,7 @@ export function buildScorecardCardsHtml(
     </div>
     <div class="player-info">
       <div class="player-line"><strong>${card.headerLabel}</strong></div>
-      <div class="marker-line">${signerName ? `Marker : <u>${signerName}</u>` : '&nbsp;'}</div>
+      <div class="marker-line">${signerName ? `${t('scoring.markerColon')} <u>${signerName}</u>` : '&nbsp;'}</div>
     </div>
   </div>
 
@@ -137,7 +140,7 @@ export function buildScorecardCardsHtml(
       <col class="tot-col" />
     </colgroup>
     <thead>
-      <tr class="hole-row"><th class="label-col">Hole</th>${holeHeaders}</tr>
+      <tr class="hole-row"><th class="label-col">${t('scoring.hole')}</th>${holeHeaders}</tr>
     </thead>
     <tbody>
       <tr class="par-row"><td class="label-col">Par</td>${parRow}</tr>
@@ -147,29 +150,29 @@ export function buildScorecardCardsHtml(
     </tbody>
   </table>
 
-  ${scorecardNotes ? `<div class="notes-box"><div class="notes-label">Infos</div><div class="notes-text">${scorecardNotes.replace(/\n/g, '<br/>')}</div></div>` : ''}
+  ${scorecardNotes ? `<div class="notes-box"><div class="notes-label">${t('scoring.infoLabel')}</div><div class="notes-text">${scorecardNotes.replace(/\n/g, '<br/>')}</div></div>` : ''}
 
 
   <div class="footer">
     <div class="footer-cell">
-      <div class="footer-label">Marker's signature</div>
+      <div class="footer-label">${t('scoring.markerSignature')}</div>
       <div class="footer-name">${signerName}</div>
     </div>
     <div class="footer-cell">
-      <div class="footer-label">Player's signature</div>
+      <div class="footer-label">${t('scoring.playerSignature')}</div>
       <div class="footer-name">${card.headerLabel}</div>
     </div>
-    <div class="footer-cell footer-score"><div class="footer-label">Brut :</div></div>
-    <div class="footer-cell footer-score"><div class="footer-label">Net :</div></div>
+    <div class="footer-cell footer-score"><div class="footer-label">${t('scoring.grossColon')}</div></div>
+    <div class="footer-cell footer-score"><div class="footer-label">${t('scoring.netColon')}</div></div>
   </div>
 </div>`
   }).join('')
 
   return `<!DOCTYPE html>
-<html>
+<html lang="${lang}">
 <head>
 <meta charset="UTF-8"/>
-<title>Scorecards — ${eventTitle}</title>
+<title>${t('scoring.printTitle', { title: eventTitle })}</title>
 <style>${SCORECARD_PRINT_STYLES}</style>
 </head>
 <body>
@@ -180,17 +183,19 @@ ${cards}
 }
 
 export function buildScorecardHtml(
+  i18n: { t: EmailT; lang: string },
   players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
   clubName: string, courseName: string, logoUrl: string | null = null,
   teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
   formatName: string = '', scorecardNotes: string = '',
 ): string {
-  const cards = buildScorecardCardsHtml(players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage)
+  const { t, lang } = i18n
+  const cards = buildScorecardCardsHtml(i18n, players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage)
   return `<!DOCTYPE html>
-<html>
+<html lang="${lang}">
 <head>
 <meta charset="UTF-8"/>
-<title>Scorecards — ${eventTitle}</title>
+<title>${t('scoring.printTitle', { title: eventTitle })}</title>
 <style>${SCORECARD_PRINT_STYLES}</style>
 </head>
 <body>
