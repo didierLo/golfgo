@@ -3,7 +3,7 @@
     "myEvents": "Mis eventos",
     "participants": "Participantes",
     "teesheet": "Lista de salidas",
-    "scorecard": "Tarjeta de puntuación",
+    "scorecard": "Tarjeta de juego",
     "groups": "Grupos",
     "events": "Eventos",
     "invitations": "Invitaciones",
@@ -120,7 +120,7 @@
     "reorderHint": "⠿ Arrastra una salida para cambiar el orden · toca la hora para editarla manualmente",
     "reorderSaving": " · guardando…",
     "dragHandleTitle": "Arrastrar para reordenar",
-    "editTimeTitle": "Editar esta hora de salida",
+    "editTimeTitle": "Editar hora de salida",
     "resetTimeTitle": "Volver a la hora automática",
     "errorSaveTime": "Error al guardar la hora — inténtalo de nuevo",
     "errorResetTime": "Error al restablecer la hora — inténtalo de nuevo",
@@ -318,10 +318,10 @@
       "headerColor": "Color de cabecera",
       "defaultColor": "GolfGo predeterminado",
       "bgImage": "Imagen de fondo",
-      "bgImageDesc": "Solo tarjetas de puntuación móviles",
+      "bgImageDesc": "Solo tarjetas de juego móviles",
       "addBgImage": "+ Añadir imagen de fondo",
       "logoDesc": "PNG, JPG — reemplaza el logo de GolfGo",
-      "bgImageDesc2": "JPG, PNG — fondo de tarjetas de puntuación móviles",
+      "bgImageDesc2": "JPG, PNG — fondo de tarjetas de juego móviles",
       "uploading": "Subiendo...",
       "tabs": {
         "invitation": "Correo de invitación",
@@ -343,7 +343,7 @@
       },
       "reminder": "⏰ Recordatorio",
       "reminderSubject": "Recordatorio — {{group_name}}",
-      "reminderBody": "Hola {{first_name}},\n\nQuedan {{places_restantes}} plazas para nuestra próxima ronda el {{event_date}} a las {{start_time}}.\n\n¡Haz clic abajo si quieres unirte!\n\n¡Hasta en el campo!\n\n{{owner_name}}\n\n{{yes_button}}",
+      "reminderBody": "Hola {{first_name}},\n\nQuedan {{places_restantes}} plazas para nuestra próxima vuelta de gol fel {{event_date}} a las {{start_time}}.\n\n¡Haz clic abajo si quieres unirte!\n\n¡Hasta en el campo!\n\n{{owner_name}}\n\n{{yes_button}}",
       "invitation": "✉️ Invitación",
       "invitationSubject": "Invitación: {{event_title}}",
       "info": "📢 Información",
@@ -436,7 +436,7 @@
     "start": "Inicio *",
     "end": "Fin",
     "eventType": "Tipo de evento",
-    "golf": "⛳ Ronda de golf",
+    "golf": "⛳ Vuelta de golf",
     "other": "🎉 Otro evento",
     "club": "Club",
     "chooseClub": "Elige un club...",
@@ -466,10 +466,10 @@
     "clubCourseRequired": "El club y el campo son obligatorios",
     "extraActivity": "Actividad adicional",
     "extraActivityPlaceholder": "Ej.: Comida en el clubhouse — 19h",
-    "scorecardNotes": "Notas de la tarjeta de puntuación",
+    "scorecardNotes": "Notas de la tarjeta de juego",
     "scorecardNotesPlaceholder": "Reglas específicas, información local, instrucciones...",
-    "scorecardNotesHint": "Se imprime bajo cada tarjeta de puntuación.",
-    "hcpPercent": "% HCP aplicado al equipo",
+    "scorecardNotesHint": "Se imprime bajo cada tarjeta de juego.",
+    "hcpPercent": "% de hándicap aplicado al equipo",
     "hcpDefault": "por defecto {value}%",
     "feePlaceholder": "Ej.: 35",
     "maxPlaceholder": "Ej.: 24",
@@ -603,8 +603,8 @@
     "year1": "1 año"
   },
   "leaderboard": {
-    "noScorecard": "No se encontró ninguna tarjeta de puntuación para este evento",
-    "title": "Clasificación",
+    "noScorecard": "No se encontró ninguna tarjeta de juego para este evento",
+    "title": " Leaderboard",
     "noScores": "Todavía no hay puntuaciones."
   },
   "addParticipants": {
@@ -709,7 +709,7 @@
     "title": "Resultados",
     "subtitle": "{count} jugadores · {format}",
     "leaderboard": "🏆 Clasificación",
-    "scorecards": "📋 Tarjetas de puntuación",
+    "scorecards": "📋 Tarjetas de juego",
     "noScores": "Sin resultados para este evento",
     "noScoresHint": "Los resultados aparecerán aquí cuando se introduzcan",
     "noParticipants": "Sin participantes para este evento",
@@ -763,12 +763,12 @@
     "notFound": "Evento no encontrado",
     "directions": "Cómo llegar",
     "myParticipation": "Mi participación",
-    "going18": "Participo — 18 hoyos",
-    "going18active": "✓ Participo — 18 hoyos",
-    "going9": "Participo — 9 hoyos",
-    "going9active": "✓ Participo — 9 hoyos",
+    "going18": "Me apunto — 18 hoyos",
+    "going18active": "✓ Me apunto — 18 hoyos",
+    "going9": "Me apunto — 9 hoyos",
+    "going9active": "✓ Me apunto — 9 hoyos",
     "notGoing": "No me apunto",
-    "notGoingActive": "✗ No participo",
+    "notGoingActive": "✗ No me apunto",
     "full": "Completo",
     "participants": "{count} participante(s) confirmado(s)",
     "participantsMax": "{count} / {max} plaza(s) — {remaining} restantes",
@@ -777,10 +777,10 @@
     "toastDeclined": "Participación rechazada",
     "toast18": "Confirmado — 18 hoyos ⛳",
     "toast9": "Confirmado — 9 hoyos ⛳",
-    "going9out": "Participo — 9H Ida",
-    "going9outActive": "✓ Participo — 9H Ida",
-    "going9in": "Participo — 9H Vuelta",
-    "going9inActive": "✓ Participo — 9H Vuelta",
+    "going9out": "Me apunto — 9H Ida",
+    "going9outActive": "✓ Me apunto — 9H Ida",
+    "going9in": "Me apunto — 9H Vuelta",
+    "going9inActive": "✓ Me apunto — 9H Vuelta",
     "toast9out": "Confirmado — 9H Ida ⛳",
     "toast9in": "Confirmado — 9H Vuelta ⛳"
   },
@@ -885,8 +885,8 @@
     "cancel": "Cancelar",
     "firstName": "Nombre *",
     "lastName": "Apellido *",
-    "federalNo": "Nº federativo",
-    "federalNoRequired": "Nº federativo *",
+    "federalNo": "Nº de federación",
+    "federalNoRequired": "Nº de federación *",
     "federalNoOptional": "opcional",
     "whs": "WHS",
     "email": "Dirección de correo",
@@ -906,7 +906,7 @@
     "alreadyMember": "Este jugador ya forma parte de este grupo como {role}",
     "importTitle": "Importar jugadores",
     "importHint": "Este archivo también sirve para actualizar jugadores existentes (hándicap, club, etc.): solo se modifican las celdas rellenadas, el resto nunca se sobrescribe.",
-    "federalLabel": "Nº federativo {no}"
+    "federalLabel": "Nº de federación {no}"
   },
   "addGroup": {
     "title": "Nuevo grupo",
@@ -943,7 +943,7 @@
     "notFound": "Jugador no encontrado",
     "firstName": "Nombre *",
     "lastName": "Apellido *",
-    "federalNo": "Nº federativo",
+    "federalNo": "Nº de federación",
     "whs": "WHS",
     "email": "Dirección de correo",
     "phone": "Teléfono",
@@ -965,7 +965,7 @@
     "createGroup": "+ Crear un grupo →"
   },
   "scorecard": {
-    "title": "Tarjeta de puntuación",
+    "title": "Tarjeta de juego",
     "event": "Evento",
     "noEvents": "No se encontraron eventos",
     "noEventsHint": "Tus resultados aparecerán aquí cuando estés inscrito en un evento",
@@ -977,7 +977,7 @@
     "closed": "Cerrado",
     "readOnly": "Solo lectura",
     "signConfirm": "¿Confirmar el fin de la partida? La tarjeta se bloqueará y ya no podrá modificarse.",
-    "send": "Enviar tarjeta(s) de puntuación",
+    "send": "Enviar tarjeta(s) de juego",
     "sending": "Enviando...",
     "sent": "✓ Enviado",
     "sendError": "Error al enviar",
@@ -985,10 +985,10 @@
     "me": "Yo",
     "myScorecard": "Mi tarjeta",
     "noFlightsForEvent": "Ningún flight para este evento",
-    "allScorecards": "Todas las tarjetas de puntuación",
+    "allScorecards": "Todas las tarjetas de juego",
     "confirmedCount": "{count, plural, one {# participante confirmado} other {# participantes confirmados}}",
     "endOfRoundHint": "Haz clic aquí al terminar la partida",
-    "signAndFinish": "Firmar la tarjeta y terminar la partida",
+    "signAndFinish": "Firmar la tarjeta y terminar la vuelta",
     "signed": "La tarjeta ha sido firmada y enviada a la clasificación.",
     "retryError": "Error — inténtalo de nuevo",
     "bulkSent": "{count, plural, one {# tarjeta enviada} other {# tarjetas enviadas}}",
@@ -1106,13 +1106,13 @@
     "start": "Inicio *",
     "end": "Fin",
     "eventType": "Tipo de evento",
-    "golf": "⛳ Ronda de golf",
+    "golf": "⛳ Vuelta de golf",
     "other": "🎉 Otro evento",
-    "golfHint": "Resultados, tarjetas de puntuación y clasificación estarán disponibles",
+    "golfHint": "Resultados, tarjetas de juego y clasificación estarán disponibles",
     "otherHint": "Solo participantes y pagos",
     "club": "Club",
     "chooseClub": "Elige un club...",
-    "course": "campo",
+    "course": "campo de golf",
     "chooseCourse": "Elige un campo...",
     "noCourse": "Sin campo — añádelos en la sección Clubs",
     "format": "Formato de competición",
@@ -1135,10 +1135,10 @@
     "clubCourseRequired": "El club y el campo son obligatorios",
     "extraActivity": "Actividad adicional",
     "extraActivityPlaceholder": "Ej.: Comida en el clubhouse — 19h",
-    "scorecardNotes": "Notas de la tarjeta de puntuación",
+    "scorecardNotes": "Notas de la tarjeta de juego",
     "scorecardNotesPlaceholder": "Reglas específicas, información local, instrucciones...",
-    "scorecardNotesHint": "Se imprime bajo cada tarjeta de puntuación.",
-    "hcpPercent": "% HCP aplicado al equipo",
+    "scorecardNotesHint": "Se imprime bajo cada tarjeta de juego.",
+    "hcpPercent": "% de hándicap aplicado al equipo",
     "hcpDefault": "por defecto {value}%",
     "feePlaceholder": "Ej.: 35",
     "maxPlaceholder": "Ej.: 24",
@@ -1163,8 +1163,8 @@
     "18": "18",
     "9out": "9-ida",
     "9in": "9-vuelta",
-    "out": "Primeros 9",
-    "in": "Últimos 9"
+    "out": "Front 9",
+    "in": "Back 9"
   },
   "importClubs": {
     "templateDesc": "Descargar la plantilla de archivo",
@@ -1360,7 +1360,7 @@
   "welcome": {
     "badge": "⛳ Bienvenido a GolfGo",
     "title": "¿Cómo desea utilizar GolfGo?",
-    "subtitle": "GolfGo organiza sus salidas de golf con amigos — invitaciones, flights equilibrados, tarjetas de puntuación, clasificación y mucho más, todo en un mismo lugar.",
+    "subtitle": "GolfGo organiza sus salidas de golf con amigos — invitaciones, flights equilibrados, tarjetas de juego, clasificación y mucho más, todo en un mismo lugar.",
     "playerTitle": "Soy jugador",
     "playerDesc": "Encuentro todos mis eventos, me apunto con un clic y consulto mi hoja de salida.",
     "ownerTitle": "Creo un grupo",
@@ -1374,7 +1374,7 @@
     "flyawayNoteMiddle": "Si tienes dudas, busca primero en",
     "flyawayNoteSuffix": "encuentra el club y copia el nombre desde la dirección de la página.",
     "flyawayPlaceholder": "Nombre exacto del club",
-    "flyawayNoScorecard": "No se encontró tarjeta de puntuación para este recorrido.",
+    "flyawayNoScorecard": "No se encontró tarjeta de juego para este recorrido.",
     "holesCount": "{count} hoyos",
     "importThisCard": "Importar esta tarjeta",
     "noDetailAvailable": "Sin detalle disponible.",
@@ -1405,7 +1405,7 @@
     "gross": "Bruto",
     "net": "Neto",
     "pts": "Pts",
-    "received": "Rec.",
+    "received": "HCP",
     "bestBall": "Mejor bola",
     "unassigned": "Sin flight",
     "markerSignature": "Firma del marcador",
@@ -1423,7 +1423,7 @@
     "grossColon": "Bruto:",
     "netColon": "Neto:",
     "infoLabel": "Info",
-    "printTitle": "Tarjetas de puntuación — {title}",
+    "printTitle": "Tarjetas de juego — {title}",
     "team": "Equipo {n}"
   },
 
@@ -1451,7 +1451,7 @@
 
   "notFound": {
     "title": "Bola fuera de límites",
-    "desc": "Esta página no existe o se ha movido. ¡Vuelve al tee de salida!"
+    "desc": "Esta página no existe o se ha movido. ¡Vuelve al tee!"
   },
 
   "playersImport": {
@@ -1471,7 +1471,7 @@
     "bulkHint": "Rellena las filas y haz clic en \"Añadir\"",
     "colSurname": "Apellido *",
     "colFirstName": "Nombre *",
-    "colFederalNo": "Nº federativo",
+    "colFederalNo": "Nº de federación",
     "colPhone": "Teléfono",
     "addRow": "+ Añadir una fila",
     "adding": "Añadiendo…",
@@ -1482,14 +1482,14 @@
 
   "email": {
     "respond": {
-      "yes": "Participo",
+      "yes": "Me apunto",
       "waitlist": "Apuntarme a la lista de espera",
       "no": "No puedo participar",
       "h18": "18 hoyos",
       "h18Sub": "Campo completo",
-      "h9front": "9 hoyos Front",
+      "h9front": "9 Front",
       "h9frontSub": "Hoyos 1–9",
-      "h9back": "9 hoyos Back",
+      "h9back": "9 Back",
       "h9backSub": "Hoyos 10–18"
     },
     "common": {
@@ -1534,7 +1534,7 @@
       "footer": "Organizado con GolfGo"
     },
     "scorecard": {
-      "subject": "Tu tarjeta de puntuación — {title}"
+      "subject": "Tu tarjeta de juego — {title}"
     },
     "groupInvite": {
       "subject": "Invitación para unirte a {group} en GolfGo",
@@ -1570,7 +1570,7 @@
     "payment": {
       "subject": "Confirmación de pago de GolfGo",
       "received": "Hemos recibido tu pago. ¡Gracias!",
-      "seeYou": "¡Hasta pronto en el campo! ⛳"
+      "seeYou": "¡Hasta pronto en el campo de golf! ⛳"
     },
     "composerDefaults": {
       "teesheetBody": "Hola {{first_name}},\n\nEste es el orden de salida de {{event_title}}.\n\nTu flight es el número {{flight_number}}, con salida a las {{start_time}}.",
@@ -1588,7 +1588,7 @@
     "leftBody": "{name} ya no está confirmado/a (ahora {status}) — {date}.",
     "status": {
       "GOING": "confirmado/a",
-      "DECLINED": "de baja",
+      "DECLINED": "retirado",
       "WAITLIST": "en lista de espera",
       "INVITED": "invitado/a"
     },
