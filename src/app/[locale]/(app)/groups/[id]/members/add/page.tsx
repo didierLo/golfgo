@@ -346,7 +346,7 @@ export default function AddMemberPage() {
       )}
 
       <div className="flex items-center justify-between mt-6">
-        <a href={`/groups/${groupId}/members`} className="text-[13px] font-medium text-slate-500 hover:text-black transition-colors">{t('addMember.backToMembers')}</a>
+        <a href={`/groups/${groupId}/members`} className="text-[13px] font-medium text-slate-500 hover:text-black transition-colors on-bg">{t('addMember.backToMembers')}</a>
         {addedCount > 0 && <a href={`/groups/${groupId}/events`} className="text-[13px] font-semibold text-[#185FA5] hover:underline">{t('addMember.continueToEvents')}</a>}
       </div>
 

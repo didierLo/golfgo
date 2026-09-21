@@ -68,7 +68,7 @@ window.location.href = `/groups/${group.id}/members`
         <p className="text-[13px] text-slate-900 mt-0.5">{t('addGroup.subtitle')}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 on-bg-card">
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('addGroup.nameLabel')}</label>
           <input value={name} onChange={e => setName(e.target.value)} required

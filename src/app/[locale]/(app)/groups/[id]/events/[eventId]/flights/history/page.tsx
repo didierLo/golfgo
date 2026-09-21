@@ -196,7 +196,7 @@ export default function FlightHistoryPage() {
       {/* Période + tri */}
       <div className="flex flex-wrap items-end gap-4 mb-5">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('flightHistory.period')}</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">{t('flightHistory.period')}</span>
           <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
             {PERIOD_OPTIONS.map(opt => (
               <button key={opt.value} onClick={() => setPeriodDays(opt.value)}
@@ -210,7 +210,7 @@ export default function FlightHistoryPage() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('flightHistory.sort')}</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">{t('flightHistory.sort')}</span>
           <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
             {(['name', 'count'] as const).map(k => (
               <button key={k} onClick={() => setSortKey(k)}
@@ -224,9 +224,9 @@ export default function FlightHistoryPage() {
         </div>
 
         <div className="flex flex-col gap-1 ml-auto">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('flightHistory.intensity')}</span>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">{t('flightHistory.intensity')}</span>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-400">0</span>
+            <span className="text-[11px] text-slate-400 on-bg">0</span>
             <div className="flex h-5 w-32 rounded-lg overflow-hidden border border-slate-200">
               {[0, 0.15, 0.3, 0.5, 0.7, 0.85, 1].map((r, i) => {
                 const rv = Math.round(255 - r * (255 - 59))
@@ -235,12 +235,12 @@ export default function FlightHistoryPage() {
                 return <div key={i} className="flex-1" style={{ background: r === 0 ? '#F8FAFC' : `rgb(${rv},${gv},${bv})` }} />
               })}
             </div>
-            <span className="text-[11px] text-slate-400">{maxCount}×</span>
+            <span className="text-[11px] text-slate-400 on-bg">{maxCount}×</span>
           </div>
         </div>
       </div>
 
-      <p className="text-[11px] text-slate-400 mb-4">{t('flightHistory.manualNote')}</p>
+      <p className="text-[11px] text-slate-400 mb-4 on-bg">{t('flightHistory.manualNote')}</p>
 
       {/* Matrice */}
       {loading ? (
@@ -248,7 +248,7 @@ export default function FlightHistoryPage() {
           {[1,2,3,4].map(i => <div key={i} className="h-8 bg-slate-100 rounded-xl animate-pulse" />)}
         </div>
       ) : players.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 text-[13px]">{t('flightHistory.noMembers')}</div>
+        <div className="text-center py-16 text-slate-400 text-[13px] on-bg-card">{t('flightHistory.noMembers')}</div>
       ) : (
         <div className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="border-collapse" style={{ fontSize: '11px' }}>
@@ -322,7 +322,7 @@ export default function FlightHistoryPage() {
       {/* Historique des flights */}
       {!loading && flightRows.length > 0 && (
         <div className="mt-8">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 on-bg">
             {t('flightHistory.title')} · {flightRows.length}
           </p>
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -349,7 +349,7 @@ export default function FlightHistoryPage() {
         </div>
       )}
 
-      <p className="mt-4 text-[11px] text-slate-400">
+      <p className="mt-4 text-[11px] text-slate-400 on-bg">
         Corrections sauvegardées dans <code className="bg-slate-100 px-1 rounded">flight_history_overrides</code> (group_id, player_a, player_b, count)
       </p>
     </div>

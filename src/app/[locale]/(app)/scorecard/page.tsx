@@ -451,7 +451,7 @@ useEffect(() => {
         </svg>
       </div>
       <p className="text-[15px] font-bold text-slate-700 mb-1">{error}</p>
-      <p className="text-[13px] text-slate-500">{t('scorecard.noEventsHint')}</p>
+      <p className="text-[13px] text-slate-500 on-bg">{t('scorecard.noEventsHint')}</p>
     </div>
   )
 
@@ -610,10 +610,10 @@ useEffect(() => {
             <>
               <SaveFeedback status={saveStatus} />
               {isPastEvent && (
-                <span className="text-[10px] text-slate-400 font-medium">{t('scorecard.readOnly')}</span>
+                <span className="text-[10px] text-slate-400 font-medium on-bg">{t('scorecard.readOnly')}</span>
               )}
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap">
+                <span className="text-[11px] font-semibold text-slate-500 whitespace-nowrap on-bg">
                   {t('scorecard.endOfRoundHint')}
                 </span>
                 <span className="text-[18px] animate-bounce" style={{ animationDuration: '1.4s' }}>👉</span>

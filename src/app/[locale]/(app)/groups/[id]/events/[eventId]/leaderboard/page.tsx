@@ -107,7 +107,7 @@ setScorecardId(scorecard?.id ?? null)
           eventFormat={eventFormat}
         />
       ) : (
-        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
           {t('leaderboard.noScorecard')}
         </div>
       )}

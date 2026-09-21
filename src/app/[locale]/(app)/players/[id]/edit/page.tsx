@@ -235,7 +235,7 @@ setLoading(false)
 
       <div className="mt-6 pt-4 border-t border-slate-100">
         <button onClick={() => router.push(groupId ? `/groups/${groupId}/members` : '/')}
-          className="text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors">
+          className="text-[13px] font-medium text-slate-500 hover:text-slate-700 transition-colors on-bg">
           {t('editPlayer.backToMembers')}
         </button>
       </div>

@@ -28,7 +28,7 @@ function Toggle({ value, onChange, label, desc }: {
       </button>
       <div>
         <p className="text-[13px] font-semibold text-slate-800">{label}</p>
-        <p className="text-[11px] text-slate-500 mt-0.5">{desc}</p>
+        <p className="text-[11px] text-slate-500 mt-0.5 on-bg">{desc}</p>
       </div>
     </div>
   )
@@ -112,7 +112,7 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
         <p className="text-[13px] text-slate-900 mt-0.5">{name}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 on-bg-card">
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editGroup.nameLabel')}</label>
           <input value={name} onChange={e => setName(e.target.value)} required className={inputClass} />
@@ -140,7 +140,7 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
           <select value={groupLocale} onChange={e => setGroupLocale(e.target.value as Locale)} className={inputClass}>
             {LOCALES.map(l => <option key={l} value={l}>{LOCALE_NAMES[l]}</option>)}
           </select>
-          <p className="text-[11px] text-slate-500 mt-1">{t('editGroup.languageHint')}</p>
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.languageHint')}</p>
         </div>
 
         {/* ── Automatisations ── */}

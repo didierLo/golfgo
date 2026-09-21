@@ -409,7 +409,7 @@ export default function ScorecardsPage() {
             {flightSections.map((section, si) => (
               <div key={si}>
                 {section.label && (
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{section.label}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 on-bg">{section.label}</p>
                 )}
                 <div className="flex gap-3 flex-wrap items-center">
                   {section.groups.map((group, gi) => {
@@ -524,7 +524,7 @@ export default function ScorecardsPage() {
               />
             </div>
           ) : (
-            <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl print:hidden">
+            <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl print:hidden on-bg-card">
               {t('scorecards.noParticipants')}
             </div>
           )}
@@ -532,7 +532,7 @@ export default function ScorecardsPage() {
       )}
 
       {!scorecardLoading && !selectedCourseId && (
-        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl print:hidden">
+        <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl print:hidden on-bg-card">
           {isOwner ? t('scorecards.noCourse') : t('scorecards.noCourseReadOnly')}
         </div>
       )}

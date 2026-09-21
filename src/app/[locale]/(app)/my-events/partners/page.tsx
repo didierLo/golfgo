@@ -122,7 +122,7 @@ export default function MyPartnersPage() {
   )
 
   if (!me) return (
-    <div className="p-6 text-[13px] text-slate-500">{t('editPlayer.notFound')}</div>
+    <div className="p-6 text-[13px] text-slate-500 on-bg">{t('editPlayer.notFound')}</div>
   )
 
   return (
@@ -144,7 +144,7 @@ export default function MyPartnersPage() {
         </p>
 
         {partners.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-900 py-10 text-center text-[13px] text-slate-400">
+          <div className="rounded-xl border border-dashed border-slate-900 py-10 text-center text-[13px] text-slate-400 on-bg-card">
             {t('partners.noData')}
           </div>
         ) : (

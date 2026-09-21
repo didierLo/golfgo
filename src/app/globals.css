@@ -25,3 +25,33 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ── Lisibilité sur la photo de fond ─────────────────────────────────────────────────────────
+   La photo (ciel, herbe, arbres sombres) est visible entre les cartes. Un texte gris clair posé
+   directement dessus devient illisible, et un gris foncé seul disparaît sur les arbres.
+
+   .on-bg      : petit texte (astuce, libellé, lien « retour »…) posé directement sur la photo.
+                 Gris foncé + halo blanc : lisible sur le ciel, l'herbe ET les arbres.
+                 Non superposé aux utilitaires Tailwind (couche « utilities ») : il l'emporte donc
+                 sur text-slate-400, etc. — voulu.
+   .on-bg-card : bloc (formulaire, message « aucun … ») posé sur la photo : même carte translucide
+                 bleu clair que les autres cartes de l'application. Dans la couche « components » :
+                 un padding ou un fond Tailwind présent sur l'élément reste prioritaire. */
+.on-bg {
+  color: #334155;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.95), 0 0 8px rgba(255, 255, 255, 0.85), 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+.on-bg:hover { color: #0f172a; }
+
+@layer components {
+  .on-bg-card {
+    background: rgba(235, 243, 252, 0.82);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 1rem;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    padding: 1.25rem;
+    color: #334155;
+  }
+}

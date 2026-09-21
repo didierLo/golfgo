@@ -138,7 +138,7 @@ function MemberSearchView({
       )}
 
       {!selectedMember && !query && (
-        <div className="text-center py-10 text-[13px] text-slate-400 border border-dashed border-slate-200 rounded-xl">
+        <div className="text-center py-10 text-[13px] text-slate-400 border border-dashed border-slate-200 rounded-xl on-bg-card">
           {t('invitations.typeToSearch')}
         </div>
       )}
@@ -657,7 +657,7 @@ const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length 
         />
       ) : (
         sortedFiltered.length === 0 ? (
-          <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+          <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
             {t('invitations.noInvitations')}
           </div>
         ) : (

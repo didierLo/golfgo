@@ -67,7 +67,7 @@ export default function PayPage() {
 
   return (
     <div className="p-5 sm:p-8 max-w-md mx-auto">
-      <button onClick={() => router.back()} className="text-[13px] text-slate-500 hover:text-slate-700 mb-6 flex items-center gap-1">
+      <button onClick={() => router.back()} className="text-[13px] text-slate-500 hover:text-slate-700 mb-6 flex items-center gap-1 on-bg">
         {t('payments.back')}
       </button>
       <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-5">

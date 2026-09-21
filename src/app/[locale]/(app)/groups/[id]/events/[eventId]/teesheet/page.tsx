@@ -422,13 +422,13 @@ useEffect(() => {
           {[1,2,3].map(i => <div key={i} className="h-20 bg-white/40 rounded-xl animate-pulse" />)}
         </div>
       ) : flights.length === 0 ? (
-        <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-[13px] text-slate-500">
+        <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-[13px] text-slate-500 on-bg-card">
           {t('teesheet.empty')}
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {isOwner && flights.length > 0 && (
-            <p className="text-[11px] text-slate-400 -mb-1 print:hidden">
+            <p className="text-[11px] text-slate-400 -mb-1 print:hidden on-bg">
               {t('teesheet.reorderHint')}{reordering || savingTime ? t('teesheet.reorderSaving') : ''}
             </p>
           )}

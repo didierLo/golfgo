@@ -514,7 +514,7 @@ const flightGroups = useMemo(() =>
             </p>
             {flights.length === 0 ? (
               <div className="flex flex-wrap gap-2">
-                {players.length === 0 && <p className="text-[13px] text-slate-500">{t('flights.noConfirmed')}</p>}
+                {players.length === 0 && <p className="text-[13px] text-slate-500 on-bg">{t('flights.noConfirmed')}</p>}
                 {players.map((p: any) => (
                   <div key={p.id} className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5">
                     <span className="text-[13px] font-medium text-slate-800">{p.first_name} {p.surname}</span>
@@ -580,7 +580,7 @@ const flightGroups = useMemo(() =>
           {/* Flights */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">
                 {t('flights.flightsTitle')} {flights.length > 0 && `(${flights.length})`}
               </p>
               {manualEdits && flights.length > 0 && (
@@ -594,7 +594,7 @@ const flightGroups = useMemo(() =>
             </div>
 
             {isOwner && flights.length > 0 && (
-              <p className="text-[11px] text-slate-400 mb-3 flex items-center gap-1.5">
+              <p className="text-[11px] text-slate-400 mb-3 flex items-center gap-1.5 on-bg">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="5 9 2 12 5 15"/><polyline points="19 9 22 12 19 15"/>
                   <line x1="2" y1="12" x2="22" y2="12"/>
@@ -604,7 +604,7 @@ const flightGroups = useMemo(() =>
             )}
 
             {flights.length === 0 ? (
-              <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-slate-400">
+              <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-slate-400 on-bg-card">
                 <p className="text-[14px] font-medium">{t('flights.noFlights')}</p>
                 {isOwner && <p className="text-[12px] mt-1">{t('flights.generateHint')}</p>}
               </div>
@@ -619,7 +619,7 @@ const flightGroups = useMemo(() =>
                           {group.label}
                         </span>
                         <div className="flex-1 h-px bg-slate-100" />
-                        <span className="text-[11px] text-slate-400">{group.flights.length} flight{group.flights.length > 1 ? 's' : ''}</span>
+                        <span className="text-[11px] text-slate-400 on-bg">{group.flights.length} flight{group.flights.length > 1 ? 's' : ''}</span>
                       </div>
                     )}
 

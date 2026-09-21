@@ -15,7 +15,7 @@ export default function SettingsPage() {
         </svg>
       </div>
       <p className="text-[15px] font-bold text-slate-700 mb-1">{t('settings.title')}</p>
-      <p className="text-[13px] text-slate-500">{t('settings.comingSoon')}</p>
+      <p className="text-[13px] text-slate-500 on-bg">{t('settings.comingSoon')}</p>
     </div>
   )
 }

@@ -280,7 +280,7 @@ export default function MembersPage() {
       <div className="flex items-center justify-between mb-3">
         <div>
         <button onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-4">
+          className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-4 on-bg">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -324,7 +324,7 @@ export default function MembersPage() {
      
       {/* ── Liste membres ── */}
       {members.length === 0 ? (
-        <div className="text-center py-16 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+        <div className="text-center py-16 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
           {t('members.noMembers')}
         </div>
       ) : (

@@ -99,7 +99,7 @@ export default function AddEventPage() {
         <p className="text-[13px] text-slate-900 mt-0.5">{t('addEvent.subtitle')}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 on-bg-card">
 
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('addEvent.titleLabel')}</label>
@@ -140,7 +140,7 @@ export default function AddEventPage() {
               {t('addEvent.other')}
             </button>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1.5">
+          <p className="text-[11px] text-slate-500 mt-1.5 on-bg">
             {isGolf ? t('addEvent.golfHint') : t('addEvent.otherHint')}
           </p>
         </div>
@@ -193,8 +193,8 @@ export default function AddEventPage() {
                 if (!selected || selected.team_format === 'individual') return null
                 return (
                   <div className="mt-3">
-                    <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-                      {t('addEvent.hcpPercent')} <span className="text-slate-400 font-normal">— {t('addEvent.hcpDefault', { value: selected.hcp_percentage })}</span>
+                    <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+                      {t('addEvent.hcpPercent')} <span className="text-slate-400 font-normal on-bg">— {t('addEvent.hcpDefault', { value: selected.hcp_percentage })}</span>
                     </label>
                     <input type="number" min={0} max={100} step={5}
                       value={hcpOverride} onChange={e => setHcpOverride(e.target.value)}
@@ -209,52 +209,52 @@ export default function AddEventPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-              {t('addEvent.fee')} <span className="text-slate-400 font-normal">— {t('addEvent.feeOptional')}</span>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+              {t('addEvent.fee')} <span className="text-slate-400 font-normal on-bg">— {t('addEvent.feeOptional')}</span>
             </label>
             <input value={fee} onChange={e => setFee(e.target.value)} placeholder={t('addEvent.feePlaceholder')} className={inputClass} />
-            {fee && <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.feeHint')}</p>}
+            {fee && <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('addEvent.feeHint')}</p>}
           </div>
 
           <div>
-            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-              {t('addEvent.maxParticipants')} <span className="text-slate-400 font-normal">— {t('addEvent.maxOptional')}</span>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+              {t('addEvent.maxParticipants')} <span className="text-slate-400 font-normal on-bg">— {t('addEvent.maxOptional')}</span>
             </label>
             <input value={maxParticipants} onChange={e => setMaxParticipants(e.target.value)}
               placeholder={t('addEvent.maxPlaceholder')} type="number" min="1" className={inputClass} />
-            {maxParticipants && <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.maxHint')}</p>}
+            {maxParticipants && <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('addEvent.maxHint')}</p>}
           </div>
         </div>
 
         <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            {t('addEvent.emailMessage')} <span className="text-slate-400 font-normal">— {t('addEvent.emailOptional')}</span>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+            {t('addEvent.emailMessage')} <span className="text-slate-400 font-normal on-bg">— {t('addEvent.emailOptional')}</span>
           </label>
           <textarea value={emailMessage} onChange={e => setEmailMessage(e.target.value)}
             placeholder={t('addEvent.emailPlaceholder')} rows={3}
             className={`${inputClass} resize-none`} />
-          <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.emailHint')}</p>
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('addEvent.emailHint')}</p>
         </div>
 
         <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            {t('addEvent.extraActivity')} <span className="text-slate-400 font-normal">— {t('addEvent.emailOptional')}</span>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+            {t('addEvent.extraActivity')} <span className="text-slate-400 font-normal on-bg">— {t('addEvent.emailOptional')}</span>
           </label>
           <input value={extraActivityLabel} onChange={e => setExtraActivityLabel(e.target.value)}
             placeholder={t('addEvent.extraActivityPlaceholder')} className={inputClass} />
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">
             {t('addEvent.extraActivityHint')}
           </p>
         </div>
 
         <div>
-        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-          {t('addEvent.scorecardNotes')} <span className="text-slate-400 font-normal">— {t('addEvent.emailOptional')}</span>
+        <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+          {t('addEvent.scorecardNotes')} <span className="text-slate-400 font-normal on-bg">— {t('addEvent.emailOptional')}</span>
         </label>
         <textarea value={scorecardNotes} onChange={e => setScorecardNotes(e.target.value)}
           placeholder={t('addEvent.scorecardNotesPlaceholder')}
           rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
-        <p className="text-[11px] text-slate-500 mt-1">{t('addEvent.scorecardNotesHint')}</p>
+        <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('addEvent.scorecardNotesHint')}</p>
       </div>
 
         {error && <div className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</div>}

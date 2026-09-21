@@ -1030,7 +1030,7 @@ export default function ParticipantsPage() {
               {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-white/40 rounded-xl animate-pulse" />)}
             </div>
           ) : upcomingEvents.length === 0 ? (
-            <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl">
+            <div className="text-center py-12 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
               {t('participants.noUpcoming')}
             </div>
           ) : (

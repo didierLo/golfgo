@@ -16,7 +16,7 @@ export default function PrivacyPage() {
 
       <Link
         href={`/${locale}`}
-        className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-6 on-bg"
       >
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
           <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -110,7 +110,7 @@ export default function PrivacyPage() {
       <div className="mt-6 text-center">
         <Link
           href={`/${locale}//legal/cgu`}
-          className="text-[12px] text-slate-400 hover:text-slate-600 transition-colors underline underline-offset-2"
+          className="text-[12px] text-slate-400 hover:text-slate-600 transition-colors underline underline-offset-2 on-bg"
         >
           {t('linkToCgu')} →
         </Link>

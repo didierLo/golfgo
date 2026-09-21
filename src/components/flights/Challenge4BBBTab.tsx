@@ -550,13 +550,13 @@ export default function Challenge4BBBTab({
                   <div key={round.eventId}>
                     <div className="mb-3">
                       <p className="text-[13px] font-bold text-slate-800">{ev.title}</p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-slate-400 on-bg">
                         {formatDate(ev.starts_at, locale)} · {t('registered', { count: ev.going.length })}
                       </p>
                     </div>
 
                     {isOwner && (
-                      <p className="text-[11px] text-slate-400 mb-2 flex items-center gap-1.5">
+                      <p className="text-[11px] text-slate-400 mb-2 flex items-center gap-1.5 on-bg">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="5 9 2 12 5 15"/><polyline points="19 9 22 12 19 15"/>
                           <line x1="2" y1="12" x2="22" y2="12"/>
@@ -643,7 +643,7 @@ export default function Challenge4BBBTab({
       )}
 
       {events.length === 0 && !loading && (
-        <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-slate-400">
+        <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-slate-400 on-bg-card">
           <p className="text-[14px] font-medium">{t('noEvents')}</p>
           <p className="text-[12px] mt-1">{t('noEventsHint')}</p>
         </div>

@@ -87,13 +87,13 @@ export default function ClubDetailPage() {
   }
 
   if (loading) {
-    return <div className="p-6 text-[13px] text-gray-400">…</div>
+    return <div className="p-6 text-[13px] text-gray-400 on-bg">…</div>
   }
 
   if (!club) {
     return (
       <div className="p-6 max-w-4xl">
-        <p className="text-[13px] text-gray-500">{t('clubs.notFound')}</p>
+        <p className="text-[13px] text-gray-500 on-bg">{t('clubs.notFound')}</p>
         <button onClick={() => router.push('/admin/clubs')} className="mt-3 text-[13px] text-[#185FA5] hover:underline">
           ← {t('clubs.backToList')}
         </button>
@@ -128,7 +128,7 @@ export default function ClubDetailPage() {
           placeholder={t('clubs.regionPlaceholder')}
           className="border border-gray-200 rounded-md px-2 py-1 text-[12px] bg-white focus:outline-none focus:border-blue-300 w-40"
         />
-        {saving && <span className="text-[11px] text-gray-400">{t('clubs.saving')}</span>}
+        {saving && <span className="text-[11px] text-gray-400 on-bg">{t('clubs.saving')}</span>}
 
         <div className="ml-auto flex items-center gap-2">
           {confirmingDelete ? (
@@ -139,7 +139,7 @@ export default function ClubDetailPage() {
                 {deleting ? t('clubs.sendingRequest') : t('clubs.confirmDeleteRequest')}
               </button>
               <button onClick={() => setConfirmingDelete(false)} disabled={deleting}
-                className="text-[13px] text-gray-400 hover:text-gray-600 px-1">
+                className="text-[13px] text-gray-400 hover:text-gray-600 px-1 on-bg">
                 ✕
               </button>
             </>

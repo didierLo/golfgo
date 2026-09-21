@@ -368,7 +368,7 @@ export default function AddClubPage() {
 
   return (
     <div className="p-6 max-w-4xl">
-      <button onClick={() => router.push('/admin/clubs')} className="text-[12px] text-gray-400 hover:text-gray-600 mb-3 inline-flex items-center gap-1">
+      <button onClick={() => router.push('/admin/clubs')} className="text-[12px] text-gray-400 hover:text-gray-600 mb-3 inline-flex items-center gap-1 on-bg">
         ← {t('clubs.backToList')}
       </button>
 

@@ -253,7 +253,7 @@ async function handleSubmit(e: React.FormEvent) {
         <p className="text-[13px] text-slate-900 mt-0.5">{title}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 on-bg-card">
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editEvent.titleLabel')}</label>
           <input value={title} onChange={e => setTitle(e.target.value)} required className={inputClass} />
@@ -335,8 +335,8 @@ async function handleSubmit(e: React.FormEvent) {
               if (!selected || selected.team_format === 'individual') return null
               return (
                 <div className="mt-3">
-                  <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-                    {t('editEvent.hcpPercent')} <span className="text-slate-400 font-normal">— {t('editEvent.hcpDefault', { value: selected.hcp_percentage })}</span>
+                  <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+                    {t('editEvent.hcpPercent')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.hcpDefault', { value: selected.hcp_percentage })}</span>
                   </label>
                   <input type="number" min={0} max={100} step={5}
                     value={hcpOverride} onChange={e => setHcpOverride(e.target.value)}
@@ -353,59 +353,59 @@ async function handleSubmit(e: React.FormEvent) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-              {t('editEvent.fee')} <span className="text-slate-400 font-normal">— {t('editEvent.feeOptional')}</span>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+              {t('editEvent.fee')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.feeOptional')}</span>
             </label>
             <input value={fee} onChange={e => setFee(e.target.value)} placeholder={t('editEvent.feePlaceholder')} className={inputClass} />
-            {fee && <p className="text-[11px] text-slate-500 mt-1">{t('editEvent.feeHint')}</p>}
+            {fee && <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editEvent.feeHint')}</p>}
           </div>
           <div>
-            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-              {t('editEvent.maxParticipants')} <span className="text-slate-400 font-normal">— {t('editEvent.maxOptional')}</span>
+            <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+              {t('editEvent.maxParticipants')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.maxOptional')}</span>
             </label>
             <input value={maxParticipants} onChange={e => setMaxParticipants(e.target.value)}
               placeholder={t('editEvent.maxPlaceholder')} type="number" min="1" className={inputClass} />
-            {maxParticipants && <p className="text-[11px] text-slate-500 mt-1">{t('editEvent.maxHint')}</p>}
+            {maxParticipants && <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editEvent.maxHint')}</p>}
           </div>
         </div>
 
         <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            {t('editEvent.emailMessage')} <span className="text-slate-400 font-normal">— {t('editEvent.emailOptional')}</span>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+            {t('editEvent.emailMessage')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.emailOptional')}</span>
           </label>
           <textarea value={emailMessage} onChange={e => setEmailMessage(e.target.value)}
             placeholder={t('editEvent.emailPlaceholder')}
             rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
-          <p className="text-[11px] text-slate-500 mt-1">{t('editEvent.emailHint')}</p>
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editEvent.emailHint')}</p>
         </div>
 
         <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            {t('editEvent.extraActivity')} <span className="text-slate-400 font-normal">— {t('editEvent.emailOptional')}</span>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+            {t('editEvent.extraActivity')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.emailOptional')}</span>
           </label>
           <input value={extraActivityLabel} onChange={e => setExtraActivityLabel(e.target.value)}
             placeholder={t('editEvent.extraActivityPlaceholder')} className={inputClass} />
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">
             {t('editEvent.extraActivityHint')}
           </p>
         </div>
         
         <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">
-            {t('editEvent.scorecardNotes')} <span className="text-slate-400 font-normal">— {t('editEvent.emailOptional')}</span>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
+            {t('editEvent.scorecardNotes')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.emailOptional')}</span>
           </label>
           <textarea value={scorecardNotes} onChange={e => setScorecardNotes(e.target.value)}
             placeholder={t('editEvent.scorecardNotesPlaceholder')}
             rows={3} className={`${inputClass} resize-none placeholder-slate-300`} />
-          <p className="text-[11px] text-slate-500 mt-1">{t('editEvent.scorecardNotesHint')}</p>
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editEvent.scorecardNotesHint')}</p>
         </div>
 
         {/* ── Photos ── */}
     <div className="h-px bg-slate-100" />
 
     <div>
-      <label className="block text-[12px] font-semibold text-slate-600 mb-2">
-      {t('editEvent.photosLabel')} <span className="text-slate-400 font-normal">— {t('editEvent.photosOptional')}</span>
+      <label className="block text-[12px] font-semibold text-slate-600 mb-2 on-bg">
+      {t('editEvent.photosLabel')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.photosOptional')}</span>
     </label>
 
       <PhotoUploader eventId={eventId} />

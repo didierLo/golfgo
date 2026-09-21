@@ -22,7 +22,7 @@ export default function NoEventPage() {
       <h2 className="text-[17px] font-bold text-slate-800 mb-2">
         {t('events.noEventYetTitle')}
       </h2>
-      <p className="text-[13px] text-slate-500 mb-6 max-w-xs leading-relaxed">
+      <p className="text-[13px] text-slate-500 mb-6 max-w-xs leading-relaxed on-bg">
         {t('events.noEventYetDesc')}
       </p>
 

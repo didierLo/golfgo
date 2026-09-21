@@ -220,7 +220,7 @@ export default function EventsPage() {
       )}
 
       {events.length === 0 && (
-        <div className="text-center py-16 text-slate-500">
+        <div className="text-center py-16 text-slate-500 on-bg-card">
           <div className="text-4xl mb-3">📅</div>
           <p className="text-[15px] font-semibold">{t('events.noEvents')}</p>
           <p className="text-[13px] mt-1">{t('events.noEventsHint')}</p>

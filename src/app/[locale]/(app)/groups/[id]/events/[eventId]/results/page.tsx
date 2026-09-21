@@ -373,26 +373,26 @@ export default function ResultsPage() {
                   : undefined}
               />
             ) : (
-              <div className="text-center py-16 text-slate-500 border border-dashed border-slate-200 rounded-xl">
+              <div className="text-center py-16 text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
                 <div className="text-3xl mb-3">🏌️</div>
                 <p className="text-[14px] font-semibold">{t('results.noScores')}</p>
-                <p className="text-[12px] mt-1 text-slate-400">{t('results.noScoresHint')}</p>
+                <p className="text-[12px] mt-1 text-slate-400 on-bg">{t('results.noScoresHint')}</p>
               </div>
             )
           )}
 
           {tab === 'scorecards' && (
             players.length === 0 ? (
-              <div className="text-center py-16 text-slate-500 border border-dashed border-slate-200 rounded-xl">
+              <div className="text-center py-16 text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
                 <div className="text-3xl mb-3">📋</div>
                 <p className="text-[14px] font-semibold">{t('results.noParticipants')}</p>
               </div>
             ) : (
               <>
                 {lastRefresh && (
-                  <p className="text-[11px] text-slate-400 mb-4">
+                  <p className="text-[11px] text-slate-400 mb-4 on-bg">
                     {t('results.updatedAt', { time: lastRefresh.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })}
-                    <span className="text-slate-300"> · {t('results.pollInterval')}</span>
+                    <span className="text-slate-300 on-bg"> · {t('results.pollInterval')}</span>
                   </p>
                 )}
 
@@ -401,7 +401,7 @@ export default function ResultsPage() {
                   {flightSections.map((section, si) => (
                     <div key={si}>
                       {section.label && (
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{section.label}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 on-bg">{section.label}</p>
                       )}
                       <div className="flex gap-3 flex-wrap items-center">
                         {section.groups.map((group, gi) => {

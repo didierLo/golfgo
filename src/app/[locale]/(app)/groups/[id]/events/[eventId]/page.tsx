@@ -124,7 +124,7 @@ export default function EventOverviewPage() {
   )
 
   if (!event) return (
-    <div className="p-6 text-[13px] text-slate-500">{t('eventOverview.notFound')}</div>
+    <div className="p-6 text-[13px] text-slate-500 on-bg">{t('eventOverview.notFound')}</div>
   )
 
   const isFull    = !!event.max_participants && participantCount >= event.max_participants && status !== 'GOING'
