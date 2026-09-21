@@ -1590,6 +1590,23 @@
       "WAITLIST": "op de wachtlijst",
       "INVITED": "uitgenodigd"
     },
-    "unknownPlayer": "Een speler"
+    "unknownPlayer": "Een speler",
+    "removedFromFlight": "Uit Flight {flight} gehaald.",
+    "toPlace": "Nog in geen enkele flight: nog te plaatsen."
+  },
+
+  "flightWatch": {
+    "lineMissing": "{name} heeft bevestigd maar zit in geen enkele flight",
+    "lineStale": "{name} zit in Flight {flights} maar is niet meer bevestigd",
+    "lineDuplicate": "{name} zit in meerdere flights ({flights})",
+    "lineEmpty": "Flight {flight} is leeg",
+    "lineRemoved": "{name} is uit Flight {flight} gehaald (niet meer bevestigd)",
+    "pushMore": "{first} (+{count} meer)",
+    "emailSubject": "⚠️ Flights om na te kijken — {title}",
+    "emailIntro": "De flights van {title} komen niet meer overeen met de spelers die bevestigd hebben:",
+    "emailIntroRemoved": "Er zijn automatisch spelers uit de flights van {title} gehaald:",
+    "emailTeesheetSent": "De startlijst is al in deze toestand naar de spelers gestuurd.",
+    "emailCta": "Flights openen →",
+    "emailFooter": "Automatische GolfGo-controle · je wordt alleen opnieuw gewaarschuwd als de situatie verandert"
   }
 }

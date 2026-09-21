@@ -1593,6 +1593,23 @@
       "WAITLIST": "auf der Warteliste",
       "INVITED": "eingeladen"
     },
-    "unknownPlayer": "Ein Spieler"
+    "unknownPlayer": "Ein Spieler",
+    "removedFromFlight": "Aus Flight {flight} entfernt.",
+    "toPlace": "Noch in keinem Flight: bitte einteilen."
+  },
+
+  "flightWatch": {
+    "lineMissing": "{name} hat zugesagt, ist aber in keinem Flight",
+    "lineStale": "{name} ist in Flight {flights}, aber nicht mehr bestätigt",
+    "lineDuplicate": "{name} ist in mehreren Flights ({flights})",
+    "lineEmpty": "Flight {flight} ist leer",
+    "lineRemoved": "{name} wurde aus Flight {flight} entfernt (nicht mehr bestätigt)",
+    "pushMore": "{first} (+{count} weitere)",
+    "emailSubject": "⚠️ Flights prüfen — {title}",
+    "emailIntro": "Die Flights von {title} stimmen nicht mehr mit den zugesagten Spielern überein:",
+    "emailIntroRemoved": "Aus den Flights von {title} wurden automatisch Spieler entfernt:",
+    "emailTeesheetSent": "Die Startliste wurde bereits in diesem Zustand an die Spieler gesendet.",
+    "emailCta": "Flights öffnen →",
+    "emailFooter": "Automatische GolfGo-Prüfung · Sie werden nur erneut benachrichtigt, wenn sich die Situation ändert"
   }
 }

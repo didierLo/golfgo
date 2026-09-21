@@ -1134,7 +1134,7 @@
     "errorUnexpected": "Unexpected error",
     "adminOnly": "You must be an admin to use this feature",
     "clubCourseRequired": "Club and course are required",
-    "extraActivity": "Additional activity",
+    "extraActivity": " Additional activity",
     "extraActivityPlaceholder": "E.g.: Clubhouse meal — 7 pm",
     "scorecardNotes": "Scorecard notes",
     "scorecardNotesPlaceholder": "Specific rules, local info, instructions...",
@@ -1593,6 +1593,23 @@
       "WAITLIST": "on the waiting list",
       "INVITED": "invited"
     },
-    "unknownPlayer": "A player"
+    "unknownPlayer": "A player",
+    "removedFromFlight": "Removed from Flight {flight}.",
+    "toPlace": "Not in any flight yet: to be placed."
+  },
+
+  "flightWatch": {
+    "lineMissing": "{name} is confirmed but is not in any flight",
+    "lineStale": "{name} is in Flight {flights} but is no longer confirmed",
+    "lineDuplicate": "{name} is in several flights ({flights})",
+    "lineEmpty": "Flight {flight} is empty",
+    "lineRemoved": "{name} was removed from Flight {flight} (no longer confirmed)",
+    "pushMore": "{first} (+{count} more)",
+    "emailSubject": "⚠️ Flights to review — {title}",
+    "emailIntro": "The flights of {title} no longer match the players who confirmed:",
+    "emailIntroRemoved": "Players were automatically removed from the flights of {title}:",
+    "emailTeesheetSent": "The tee sheet has already been sent to the players in this state.",
+    "emailCta": "Open the flights →",
+    "emailFooter": "Automatic GolfGo check · you are only notified again if the situation changes"
   }
 }

@@ -5,6 +5,7 @@ import { generateICS } from '@/lib/ics'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail, drainEmailQueue } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
+import { runFlightWatch } from '@/lib/flights/flightWatch'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -313,6 +314,8 @@ export async function GET(req: Request) {
     { auth: { persistSession: false } }
   )
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  // Événements dont le tee sheet automatique part CE matin (pour l'alerte « envoyé avec des écarts »)
+  const teesheetSentEventIds = new Set<string>()
 
     const results = {
     reminders:  { sent: 0, queued: 0, skipped: 0, errors: [] as string[] },
@@ -716,6 +719,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         })
         const teesheetJson = await teesheetRes.json()
         if (teesheetJson.success) {
+          teesheetSentEventIds.add(event.id)
           results.teesheets.sent    += teesheetJson.sent    ?? 0
           results.teesheets.skipped += teesheetJson.skipped ?? 0
           results.teesheets.queued  = (results.teesheets.queued ?? 0) + (teesheetJson.queued ?? 0)
@@ -726,6 +730,15 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
     }
   }
 
-  console.log('[CRON reminders]', JSON.stringify(results))
-  return Response.json({ success: true, ...results })
+  // ── Surveillance des flights : « que des OUI dans les flights, et tous les OUI y sont »
+  //    Alerte l'organisateur UNIQUEMENT si la situation a changé depuis la dernière alerte.
+  let flightWatch: Record<string, number> = {}
+  try {
+    flightWatch = await runFlightWatch(supabase, { teesheetSentEventIds })
+  } catch (e) {
+    console.error('[CRON flight-watch]', e)
+  }
+
+  console.log('[CRON reminders]', JSON.stringify({ ...results, flightWatch }))
+  return Response.json({ success: true, ...results, flightWatch })
 }

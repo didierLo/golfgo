@@ -1591,6 +1591,23 @@
       "WAITLIST": "en liste d'attente",
       "INVITED": "invité(e)"
     },
-    "unknownPlayer": "Un joueur"
+    "unknownPlayer": "Un joueur",
+    "removedFromFlight": "Retiré(e) du Flight {flight}.",
+    "toPlace": "Aucun flight pour l'instant : à placer."
+  },
+
+  "flightWatch": {
+    "lineMissing": "{name} est confirmé(e) mais n'est dans aucun flight",
+    "lineStale": "{name} est dans le Flight {flights} mais n'est plus confirmé(e)",
+    "lineDuplicate": "{name} est dans plusieurs flights ({flights})",
+    "lineEmpty": "Le Flight {flight} est vide",
+    "lineRemoved": "{name} a été retiré(e) du Flight {flight} (n'est plus confirmé(e))",
+    "pushMore": "{first} (+{count} autre(s))",
+    "emailSubject": "⚠️ Flights à revoir — {title}",
+    "emailIntro": "Les flights de {title} ne correspondent plus aux joueurs qui ont confirmé :",
+    "emailIntroRemoved": "Des joueurs ont été retirés automatiquement des flights de {title} :",
+    "emailTeesheetSent": "Le tee sheet a déjà été envoyé aux joueurs dans cet état.",
+    "emailCta": "Ouvrir les flights →",
+    "emailFooter": "Contrôle automatique GolfGo · tu ne seras prévenu(e) à nouveau que si la situation change"
   }
 }
