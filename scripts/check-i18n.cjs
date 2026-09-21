@@ -18,6 +18,7 @@
  * AVERTISSEMENTS
  *   - texte anglais qui contient des accents français (mauvaise langue dans en.json)
  *   - texte identique à l'anglais dans une autre langue (peut-être non traduit)
+ *   - espace (ou espace insécable) au début ou à la fin d'un texte
  *
  * Options :  --unused   liste aussi les clés jamais utilisées dans le code (indicatif : les clés construites
  *                       dynamiquement, comme t(`status.${x}`), apparaissent à tort comme « inutilisées »)
@@ -180,6 +181,16 @@ if (flat[REF]) {
 }
 
 // ── Avertissements ───────────────────────────────────────────────────────────────────────────
+// Espaces (y compris insécables) au début ou à la fin d'un texte : presque toujours une faute de saisie.
+// Exceptions voulues : les suffixes collés à une autre phrase (ex. « · 3 ignorés »).
+const SPACE_OK = /(skippedSuffix|bulkSkipped|reorderSaving)$/
+for (const l of loaded) {
+  for (const [key, val] of Object.entries(flat[l])) {
+    if (typeof val === 'string' && val !== val.trim() && !SPACE_OK.test(key)) {
+      warn('espace parasite', `${l}.json : « ${key} » commence ou finit par une espace : ${JSON.stringify(val.slice(0, 40))}`)
+    }
+  }
+}
 // Textes légitimement identiques à l'anglais dans certaines langues (mot de golf international, même mot dans les deux langues…).
 // Ajoutez ici une clé quand un avertissement « identique à l'anglais » est un faux positif.
 const KNOWN_SAME = new Set([

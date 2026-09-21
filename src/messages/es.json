@@ -604,7 +604,7 @@
   },
   "leaderboard": {
     "noScorecard": "No se encontró ninguna tarjeta de juego para este evento",
-    "title": " Leaderboard",
+    "title": "Leaderboard",
     "noScores": "Todavía no hay puntuaciones."
   },
   "addParticipants": {
