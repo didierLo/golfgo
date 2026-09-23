@@ -2,6 +2,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { getGroupLocale, serverT, type Locale, type EmailT } from '@/lib/i18n/server'
+import { getGroupOwners } from '@/lib/groups/owner'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -142,9 +143,8 @@ export async function POST(req: Request) {
     // Récupérer le groupe et l'owner
     const { data: group } = await supabase
       .from('groups')
-      .select('name, template_logo_url, owner:groups_players(players(first_name, surname))')
+      .select('name, template_logo_url')
       .eq('id', groupId)
-      .eq('groups_players.role', 'owner')
       .single()
 
     if (!group) {
@@ -181,8 +181,9 @@ export async function POST(req: Request) {
     const inviteUrl = `${appUrl}/${locale}/join/${inviteLink.token}`
     const qrUrl     = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(inviteUrl)}`
 
-    const ownerPlayer   = (group.owner as any)?.[0]?.players
-    const senderName    = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : t('email.common.organiser')
+    const owners         = await getGroupOwners(supabase, groupId)
+    const ownerPlayer    = owners.primary
+    const senderName     = ownerPlayer ? `${ownerPlayer.firstName} ${ownerPlayer.surname}` : t('email.common.organiser')
     const groupName     = group.name
     const logoUrl       = (group as any).template_logo_url ?? null
     const subject       = t('email.groupInvite.subject', { group: groupName })

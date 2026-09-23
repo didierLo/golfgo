@@ -6,6 +6,7 @@ import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail, drainEmailQueue } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
 import { runFlightWatch } from '@/lib/flights/flightWatch'
+import { getGroupOwners } from '@/lib/groups/owner'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -338,10 +339,7 @@ export async function GET(req: Request) {
     groups!events_group_id_fkey(
       id, name, auto_reminders, auto_teesheet, auto_invitation, template_logo_url,
       template_reminder_subject, template_reminder_body,
-      template_invitation_subject, template_invitation_body,
-      owner:groups_players(
-        role, player:players(id, first_name, surname, email)
-      )
+      template_invitation_subject, template_invitation_body
     )
   `)
 
@@ -354,10 +352,15 @@ console.log('events error:', JSON.stringify(eventsError))
 for (const event of (events || []) as any[]) {
   const days        = daysDiff(event.starts_at)
   const group       = event.groups as any
-  const ownerPlayer = group?.owner?.find((o: any) => o.role === 'owner')?.player
   const logoUrl     = group?.template_logo_url ?? null
   // Langue du groupe : tous les textes envoyés aux joueurs (et à l'organisateur) suivent cette langue
   const gl: Locale = await getGroupLocale(supabase, event.group_id)
+  // Organisateur(s) du groupe : un seul signe les emails aux joueurs (owners.primary),
+  // mais toutes les personnes en rôle « owner » reçoivent les alertes ci-dessous (owners.all)
+  const owners      = await getGroupOwners(supabase, event.group_id)
+  const ownerPlayer = owners.primary
+    ? { first_name: owners.primary.firstName, surname: owners.primary.surname, email: owners.primary.email }
+    : null
   const t  = serverT(gl)
   const dl = DATE_LOCALE[gl]
 
@@ -623,34 +626,36 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
         .eq('event_id', event.id)
 
       if (!flightsData || flightsData.length === 0) {
-        // Pas de flights → email d'avertissement à l'owner
-        if (!ownerPlayer?.email) continue
-
+        // Pas de flights → email d'avertissement à CHAQUE organisateur du groupe, pas seulement au signataire
         const eventUrl = `${appUrl}/${gl}/groups/${event.group_id}/events/${event.id}/flights`
 
-        if (!EMAIL_ENABLED) { results.noTeesheet.sent++; continue }
+        for (const ownerContact of owners.all) {
+          if (!ownerContact.email) continue
 
-        const html = buildNoTeesheetHtml({
-          t, lang: gl,
-          ownerFirstName: ownerPlayer.first_name,
-          eventTitle:     event.title,
-          eventDate:      formatDate(event.starts_at, dl),
-          eventUrl,
-          logoUrl,
-        })
+          if (!EMAIL_ENABLED) { results.noTeesheet.sent++; continue }
 
-        const result = await sendOrQueueEmail({
-          category: 'other',
-          groupId:  event.group_id,
-          eventId:  event.id,
-          from:     'GolfGo <info@golfgo.be>',
-          to:       ownerPlayer.email,
-          subject:  t('email.owner.subject', { title: event.title }),
-          html,
-        })
+          const html = buildNoTeesheetHtml({
+            t, lang: gl,
+            ownerFirstName: ownerContact.firstName,
+            eventTitle:     event.title,
+            eventDate:      formatDate(event.starts_at, dl),
+            eventUrl,
+            logoUrl,
+          })
 
-        if (!result.sent && !result.queued) results.noTeesheet.errors.push(result.error)
-        else results.noTeesheet.sent++
+          const result = await sendOrQueueEmail({
+            category: 'other',
+            groupId:  event.group_id,
+            eventId:  event.id,
+            from:     'GolfGo <info@golfgo.be>',
+            to:       ownerContact.email,
+            subject:  t('email.owner.subject', { title: event.title }),
+            html,
+          })
+
+          if (!result.sent && !result.queued) results.noTeesheet.errors.push(result.error)
+          else results.noTeesheet.sent++
+        }
 
       } else {
         // Flights existants → construire et envoyer la teesheet

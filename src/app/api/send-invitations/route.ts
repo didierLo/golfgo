@@ -3,6 +3,7 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
+import { getGroupOwners } from '@/lib/groups/owner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
@@ -244,8 +245,8 @@ if (evErr || !event) {
 
 const [{ data: groupData }, { data: participants, error: pErr }] = await Promise.all([
   supabase.from('groups')
-    .select('template_invitation_subject, template_invitation_body, template_logo_url, owner:groups_players(players(first_name, surname))')
-    .eq('id', event.group_id).eq('groups_players.role', 'owner').single(),
+    .select('template_invitation_subject, template_invitation_body, template_logo_url')
+    .eq('id', event.group_id).single(),
   supabase.from('event_participants')
     .select('player_id, invite_token, players(first_name, surname, email)')
     .eq('event_id', eventId).in('player_id', playerIds)
@@ -265,8 +266,9 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
     const gl: Locale = await getGroupLocale(supabase, event.group_id)   // langue du groupe
     const t  = serverT(gl)
     const dl = DATE_LOCALE[gl]
-    const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-    const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
+    const owners      = await getGroupOwners(supabase, event.group_id)
+    const ownerPlayer = owners.primary
+    const ownerName   = ownerPlayer ? `${ownerPlayer.firstName} ${ownerPlayer.surname}` : ''
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const eventLink = `${appUrl}/groups/${event.group_id}/events/${eventId}`
     const eventDate = formatDate(event.starts_at, dl)

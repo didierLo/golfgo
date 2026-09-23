@@ -2,6 +2,7 @@ import webpush from 'web-push'
 import { createClient } from '@supabase/supabase-js'
 import { getGroupLocale, serverT, DATE_LOCALE } from '@/lib/i18n/server'
 import { detectFlightIssues, signatureOf, fetchPendingRemovals, markRemovalsNotified, sendPushToUser, type Removal, type FlightIssue } from '@/lib/flights/flightWatch'
+import { getGroupOwners } from '@/lib/groups/owner'
 
 webpush.setVapidDetails(
   'mailto:info@golfgo.be',
@@ -59,13 +60,15 @@ export async function POST(req: Request) {
 
     if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
 
-    const { data: group } = await supabase.from('groups').select('owner_id').eq('id', event.group_id).single()
-    if (!group?.owner_id) return Response.json({ success: false, error: 'Owner introuvable' }, { status: 404 })
+    // Toutes les personnes en rôle « owner » du groupe reçoivent cette notification (pas seulement le signataire des emails)
+    const owners = await getGroupOwners(supabase, event.group_id)
+    const ownerUserIds = owners.all.map(o => o.userId).filter((id): id is string => !!id)
+    if (!ownerUserIds.length) return Response.json({ success: false, error: 'Owner introuvable' }, { status: 404 })
 
     const { data: subs } = await supabase.from('push_subscriptions')
-      .select('id, endpoint, p256dh, auth').eq('user_id', group.owner_id)
+      .select('id, endpoint, p256dh, auth').in('user_id', ownerUserIds)
 
-    if (!subs?.length) return Response.json({ success: true, sent: 0, note: 'Aucun abonnement push pour cet owner' })
+    if (!subs?.length) return Response.json({ success: true, sent: 0, note: 'Aucun abonnement push pour les organisateurs' })
 
     // Langue du groupe : la notification à l'organisateur suit la même langue que les emails du groupe
     const gl = await getGroupLocale(supabase, event.group_id)
@@ -164,19 +167,23 @@ async function notifyDeletedParticipation(eventId: string, playerId: string) {
 
   const { data: event } = await supabase.from('events').select('id, title, group_id').eq('id', eventId).maybeSingle()
   if (!event) return Response.json({ success: true, skipped: 'event introuvable' })
-  const { data: group } = await supabase.from('groups').select('owner_id').eq('id', event.group_id).maybeSingle()
-  if (!group?.owner_id) return Response.json({ success: false, error: 'Owner introuvable' }, { status: 404 })
+  const owners = await getGroupOwners(supabase, event.group_id)
+  const ownerUserIds = owners.all.map(o => o.userId).filter((id): id is string => !!id)
+  if (!ownerUserIds.length) return Response.json({ success: false, error: 'Owner introuvable' }, { status: 404 })
 
   const gl = await getGroupLocale(supabase, event.group_id)
   const t  = serverT(gl)
   const body = removals
     .map(r => t('flightWatch.lineRemoved', { name: r.name ?? t('pushNotif.unknownPlayer'), flight: r.flight_number ?? '?' }))
     .join(' ')
-  const sent = await sendPushToUser(supabase, group.owner_id, {
-    title: t('pushNotif.reviewTitle', { title: event.title }),
-    body,
-    url: `/${gl}/groups/${event.group_id}/events/${event.id}/flights`,
-  })
+  let sent = 0
+  for (const uid of ownerUserIds) {
+    sent += await sendPushToUser(supabase, uid, {
+      title: t('pushNotif.reviewTitle', { title: event.title }),
+      body,
+      url: `/${gl}/groups/${event.group_id}/events/${event.id}/flights`,
+    })
+  }
   if (sent > 0) await markRemovalsNotified(supabase, removals)
   return Response.json({ success: true, sent })
 }

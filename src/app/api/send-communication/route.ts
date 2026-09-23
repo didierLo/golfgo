@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
+import { getGroupOwners } from '@/lib/groups/owner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
@@ -217,9 +218,8 @@ export async function POST(req: Request) {
     // Charger le groupe + owner
 const [{ data: groupData }, eventResult] = await Promise.all([
   supabase.from('groups')
-    .select('name, template_logo_url, owner:groups_players(players(first_name, surname))')
+    .select('name, template_logo_url')
     .eq('id', groupId)
-    .eq('groups_players.role', 'owner')
     .single(),
   eventId
     ? supabase.from('events')
@@ -229,8 +229,9 @@ const [{ data: groupData }, eventResult] = await Promise.all([
 ])
 
 const event       = eventResult.data ?? undefined
-const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : ''
+const owners      = await getGroupOwners(supabase, groupId)
+const ownerPlayer = owners.primary
+const ownerName   = ownerPlayer ? `${ownerPlayer.firstName} ${ownerPlayer.surname}` : ''
 const groupName   = (groupData as any)?.name ?? ''
 const logoUrl     = (groupData as any)?.template_logo_url ?? null
 

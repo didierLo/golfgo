@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
+import { getGroupOwners } from '@/lib/groups/owner'
 
 function formatDate(dateStr: string, loc: string) {
   return new Date(dateStr).toLocaleDateString(loc, {
@@ -253,11 +254,12 @@ export async function POST(req: Request) {
       const dl = DATE_LOCALE[gl]
 
       const { data: groupData } = await supabase.from('groups')
-        .select('template_invitation_subject, template_invitation_body, template_logo_url, owner:groups_players(players(first_name, surname))')
-        .eq('id', event.group_id).eq('groups_players.role', 'owner').single()
+        .select('template_invitation_subject, template_invitation_body, template_logo_url')
+        .eq('id', event.group_id).single()
 
-      const ownerPlayer = (groupData?.owner as any)?.[0]?.players
-      const ownerName   = ownerPlayer ? `${ownerPlayer.first_name} ${ownerPlayer.surname}` : t('email.common.organiser')
+      const owners      = await getGroupOwners(supabase, event.group_id)
+      const ownerPlayer = owners.primary
+      const ownerName   = ownerPlayer ? `${ownerPlayer.firstName} ${ownerPlayer.surname}` : t('email.common.organiser')
       const eventDate   = formatDate(event.starts_at, dl)
       const eventTime   = formatTime(event.starts_at, dl)
       const bodyTemplate = groupData?.template_invitation_body ?? t.raw('email.defaults.invitationBody')

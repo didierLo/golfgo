@@ -16,6 +16,7 @@ import webpush from 'web-push'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { getGroupLocale, serverT, DATE_LOCALE, type ServerT } from '@/lib/i18n/server'
+import { getGroupOwners } from '@/lib/groups/owner'
 
 export type IssueKind = 'MISSING' | 'STALE' | 'DUPLICATE' | 'EMPTY_FLIGHT'
 export type FlightIssue = {
@@ -191,17 +192,6 @@ const defaultDeps: Deps = {
   now: () => new Date(),
 }
 
-// ── Organisateur du groupe ───────────────────────────────────────────────────────────────────
-async function resolveOwner(supabase: any, groupId: string) {
-  const [{ data: group }, { data: gp }] = await Promise.all([
-    supabase.from('groups').select('owner_id, template_logo_url').eq('id', groupId).maybeSingle(),
-    supabase.from('groups_players').select('role, players(first_name, email)').eq('group_id', groupId).eq('role', 'owner'),
-  ])
-  const row = (gp ?? [])[0]
-  const p = Array.isArray(row?.players) ? row.players[0] : row?.players
-  return { userId: group?.owner_id as string | undefined, logoUrl: (group?.template_logo_url ?? null) as string | null, email: p?.email as string | undefined, firstName: (p?.first_name ?? '') as string }
-}
-
 // ── Retraits automatiques à signaler ─────────────────────────────────────────────────────────
 export async function fetchPendingRemovals(supabase: any, eventId: string, playerId?: string): Promise<Removal[]> {
   let q = supabase.from('flight_removal_log').select('id, player_id, flight_number, reason').eq('event_id', eventId).is('notified_at', null)
@@ -251,27 +241,35 @@ export async function checkEventFlights(
   const gl = await getGroupLocale(supabase, event.group_id)
   const t = serverT(gl)
   const dl = DATE_LOCALE[gl]
-  const owner = await resolveOwner(supabase, event.group_id)
+  const owners = await getGroupOwners(supabase, event.group_id)
   const lines = issueLines(t, issues, removals)
   const url = `/${gl}/groups/${event.group_id}/events/${event.id}/flights`
   const first = lines[0] ?? ''
   const body = lines.length > 1 ? t('flightWatch.pushMore', { first, count: lines.length - 1 }) : first
 
+  // Alerte envoyée à TOUTES les personnes en rôle « owner » du groupe (pas seulement au signataire des
+  // emails joueurs) : un accès de suivi donné à quelqu'un d'autre continue de recevoir ces alertes.
   let delivered = 0
-  if (owner.userId) delivered += await deps.sendPush(supabase, owner.userId, { title: t('pushNotif.reviewTitle', { title: event.title }), body, url })
-  if (owner.email && deps.emailEnabled()) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-    const res = await deps.sendEmail({
-      category: 'other', groupId: event.group_id, eventId: event.id, from: 'GolfGo <info@golfgo.be>', to: owner.email,
-      subject: t('flightWatch.emailSubject', { title: event.title }),
-      html: buildFlightWatchHtml({
-        t, lang: gl, ownerFirstName: owner.firstName, eventTitle: event.title,
-        eventDate: new Date(event.starts_at).toLocaleDateString(dl, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }),
-        lines, introKey: hasIssues ? 'flightWatch.emailIntro' : 'flightWatch.emailIntroRemoved',
-        teesheetSent: opts.phase === 'teesheet_sent' && hasIssues, url: `${appUrl}${url}`, logoUrl: owner.logoUrl,
-      }),
-    })
-    if (res.sent || res.queued) delivered++
+  const pushedUserIds = new Set<string>()
+  for (const o of owners.all) {
+    if (o.userId && !pushedUserIds.has(o.userId)) {
+      pushedUserIds.add(o.userId)
+      delivered += await deps.sendPush(supabase, o.userId, { title: t('pushNotif.reviewTitle', { title: event.title }), body, url })
+    }
+    if (o.email && deps.emailEnabled()) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+      const res = await deps.sendEmail({
+        category: 'other', groupId: event.group_id, eventId: event.id, from: 'GolfGo <info@golfgo.be>', to: o.email,
+        subject: t('flightWatch.emailSubject', { title: event.title }),
+        html: buildFlightWatchHtml({
+          t, lang: gl, ownerFirstName: o.firstName, eventTitle: event.title,
+          eventDate: new Date(event.starts_at).toLocaleDateString(dl, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }),
+          lines, introKey: hasIssues ? 'flightWatch.emailIntro' : 'flightWatch.emailIntroRemoved',
+          teesheetSent: opts.phase === 'teesheet_sent' && hasIssues, url: `${appUrl}${url}`, logoUrl: owners.logoUrl,
+        }),
+      })
+      if (res.sent || res.queued) delivered++
+    }
   }
   if (delivered === 0) return 'not_sent'   // rien n'est parti : on NE mémorise PAS, on réessaiera au prochain passage
 
