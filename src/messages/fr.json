@@ -497,7 +497,10 @@
     "autoInvitationLabel": "Invitation automatique J-14",
     "autoInvitationDesc": "Envoie une invitation à tous les membres 14 jours avant l'événement",
     "languageLabel": "Langue du groupe",
-    "languageHint": "Langue des emails, des documents imprimés et des notifications de ce groupe."
+    "languageHint": "Langue des emails, des documents imprimés et des notifications de ce groupe.",
+    "signerLabel": "Signataire des documents",
+    "signerHint": "Nom affiché dans les emails envoyés aux joueurs de ce groupe (invitation, rappel…). Seuls les owners du groupe peuvent être choisis.",
+    "signerNoOwners": "Aucun owner trouvé"
   },
   "flightHistory": {
     "title": "Historique des flights",
@@ -958,7 +961,9 @@
     "saving": "Enregistrement en cours...",
     "save": "Enregistrer",
     "backToMembers": "← Retour à la liste des membres",
-    "updateBlocked": "La mise à jour n'a pas été appliquée (droits insuffisants ?)"
+    "updateBlocked": "La mise à jour n'a pas été appliquée (droits insuffisants ?)",
+    "lastOwnerBlocked": "Cette personne est la seule owner du groupe : il doit toujours en rester au moins un(e).",
+    "signerOwnerBlocked": "Cette personne signe actuellement les emails de ce groupe. Choisis d'abord un autre signataire dans les réglages du groupe."
   },
   "notOwner": {
     "title": "Fonctionnalité réservée aux organisateurs",

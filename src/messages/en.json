@@ -497,7 +497,10 @@
     "autoInvitationLabel": "Automatic invitation 14 days before the event",
     "autoInvitationDesc": "Sends an invitation to all members 14 days before the event",
     "languageLabel": "Group language",
-    "languageHint": "Language of the emails, printed documents and notifications for this group."
+    "languageHint": "Language of the emails, printed documents and notifications for this group.",
+    "signerLabel": "Document signer",
+    "signerHint": "Name shown in the emails sent to this group's players (invitation, reminder…). Only the group's owners can be chosen.",
+    "signerNoOwners": "No owner found"
   },
   "flightHistory": {
     "title": "Flight history",
@@ -958,7 +961,9 @@
     "saving": "Saving...",
     "save": "Save",
     "backToMembers": "← Back to members",
-    "updateBlocked": "The update wasn't applied (insufficient permissions?)"
+    "updateBlocked": "The update wasn't applied (insufficient permissions?)",
+    "lastOwnerBlocked": "This person is the group's only owner: it must always keep at least one.",
+    "signerOwnerBlocked": "This person currently signs the emails sent to this group. Choose another signer first, in the group settings."
   },
   "notOwner": {
     "title": "Feature reserved for organisers",

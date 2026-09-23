@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import { LOCALES, LOCALE_NAMES, normalizeLocale, type Locale } from '@/lib/i18n/types'
+import { getGroupOwners, type OwnerContact } from '@/lib/groups/owner'
 
 const supabase = createClient()
 
@@ -52,6 +53,9 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
   const [groupLocale,     setGroupLocale]    = useState<Locale>('fr')
   const [initialLocale,   setInitialLocale]  = useState<Locale>('fr')
 
+  const [owners,          setOwners]         = useState<OwnerContact[]>([])
+  const [signerUserId,    setSignerUserId]   = useState<string | null>(null)   // = groups.owner_id : qui signe les emails
+
   useEffect(() => { fetchGroup() }, [])
 
   async function fetchGroup() {
@@ -72,6 +76,11 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
     const { data: loc } = await supabase.from('groups').select('locale').eq('id', id).maybeSingle()
     const l = normalizeLocale(loc?.locale)
     setGroupLocale(l); setInitialLocale(l)
+
+    // Signataire des documents : même logique que celle utilisée pour les emails (src/lib/groups/owner.ts)
+    const groupOwners = await getGroupOwners(supabase, id)
+    setOwners(groupOwners.all)
+    setSignerUserId(groupOwners.primary?.userId ?? null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -95,6 +104,12 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
     if (groupLocale !== initialLocale) {
       const { error: localeError } = await supabase.from('groups').update({ locale: groupLocale }).eq('id', id)
       if (localeError) { alert(localeError.message); setSaving(false); return }
+    }
+
+    // Signataire des documents : enregistré seulement s'il a changé
+    if (signerUserId) {
+      const { error: signerError } = await supabase.from('groups').update({ owner_id: signerUserId }).eq('id', id)
+      if (signerError) { alert(signerError.message); setSaving(false); return }
     }
     router.push('/groups')
   }
@@ -141,6 +156,20 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
             {LOCALES.map(l => <option key={l} value={l}>{LOCALE_NAMES[l]}</option>)}
           </select>
           <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.languageHint')}</p>
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editGroup.signerLabel')}</label>
+          {owners.length > 0 ? (
+            <select value={signerUserId ?? ''} onChange={e => setSignerUserId(e.target.value)} className={inputClass}>
+              {owners.filter(o => o.userId).map(o => (
+                <option key={o.playerId} value={o.userId!}>{o.firstName} {o.surname}</option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-[13px] text-slate-400 italic">{t('editGroup.signerNoOwners')}</p>
+          )}
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.signerHint')}</p>
         </div>
 
         {/* ── Automatisations ── */}

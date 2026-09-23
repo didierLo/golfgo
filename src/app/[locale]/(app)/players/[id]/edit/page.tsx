@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
+import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import { checkOwnerDemotion } from '@/lib/groups/roleGuard'
 
 const supabase = createClient()
 const inputClass = "w-full border border-white/60 rounded-xl px-3 py-2.5 text-[13px] text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white/70 backdrop-blur-sm"
@@ -26,11 +28,13 @@ export default function EditPlayerPage() {
   const playerId     = params.id as string
   const groupId      = searchParams.get('groupId')
   const t            = useTranslations()
+  const { role: viewerRole } = useGroupRole(groupId ?? undefined)   // seul un owner du groupe peut voir/changer le rôle ci-dessous
 
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [error,   setError]   = useState('')
-  const [role,    setRole]    = useState<Role>('member')
+  const [role,        setRole]        = useState<Role>('member')
+  const [initialRole, setInitialRole] = useState<Role | null>(null)   // valeur avant modification, pour savoir si on RETIRE le rôle owner
 
   const [form, setForm] = useState({
     first_name: '', surname: '', federal_no: '', whs: '',
@@ -63,7 +67,7 @@ setForm({
   default_tee_color: player.default_tee_color ?? 'yellow',
 })
 
-if (gp) setRole(gp.role as Role)
+if (gp) { setRole(gp.role as Role); setInitialRole(gp.role as Role) }
 setLoading(false)
   }
 
@@ -99,9 +103,16 @@ setLoading(false)
     }
 
     if (groupId) {
+      // On retire le rôle owner à ce joueur (il l'avait avant, il ne l'aura plus) : vérifier qu'il peut être retiré sans problème
+      if (initialRole === 'owner' && role !== 'owner') {
+        const block = await checkOwnerDemotion(supabase, groupId, playerId)
+        if (block === 'LAST_OWNER') { setError(t('editPlayer.lastOwnerBlocked')); setSaving(false); return }
+        if (block === 'IS_SIGNER')  { setError(t('editPlayer.signerOwnerBlocked')); setSaving(false); return }
+      }
       const { error: gpErr } = await supabase.from('groups_players')
         .update({ role }).eq('group_id', groupId).eq('player_id', playerId)
       if (gpErr) { setError(gpErr.message); setSaving(false); return }
+      setInitialRole(role)
     }
 
     router.push(groupId ? `/groups/${groupId}/members` : '/')
@@ -204,19 +215,21 @@ setLoading(false)
           </div>
         </div>
 
-        {groupId && (
+        {groupId && viewerRole === 'owner' && (
           <div className="border border-white/60 rounded-xl p-5 bg-white/70 backdrop-blur-sm">
             <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('editPlayer.groupRole')}</label>
             <div className="flex gap-2">
-              {(['member', 'guest'] as const).map(r => (
+              {(['member', 'guest', 'owner'] as const).map(r => (
                 <button key={r} type="button" onClick={() => setRole(r)}
                   className={`px-3 py-1.5 rounded-xl text-[12px] font-semibold border transition-colors ${
                     role === r
                       ? r === 'guest'
                         ? 'bg-amber-50 border-amber-300 text-amber-700'
-                        : 'bg-[#EBF3FC] border-[#185FA5] text-[#185FA5]'
+                        : r === 'owner'
+                          ? 'bg-[#185FA5] border-[#185FA5] text-white'
+                          : 'bg-[#EBF3FC] border-[#185FA5] text-[#185FA5]'
                       : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'}`}>
-                  {r === 'guest' ? t('editPlayer.visitor') : t('editPlayer.member')}
+                  {r === 'guest' ? t('editPlayer.visitor') : r === 'owner' ? t('members.admin') : t('editPlayer.member')}
                 </button>
               ))}
             </div>

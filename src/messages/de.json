@@ -496,7 +496,10 @@
     "autoInvitationLabel": "Automatische Einladung 14 Tage vor der Veranstaltung",
     "autoInvitationDesc": "Sendet 14 Tage vor der Veranstaltung eine Einladung an alle Mitglieder.",
     "languageLabel": "Sprache der Gruppe",
-    "languageHint": "Sprache der E-Mails, gedruckten Dokumente und Benachrichtigungen dieser Gruppe."
+    "languageHint": "Sprache der E-Mails, gedruckten Dokumente und Benachrichtigungen dieser Gruppe.",
+    "signerLabel": "Unterzeichner der Dokumente",
+    "signerHint": "Name, der in den E-Mails an die Spieler dieser Gruppe angezeigt wird (Einladung, Erinnerung…). Nur die Owner der Gruppe können ausgewählt werden.",
+    "signerNoOwners": "Kein Owner gefunden"
   },
   "flightHistory": {
     "title": "Flight-Verlauf",
@@ -957,7 +960,9 @@
     "saving": "Speichern...",
     "save": "Speichern",
     "backToMembers": "← Zurück zu Mitgliedern",
-    "updateBlocked": "Die Aktualisierung wurde nicht übernommen (unzureichende Berechtigungen?)"
+    "updateBlocked": "Die Aktualisierung wurde nicht übernommen (unzureichende Berechtigungen?)",
+    "lastOwnerBlocked": "Diese Person ist der einzige Owner der Gruppe: es muss immer mindestens einer bleiben.",
+    "signerOwnerBlocked": "Diese Person unterschreibt derzeit die E-Mails dieser Gruppe. Wählen Sie zuerst einen anderen Unterzeichner in den Gruppeneinstellungen."
   },
   "notOwner": {
     "title": "Funktion für Organisatoren",

@@ -495,7 +495,10 @@
     "autoInvitationLabel": "Automatische uitnodiging 14 dagen voor het evenement",
     "autoInvitationDesc": "Verstuurt een uitnodiging naar alle leden 14 dagen voor het evenement",
     "languageLabel": "Taal van de groep",
-    "languageHint": "Taal van de e-mails, afgedrukte documenten en meldingen van deze groep."
+    "languageHint": "Taal van de e-mails, afgedrukte documenten en meldingen van deze groep.",
+    "signerLabel": "Ondertekenaar van documenten",
+    "signerHint": "Naam die wordt getoond in de e-mails aan de spelers van deze groep (uitnodiging, herinnering…). Alleen de owners van de groep kunnen gekozen worden.",
+    "signerNoOwners": "Geen owner gevonden"
   },
   "flightHistory": {
     "title": "Flightgeschiedenis",
@@ -956,7 +959,9 @@
     "saving": "Opslaan...",
     "save": "Opslaan",
     "backToMembers": "← Terug naar leden",
-    "updateBlocked": "De update is niet toegepast (onvoldoende rechten?)"
+    "updateBlocked": "De update is niet toegepast (onvoldoende rechten?)",
+    "lastOwnerBlocked": "Deze persoon is de enige owner van de groep: er moet altijd minstens één overblijven.",
+    "signerOwnerBlocked": "Deze persoon ondertekent momenteel de e-mails van deze groep. Kies eerst een andere ondertekenaar in de groepsinstellingen."
   },
   "notOwner": {
     "title": "Functie voorbehouden aan organisatoren",

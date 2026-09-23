@@ -496,7 +496,10 @@
     "autoInvitationLabel": "Invitación automática 14 días antes del evento",
     "autoInvitationDesc": "Envía una invitación a todos los miembros 14 días antes del evento",
     "languageLabel": "Idioma del grupo",
-    "languageHint": "Idioma de los correos, documentos impresos y notificaciones de este grupo."
+    "languageHint": "Idioma de los correos, documentos impresos y notificaciones de este grupo.",
+    "signerLabel": "Firmante de los documentos",
+    "signerHint": "Nombre que aparece en los correos enviados a los jugadores de este grupo (invitación, recordatorio…). Solo se puede elegir entre las owners del grupo.",
+    "signerNoOwners": "No se ha encontrado ninguna owner"
   },
   "flightHistory": {
     "title": "Historial de flights",
@@ -957,7 +960,9 @@
     "saving": "Guardando...",
     "save": "Guardar",
     "backToMembers": "← Volver a miembros",
-    "updateBlocked": "La actualización no se aplicó (¿permisos insuficientes?)"
+    "updateBlocked": "La actualización no se aplicó (¿permisos insuficientes?)",
+    "lastOwnerBlocked": "Esta persona es la única owner del grupo: siempre debe quedar al menos una.",
+    "signerOwnerBlocked": "Esta persona firma actualmente los correos de este grupo. Elige antes otro firmante en los ajustes del grupo."
   },
   "notOwner": {
     "title": "Función reservada a organizadores",
