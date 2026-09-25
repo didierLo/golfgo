@@ -500,7 +500,11 @@
     "languageHint": "Language of the emails, printed documents and notifications for this group.",
     "signerLabel": "Document signer",
     "signerHint": "Name shown in the emails sent to this group's players (invitation, reminder…). Only the group's owners can be chosen.",
-    "signerNoOwners": "No owner found"
+    "signerNoOwners": "No owner found",
+    "backgroundLabel": "App background",
+    "backgroundHint": "Photo shown behind the app for this group, on computer, tablet and phone.",
+    "backgroundAdd": "+ Add a background photo",
+    "backgroundReset": "Reset to default photo"
   },
   "flightHistory": {
     "title": "Flight history",

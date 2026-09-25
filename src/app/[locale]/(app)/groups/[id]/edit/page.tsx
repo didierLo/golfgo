@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
@@ -56,12 +56,19 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
   const [owners,          setOwners]         = useState<OwnerContact[]>([])
   const [signerUserId,    setSignerUserId]   = useState<string | null>(null)   // = groups.owner_id : qui signe les emails
 
+  // Fond de l'application pour ce groupe (visible sur ordinateur, tablette et smartphone).
+  // L'upload et la réinitialisation écrivent tout de suite en base, comme le logo/l'image des emails
+  // dans Communications → Réglages : pas besoin de cliquer sur « Enregistrer » pour que ça prenne effet.
+  const [backgroundUrl,   setBackgroundUrl]   = useState<string | null>(null)
+  const [bgUploading,     setBgUploading]     = useState(false)
+  const bgFileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => { fetchGroup() }, [])
 
   async function fetchGroup() {
     const { data, error } = await supabase
       .from('groups')
-      .select('name, description, color, auto_reminders, auto_teesheet, auto_invitation')
+      .select('name, description, color, auto_reminders, auto_teesheet, auto_invitation, background_url')
       .eq('id', id).single()
     if (error) { alert(error.message); router.push('/groups'); return }
     setName(data.name)
@@ -71,6 +78,7 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
     setAutoTeesheet(data.auto_teesheet ?? false)
     setLoading(false)
     setAutoInvitation(data.auto_invitation ?? false)
+    setBackgroundUrl(data.background_url ?? null)
 
     // Langue du groupe : requête séparée, pour ne pas casser cette page si la migration SQL n'est pas encore passée
     const { data: loc } = await supabase.from('groups').select('locale').eq('id', id).maybeSingle()
@@ -81,6 +89,26 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
     const groupOwners = await getGroupOwners(supabase, id)
     setOwners(groupOwners.all)
     setSignerUserId(groupOwners.primary?.userId ?? null)
+  }
+
+  async function handleBackgroundUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file) return
+    setBgUploading(true)
+    const path = `${id}/appbg.${file.name.split('.').pop()}`
+    const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
+    if (error) { alert(error.message); setBgUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
+    const bustedUrl = `${publicUrl}?v=${Date.now()}`
+    const { error: dbError } = await supabase.from('groups').update({ background_url: bustedUrl }).eq('id', id)
+    if (dbError) { alert(dbError.message); setBgUploading(false); return }
+    setBackgroundUrl(bustedUrl)
+    setBgUploading(false)
+  }
+
+  async function handleBackgroundReset() {
+    const { error } = await supabase.from('groups').update({ background_url: null }).eq('id', id)
+    if (error) { alert(error.message); return }
+    setBackgroundUrl(null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -156,6 +184,27 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
             {LOCALES.map(l => <option key={l} value={l}>{LOCALE_NAMES[l]}</option>)}
           </select>
           <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.languageHint')}</p>
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editGroup.backgroundLabel')}</label>
+          {backgroundUrl ? (
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={backgroundUrl} alt="" className="h-16 w-28 object-cover rounded-xl border border-white/50" />
+              <div className="flex flex-col gap-1">
+                <button type="button" onClick={() => bgFileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
+                <button type="button" onClick={handleBackgroundReset} className="text-[11px] font-semibold text-red-500 hover:underline">{t('editGroup.backgroundReset')}</button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" onClick={() => bgFileInputRef.current?.click()} disabled={bgUploading}
+              className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
+              {bgUploading ? t('communications.templates.uploading') : t('editGroup.backgroundAdd')}
+            </button>
+          )}
+          <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBackgroundUpload} />
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.backgroundHint')}</p>
         </div>
 
         <div>

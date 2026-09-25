@@ -499,7 +499,11 @@
     "languageHint": "Sprache der E-Mails, gedruckten Dokumente und Benachrichtigungen dieser Gruppe.",
     "signerLabel": "Unterzeichner der Dokumente",
     "signerHint": "Name, der in den E-Mails an die Spieler dieser Gruppe angezeigt wird (Einladung, Erinnerung…). Nur die Owner der Gruppe können ausgewählt werden.",
-    "signerNoOwners": "Kein Owner gefunden"
+    "signerNoOwners": "Kein Owner gefunden",
+    "backgroundLabel": "App-Hintergrund",
+    "backgroundHint": "Foto, die für diese Gruppe im Hintergrund der App angezeigt wird — auf Computer, Tablet und Smartphone.",
+    "backgroundAdd": "+ Hintergrundfoto hinzufügen",
+    "backgroundReset": "Zum Standardfoto zurücksetzen"
   },
   "flightHistory": {
     "title": "Flight-Verlauf",

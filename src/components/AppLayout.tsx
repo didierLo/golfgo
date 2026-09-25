@@ -5,9 +5,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations, useLocale } from 'next-intl'
-import Image from 'next/image'
 
-interface Group       { id: string; name: string; color: string; role: 'owner' | 'member' }
+interface Group       { id: string; name: string; color: string; role: 'owner' | 'member'; backgroundUrl: string | null }
 interface CurrentUser { initials: string; name: string; email: string | null }
 
 const FALLBACK_COLORS = ['#378ADD', '#EF9F27', '#7F77DD', '#1D9E75', '#D85A30', '#D4537E']
@@ -149,12 +148,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         const initials = ((playerData.first_name?.[0] ?? '') + (playerData.surname?.[0] ?? '')).toUpperCase()
               setCurrentUser({ initials, name: `${playerData.first_name} ${playerData.surname}`, email: user.email ?? null })
         setCurrentPlayerId(playerData.id)
-        const { data, error } = await supabase.from('groups_players').select(`role, groups(id, name, color)`).eq('player_id', playerData.id)
+        const { data, error } = await supabase.from('groups_players').select(`role, groups(id, name, color, background_url)`).eq('player_id', playerData.id)
         if (error) { setLoading(false); return }
         const fetchedGroups: Group[] = (data ?? []).filter((row: any) => row.groups).map((row: any, index: number) => ({
           id: row.groups.id, name: row.groups.name,
           color: row.groups.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length],
           role: row.role as 'owner' | 'member',
+          backgroundUrl: row.groups.background_url ?? null,
         }))
         setGroups(fetchedGroups)
         const urlGroupId = pathname.match(/\/groups\/([^/]+)/)?.[1]
@@ -243,14 +243,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'transparent' }}>
      <div className="fixed inset-0 -z-10 overflow-hidden">
-  <Image
-    src="/golf-bg.jpg"
+  {/* Photo du groupe actif si l'organisateur en a choisi une, sinon l'image par défaut de GolfGo.
+      <img> plutôt que next/image : la photo peut venir du stockage Supabase (un autre domaine),
+      que next/image refuserait sans configuration supplémentaire dans next.config.ts. */}
+  {/* eslint-disable-next-line @next/next/no-img-element */}
+  <img
+    src={activeGroup?.backgroundUrl || '/golf-bg.jpg'}
     alt=""
-    fill
-    priority
-    quality={75}
-    sizes="100vw"
-    style={{ objectFit: 'cover', objectPosition: '50% center' }}
+    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% center' }}
   />
 </div>
 

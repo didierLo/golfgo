@@ -499,7 +499,11 @@
     "languageHint": "Idioma de los correos, documentos impresos y notificaciones de este grupo.",
     "signerLabel": "Firmante de los documentos",
     "signerHint": "Nombre que aparece en los correos enviados a los jugadores de este grupo (invitación, recordatorio…). Solo se puede elegir entre las owners del grupo.",
-    "signerNoOwners": "No se ha encontrado ninguna owner"
+    "signerNoOwners": "No se ha encontrado ninguna owner",
+    "backgroundLabel": "Fondo de la aplicación",
+    "backgroundHint": "Foto que se muestra detrás de la aplicación para este grupo, en ordenador, tablet y móvil.",
+    "backgroundAdd": "+ Añadir una foto de fondo",
+    "backgroundReset": "Volver a la foto predeterminada"
   },
   "flightHistory": {
     "title": "Historial de flights",

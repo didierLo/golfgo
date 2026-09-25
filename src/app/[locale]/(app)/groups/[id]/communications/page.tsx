@@ -26,8 +26,6 @@ const selectClass   = "border border-slate-200 rounded-xl px-3 py-2 text-[12px] 
 
 type Template = {
   template_logo_url:           string | null
-  template_header_color:       string
-  template_bg_image_url:       string | null
   template_invitation_subject: string | null
   template_invitation_body:    string | null
   template_teesheet_subject:   string | null
@@ -48,7 +46,7 @@ type MessageType = 'invitation' | 'reminder' | 'teesheet' | 'newmember' | 'score
 // t.raw : les {{variables}} ne doivent pas passer par le moteur de mise en forme.
 function buildDefaults(t: EmailT): Template {
   return {
-    template_logo_url: null, template_header_color: '#185FA5', template_bg_image_url: null,
+    template_logo_url: null,
     template_invitation_subject: t.raw('email.defaults.invitationSubject'),
     template_invitation_body:    t.raw('email.defaults.invitationBody'),
     template_teesheet_subject:   t.raw('email.defaults.teesheetSubject'),
@@ -212,8 +210,6 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
   const [preview,       setPreview]       = useState(false)
   const [showPreview,   setShowPreview]   = useState(false)
 
-  const [mainTab, setMainTab] = useState<'send' | 'settings' | 'invite' | 'scorecards'>('send')
-
   const [printHoles, setPrintHoles] = useState<Hole[]>([])
 
 
@@ -233,7 +229,7 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
     setLoading(true)
     const [{ data: group }, { data: evts }, { data: membersData }] = await Promise.all([
       supabase.from('groups')
-      .select('template_logo_url, template_header_color, template_bg_image_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body, template_reminder_subject, template_reminder_body, template_newmember_subject, template_newmember_body')
+      .select('template_logo_url, template_invitation_subject, template_invitation_body, template_teesheet_subject, template_teesheet_body, template_reminder_subject, template_reminder_body, template_newmember_subject, template_newmember_body')
       .eq('id', groupId).single(),
       supabase.from('events').select('id, title, starts_at').eq('group_id', groupId).order('starts_at', { ascending: false }),
       supabase.from('groups_players').select('role, player:players(id, first_name, surname, email)').eq('group_id', groupId)
@@ -245,8 +241,6 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
 
     if (group) setGroupTemplate({
       template_logo_url:           group.template_logo_url ?? null,
-      template_header_color:       group.template_header_color ?? '#185FA5',
-      template_bg_image_url:       group.template_bg_image_url ?? null,
       template_invitation_subject: group.template_invitation_subject ?? fresh.template_invitation_subject,
       template_invitation_body:    group.template_invitation_body ?? fresh.template_invitation_body,
       template_teesheet_subject:   group.template_teesheet_subject ?? fresh.template_teesheet_subject,
@@ -326,7 +320,6 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
       template_teesheet_subject:   defaults.template_teesheet_subject,
       template_teesheet_body:      defaults.template_teesheet_body,
       template_logo_url:           null,
-      template_header_color:       '#185FA5',
     }).eq('id', groupId)
     if (error) { toast.error(error.message); return }
     setGroupTemplate({ ...defaults })
@@ -342,23 +335,6 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
     const bustedUrl = `${publicUrl}?v=${Date.now()}`
     setGroupTemplate(prev => ({ ...prev, template_logo_url: bustedUrl }))
     toast.success(t('communications.toasts.logoUploaded')); setUploading(false)
-  }
-  async function handleBgUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]; if (!file) return; setUploading(true)
-    const path = `${groupId}/bg.${file.name.split('.').pop()}`
-    const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
-    if (error) { toast.error(error.message); setUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
-    const bustedUrl = `${publicUrl}?v=${Date.now()}`
-    setGroupTemplate(prev => ({ ...prev, template_bg_image_url: bustedUrl }))
-    await supabase.from('groups').update({ template_bg_image_url: bustedUrl }).eq('id', groupId)
-    toast.success(t('communications.toasts.bgUploaded')); setUploading(false)
-}
-
-  async function handleBgDelete() {
-    setGroupTemplate(prev => ({ ...prev, template_bg_image_url: null }))
-    await supabase.from('groups').update({ template_bg_image_url: null }).eq('id', groupId)
-    toast.success(t('communications.toasts.bgDeleted'))
   }
 
   const membersWithEmail = useMemo(() =>
@@ -720,25 +696,9 @@ printFormatName, printScorecardNotes
           onSaveTemplate={handleSaveTemplate}
           onReset={handleReset}
           onLogoUpload={handleLogoUpload}
-          onBgUpload={handleBgUpload}
-          onBgDelete={handleBgDelete}
         />
       )}
 
-       {/* ── Onglets ── */}
-      <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit mb-6">
-        {([
-          { key: 'send',       label: t('communications.tabs.send') },
-          { key: 'settings',   label: t('communications.tabs.settings') },
-        ] as const).map(tab => (
-          <button key={tab.key} onClick={() => setMainTab(tab.key)}
-            className={`px-4 py-2 rounded-lg text-[12px] font-semibold transition-colors ${mainTab === tab.key ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {mainTab === 'send' && (
       <div className="flex flex-col gap-6">
 
         <CommRecipientsPanel
@@ -775,7 +735,6 @@ printFormatName, printScorecardNotes
         applyPreviewVars={applyPreviewVars}
         />
       </div>
-      )}
 
       {showPreview && (
         <EmailPreviewModal

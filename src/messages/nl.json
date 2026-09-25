@@ -498,7 +498,11 @@
     "languageHint": "Taal van de e-mails, afgedrukte documenten en meldingen van deze groep.",
     "signerLabel": "Ondertekenaar van documenten",
     "signerHint": "Naam die wordt getoond in de e-mails aan de spelers van deze groep (uitnodiging, herinnering…). Alleen de owners van de groep kunnen gekozen worden.",
-    "signerNoOwners": "Geen owner gevonden"
+    "signerNoOwners": "Geen owner gevonden",
+    "backgroundLabel": "Achtergrond van de app",
+    "backgroundHint": "Foto die voor deze groep achter de app wordt getoond, op computer, tablet en smartphone.",
+    "backgroundAdd": "+ Achtergrondfoto toevoegen",
+    "backgroundReset": "Terug naar standaardfoto"
   },
   "flightHistory": {
     "title": "Flightgeschiedenis",
