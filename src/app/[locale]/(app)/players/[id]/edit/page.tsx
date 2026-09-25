@@ -35,6 +35,8 @@ export default function EditPlayerPage() {
   const [error,   setError]   = useState('')
   const [role,        setRole]        = useState<Role>('member')
   const [initialRole, setInitialRole] = useState<Role | null>(null)   // valeur avant modification, pour savoir si on RETIRE le rôle owner
+  const [playerUserId, setPlayerUserId] = useState<string | null>(null)   // players.user_id : le compte de CE joueur, si un existe
+  const [gpUserId,     setGpUserId]     = useState<string | null>(null)   // groups_players.user_id : ce qui est déjà enregistré pour lui dans CE groupe
 
   const [form, setForm] = useState({
     first_name: '', surname: '', federal_no: '', whs: '',
@@ -46,10 +48,10 @@ export default function EditPlayerPage() {
   async function loadPlayer() {
    const [{ data: player, error: pErr }, { data: gp }] = await Promise.all([
   supabase.from('players')
-    .select('first_name, surname, federal_no, whs, email, phone, gender, default_tee_color')
+    .select('first_name, surname, federal_no, whs, email, phone, gender, default_tee_color, user_id')
     .eq('id', playerId).single(),
   groupId
-    ? supabase.from('groups_players').select('role')
+    ? supabase.from('groups_players').select('role, user_id')
         .eq('group_id', groupId).eq('player_id', playerId).maybeSingle()
     : Promise.resolve({ data: null }),
 ])
@@ -67,7 +69,8 @@ setForm({
   default_tee_color: player.default_tee_color ?? 'yellow',
 })
 
-if (gp) { setRole(gp.role as Role); setInitialRole(gp.role as Role) }
+setPlayerUserId(player.user_id ?? null)
+if (gp) { setRole(gp.role as Role); setInitialRole(gp.role as Role); setGpUserId(gp.user_id ?? null) }
 setLoading(false)
   }
 
@@ -109,10 +112,20 @@ setLoading(false)
         if (block === 'LAST_OWNER') { setError(t('editPlayer.lastOwnerBlocked')); setSaving(false); return }
         if (block === 'IS_SIGNER')  { setError(t('editPlayer.signerOwnerBlocked')); setSaving(false); return }
       }
+      // Un owner doit être identifiable par son compte (players.user_id) : c'est ce qui permet de le proposer
+      // comme signataire des documents, et de lui envoyer les alertes d'organisateur (flights, push…). On le
+      // renseigne dès que le rôle est owner et qu'il manque encore — que ce soit une nouvelle promotion ou une
+      // ligne déjà owner à laquelle ce lien n'avait jamais été fait.
+      const gpUpdate: { role: Role; user_id?: string } = { role }
+      if (role === 'owner' && !gpUserId) {
+        if (!playerUserId) { setError(t('editPlayer.ownerNeedsAccount')); setSaving(false); return }
+        gpUpdate.user_id = playerUserId
+      }
       const { error: gpErr } = await supabase.from('groups_players')
-        .update({ role }).eq('group_id', groupId).eq('player_id', playerId)
+        .update(gpUpdate).eq('group_id', groupId).eq('player_id', playerId)
       if (gpErr) { setError(gpErr.message); setSaving(false); return }
       setInitialRole(role)
+      if (gpUpdate.user_id) setGpUserId(gpUpdate.user_id)
     }
 
     router.push(groupId ? `/groups/${groupId}/members` : '/')

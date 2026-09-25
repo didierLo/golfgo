@@ -965,7 +965,8 @@
     "backToMembers": "← Terug naar leden",
     "updateBlocked": "De update is niet toegepast (onvoldoende rechten?)",
     "lastOwnerBlocked": "Deze persoon is de enige owner van de groep: er moet altijd minstens één overblijven.",
-    "signerOwnerBlocked": "Deze persoon ondertekent momenteel de e-mails van deze groep. Kies eerst een andere ondertekenaar in de groepsinstellingen."
+    "signerOwnerBlocked": "Deze persoon ondertekent momenteel de e-mails van deze groep. Kies eerst een andere ondertekenaar in de groepsinstellingen.",
+    "ownerNeedsAccount": "Deze persoon moet eerst een GolfGo-account hebben aangemaakt (minstens één keer ingelogd) voordat hij/zij owner kan worden."
   },
   "notOwner": {
     "title": "Functie voorbehouden aan organisatoren",

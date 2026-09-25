@@ -967,7 +967,8 @@
     "backToMembers": "← Retour à la liste des membres",
     "updateBlocked": "La mise à jour n'a pas été appliquée (droits insuffisants ?)",
     "lastOwnerBlocked": "Cette personne est la seule owner du groupe : il doit toujours en rester au moins un(e).",
-    "signerOwnerBlocked": "Cette personne signe actuellement les emails de ce groupe. Choisis d'abord un autre signataire dans les réglages du groupe."
+    "signerOwnerBlocked": "Cette personne signe actuellement les emails de ce groupe. Choisis d'abord un autre signataire dans les réglages du groupe.",
+    "ownerNeedsAccount": "Cette personne doit avoir créé un compte GolfGo (connectée au moins une fois) avant de pouvoir devenir owner."
   },
   "notOwner": {
     "title": "Fonctionnalité réservée aux organisateurs",

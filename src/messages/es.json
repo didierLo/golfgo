@@ -966,7 +966,8 @@
     "backToMembers": "← Volver a miembros",
     "updateBlocked": "La actualización no se aplicó (¿permisos insuficientes?)",
     "lastOwnerBlocked": "Esta persona es la única owner del grupo: siempre debe quedar al menos una.",
-    "signerOwnerBlocked": "Esta persona firma actualmente los correos de este grupo. Elige antes otro firmante en los ajustes del grupo."
+    "signerOwnerBlocked": "Esta persona firma actualmente los correos de este grupo. Elige antes otro firmante en los ajustes del grupo.",
+    "ownerNeedsAccount": "Esta persona debe haber creado una cuenta de GolfGo (haber iniciado sesión al menos una vez) antes de poder ser owner."
   },
   "notOwner": {
     "title": "Función reservada a organizadores",
