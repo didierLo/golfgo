@@ -94,25 +94,49 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
   async function handleBackgroundUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file) return
     setBgUploading(true)
-    const path = `${id}/appbg.${file.name.split('.').pop()}`
-    const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
-    if (error) { alert(error.message); setBgUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
-    const bustedUrl = `${publicUrl}?v=${Date.now()}`
-    const { error: dbError } = await supabase.from('groups').update({ background_url: bustedUrl }).eq('id', id)
-    if (dbError) { alert(dbError.message); setBgUploading(false); return }
-    setBackgroundUrl(bustedUrl)
-    // Le fond de l'application (AppLayout) est chargé une seule fois à l'ouverture de GolfGo et gardé
-    // en mémoire : sans ce rechargement complet, la nouvelle image resterait invisible ailleurs dans
-    // l'app tant que la page n'est pas rouverte — même mécanique que le changement de groupe actif.
-    window.location.reload()
+    // Tout est protégé par un filet de sécurité : la version précédente pouvait échouer sans jamais
+    // afficher le moindre message. On distingue aussi « erreur » de « 0 ligne modifiée » (une écriture
+    // peut être acceptée par Supabase sans rien changer si les droits d'accès ne correspondent pas —
+    // ça ne remonte alors PAS comme une erreur classique, d'où l'ajout de .select() ci-dessous).
+    try {
+      const path = `${id}/appbg.${file.name.split('.').pop()}`
+      const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
+      if (error) { alert(`Envoi impossible : ${error.message}`); setBgUploading(false); return }
+      const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
+      const bustedUrl = `${publicUrl}?v=${Date.now()}`
+      const { data: updated, error: dbError } = await supabase.from('groups')
+        .update({ background_url: bustedUrl }).eq('id', id).select('id')
+      if (dbError) { alert(`Enregistrement impossible : ${dbError.message}`); setBgUploading(false); return }
+      if (!updated || updated.length === 0) {
+        alert("L'image a bien été envoyée, mais l'enregistrement n'a modifié aucune ligne (probablement un problème de droits d'accès sur ce groupe). Rien n'a changé.")
+        setBgUploading(false)
+        return
+      }
+      setBackgroundUrl(bustedUrl)
+      // Le fond de l'application (AppLayout) est chargé une seule fois à l'ouverture de GolfGo et gardé
+      // en mémoire : sans ce rechargement complet, la nouvelle image resterait invisible ailleurs dans
+      // l'app tant que la page n'est pas rouverte — même mécanique que le changement de groupe actif.
+      window.location.reload()
+    } catch (e: any) {
+      alert(`Erreur inattendue lors de l'envoi de l'image : ${e?.message ?? e}`)
+      setBgUploading(false)
+    }
   }
 
   async function handleBackgroundReset() {
-    const { error } = await supabase.from('groups').update({ background_url: null }).eq('id', id)
-    if (error) { alert(error.message); return }
-    setBackgroundUrl(null)
-    window.location.reload()
+    try {
+      const { data: updated, error } = await supabase.from('groups')
+        .update({ background_url: null }).eq('id', id).select('id')
+      if (error) { alert(`Réinitialisation impossible : ${error.message}`); return }
+      if (!updated || updated.length === 0) {
+        alert("La réinitialisation n'a modifié aucune ligne (probablement un problème de droits d'accès sur ce groupe).")
+        return
+      }
+      setBackgroundUrl(null)
+      window.location.reload()
+    } catch (e: any) {
+      alert(`Erreur inattendue lors de la réinitialisation : ${e?.message ?? e}`)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
