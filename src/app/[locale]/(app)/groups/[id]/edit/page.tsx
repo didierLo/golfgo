@@ -102,13 +102,17 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
     const { error: dbError } = await supabase.from('groups').update({ background_url: bustedUrl }).eq('id', id)
     if (dbError) { alert(dbError.message); setBgUploading(false); return }
     setBackgroundUrl(bustedUrl)
-    setBgUploading(false)
+    // Le fond de l'application (AppLayout) est chargé une seule fois à l'ouverture de GolfGo et gardé
+    // en mémoire : sans ce rechargement complet, la nouvelle image resterait invisible ailleurs dans
+    // l'app tant que la page n'est pas rouverte — même mécanique que le changement de groupe actif.
+    window.location.reload()
   }
 
   async function handleBackgroundReset() {
     const { error } = await supabase.from('groups').update({ background_url: null }).eq('id', id)
     if (error) { alert(error.message); return }
     setBackgroundUrl(null)
+    window.location.reload()
   }
 
   async function handleSubmit(e: React.FormEvent) {
