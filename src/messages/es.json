@@ -1512,7 +1512,8 @@
     "adding": "Añadiendo…",
     "addCount": "Añadir {count, plural, one {# jugador} other {# jugadores}}",
     "noValid": "Ningún jugador válido",
-    "added": "{count, plural, one {# jugador añadido} other {# jugadores añadidos}}"
+    "added": "{count, plural, one {# jugador añadido} other {# jugadores añadidos}}",
+    "skippedExisting": "{count} jugador(es) ya conocido(s) se dejó/dejaron sin cambios."
   },
 
   "email": {

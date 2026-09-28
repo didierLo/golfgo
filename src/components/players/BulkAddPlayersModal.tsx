@@ -8,12 +8,12 @@ import { useTranslations } from 'next-intl'
 const supabase = createClient()
 
 type PlayerRow = { surname: string; first_name: string; whs: string; federal_no: string; email: string; phone: string; home_club: string }
-type Props = { isOpen: boolean; onClose: () => void }
+type Props = { isOpen: boolean; onClose: () => void; groupId: string }
 
 const emptyRow: PlayerRow = { surname: '', first_name: '', whs: '', federal_no: '', email: '', phone: '', home_club: '' }
 const cellClass = "w-full border border-slate-200 rounded-lg px-2 py-1.5 text-[12px] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-1 focus:ring-[#185FA5]/30 focus:border-[#185FA5] bg-white"
 
-export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
+export default function BulkAddPlayersModal({ isOpen, onClose, groupId }: Props) {
   const t = useTranslations()
   const [listRows, setListRows] = useState<PlayerRow[]>([{ ...emptyRow }])
   const [loading, setLoading] = useState(false)
@@ -43,9 +43,26 @@ export default function BulkAddPlayersModal({ isOpen, onClose }: Props) {
           home_club:  row.home_club.trim() || null,
         }))
       if (players.length === 0) { toast.error(t('playersImport.noValid')); setLoading(false); return }
-      const { error } = await supabase.from('players').upsert(players, { onConflict: 'federal_no' })
-      if (error) { toast.error(error.message); setLoading(false); return }
-      toast.success(t('playersImport.added', { count: players.length }))
+      // Un joueur déjà connu (même numéro fédéral, dans n'importe quel groupe) n'est JAMAIS écrasé par une saisie
+      // en liste : il est laissé tel quel et simplement compté. Fonction contrôlée : seul l'identifiant est renvoyé.
+      const unique = players.filter((p, i) => !p.federal_no || players.findIndex(q => q.federal_no === p.federal_no) === i)
+      const federals = unique.map(p => p.federal_no).filter(Boolean)
+      let known = new Set<string>()
+      if (federals.length > 0) {
+        const { data: found, error: lookupError } = await supabase.rpc('catalog_lookup', { p_group_id: groupId, p_federals: federals })
+        if (lookupError) { toast.error(lookupError.message); setLoading(false); return }
+        known = new Set((found ?? []).map((r: { federal_no: string }) => r.federal_no))
+      }
+      const toInsert = unique
+        .filter(p => !p.federal_no || !known.has(p.federal_no))
+        .map(p => ({ id: crypto.randomUUID(), ...p, federal_no: p.federal_no || null }))
+      const skipped = players.length - toInsert.length
+      if (toInsert.length > 0) {
+        const { error } = await supabase.from('players').insert(toInsert)
+        if (error) { toast.error(error.message); setLoading(false); return }
+      }
+      toast.success(t('playersImport.added', { count: toInsert.length }))
+      if (skipped > 0) toast(t('playersImport.skippedExisting', { count: skipped }), { duration: 6000 })
       setListRows([{ ...emptyRow }])
       onClose()
       window.location.reload()

@@ -48,8 +48,8 @@ export default function AddMemberPage() {
   }, [search])
 
   async function searchPlayers() {
-    const { data } = await supabase.from('players').select('id, first_name, surname, federal_no, whs')
-      .or(`federal_no.ilike.%${search}%,first_name.ilike.%${search}%,surname.ilike.%${search}%`).limit(10)
+    // Fonction contrôlée (réservée aux organisateurs de ce groupe) : identité minimale, 10 résultats maximum.
+    const { data } = await supabase.rpc('catalog_search', { p_group_id: groupId, p_term: search })
     setResults(data || [])
   }
 
@@ -94,26 +94,29 @@ export default function AddMemberPage() {
 
     if (!guestMode && form.federal_no.trim()) {
       const federal = form.federal_no.trim().toUpperCase()
-      const { data: existing } = await supabase.from('players').select('id').eq('federal_no', federal).maybeSingle()
+      const { data: found } = await supabase.rpc('catalog_lookup', { p_group_id: groupId, p_federals: [federal] })
+      const existing = found?.[0]
       if (existing) { await addExisting(existing.id, 'member'); setShowCreate(false); setSaving(false); return }
     }
 
     const federal = form.federal_no.trim() ? form.federal_no.trim().toUpperCase() : null
-    const { data: player, error: playerError } = await supabase.from('players').insert({
+    const newPlayerId = crypto.randomUUID()
+    const { error: playerError } = await supabase.from('players').insert({
+      id: newPlayerId,
       first_name: form.first_name.trim(), surname: form.surname.trim(),
       federal_no: federal,
       whs: form.whs ? parseFloat(form.whs.replace(',', '.')) : null,
       email: form.email.trim() || null, phone: form.phone.trim() || null,
       gender: form.gender, default_tee_color: form.default_tee_color,
-    }).select('id').single()
+    })
 
-    if (playerError || !player) { setError(playerError?.message ?? t('addMember.errorPlayer')); setSaving(false); return }
+    if (playerError) { setError(playerError.message ?? t('addMember.errorPlayer')); setSaving(false); return }
 
     const role: Role = guestMode ? 'guest' : 'member'
-    const { error: gpError } = await supabase.from('groups_players').insert({ group_id: groupId, player_id: player.id, role })
+    const { error: gpError } = await supabase.from('groups_players').insert({ group_id: groupId, player_id: newPlayerId, role })
     if (gpError) { setError(gpError.message); setSaving(false); return }
 
-    setAdded(prev => ({ ...prev, [player.id]: role }))
+    setAdded(prev => ({ ...prev, [newPlayerId]: role }))
     setShowCreate(false)
     setForm({ first_name: '', surname: '', federal_no: '', whs: '', email: '', phone: '', gender: 'M', default_tee_color: 'yellow' })
     setSaving(false)
@@ -350,7 +353,7 @@ export default function AddMemberPage() {
         {addedCount > 0 && <a href={`/groups/${groupId}/events`} className="text-[13px] font-semibold text-[#185FA5] hover:underline">{t('addMember.continueToEvents')}</a>}
       </div>
 
-      <BulkAddPlayersModal isOpen={isListModalOpen} onClose={() => setIsListModalOpen(false)} />
+      <BulkAddPlayersModal isOpen={isListModalOpen} onClose={() => setIsListModalOpen(false)} groupId={groupId} />
 
       {showImport && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -368,7 +371,7 @@ export default function AddMemberPage() {
               </svg>
               <p className="text-[11.5px] text-[#0C447C] leading-snug">{t('addMember.importHint')}</p>
             </div>
-            <ImportPlayers />
+            <ImportPlayers currentGroupId={groupId} />
           </div>
         </div>
       )}

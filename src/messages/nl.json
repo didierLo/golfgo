@@ -1510,7 +1510,8 @@
     "adding": "Toevoegen…",
     "addCount": "{count, plural, one {# speler} other {# spelers}} toevoegen",
     "noValid": "Geen geldige speler",
-    "added": "{count, plural, one {# speler toegevoegd} other {# spelers toegevoegd}}"
+    "added": "{count, plural, one {# speler toegevoegd} other {# spelers toegevoegd}}",
+    "skippedExisting": "{count} reeds bekende speler(s) ongewijzigd gelaten."
   },
 
   "email": {

@@ -1511,7 +1511,8 @@
     "adding": "Ajout…",
     "addCount": "Ajouter {count, plural, one {# joueur} other {# joueurs}}",
     "noValid": "Aucun joueur valide",
-    "added": "{count, plural, one {# joueur ajouté} other {# joueurs ajoutés}}"
+    "added": "{count, plural, one {# joueur ajouté} other {# joueurs ajoutés}}",
+    "skippedExisting": "{count} joueur(s) déjà connu(s) laissé(s) tel(s) quel(s)."
   },
 
   "email": {

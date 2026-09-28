@@ -51,7 +51,7 @@ function normalizeColumn(name: string) {
 function cleanPhone(p: any) { if (!p) return null; return String(p).replace(/[^0-9+]/g, '').trim() }
 function cleanWHS(v: any) { if (!v) return null; const n = Number(String(v).replace(',', '.')); return isNaN(n) ? null : n }
 
-export default function ImportPlayers() {
+export default function ImportPlayers({ currentGroupId }: { currentGroupId?: string }) {
   const t = useTranslations()
   const [fileName, setFileName] = useState('')
   const [preview, setPreview]   = useState<PlayerPreview[]>([])
@@ -80,9 +80,19 @@ export default function ImportPlayers() {
   }
 
   async function buildPreview(data: any[]) {
-    const federals = data.map(r => String(r.federal_no || '').trim().toUpperCase())
-    const { data: existing } = await supabase.from('players').select('federal_no, whs, first_name, surname, email, phone, home_club').in('federal_no', federals)
-    const map = new Map(); existing?.forEach(p => map.set(p.federal_no, p))
+    const federals = data.map(r => String(r.federal_no || '').trim().toUpperCase()).filter(Boolean)
+    // Fonction contrôlée : renvoie l'identifiant de chaque joueur déjà connu ; nom, email, téléphone, club et
+    // handicap ne sont fournis QUE pour les joueurs qui partagent déjà un groupe avec vous. Les autres ne sont
+    // jamais modifiés par un import (ils peuvent en revanche être ajoutés à votre groupe).
+    const lookupGroup = currentGroupId || groupId
+    type Known = { federal_no: string; id: string; visible: boolean; first_name: string | null; surname: string | null; whs: number | null; email: string | null; phone: string | null; home_club: string | null }
+    let existing: Known[] = []
+    if (lookupGroup && federals.length > 0) {
+      const { data: found, error } = await supabase.rpc('catalog_lookup', { p_group_id: lookupGroup, p_federals: federals })
+      if (error) { alert(error.message); return }
+      existing = found ?? []
+    }
+    const map = new Map(); existing.forEach(p => map.set(p.federal_no, p))
     const previewRows: PlayerPreview[] = data.map((r, i) => {
       let federal = String(r.federal_no || '').trim().toUpperCase()
       if (!federal) federal = `AUTO_${Date.now()}_${i}`
@@ -94,7 +104,9 @@ export default function ImportPlayers() {
       const home_club   = r.home_club || null
       const existingPlayer = map.get(federal)
       let status: 'NEW' | 'UPDATE' | 'EXISTS' = 'NEW'
-      if (existingPlayer) {
+      if (existingPlayer && existingPlayer.visible === false) {
+        status = 'EXISTS'   // joueur d'un autre groupe : reconnu, jamais modifié depuis cet import
+      } else if (existingPlayer) {
         // Un champ ne compte comme "changé" que s'il est réellement renseigné dans le
         // fichier ET différent de la valeur en base — une cellule vide n'est jamais un changement.
         const changed =
@@ -126,10 +138,12 @@ export default function ImportPlayers() {
 
     // 1) Nouveaux joueurs : rien à préserver, insert complet comme avant
     if (newRows.length > 0) {
-      const rows = newRows.map(p => ({ federal_no: p.federal_no, first_name: p.first_name, surname: p.surname, whs: p.whs, email: p.email, phone: p.phone, home_club: p.home_club }))
-      const { data, error } = await supabase.from('players').upsert(rows, { onConflict: 'federal_no' }).select('id')
+      // L'identifiant est fixé ici et l'insertion ne demande rien en retour : un joueur qui n'appartient encore
+      // à aucun groupe n'est pas lisible, on ne peut donc pas le relire juste après l'avoir créé.
+      const rows = newRows.map(p => ({ id: crypto.randomUUID(), federal_no: p.federal_no, first_name: p.first_name, surname: p.surname, whs: p.whs, email: p.email, phone: p.phone, home_club: p.home_club }))
+      const { error } = await supabase.from('players').insert(rows)
       if (error) { alert(error.message); setLoading(false); return }
-      data?.forEach(d => insertedIds.push(d.id))
+      rows.forEach(r => insertedIds.push(r.id))
     }
 
     // 2) Joueurs existants : update champ par champ, un appel par ligne, en n'envoyant
