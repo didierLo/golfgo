@@ -404,6 +404,28 @@
       "subject": "Objet :",
       "disclaimer": "Aperçu avec données fictives · les liens ne fonctionnent pas",
       "error": "Erreur aperçu"
+    },
+    "emailFailures": {
+      "title": "Emails non délivrés ({count})",
+      "intro": "Ces emails ont été refusés, le plus souvent à cause d'une adresse mal saisie. Corrigez l'adresse sur la fiche du joueur, puis renvoyez.",
+      "failedAddress": "Adresse refusée : {address}",
+      "reason": "Motif : {error}",
+      "fixAddress": "Corriger l'adresse",
+      "resend": "Renvoyer",
+      "resendHint": "Corrigez d'abord l'adresse pour pouvoir renvoyer",
+      "dismiss": "Ignorer",
+      "resent": "Invitation renvoyée",
+      "resendFailed": "Le renvoi a échoué : {error}",
+      "unknownPlayer": "Joueur non identifié",
+      "categories": {
+        "invitation": "Invitation",
+        "reminder": "Rappel",
+        "teesheet": "Liste des départs",
+        "communication": "Message",
+        "scorecard": "Cartes de score",
+        "group_invite": "Invitation au groupe",
+        "other": "Autre"
+      }
     }
   },
   "constraints": {
@@ -842,7 +864,8 @@
     "eventsCount": "{count} événement(s)",
     "typeToSearch": "Saisissez le nom d'un membre pour voir ses participations",
     "invited": "Invité «{date}»",
-    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
+    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité",
+    "sendFailed": "{count} invitation(s) n'ont pas pu être envoyées : {details}. Corrigez l'adresse (Communications), puis renvoyez."
   },
   "members": {
     "title": "Membres",
@@ -1605,7 +1628,9 @@
     },
     "unknownPlayer": "Un joueur",
     "removedFromFlight": "Retiré(e) du Flight {flight}.",
-    "toPlace": "Aucun flight pour l'instant : à placer."
+    "toPlace": "Aucun flight pour l'instant : à placer.",
+    "emailFailedTitle": "{group} — email non délivré",
+    "emailFailedBody": "Un ou plusieurs emails n'ont pas pu être envoyés (adresse refusée ?). Ouvrez Communications pour les corriger."
   },
 
   "flightWatch": {

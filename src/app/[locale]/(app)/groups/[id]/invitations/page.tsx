@@ -272,11 +272,16 @@ export default function InvitationsPage() {
       const { error: insertError } = await supabase.from('event_participants').insert(rows)
       if (insertError) throw new Error(insertError.message)
 
+      let failedCount = 0
       if (sendEmail) {
         const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: toInvite }) })
         if (!res.ok) throw new Error(t('common.error'))
         const sendResult = await res.json()
-        toast.success(t('invitations.invitationsSent', { count: toInvite.length }))
+        // L'API renvoie la liste des envois refusés (adresse invalide…) : on la montre au lieu d'annoncer
+        // « N invitations envoyées » quand certaines ne sont pas parties.
+        failedCount = sendResult.errors?.length ?? 0
+        if (toInvite.length - failedCount > 0) toast.success(t('invitations.invitationsSent', { count: toInvite.length - failedCount }))
+        if (failedCount > 0) toast.error(t('invitations.sendFailed', { count: failedCount, details: sendResult.errors.join(' ; ') }), { duration: 12000 })
         if (sendResult.queued > 0) {
           toast.error(t('common.quotaExceeded', { count: sendResult.queued }), { duration: 6000 })
         }
@@ -286,7 +291,9 @@ export default function InvitationsPage() {
       }
       setSelectedPlayers([])
       setHolesMap({})
-      window.location.href = `/groups/${groupId}/events`
+      // En cas d'échec on RESTE sur la page pour que le message reste lisible (un rechargement l'effacerait).
+      if (failedCount > 0) loadData()
+      else window.location.href = `/groups/${groupId}/events`
     } catch (e: any) { toast.error(e.message ?? t('common.error')) }
     finally { setSending(false) }
   }
@@ -306,7 +313,9 @@ export default function InvitationsPage() {
       const res = await fetch('/api/send-invitations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId: selectedEvent, playerIds: selectedPlayers }) })
       if (!res.ok) throw new Error(t('common.error'))
       const resendResult = await res.json()
-      toast.success(t('invitations.resendSuccess', { count: selectedPlayers.length }))
+      const resendFailed = resendResult.errors?.length ?? 0
+      if (selectedPlayers.length - resendFailed > 0) toast.success(t('invitations.resendSuccess', { count: selectedPlayers.length - resendFailed }))
+      if (resendFailed > 0) toast.error(t('invitations.sendFailed', { count: resendFailed, details: resendResult.errors.join(' ; ') }), { duration: 12000 })
       if (resendResult.queued > 0) {
         toast.error(t('common.quotaExceeded', { count: resendResult.queued }), { duration: 6000 })
       }

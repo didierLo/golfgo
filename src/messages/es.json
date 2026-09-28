@@ -403,6 +403,28 @@
       "subject": "Asunto:",
       "disclaimer": "Vista previa con datos ficticios · los enlaces no funcionan",
       "error": "Error en la vista previa"
+    },
+    "emailFailures": {
+      "title": "Correos no entregados ({count})",
+      "intro": "Estos correos fueron rechazados, casi siempre por una dirección mal escrita. Corrija la dirección en la ficha del jugador y reenvíe.",
+      "failedAddress": "Dirección rechazada: {address}",
+      "reason": "Motivo: {error}",
+      "fixAddress": "Corregir la dirección",
+      "resend": "Reenviar",
+      "resendHint": "Corrija primero la dirección para poder reenviar",
+      "dismiss": "Ignorar",
+      "resent": "Invitación reenviada",
+      "resendFailed": "El reenvío falló: {error}",
+      "unknownPlayer": "Jugador no identificado",
+      "categories": {
+        "invitation": "Invitación",
+        "reminder": "Recordatorio",
+        "teesheet": "Lista de salidas",
+        "communication": "Mensaje",
+        "scorecard": "Tarjetas de puntuación",
+        "group_invite": "Invitación al grupo",
+        "other": "Otro"
+      }
     }
   },
   "constraints": {
@@ -841,7 +863,8 @@
     "eventsCount": "{count} evento(s)",
     "typeToSearch": "Escribe el nombre de un miembro para ver sus participaciones",
     "invited": "Invitado «{date}»",
-    "adminOnly": "Debes ser administrador para usar esta función"
+    "adminOnly": "Debes ser administrador para usar esta función",
+    "sendFailed": "No se pudieron enviar {count} invitación(es): {details}. Corrija la dirección (Comunicaciones) y reenvíe."
   },
   "members": {
     "title": "Miembros",
@@ -1606,7 +1629,9 @@
     },
     "unknownPlayer": "Un jugador",
     "removedFromFlight": "Retirado/a del Flight {flight}.",
-    "toPlace": "Aún sin flight: por asignar."
+    "toPlace": "Aún sin flight: por asignar.",
+    "emailFailedTitle": "{group} — correo no entregado",
+    "emailFailedBody": "No se pudieron enviar uno o más correos (¿dirección rechazada?). Abra Comunicaciones para corregirlos."
   },
 
   "flightWatch": {

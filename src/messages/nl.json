@@ -402,6 +402,28 @@
       "subject": "Onderwerp:",
       "disclaimer": "Voorbeeld met fictieve gegevens · links werken niet",
       "error": "Fout bij voorbeeld"
+    },
+    "emailFailures": {
+      "title": "E-mails niet afgeleverd ({count})",
+      "intro": "Deze e-mails werden geweigerd, meestal door een verkeerd getypt adres. Corrigeer het adres op de spelerskaart en verstuur opnieuw.",
+      "failedAddress": "Geweigerd adres: {address}",
+      "reason": "Reden: {error}",
+      "fixAddress": "Adres corrigeren",
+      "resend": "Opnieuw verzenden",
+      "resendHint": "Corrigeer eerst het adres om opnieuw te kunnen verzenden",
+      "dismiss": "Negeren",
+      "resent": "Uitnodiging opnieuw verzonden",
+      "resendFailed": "Opnieuw verzenden mislukt: {error}",
+      "unknownPlayer": "Onbekende speler",
+      "categories": {
+        "invitation": "Uitnodiging",
+        "reminder": "Herinnering",
+        "teesheet": "Startlijst",
+        "communication": "Bericht",
+        "scorecard": "Scorekaarten",
+        "group_invite": "Groepsuitnodiging",
+        "other": "Overig"
+      }
     }
   },
   "constraints": {
@@ -840,7 +862,8 @@
     "eventsCount": "{count} evenement(en)",
     "typeToSearch": "Typ de naam van een lid om zijn deelnames te zien",
     "invited": "Uitgenodigd «{date}»",
-    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken"
+    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
+    "sendFailed": "{count} uitnodiging(en) konden niet worden verzonden: {details}. Corrigeer het adres (Communicatie) en verstuur opnieuw."
   },
   "members": {
     "title": "Leden",
@@ -1604,7 +1627,9 @@
     },
     "unknownPlayer": "Een speler",
     "removedFromFlight": "Uit Flight {flight} gehaald.",
-    "toPlace": "Nog in geen enkele flight: nog te plaatsen."
+    "toPlace": "Nog in geen enkele flight: nog te plaatsen.",
+    "emailFailedTitle": "{group} — e-mail niet afgeleverd",
+    "emailFailedBody": "Een of meer e-mails konden niet worden verzonden (adres geweigerd?). Open Communicatie om ze te corrigeren."
   },
 
   "flightWatch": {

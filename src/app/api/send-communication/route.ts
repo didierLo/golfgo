@@ -396,6 +396,7 @@ if (eventId) {
 
       const result = await sendOrQueueEmail({
         category: 'communication',
+        playerId: player.id,
         groupId:  groupId,
         eventId:  event?.id ?? null,
         from:     'GolfGo <info@golfgo.be>',

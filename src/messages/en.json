@@ -404,6 +404,28 @@
       "subject": "Subject:",
       "disclaimer": "Preview with sample data · links do not work",
       "error": "Preview error"
+    },
+    "emailFailures": {
+      "title": "Emails not delivered ({count})",
+      "intro": "These emails were refused, most often because of a mistyped address. Fix the address on the player's card, then resend.",
+      "failedAddress": "Refused address: {address}",
+      "reason": "Reason: {error}",
+      "fixAddress": "Fix the address",
+      "resend": "Resend",
+      "resendHint": "Fix the address first to be able to resend",
+      "dismiss": "Dismiss",
+      "resent": "Invitation resent",
+      "resendFailed": "Resend failed: {error}",
+      "unknownPlayer": "Unidentified player",
+      "categories": {
+        "invitation": "Invitation",
+        "reminder": "Reminder",
+        "teesheet": "Tee sheet",
+        "communication": "Message",
+        "scorecard": "Scorecards",
+        "group_invite": "Group invitation",
+        "other": "Other"
+      }
     }
   },
   "constraints": {
@@ -842,7 +864,8 @@
     "eventsCount": "{count} event(s)",
     "typeToSearch": "Type a member's name to see their participations",
     "invited": "Invited «{date}»",
-    "adminOnly": "You must be an admin to use this feature"
+    "adminOnly": "You must be an admin to use this feature",
+    "sendFailed": "{count} invitation(s) could not be sent: {details}. Fix the address (Communications), then resend."
   },
   "members": {
     "title": "Members",
@@ -1607,7 +1630,9 @@
     },
     "unknownPlayer": "A player",
     "removedFromFlight": "Removed from Flight {flight}.",
-    "toPlace": "Not in any flight yet: to be placed."
+    "toPlace": "Not in any flight yet: to be placed.",
+    "emailFailedTitle": "{group} — email not delivered",
+    "emailFailedBody": "One or more emails could not be sent (address refused?). Open Communications to fix them."
   },
 
   "flightWatch": {

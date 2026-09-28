@@ -12,7 +12,8 @@
 // (ou s'il y a des retraits automatiques non encore signalés).
 
 import { createHash } from 'crypto'
-import webpush from 'web-push'
+import { sendPushToUser } from '@/lib/push/send'
+export { sendPushToUser }
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { getGroupLocale, serverT, DATE_LOCALE, type ServerT } from '@/lib/i18n/server'
@@ -161,28 +162,6 @@ export type Deps = {
   sendPush: (supabase: any, userId: string, payload: { title: string; body: string; url: string }) => Promise<number>
   emailEnabled: () => boolean
   now: () => Date
-}
-
-let vapidReady = false
-export async function sendPushToUser(supabase: any, userId: string, payload: { title: string; body: string; url: string }): Promise<number> {
-  const { data: subs } = await supabase.from('push_subscriptions').select('id, endpoint, p256dh, auth').eq('user_id', userId)
-  if (!subs?.length) return 0
-  if (!vapidReady) {
-    webpush.setVapidDetails('mailto:info@golfgo.be', process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!, process.env.VAPID_PRIVATE_KEY!)
-    vapidReady = true
-  }
-  let sent = 0
-  const stale: string[] = []
-  for (const sub of subs) {
-    try {
-      await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, JSON.stringify(payload))
-      sent++
-    } catch (err: any) {
-      if (err.statusCode === 410 || err.statusCode === 404) stale.push(sub.id)
-    }
-  }
-  if (stale.length) await supabase.from('push_subscriptions').delete().in('id', stale)
-  return sent
 }
 
 const defaultDeps: Deps = {

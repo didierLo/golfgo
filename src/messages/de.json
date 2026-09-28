@@ -403,6 +403,28 @@
       "subject": "Betreff:",
       "disclaimer": "Vorschau mit Beispieldaten · Links funktionieren nicht",
       "error": "Fehler bei der Vorschau"
+    },
+    "emailFailures": {
+      "title": "E-Mails nicht zugestellt ({count})",
+      "intro": "Diese E-Mails wurden abgelehnt, meist wegen einer falsch eingegebenen Adresse. Korrigieren Sie die Adresse auf der Spielerkarte und senden Sie erneut.",
+      "failedAddress": "Abgelehnte Adresse: {address}",
+      "reason": "Grund: {error}",
+      "fixAddress": "Adresse korrigieren",
+      "resend": "Erneut senden",
+      "resendHint": "Korrigieren Sie zuerst die Adresse, um erneut senden zu können",
+      "dismiss": "Ignorieren",
+      "resent": "Einladung erneut gesendet",
+      "resendFailed": "Erneutes Senden fehlgeschlagen: {error}",
+      "unknownPlayer": "Unbekannter Spieler",
+      "categories": {
+        "invitation": "Einladung",
+        "reminder": "Erinnerung",
+        "teesheet": "Startliste",
+        "communication": "Nachricht",
+        "scorecard": "Scorekarten",
+        "group_invite": "Gruppeneinladung",
+        "other": "Sonstiges"
+      }
     }
   },
   "constraints": {
@@ -841,7 +863,8 @@
     "eventsCount": "{count} Veranstaltung(en)",
     "typeToSearch": "Mitgliedsnamen eingeben, um seine Teilnahmen anzuzeigen",
     "invited": "Eingeladen «{date}»",
-    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen"
+    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen",
+    "sendFailed": "{count} Einladung(en) konnten nicht gesendet werden: {details}. Korrigieren Sie die Adresse (Kommunikation) und senden Sie erneut."
   },
   "members": {
     "title": "Mitglieder",
@@ -1607,7 +1630,9 @@
     },
     "unknownPlayer": "Ein Spieler",
     "removedFromFlight": "Aus Flight {flight} entfernt.",
-    "toPlace": "Noch in keinem Flight: bitte einteilen."
+    "toPlace": "Noch in keinem Flight: bitte einteilen.",
+    "emailFailedTitle": "{group} — E-Mail nicht zugestellt",
+    "emailFailedBody": "Eine oder mehrere E-Mails konnten nicht gesendet werden (Adresse abgelehnt?). Öffnen Sie Kommunikation, um sie zu korrigieren."
   },
 
   "flightWatch": {

@@ -23,11 +23,11 @@ export async function GET() {
   }
 
   const [{ data: pending }, { data: failed }, { data: recentSent }, { count: pendingCount }, { count: failedCount }] = await Promise.all([
-    supabaseAdmin.from('email_queue').select('*').eq('status', 'pending').order('created_at', { ascending: true }).limit(200),
-    supabaseAdmin.from('email_queue').select('*').eq('status', 'failed').order('created_at', { ascending: false }).limit(100),
-    supabaseAdmin.from('email_queue').select('*').eq('status', 'sent').order('sent_at', { ascending: false }).limit(50),
+    supabaseAdmin.from('email_queue').select('id, status, category, group_id, event_id, player_id, to_email, subject, last_error, attempts, created_at, sent_at').eq('status', 'pending').order('created_at', { ascending: true }).limit(200),
+    supabaseAdmin.from('email_queue').select('id, status, category, group_id, event_id, player_id, to_email, subject, last_error, attempts, created_at, sent_at').is('resolved_at', null).eq('status', 'failed').order('created_at', { ascending: false }).limit(100),
+    supabaseAdmin.from('email_queue').select('id, status, category, group_id, event_id, player_id, to_email, subject, last_error, attempts, created_at, sent_at').eq('status', 'sent').order('sent_at', { ascending: false }).limit(50),
     supabaseAdmin.from('email_queue').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabaseAdmin.from('email_queue').select('*', { count: 'exact', head: true }).eq('status', 'failed'),
+    supabaseAdmin.from('email_queue').select('*', { count: 'exact', head: true }).is('resolved_at', null).eq('status', 'failed'),
   ])
 
   return Response.json({

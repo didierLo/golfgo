@@ -335,6 +335,7 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
 
       const result = await sendOrQueueEmail({
         category: 'invitation',
+        playerId: p.player_id,
         groupId:  event.group_id,
         eventId:  event.id,
         from:     'GolfGo <noreply@golfgo.be>', replyTo: 'info@golfgo.be', to: player.email, subject, html,

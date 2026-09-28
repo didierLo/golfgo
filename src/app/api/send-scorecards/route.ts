@@ -111,6 +111,7 @@ export async function POST(req: Request) {
 
       const result = await sendOrQueueEmail({
         category: 'scorecard',
+        playerId: player.id,
         groupId:  event.group_id,
         eventId:  eventId,
         from:     'GolfGo <noreply@golfgo.be>',

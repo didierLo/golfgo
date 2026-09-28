@@ -12,6 +12,7 @@ import type { TeamFormat } from '@/lib/golf/scorecards/composeCards'
 import type { Hole, TeeInfo } from '@/components/scorecards/scorecard-types'
 import { computePhcp } from '@/components/scorecards/scorecard-types'
 import CommSettingsPanel from '@/components/communications/CommSettingsPanel'
+import EmailFailuresPanel from '@/components/communications/EmailFailuresPanel'
 import CommMessageComposer from '@/components/communications/CommMessageComposer'
 import CommRecipientsPanel from '@/components/communications/CommRecipientsPanel'
 import PushSubscribeButton from '@/components/notifications/PushSubscribeButton'
@@ -115,65 +116,6 @@ export default function CommunicationsPage() {
   const { role, loading: roleLoading } = useGroupRole(groupId)
   const isOwner = role === 'owner'
 
-  // ── File d'attente email (compact, visible pour l'admin site uniquement — l'API renvoie 403 sinon) ──
-  const [queueVisible, setQueueVisible] = useState(false)
-  const [queueCounts,  setQueueCounts]  = useState({ pending: 0, failed: 0 })
-  const [queueItems,   setQueueItems]   = useState<any[]>([])
-  const [queueOpen,    setQueueOpen]    = useState(false)
-  const [queueDraining, setQueueDraining] = useState(false)
-  const [queueRetryingId, setQueueRetryingId] = useState<string | null>(null)
-  const [editingEmailId,  setEditingEmailId]  = useState<string | null>(null)
-  const [emailDraft,      setEmailDraft]      = useState('')
-
-  useEffect(() => { loadQueue() }, [])
-
-  async function loadQueue() {
-    const res = await fetch('/api/admin/email-queue')
-    if (res.status === 403) { setQueueVisible(false); return }
-    const json = await res.json()
-    setQueueVisible(true)
-    setQueueCounts(json.counts ?? { pending: 0, failed: 0 })
-    setQueueItems(json.failed ?? [])
-  }
-
-  async function handleQueueDrain() {
-    setQueueDraining(true)
-    try {
-      const res = await fetch('/api/admin/email-queue/drain', { method: 'POST' })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Erreur')
-      toast.success(`${json.sent} email(s) envoyé(s) — ${json.stillPending} encore en attente`)
-      loadQueue()
-    } catch (e: any) {
-      toast.error(e.message ?? 'Erreur')
-    } finally {
-      setQueueDraining(false)
-    }
-  }
-
-  async function handleQueueRetry(id: string, correctedEmail?: string) {
-    setQueueRetryingId(id)
-    try {
-      const res = await fetch('/api/admin/email-queue/retry', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(correctedEmail !== undefined ? { id, to_email: correctedEmail } : { id }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Erreur')
-      toast.success('Remis en file — sera renvoyé au prochain passage')
-      // Retrait immédiat de la vue : la ligne passe en 'pending' côté base,
-      // pas la peine de la garder affichée avec son ancien statut le temps
-      // du rechargement complet.
-      setQueueItems(items => items.filter(i => i.id !== id))
-      setQueueCounts(c => ({ pending: c.pending + 1, failed: Math.max(0, c.failed - 1) }))
-      setEditingEmailId(null)
-      loadQueue()
-    } catch (e: any) {
-      toast.error(e.message ?? 'Erreur')
-    } finally {
-      setQueueRetryingId(null)
-    }
-  }
   const t      = useTranslations()
   const locale = useLocale()
 
@@ -623,68 +565,7 @@ printFormatName, printScorecardNotes
         </div>
       </div>
 
-      {queueVisible && (queueCounts.pending > 0 || queueCounts.failed > 0) && (
-        <div className="mb-6 border border-slate-200 rounded-xl px-4 py-2.5 text-[12px]">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <button onClick={() => setQueueOpen(o => !o)} className="flex items-center gap-2 font-semibold text-slate-700 hover:text-slate-900">
-              <span>{queueOpen ? '▾' : '▸'}</span>
-              📬 File email —
-              {queueCounts.pending > 0 && <span className="text-amber-700"> {queueCounts.pending} en attente</span>}
-              {queueCounts.pending > 0 && queueCounts.failed > 0 && <span className="text-slate-300"> · </span>}
-              {queueCounts.failed > 0 && <span className="text-red-600"> {queueCounts.failed} échec(s)</span>}
-            </button>
-            {queueCounts.pending > 0 && (
-              <button
-                onClick={handleQueueDrain}
-                disabled={queueDraining}
-                className="text-[11px] font-semibold text-[#185FA5] hover:text-[#0C447C] disabled:opacity-40"
-              >
-                {queueDraining ? 'Envoi…' : 'Vider maintenant'}
-              </button>
-            )}
-          </div>
-          {queueOpen && (
-            <div className="mt-2 pt-2 border-t border-slate-100 divide-y divide-slate-100">
-              {queueItems.length === 0 ? (
-                <p className="py-1.5 text-slate-400">Aucun échec — {queueCounts.pending} email(s) en attente du prochain envoi.</p>
-              ) : queueItems.map(item => (
-                <div key={item.id} className="py-1.5 flex items-center justify-between gap-2">
-                  {editingEmailId === item.id ? (
-                    <input
-                      type="email"
-                      autoFocus
-                      value={emailDraft}
-                      onChange={e => setEmailDraft(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Escape') setEditingEmailId(null) }}
-                      className="flex-1 min-w-0 border border-[#185FA5]/40 rounded-lg px-1.5 py-0.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30"
-                    />
-                  ) : (
-                    <span className="text-slate-600 truncate">
-                      <button
-                        type="button"
-                        onClick={() => { setEditingEmailId(item.id); setEmailDraft(item.to_email) }}
-                        title="Corriger l'adresse"
-                        className="font-medium hover:underline decoration-dashed underline-offset-2"
-                      >
-                        {item.to_email}
-                      </button>
-                      {' '}— {item.subject}
-                      <span className="text-red-500"> ({item.last_error})</span>
-                    </span>
-                  )}
-                  <button
-                    onClick={() => handleQueueRetry(item.id, editingEmailId === item.id ? emailDraft : undefined)}
-                    disabled={queueRetryingId === item.id}
-                    className="text-[11px] font-semibold text-[#185FA5] hover:text-[#0C447C] underline underline-offset-2 disabled:opacity-40 shrink-0"
-                  >
-                    {queueRetryingId === item.id ? 'Remise en file…' : 'Réessayer'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <EmailFailuresPanel groupId={groupId} />
 
    {/* ── Panneau Paramètres (collapsible) ── */}
       {showSettings && (

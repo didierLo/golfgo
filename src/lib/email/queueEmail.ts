@@ -9,12 +9,15 @@ const supabaseAdmin = createClient(
   { auth: { persistSession: false } }
 )
 
+import { notifyOwnersOfEmailFailure } from '@/lib/email/notifyEmailFailure'
+
 export type EmailCategory = 'reminder' | 'invitation' | 'teesheet' | 'communication' | 'group_invite' | 'scorecard' | 'other'
 
 export type EmailPayload = {
   category:    EmailCategory
   groupId?:    string | null
   eventId?:    string | null
+  playerId?:   string | null   // joueur destinataire : permet à l'organisateur de corriger SON adresse après un échec
   from:        string
   replyTo?:    string
   to:          string
@@ -71,13 +74,14 @@ export async function sendOrQueueEmail(payload: EmailPayload): Promise<
   if (!error) return { sent: true }
 
   const queued = isQuotaError(error)
-  await supabaseAdmin.from('email_queue').insert({
+  const { data: inserted } = await supabaseAdmin.from('email_queue').insert({
     status:      queued ? 'pending' : 'failed',
     attempts:    1,
     last_error:  error.message,
     category:    payload.category,
     group_id:    payload.groupId ?? null,
     event_id:    payload.eventId ?? null,
+    player_id:   payload.playerId ?? null,
     from_email:  payload.from,
     reply_to:    payload.replyTo ?? null,
     to_email:    payload.to,
@@ -85,7 +89,13 @@ export async function sendOrQueueEmail(payload: EmailPayload): Promise<
     html:        payload.html,
     headers:     payload.headers ?? null,
     attachments: payload.attachments ?? null,
-  })
+  }).select('id').single()
+
+  // Échec définitif (pas un simple dépassement de quota, qui se réessaie tout seul) : prévenir les organisateurs.
+  // Une panne de notification ne doit jamais empêcher la suite de l'envoi.
+  if (!queued && payload.groupId && inserted?.id) {
+    try { await notifyOwnersOfEmailFailure(supabaseAdmin, payload.groupId, inserted.id) } catch { /* sans effet sur l'envoi */ }
+  }
 
   return { sent: false, queued, error: error.message }
 }
@@ -139,6 +149,9 @@ export async function drainEmailQueue(maxToSend: number = 80): Promise<{ sent: n
           status: attempts >= 5 ? 'failed' : 'pending',
         })
         .eq('id', item.id)
+      if (attempts >= 5 && item.group_id) {
+        try { await notifyOwnersOfEmailFailure(supabaseAdmin, item.group_id, item.id) } catch { /* sans effet sur le cron */ }
+      }
     }
 
     await new Promise(r => setTimeout(r, 250))

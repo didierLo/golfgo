@@ -447,6 +447,7 @@ if (days === 3 && group?.auto_reminders) {
 
         const result = await sendOrQueueEmail({
           category: 'reminder',
+          playerId: ep.player_id,
           groupId:  event.group_id,
           eventId:  event.id,
           from:     'GolfGo <noreply@golfgo.be>',
@@ -583,6 +584,7 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
 
         const result = await sendOrQueueEmail({
           category: 'invitation',
+          playerId: member.player_id,
           groupId:  event.group_id,
           eventId:  event.id,
           from:     'GolfGo <noreply@golfgo.be>',
