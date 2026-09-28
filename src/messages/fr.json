@@ -126,7 +126,9 @@
     "errorSaveTime": "Erreur lors de l'enregistrement de l'heure — réessaie",
     "errorResetTime": "Erreur lors de la réinitialisation de l'heure — réessaie",
     "errorSaveOrder": "Erreur lors de l'enregistrement de l'ordre — {detail}",
-    "tryAgain": "réessaie"
+    "tryAgain": "réessaie",
+    "errorSaveInterval": "Erreur lors de l'enregistrement de l'intervalle — réessaie",
+    "notSavedRights": "Non enregistré : rien n'a été modifié en base (droits d'accès manquants sur cet événement ?)"
   },
   "calendar": {
     "months": [

@@ -124,7 +124,9 @@
     "errorSaveTime": "Fout bij het opslaan van de tijd — probeer het opnieuw",
     "errorResetTime": "Fout bij het terugzetten van de tijd — probeer het opnieuw",
     "errorSaveOrder": "Fout bij het opslaan van de volgorde — {detail}",
-    "tryAgain": "probeer het opnieuw"
+    "tryAgain": "probeer het opnieuw",
+    "errorSaveInterval": "Fout bij het opslaan van het interval — probeer het opnieuw",
+    "notSavedRights": "Niet opgeslagen: er is niets gewijzigd in de database (ontbrekende toegangsrechten voor dit evenement?)"
   },
   "calendar": {
     "months": [

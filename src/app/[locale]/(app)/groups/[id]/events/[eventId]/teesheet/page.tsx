@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useRef} from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
@@ -109,26 +109,20 @@ export default function TeeSheetPage() {
 
   useEffect(() => { if (selectedEventId) loadData(selectedEventId) }, [selectedEventId])
 
- const isFirstLoad = useRef(true)
-
-useEffect(() => {
-  if (!selectedEventId) return
-  if (isFirstLoad.current) { isFirstLoad.current = false; return }
-  supabase.from('events')
-    .update({ tee_interval: interval })
-    .eq('id', selectedEventId)
-    .then(() => {})
-}, [interval, selectedEventId])
+ // L'intervalle est enregistré uniquement quand le propriétaire le CHANGE (voir changeInterval plus bas),
+// et il est relu depuis la base au chargement (loadData). Avant, il n'était jamais relu : la page
+// repartait toujours de 9 minutes, quelle que soit la valeur enregistrée.
 
   async function loadData(evId: string) {
   setLoading(true); setError(null)
   
   const { data: event } = await supabase.from('events')
-    .select('title, starts_at').eq('id', evId).single()
+    .select('title, starts_at, tee_interval').eq('id', evId).single()
   
   if (event) {
     setEventTitle(event.title)
     setStartsAt(event.starts_at)
+    setInterval(event.tee_interval ?? 9)
     setEventDate(new Date(event.starts_at).toLocaleDateString(locale, {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     }))
@@ -201,6 +195,21 @@ useEffect(() => {
     setEditingTimeIdx(idx)
   }
 
+  async function changeInterval(next: number) {
+    const previous = interval
+    setInterval(next)
+    if (!selectedEventId) return
+    const { data, error } = await supabase.from('events')
+      .update({ tee_interval: next }).eq('id', selectedEventId).select('id')
+    if (error) {
+      toast.error(t('teesheet.errorSaveInterval'))
+      setInterval(previous)
+    } else if (!data || data.length === 0) {
+      toast.error(t('teesheet.notSavedRights'))
+      setInterval(previous)
+    }
+  }
+
   async function saveManualTime(idx: number) {
     const flight = flights[idx]
     const iso = hhmmToTimestamp(timeDraft)
@@ -211,10 +220,15 @@ useEffect(() => {
     const prevFlights = flights
     setFlights(prev => prev.map((f, i) => i === idx ? { ...f, manual_start_at: iso } : f))
     setSavingTime(true)
-    const { error } = await supabase.from('flights').update({ manual_start_at: iso }).eq('id', flight.id)
+    const { data, error } = await supabase.from('flights').update({ manual_start_at: iso }).eq('id', flight.id).select('id')
     setSavingTime(false)
     if (error) {
       toast.error(t('teesheet.errorSaveTime'))
+      setFlights(prevFlights)
+    } else if (!data || data.length === 0) {
+      // Supabase accepte l'écriture sans rien modifier quand les droits d'accès ne correspondent pas :
+      // ce n'est PAS une erreur pour lui, donc on le vérifie nous-mêmes.
+      toast.error(t('teesheet.notSavedRights'))
       setFlights(prevFlights)
     }
   }
@@ -225,10 +239,13 @@ useEffect(() => {
     const prevFlights = flights
     setFlights(prev => prev.map((f, i) => i === idx ? { ...f, manual_start_at: null } : f))
     setSavingTime(true)
-    const { error } = await supabase.from('flights').update({ manual_start_at: null }).eq('id', flight.id)
+    const { data, error } = await supabase.from('flights').update({ manual_start_at: null }).eq('id', flight.id).select('id')
     setSavingTime(false)
     if (error) {
       toast.error(t('teesheet.errorResetTime'))
+      setFlights(prevFlights)
+    } else if (!data || data.length === 0) {
+      toast.error(t('teesheet.notSavedRights'))
       setFlights(prevFlights)
     }
   }
@@ -236,14 +253,14 @@ useEffect(() => {
   // ── Réorganisation manuelle des départs ──────────────────────────────────
   function moveFlight(fromIdx: number, toIdx: number) {
     if (fromIdx === toIdx) return
-    setFlights(prev => {
-      const next = [...prev]
-      const [moved] = next.splice(fromIdx, 1)
-      next.splice(toIdx, 0, moved)
-      const renumbered = next.map((f, i) => ({ ...f, flight_number: i + 1 }))
-      persistOrder(renumbered)
-      return renumbered
-    })
+    // Le calcul se fait ICI, pas dans la fonction passée à setFlights : React peut appeler celle-ci
+    // plusieurs fois, et elle ne doit contenir aucun effet de bord (comme l'écriture en base).
+    const next = [...flights]
+    const [moved] = next.splice(fromIdx, 1)
+    next.splice(toIdx, 0, moved)
+    const renumbered = next.map((f, i) => ({ ...f, flight_number: i + 1 }))
+    setFlights(renumbered)
+    persistOrder(renumbered)
   }
 
   async function persistOrder(orderedFlights: Flight[]) {
@@ -253,14 +270,19 @@ useEffect(() => {
       // d'unicité sur (event_id, flight_number) : on passe d'abord tous les
       // flights concernés par des valeurs temporaires négatives uniques,
       // puis on écrit les numéros finaux.
-      await Promise.all(orderedFlights.map((f, i) =>
-        supabase.from('flights').update({ flight_number: -(i + 1) }).eq('id', f.id)
-      ))
-      const results = await Promise.all(orderedFlights.map((f, i) =>
-        supabase.from('flights').update({ flight_number: i + 1 }).eq('id', f.id)
-      ))
-      const firstError = results.find(r => r.error)?.error
-      if (firstError) throw firstError
+      // Chaque écriture est vérifiée : une erreur, OU une écriture acceptée sans modifier aucune ligne
+      // (droits d'accès refusés sans message), arrête tout et resynchronise l'écran avec la base.
+      const verify = (results: { error: { message: string } | null; data: unknown[] | null }[]) => {
+        const firstError = results.find(r => r.error)?.error
+        if (firstError) throw firstError
+        if (results.some(r => !r.data || r.data.length === 0)) throw new Error(t('teesheet.notSavedRights'))
+      }
+      verify(await Promise.all(orderedFlights.map((f, i) =>
+        supabase.from('flights').update({ flight_number: -(i + 1) }).eq('id', f.id).select('id')
+      )))
+      verify(await Promise.all(orderedFlights.map((f, i) =>
+        supabase.from('flights').update({ flight_number: i + 1 }).eq('id', f.id).select('id')
+      )))
     } catch (e: any) {
       toast.error(t('teesheet.errorSaveOrder', { detail: e.message ?? t('teesheet.tryAgain') }))
       loadData(selectedEventId) // resynchronise avec la base en cas d'échec partiel
@@ -400,7 +422,7 @@ useEffect(() => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-    <select value={interval} onChange={e => setInterval(Number(e.target.value))}
+    <select value={interval} onChange={e => changeInterval(Number(e.target.value))} disabled={!isOwner}
       className="border border-slate-200 rounded-xl px-2 py-1.5 text-[12px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30">
       {[6,7,8,9,10,12,15].map(v => <option key={v} value={v}>{t('teesheet.intervalUnit', { count: v })}</option>)}
     </select>

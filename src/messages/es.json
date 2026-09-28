@@ -125,7 +125,9 @@
     "errorSaveTime": "Error al guardar la hora — inténtalo de nuevo",
     "errorResetTime": "Error al restablecer la hora — inténtalo de nuevo",
     "errorSaveOrder": "Error al guardar el orden — {detail}",
-    "tryAgain": "inténtalo de nuevo"
+    "tryAgain": "inténtalo de nuevo",
+    "errorSaveInterval": "Error al guardar el intervalo — inténtalo de nuevo",
+    "notSavedRights": "No guardado: no se modificó nada en la base de datos (¿faltan derechos de acceso en este evento?)"
   },
   "calendar": {
     "months": [

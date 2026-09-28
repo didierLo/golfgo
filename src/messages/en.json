@@ -126,7 +126,9 @@
     "errorSaveTime": "Error saving the time — please try again",
     "errorResetTime": "Error resetting the time — please try again",
     "errorSaveOrder": "Error saving the order — {detail}",
-    "tryAgain": "please try again"
+    "tryAgain": "please try again",
+    "errorSaveInterval": "Error saving the interval — please try again",
+    "notSavedRights": "Not saved: nothing was changed in the database (missing access rights on this event?)"
   },
   "calendar": {
     "months": [

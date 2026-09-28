@@ -125,7 +125,9 @@
     "errorSaveTime": "Fehler beim Speichern der Zeit — bitte erneut versuchen",
     "errorResetTime": "Fehler beim Zurücksetzen der Zeit — bitte erneut versuchen",
     "errorSaveOrder": "Fehler beim Speichern der Reihenfolge — {detail}",
-    "tryAgain": "bitte erneut versuchen"
+    "tryAgain": "bitte erneut versuchen",
+    "errorSaveInterval": "Fehler beim Speichern des Abstands — bitte erneut versuchen",
+    "notSavedRights": "Nicht gespeichert: in der Datenbank wurde nichts geändert (fehlende Zugriffsrechte für diese Veranstaltung?)"
   },
   "calendar": {
     "months": [
