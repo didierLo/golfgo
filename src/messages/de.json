@@ -895,7 +895,9 @@
     "inviteRegenLoading": "Generieren…",
     "inviteNoLink": "Kein aktiver Link für diese Gruppe.",
     "inviteGenerate": "🔗 Einladungslink generieren",
-    "removeFailed": "Die Entfernung wurde nicht durchgeführt (unzureichende Rechte?). Versuchen Sie es erneut oder kontaktieren Sie den Support."
+    "removeFailed": "Die Entfernung wurde nicht durchgeführt (unzureichende Rechte?). Versuchen Sie es erneut oder kontaktieren Sie den Support.",
+    "adminsIncluded": "davon {count} Admin(s)",
+    "guestsCount": "{count} Besucher"
   },
   "addMember": {
     "title": "Mitglied hinzufügen",
@@ -967,7 +969,8 @@
     "events": "Veranstaltung(en)",
     "next": "nächste",
     "deleteConfirm": "Diese Gruppe löschen?",
-    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen"
+    "adminOnly": "Sie müssen Administrator sein, um diese Funktion zu nutzen",
+    "guestsCount": "{count} Besucher"
   },
   "editPlayer": {
     "title": "Spielerprofil bearbeiten",

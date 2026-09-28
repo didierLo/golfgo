@@ -895,7 +895,9 @@
     "inviteRegenLoading": "Generando…",
     "inviteNoLink": "No hay enlace activo para este grupo.",
     "inviteGenerate": "🔗 Generar enlace de invitación",
-    "removeFailed": "La baja no se realizó (¿permisos insuficientes?). Vuelve a intentarlo o contacta con soporte."
+    "removeFailed": "La baja no se realizó (¿permisos insuficientes?). Vuelve a intentarlo o contacta con soporte.",
+    "adminsIncluded": "de los cuales {count} admin(s)",
+    "guestsCount": "{count} visitante(s)"
   },
   "addMember": {
     "title": "Añadir un miembro",
@@ -967,7 +969,8 @@
     "events": "evento(s)",
     "next": "siguiente",
     "deleteConfirm": "¿Eliminar este grupo?",
-    "adminOnly": "Debes ser administrador para usar esta función"
+    "adminOnly": "Debes ser administrador para usar esta función",
+    "guestsCount": "{count} visitante(s)"
   },
   "editPlayer": {
     "title": "Editar perfil del jugador",

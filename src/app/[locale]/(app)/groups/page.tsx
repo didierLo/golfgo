@@ -9,7 +9,7 @@ const supabase = createClient()
 
 type Group = {
   id: string; name: string; color: string | null
-  members_count: number; events_count: number; next_event: string | null
+  members_count: number; guests_count: number; events_count: number; next_event: string | null
   role: string | null
 }
 
@@ -59,10 +59,22 @@ export default function GroupsPage() {
 
   if (error) { console.error(error); setLoading(false); return }
 
+  // Membres = membres + administrateurs, sans les visiteurs. Un simple membre ne voit qu'UNE ligne de la table
+  // des appartenances (la sienne) : l'ancien comptage direct affichait donc « 1 membre » pour lui. Ces nombres
+  // viennent d'une fonction SQL réservée aux personnes du groupe ; si elle n'est pas encore installée, on retombe
+  // sur l'ancien comptage plutôt que de casser la page.
+  const groupIds = (data ?? []).map((row: { groups?: { id?: string } }) => row.groups?.id).filter((id): id is string => !!id)
+  const { data: counts, error: countsError } = groupIds.length
+    ? await supabase.rpc('group_member_counts', { p_group_ids: groupIds })
+    : { data: [], error: null }
+  const countById = new Map<string, { members: number; guests: number }>()
+  if (!countsError) (counts ?? []).forEach((c: { group_id: string; members: number | string; guests: number | string }) => countById.set(c.group_id, { members: Number(c.members), guests: Number(c.guests) }))
+
   setGroups((data ?? []).map((row: any) => ({
     ...row.groups,
     role: row.role,
-    members_count: row.groups.members_count?.[0]?.count ?? 0,
+    members_count: countById.get(row.groups.id)?.members ?? row.groups.members_count?.[0]?.count ?? 0,
+    guests_count:  countById.get(row.groups.id)?.guests ?? 0,
     events_count: row.groups.events_count?.[0]?.count ?? 0,
     next_event: row.groups.next_event
       ?.filter((e: any) => e.starts_at >= new Date().toISOString())
@@ -147,7 +159,7 @@ export default function GroupsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-semibold text-slate-900">{group.name}</div>
                   <div className="text-[12px] text-slate-500 mt-0.5 flex items-center gap-1.5">
-                    <span>{group.members_count} {t('groups.members')}</span>
+                    <span>{group.members_count} {t('groups.members')}{group.guests_count > 0 && ` · ${t('groups.guestsCount', { count: group.guests_count })}`}</span>
                     <span>·</span>
                     <span>{group.events_count} {t('groups.events')}</span>
                     {group.next_event && (

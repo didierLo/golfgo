@@ -896,7 +896,9 @@
     "inviteRegenLoading": "Génération…",
     "inviteNoLink": "Aucun lien actif pour ce groupe.",
     "inviteGenerate": "🔗 Générer le lien d'invitation",
-    "removeFailed": "Le retrait n'a pas été effectué (droits insuffisants ?). Réessaie ou contacte le support."
+    "removeFailed": "Le retrait n'a pas été effectué (droits insuffisants ?). Réessaie ou contacte le support.",
+    "adminsIncluded": "dont {count} admin(s)",
+    "guestsCount": "{count} visiteur(s)"
   },
   "addMember": {
     "title": "Ajouter un membre",
@@ -968,7 +970,8 @@
     "events": "événement(s)",
     "next": "suivant",
     "deleteConfirm": "Supprimer ce groupe ?",
-    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité"
+    "adminOnly": "Vous devez être administrateur pour utiliser cette fonctionnalité",
+    "guestsCount": "{count} visiteur(s)"
   },
   "editPlayer": {
     "title": "Modifier le profil du joueur",

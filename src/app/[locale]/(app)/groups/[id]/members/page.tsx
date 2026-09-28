@@ -155,6 +155,14 @@ export default function MembersPage() {
   const [userRole,     setUserRole]     = useState<string | null>(null)
   const [toast,        setToast]        = useState<string | null>(null)
   const [showInvite,   setShowInvite]   = useState(false)
+
+  // Compteur : membres + administrateurs (les administrateurs SONT des membres), visiteurs comptés à part.
+  const adminCount = members.filter(m => m.role === 'owner').length
+  const guestCount = members.filter(m => m.role === 'guest').length
+  const countLabel =
+    t('members.subtitle', { count: members.length - guestCount })
+    + (adminCount > 0 ? ' ' + t('members.adminsIncluded', { count: adminCount }) : '')
+    + (guestCount > 0 ? ' · ' + t('members.guestsCount', { count: guestCount }) : '')
  
   
 
@@ -237,7 +245,7 @@ export default function MembersPage() {
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8" /><title>${t('members.title')}</title>
       <style>body{font-family:sans-serif;color:#0F172A;margin:0;padding:32px;}h1{font-size:22px;font-weight:900;margin:0 0 4px;}p{font-size:13px;color:#64748B;margin:0 0 24px;}table{width:100%;border-collapse:collapse;}thead tr{background:#F8FAFC;}thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748B;border-bottom:2px solid #E2E8F0;}thead th:nth-child(2){text-align:center;}</style>
       </head><body>
-      <h1>${t('members.title')}</h1><p>${members.length} ${t('members.subtitle', { count: '' }).trim()}</p>
+      <h1>${t('members.title')}</h1><p>${countLabel}</p>
       <table><thead><tr><th>${t('members.member')}</th><th>${t('members.whs')}</th><th>${t('members.status')}</th></tr></thead>
       <tbody>${rows}</tbody></table></body></html>`
 
@@ -287,7 +295,7 @@ export default function MembersPage() {
           {t('common.back')}
         </button>
                   <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('members.title')}</h1>
-          <p className="text-[13px] text-slate-900 mt-0.5">{t('members.subtitle', { count: members.length })}</p>
+          <p className="text-[13px] text-slate-900 mt-0.5">{countLabel}</p>
         </div>
         <div className="flex items-center gap-1.5">
           <button type="button" onClick={printList}

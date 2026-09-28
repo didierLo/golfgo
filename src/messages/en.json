@@ -896,7 +896,9 @@
     "inviteRegenLoading": "Generating…",
     "inviteNoLink": "No active link for this group.",
     "inviteGenerate": "🔗 Generate invitation link",
-    "removeFailed": "The removal did not go through (insufficient permissions?). Try again or contact support."
+    "removeFailed": "The removal did not go through (insufficient permissions?). Try again or contact support.",
+    "adminsIncluded": "including {count} admin(s)",
+    "guestsCount": "{count} visitor(s)"
   },
   "addMember": {
     "title": "Add a member",
@@ -968,7 +970,8 @@
     "events": "event(s)",
     "next": "next",
     "deleteConfirm": "Delete this group?",
-    "adminOnly": "You must be an admin to use this feature"
+    "adminOnly": "You must be an admin to use this feature",
+    "guestsCount": "{count} visitor(s)"
   },
   "editPlayer": {
     "title": "Edit player profile",

@@ -894,7 +894,9 @@
     "inviteRegenLoading": "Genereren…",
     "inviteNoLink": "Geen actieve link voor deze groep.",
     "inviteGenerate": "🔗 Uitnodigingslink genereren",
-    "removeFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support."
+    "removeFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support.",
+    "adminsIncluded": "waarvan {count} admin(s)",
+    "guestsCount": "{count} bezoeker(s)"
   },
   "addMember": {
     "title": "Lid toevoegen",
@@ -966,7 +968,8 @@
     "events": "evenement(en)",
     "next": "volgende",
     "deleteConfirm": "Deze groep verwijderen?",
-    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken"
+    "adminOnly": "U moet beheerder zijn om deze functie te gebruiken",
+    "guestsCount": "{count} bezoeker(s)"
   },
   "editPlayer": {
     "title": "Spelersprofiel bewerken",
