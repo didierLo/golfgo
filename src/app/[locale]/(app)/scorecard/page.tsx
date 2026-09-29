@@ -84,6 +84,7 @@ export default function MyScorecardPage() {
   const [isPastEvent, setIsPastEvent]           = useState(false)
   const [isValidated, setIsValidated]           = useState(false)   // clôture par l'organisateur (tout l'événement)
   const [sentIds, setSentIds]                   = useState<Set<string>>(new Set())  // joueurs dont la carte est envoyée
+  const [resetting, setResetting]               = useState(false)
 
 const [allFlights, setAllFlights]             = useState<PrintPlayer[][]>([])
 const [teamFormat, setTeamFormat]             = useState<TeamFormat>('individual')
@@ -168,6 +169,39 @@ useEffect(() => {
   // Envoie la carte des joueurs du flight qui ont des scores et ne l'ont pas encore envoyée.
   // Chacun peut envoyer pour lui seul, pour une partie du flight ou pour tout le flight :
   // les scores viennent de la base, donc ceux saisis sur les autres téléphones sont inclus.
+  // Réinitialise UNIQUEMENT la carte du joueur connecté (ou de son équipe en team2/team3_4) :
+  // efface ses scores et, si elle était envoyée, l'annule. Les autres joueurs du flight ne sont pas touchés.
+  async function handleResetMyCard(targetIds: string[], label: string) {
+    const scId = scorecardRef.current; const evId = eventRef.current
+    if (!scId || !evId || isValidated || targetIds.length === 0) return
+    if (!window.confirm(t('scorecard.resetConfirm', { name: label }))) return
+    setResetting(true)
+    try {
+      // abandonne les saisies en attente pour ces joueurs, enregistre celles des autres
+      pendingRef.current.forEach((c, k) => { if (targetIds.includes(c.pid)) pendingRef.current.delete(k) })
+      await flushPending()
+
+      const { error: e1 } = await supabase.from('saved_scorecards').delete()
+        .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', targetIds)
+      if (e1) throw e1
+      const { error: e2 } = await supabase.from('scores').delete()
+        .eq('scorecard_id', scId).eq('event_id', evId).in('player_id', targetIds)
+      if (e2) throw e2
+
+      const map: ScoreMap = { ...scoresRef.current }
+      targetIds.forEach(id => { map[id] = {} })
+      scoresRef.current = map; setScores(map)
+      const next = new Set(sentIdsRef.current); targetIds.forEach(id => next.delete(id))
+      markSent(next)
+      setSaveStatus('idle')
+      toast.success(t('scorecard.resetDone'))
+    } catch (e) {
+      console.error('reset scorecard error', e)
+      Sentry.captureException(e)
+      toast.error(t('scorecard.retryError'))
+    } finally { setResetting(false) }
+  }
+
   async function handleSignScorecard() {
     const scId = scorecardRef.current; const evId = eventRef.current
     if (!scId || !evId || isValidated) return
@@ -551,6 +585,17 @@ useEffect(() => {
   const cardPlayers = buildCardPlayers(activeGroup.length ? activeGroup : (activePlayer ? [activePlayer] : []))
   const cardLocked  = cardPlayers.length > 0 && cardPlayers.every(e => sentIds.has(e.id))
 
+  // "Ma carte" : en individuel / 4BBB c'est moi ; en team2/team3_4 c'est la carte d'équipe (ancre)
+  const myGroup     = teamGroups.find(g => g.some(p => p.id === playerId)) ?? []
+  const myCardIds   = teamFormat === 'team2' || teamFormat === 'team3_4'
+    ? buildCardPlayers(myGroup).map(e => e.id)
+    : (playerId ? [playerId] : [])
+  const myHasData   = myCardIds.some(id => sentIds.has(id) || Object.keys(scores[id] ?? {}).length > 0)
+  const myLabel     = myGroup.length > 1 && (teamFormat === 'team2' || teamFormat === 'team3_4')
+    ? myGroup.map(p => p.first_name).join(', ')
+    : t('scorecard.myCard')
+  const canReset    = !isValidated && !isPastEvent && myHasData
+
   return (
    <div className="p-5 sm:p-6 max-w-2xl">
       <h1 className="text-[22px] font-black text-slate-900 tracking-tight mb-4">{t('scorecard.title')}</h1>
@@ -715,6 +760,15 @@ useEffect(() => {
             readOnly={isReadOnly || cardLocked}
             lockedIds={Array.from(sentIds)}
           />
+        </div>
+      )}
+
+      {!scorecardLoading && activePlayer && canReset && (
+        <div className="flex justify-center mt-4">
+          <button onClick={() => handleResetMyCard(myCardIds, myLabel)} disabled={resetting || saving}
+            className="text-[12px] font-semibold px-4 py-2 rounded-xl border border-red-200 bg-white text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors">
+            {resetting ? '⏳' : '↺'} {t('scorecard.resetMine')}
+          </button>
         </div>
       )}
 
