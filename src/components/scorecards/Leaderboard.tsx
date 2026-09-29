@@ -27,8 +27,6 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
 
   const [entries,   setEntries]   = useState<LeaderboardEntry[]>([])
   const [loading,   setLoading]   = useState(true)
-  const [savingLb,  setSavingLb]  = useState(false)
-  const [saveMsgLb, setSaveMsgLb] = useState('')
 
   useEffect(() => { if (players.length > 0 && holes.length > 0) loadScores() }, [scorecardId, players, holes])
 
@@ -52,18 +50,6 @@ export default function Leaderboard({ eventId, scorecardId, players, holes, even
     })
     built.sort((a, b) => isStableford ? b.score - a.score : a.score - b.score)
     setEntries(built)
-  }
-
-  async function handleSaveLeaderboard() {
-    setSavingLb(true); setSaveMsgLb('')
-    try {
-      await supabase.from('leaderboard').upsert(
-        entries.map(e => ({ player_id: e.player.id, total: e.score })),
-        { onConflict: 'player_id' }
-      )
-      setSaveMsgLb('✓ ' + t('scorecards.saved'))
-    } catch { setSaveMsgLb(t('scorecards.error')) }
-    finally { setSavingLb(false); setTimeout(() => setSaveMsgLb(''), 3000) }
   }
 
   if (loading) return <div className="text-[13px] text-slate-400 py-4">{t('common.loading')}</div>

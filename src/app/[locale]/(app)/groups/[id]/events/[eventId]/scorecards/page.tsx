@@ -212,10 +212,6 @@ export default function ScorecardsPage() {
 
       if (isOwner) for (const u of teeUpdates) await supabase.from('event_participants').update({ tee_id: u.tee_id }).eq('event_id', activeEventId).eq('player_id', u.player_id)
       if (scId && built.length > 0) {
-        if (isOwner) {
-          const { count } = await supabase.from('scorecard_players').select('*', { count: 'exact', head: true }).eq('scorecard_id', scId)
-          if (count === 0) await supabase.from('scorecard_players').insert(built.map((p, i) => ({ scorecard_id: scId, player_id: p.id, position: i + 1 })))
-        }
         const playerIds = built.map(p => p.id)
         const [{ data: savedData }, { data: scoresData }] = await Promise.all([
           supabase.from('saved_scorecards').select('player_id, hole, strokes').eq('scorecard_id', scId).eq('event_id', activeEventId).in('player_id', playerIds),
@@ -239,7 +235,6 @@ export default function ScorecardsPage() {
 
   async function handleRemovePlayer(playerId: string) {
     if (!isOwner || !scorecardId) return
-    await supabase.from('scorecard_players').delete().eq('scorecard_id', scorecardId).eq('player_id', playerId)
     const remaining = players.filter(p => p.id !== playerId)
     setPlayers(remaining); if (activePlayerId === playerId) setActivePlayerId(remaining[0]?.id ?? null)
   }
