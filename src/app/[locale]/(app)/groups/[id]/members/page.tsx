@@ -11,134 +11,9 @@ const supabase = createClient()
 
 type Member  = { id: string; surname: string; first_name: string; whs: number | null; role: string }
 type SortKey = 'first_name' | 'surname'
-type InviteLink = { id: string; token: string; expires_at: string } | null
 
 
 
-
-// ─── QR Code (via api.qrserver.com — pas de lib) ──────────────────────────
-function QRCode({ url }: { url: string }) {
-  const src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`
-  return <img src={src} alt="QR Code" width={160} height={160} className="rounded-xl border border-slate-100" />
-}
-
-// ─── Modal lien d'invitation ──────────────────────────────────────────────
-function InviteModal({
-  groupId,
-  onClose,
-}: {
-  groupId: string
-  onClose: () => void
-}) {
-  const [link,      setLink]      = useState<InviteLink>(null)
-  const [loading,   setLoading]   = useState(true)
-  const [copying,   setCopying]   = useState(false)
-  const [regen,     setRegen]     = useState(false)
-  
-  const t = useTranslations() 
-
-  const inviteUrl = link ? `${window.location.origin}/join/${link.token}` : ''
-
-  useEffect(() => { loadLink() }, [])
-
-  async function loadLink() {
-    setLoading(true)
-    const { data } = await supabase
-      .from('group_invite_links')
-      .select('id, token, expires_at')
-      .eq('group_id', groupId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    setLink(data)
-    setLoading(false)
-  }
-
-  async function generateLink() {
-    setRegen(true)
-    // Supprimer l'ancien lien s'il existe
-    if (link) {
-      await supabase.from('group_invite_links').delete().eq('id', link.id)
-    }
-    const { data } = await supabase
-      .from('group_invite_links')
-      .insert({ group_id: groupId })
-      .select('id, token, expires_at')
-      .single()
-    setLink(data)
-    setRegen(false)
-  }
-
-  async function copyLink() {
-    if (!inviteUrl) return
-    await navigator.clipboard.writeText(inviteUrl)
-    setCopying(true)
-    setTimeout(() => setCopying(false), 2000)
-  }
-
-  const expiresLabel = link
-    ? new Date(link.expires_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
-    : ''
-
-  const isExpired = link ? new Date(link.expires_at) < new Date() : false
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(15,23,42,0.45)', backdropFilter: 'blur(4px)' }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
-        <button onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-[18px] leading-none">✕</button>
-
-        <h2 className="text-[16px] font-bold text-slate-900 mb-1">{t('members.inviteTitle')}</h2>
-        <p className="text-[12px] text-slate-500 mb-5">{t('members.inviteDesc')}</p>
-
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="w-8 h-8 border-2 border-[#185FA5] border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : link && !isExpired ? (
-          <>
-            {/* QR Code */}
-            <div className="flex justify-center mb-4">
-              <QRCode url={inviteUrl} />
-            </div>
-
-            {/* Lien */}
-            <div className="bg-slate-50 rounded-xl px-3 py-2.5 mb-3 flex items-center gap-2">
-              <span className="text-[11px] text-slate-600 truncate flex-1">{inviteUrl}</span>
-              <button onClick={copyLink}
-                className="flex-shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
-               {copying ? t('members.inviteCopied') : t('members.inviteCopy')}
-              </button>
-            </div>
-
-            <p className="text-[11px] text-slate-400 text-center mb-4">
-              {isExpired ? t('members.inviteExpired') : t('members.inviteExpires', { date: expiresLabel })}
-            </p>
-
-            <button onClick={generateLink} disabled={regen}
-              className="w-full text-[12px] font-semibold py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors disabled:opacity-40">
-              {regen ? t('members.inviteRegenLoading') : t('members.inviteRegen')}
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="text-center py-6 text-slate-400 text-[13px] mb-4">
-              {isExpired ? t('members.inviteExpired') : t('members.inviteNoLink')}
-            </div>
-            <button onClick={generateLink} disabled={regen}
-              className="w-full bg-[#185FA5] text-white text-[13px] font-semibold py-2.5 rounded-xl hover:bg-[#0C447C] transition-colors disabled:opacity-40">
-              {regen ? t('members.inviteRegenLoading') : t('members.inviteGenerate')}
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // ─── Page principale ──────────────────────────────────────────────────────
 export default function MembersPage() {
@@ -154,7 +29,6 @@ export default function MembersPage() {
   const [sortKey,      setSortKey]      = useState<SortKey>('surname')
   const [userRole,     setUserRole]     = useState<string | null>(null)
   const [toast,        setToast]        = useState<string | null>(null)
-  const [showInvite,   setShowInvite]   = useState(false)
 
   // Compteur : membres + administrateurs (les administrateurs SONT des membres), visiteurs comptés à part.
   const adminCount = members.filter(m => m.role === 'owner').length
@@ -268,11 +142,6 @@ export default function MembersPage() {
   return (
     <div className="p-5 sm:p-6">
 
-      {/* Modal invite */}
-      {showInvite && (
-        <InviteModal groupId={groupId} onClose={() => setShowInvite(false)} />
-      )}
-
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-[13px] font-medium px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
@@ -320,13 +189,6 @@ export default function MembersPage() {
           }`}>
           + {t('members.addMember')}
         </button>
-
-        {userRole === 'owner' && (
-        <button onClick={() => setShowInvite(true)}
-          className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl border border-[#185FA5] text-[#185FA5] hover:bg-[#EBF3FC] transition-colors">
-          {t('members.inviteTitle')}
-          </button>
-        )}
       </div>
 
      
