@@ -5,6 +5,7 @@ import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
 import { getGroupOwners } from '@/lib/groups/owner'
+import { requireGroupOwner } from '@/lib/groups/requireOwner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
@@ -209,6 +210,9 @@ export async function POST(req: Request) {
     if (!groupId || !playerIds?.length || !commSubject || !commBody) {
       return Response.json({ success: false, error: 'Paramètres manquants' }, { status: 400 })
     }
+
+    const auth = await requireGroupOwner(groupId)
+    if (!auth.ok) return Response.json({ success: false, error: 'Unauthorized' }, { status: auth.status })
 
     const supabase = await createServerClient()
     const gl: Locale = await getGroupLocale(supabase, groupId)   // langue du groupe

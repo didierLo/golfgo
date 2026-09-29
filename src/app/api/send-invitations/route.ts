@@ -4,6 +4,7 @@ import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
 import { getGroupOwners } from '@/lib/groups/owner'
+import { requireGroupOwner } from '@/lib/groups/requireOwner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
@@ -241,6 +242,9 @@ export async function POST(req: Request) {
 if (evErr || !event) {
   return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
 }
+
+const auth = await requireGroupOwner(event.group_id)
+if (!auth.ok) return Response.json({ success: false, error: 'Unauthorized' }, { status: auth.status })
 
 
 const [{ data: groupData }, { data: participants, error: pErr }] = await Promise.all([

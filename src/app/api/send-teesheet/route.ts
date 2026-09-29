@@ -5,6 +5,7 @@ import { buildTeesheetHtml, type TeesheetFlight } from '@/lib/email/buildTeeshee
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale } from '@/lib/i18n/server'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { geocodeEventLocation, fetchHourlyWindow } from '@/lib/weather'
+import { requireGroupOwner } from '@/lib/groups/requireOwner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
@@ -50,6 +51,11 @@ export async function POST(req: Request) {
     ])
 
     if (!event) return Response.json({ success: false, error: 'Event introuvable' }, { status: 404 })
+
+    if (!isCron) {
+      const auth = await requireGroupOwner(event.group_id)
+      if (!auth.ok) return Response.json({ success: false, error: 'Unauthorized' }, { status: auth.status })
+    }
 
     // ── Logo du groupe ────────────────────────────────────────────────────
     const { data: groupData } = await supabase

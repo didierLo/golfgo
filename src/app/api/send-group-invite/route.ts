@@ -3,6 +3,7 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { getGroupLocale, serverT, type Locale, type EmailT } from '@/lib/i18n/server'
 import { getGroupOwners } from '@/lib/groups/owner'
+import { requireGroupOwner } from '@/lib/groups/requireOwner'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -133,6 +134,9 @@ export async function POST(req: Request) {
     if (!groupId || !emails?.length) {
       return Response.json({ success: false, error: 'groupId et emails requis' }, { status: 400 })
     }
+
+    const auth = await requireGroupOwner(groupId)
+    if (!auth.ok) return Response.json({ success: false, error: 'Unauthorized' }, { status: auth.status })
 
     const supabase = await createServerClient()
 

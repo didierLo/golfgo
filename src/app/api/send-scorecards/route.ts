@@ -5,6 +5,7 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 import { getTeamGroups, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
+import { requireGroupOwner } from '@/lib/groups/requireOwner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 
@@ -24,6 +25,9 @@ export async function POST(req: Request) {
 
     if (!event) return Response.json({ success: false, error: 'Événement introuvable' }, { status: 404 })
     if (!event.course_id) return Response.json({ success: false, error: 'Aucun parcours lié à cet événement' }, { status: 400 })
+
+    const auth = await requireGroupOwner(event.group_id)
+    if (!auth.ok) return Response.json({ success: false, error: 'Unauthorized' }, { status: auth.status })
 
     const gl: Locale = await getGroupLocale(supabase, event.group_id)   // langue du groupe
     const t  = serverT(gl)
