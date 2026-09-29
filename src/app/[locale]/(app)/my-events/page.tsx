@@ -370,11 +370,11 @@ function PhotoModal({ eventId, onClose, onUploaded }: { eventId: string; onClose
       .eq('event_id', eventId)
       .order('created_at', { ascending: false })
 
-    const mapped = (data || []).map((row: { id: string; storage_path: string; uploaded_by: string | null }) => ({
-      id:          row.id,
-      storagePath: row.storage_path,
-      uploadedBy:  row.uploaded_by,
-      url:         supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl,
+    // Le compartiment est privé (photos réservées aux membres du groupe) : chaque adresse doit être
+    // signée, temporairement valable, plutôt qu'une simple adresse publique qui ne fonctionnerait plus.
+    const mapped = await Promise.all((data || []).map(async (row: { id: string; storage_path: string; uploaded_by: string | null }) => {
+      const { data: signed } = await supabase.storage.from('event-photos').createSignedUrl(row.storage_path, 60 * 60 * 6)
+      return { id: row.id, storagePath: row.storage_path, uploadedBy: row.uploaded_by, url: signed?.signedUrl ?? '' }
     }))
     setPhotos(mapped)
     setLoading(false)

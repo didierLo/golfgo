@@ -26,10 +26,11 @@ function PhotoUploader({ eventId }: { eventId: string }) {
     .eq('event_id', eventId)
     .order('created_at', { ascending: false })
 
- const withUrls = (data || []).map((row: { id: string; storage_path: string }) => ({
-    id: row.id,
-    path: row.storage_path,
-    url: supabase.storage.from('event-photos').getPublicUrl(row.storage_path).data.publicUrl
+ // Le compartiment est privé (photos réservées aux membres du groupe) : chaque adresse doit être
+  // signée, temporairement valable, plutôt qu'une simple adresse publique qui ne fonctionnerait plus.
+  const withUrls = await Promise.all((data || []).map(async (row: { id: string; storage_path: string }) => {
+    const { data: signed } = await supabase.storage.from('event-photos').createSignedUrl(row.storage_path, 60 * 60 * 6)
+    return { id: row.id, path: row.storage_path, url: signed?.signedUrl ?? '' }
   }))
 
   setPhotos(withUrls)
