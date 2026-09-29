@@ -64,6 +64,7 @@ export default function ScorecardTable({ holes, players, scores, setScores, even
   function updateScore(pid: string, hole: number, delta: number, par: number) {
     if (readOnly) return
     setScores((prev: ScoreMap) => {
+      // Trou vide : on part du par (− = par-1, + = par+1, toucher le chiffre = par)
       const current = prev[pid]?.[hole] ?? par
       return { ...prev, [pid]: { ...prev[pid], [hole]: Math.max(1, current + delta) } }
     })
@@ -159,6 +160,7 @@ function HoleBlock({ h, players, scores, onUpdate, isStableford, readOnly }: Hol
                 defaultValue={h.par}
                 onDecrement={() => onUpdate(row.player.id, h.hole_number, -1, h.par)}
                 onIncrement={() => onUpdate(row.player.id, h.hole_number, +1, h.par)}
+                onSetDefault={() => onUpdate(row.player.id, h.hole_number, 0, h.par)}
                 readOnly={readOnly}
               />
             </td>

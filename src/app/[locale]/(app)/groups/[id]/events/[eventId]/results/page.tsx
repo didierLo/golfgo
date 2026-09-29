@@ -12,6 +12,7 @@ import { getTeamGroups, playingHcp, teamPhcp } from '@/lib/golf/scorecards/compo
 import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
 import { useTranslations, useLocale } from 'next-intl'
+import * as Sentry from '@sentry/nextjs'
 
 const supabase = createClient()
 
@@ -137,6 +138,10 @@ export default function ResultsPage() {
   const selectedRef = useRef(selectedId)
   const scoresRef   = useRef<ScoreMap>({})
   const pollTimer   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const saveTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // true tant que des modifications de l'organisateur ne sont pas encore enregistrées :
+  // empêche le rafraîchissement automatique (30 s) d'écraser la saisie en cours
+  const dirtyRef    = useRef(false)
 
   useEffect(() => { selectedRef.current = selectedId }, [selectedId])
 
@@ -164,6 +169,7 @@ export default function ResultsPage() {
     const scId    = scIdRef.current
     const players = playersRef.current
     if (!scId || players.length === 0) return
+    if (dirtyRef.current) return
     const evId = selectedRef.current
     const { data: scoresData } = await supabase.from('scores')
       .select('player_id, hole, strokes')
@@ -171,7 +177,8 @@ export default function ResultsPage() {
       .in('player_id', players.map(p => p.id))
     const map: ScoreMap = {}
     players.forEach(p => { map[p.id] = {} })
-    scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+    scoresData?.forEach(s => { if (map[s.player_id]) map[s.player_id][s.hole] = s.strokes })
+    if (dirtyRef.current) return   // une saisie a commencé pendant la requête : on ne l'écrase pas
     setScores(map); scoresRef.current = map; setLastRefresh(new Date())
   }
 
@@ -236,7 +243,7 @@ export default function ResultsPage() {
           .eq('scorecard_id', scId).eq('event_id', evtId).in('player_id', built.map(p => p.id))
         const map: ScoreMap = {}
         built.forEach(p => { map[p.id] = {} })
-        scoresData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+        scoresData?.forEach(s => { if (map[s.player_id]) map[s.player_id][s.hole] = s.strokes })
         setScores(map); scoresRef.current = map
       } else { setScores({}); scoresRef.current = {} }
       setLastRefresh(new Date())
@@ -244,23 +251,54 @@ export default function ResultsPage() {
     finally { setLoading(false) }
   }
 
+  // Enregistre dans `scores` — la table lue par le classement et par les autres pages
+  // (avant : écrivait dans saved_scorecards, que le classement ne lit pas, et la saisie
+  //  était ensuite écrasée par le rafraîchissement automatique)
+  async function saveScores(): Promise<boolean> {
+    const scId = scIdRef.current
+    const evId = selectedRef.current
+    if (!scId || !evId) return false
+    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
+    const rows = playersRef.current.flatMap(player =>
+      Object.entries(scoresRef.current[player.id] ?? {})
+        .filter(([, s]) => s != null)
+        .map(([hole, strokes]) => ({
+          scorecard_id: scId, event_id: evId,
+          player_id: player.id, hole: Number(hole), strokes: strokes as number,
+        }))
+    )
+    try {
+      if (rows.length > 0) {
+        const { error } = await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+        if (error) throw error
+      }
+      dirtyRef.current = false
+      return true
+    } catch (e) {
+      console.error('results save error', e)
+      Sentry.captureException(e)
+      return false
+    }
+  }
+
+  function handleOwnerEdit(newScores: ScoreMap | ((prev: ScoreMap) => ScoreMap)) {
+    const updated = typeof newScores === 'function' ? newScores(scoresRef.current) : newScores
+    scoresRef.current = updated
+    setScores(updated)
+    dirtyRef.current = true
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(async () => {
+      const ok = await saveScores()
+      if (!ok) { setSaveMsgSc(t('scorecards.error')); setTimeout(() => setSaveMsgSc(''), 3000) }
+    }, 800)
+  }
+
   async function handleSaveScorecard() {
     if (!scorecardId) return
     setSavingSc(true); setSaveMsgSc('')
-    try {
-      const rows = playersRef.current.flatMap(player =>
-        Object.entries(scoresRef.current[player.id] ?? {})
-          .filter(([, s]) => s != null)
-          .map(([hole, strokes]) => ({
-            scorecard_id: scorecardId, event_id: selectedId,
-            player_id: player.id, hole: Number(hole), strokes: strokes as number,
-            saved_at: new Date().toISOString(),
-          }))
-      )
-      if (rows.length > 0) await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
-      setSaveMsgSc(t('scorecards.saved'))
-    } catch { setSaveMsgSc(t('scorecards.error')) }
-    finally { setSavingSc(false); setTimeout(() => setSaveMsgSc(''), 3000) }
+    const ok = await saveScores()
+    setSaveMsgSc(ok ? t('scorecards.saved') : t('scorecards.error'))
+    setSavingSc(false); setTimeout(() => setSaveMsgSc(''), 3000)
   }
 
   function buildWhatsAppLeaderboard(): string {
@@ -334,7 +372,10 @@ export default function ResultsPage() {
     </div>
   </div>
   <EventPill events={events} selectedId={selectedId}
-    onSelect={id => { setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`) }} />
+    onSelect={async id => {
+      if (dirtyRef.current) await saveScores()   // enregistre la saisie en cours avant de changer d'événement
+      setSelectedId(id); router.replace(`/groups/${groupId}/events/${id}/results`)
+    }} />
 </div>
 
 
@@ -345,7 +386,7 @@ export default function ResultsPage() {
       {/* ── Onglets ── */}
       <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-6 w-fit">
         {([['leaderboard', t('results.leaderboard')], ['scorecards', t('results.scorecards')]] as [Tab, string][]).map(([tabKey, label]) => (
-          <button key={tabKey} onClick={() => setTab(tabKey)}
+          <button key={tabKey} onClick={async () => { if (dirtyRef.current) await saveScores(); setTab(tabKey) }}
             className={`px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${tab === tabKey ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
             {label}
           </button>
@@ -452,11 +493,7 @@ export default function ResultsPage() {
                   holes={holes}
                   players={buildCardPlayers(activeGroup.length ? activeGroup : [activePlayer])}
                   scores={scores}
-                  setScores={isOwner ? (newScores) => {
-                    const updated = typeof newScores === 'function' ? newScores(scores) : newScores
-                    setScores(updated)
-                    scoresRef.current = updated
-                  } : () => {}}
+                  setScores={isOwner ? handleOwnerEdit : () => {}}
                   eventFormat={eventFormat}
                   readOnly={!isOwner}
                 />

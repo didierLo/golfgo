@@ -6,6 +6,7 @@ import ScorecardTable from '@/components/scorecards/ScorecardTable'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import * as Sentry from '@sentry/nextjs'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useGroupDocI18n } from '@/lib/i18n/client'
 import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
@@ -113,9 +114,15 @@ useEffect(() => {
             hole: Number(hole), strokes: strokes as number,
           }))
         )
-        if (rows.length > 0)
-          await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
-      } catch (e) { console.error('auto-save error', e) }
+        if (rows.length > 0) {
+          const { error } = await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+          if (error) throw error
+        }
+      } catch (e) {
+        console.error('auto-save error', e)
+        Sentry.captureException(e)
+        setSaveStatus('error')
+      }
     }, 800)
   }, [])
 
@@ -146,13 +153,20 @@ useEffect(() => {
           saved_at: new Date().toISOString(),
         }))
       )
-      if (rows.length > 0)
-        await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
-      const now = new Date().toISOString()
-      await supabase.from('scorecards').update({ validated_at: now }).eq('id', scId)
+      if (rows.length > 0) {
+        const { error } = await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+        if (error) throw error
+      }
+      // Pas de scorecards.validated_at ici : il n'y a qu'UNE scorecard par événement,
+      // la poser verrouillait les cartes de tous les flights. La carte envoyée verrouille
+      // uniquement ce flight (détecté au chargement via saved_scorecards).
       setIsValidated(true)
       setSaveStatus('sent')
-    } catch { setSaveStatus('error'); setTimeout(() => setSaveStatus('idle'), 3000) }
+    } catch (e) {
+      console.error('sign scorecard error', e)
+      Sentry.captureException(e)
+      setSaveStatus('error'); setTimeout(() => setSaveStatus('idle'), 3000)
+    }
     finally { setSaving(false) }
   }
 
@@ -357,9 +371,11 @@ useEffect(() => {
 
     const map: ScoreMap = {}
     sorted.forEach(p => { map[p.id] = {} })
-    liveData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
-    savedData?.forEach(s => { map[s.player_id][s.hole] = s.strokes })
+    liveData?.forEach(s => { if (map[s.player_id]) map[s.player_id][s.hole] = s.strokes })
+    savedData?.forEach(s => { if (map[s.player_id]) map[s.player_id][s.hole] = s.strokes })
     setScores(map); scoresRef.current = map
+    // Carte déjà envoyée par ce flight → lecture seule pour ce flight uniquement
+    if ((savedData?.length ?? 0) > 0) setIsValidated(true)
   }
 
   function requireOwner(): boolean {
