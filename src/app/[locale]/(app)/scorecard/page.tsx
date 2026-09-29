@@ -82,7 +82,8 @@ export default function MyScorecardPage() {
   const [saving, setSaving]                     = useState(false)
   const [saveStatus, setSaveStatus]             = useState<'idle' | 'saving' | 'sent' | 'error'>('idle')
   const [isPastEvent, setIsPastEvent]           = useState(false)
-  const [isValidated, setIsValidated]           = useState(false)
+  const [isValidated, setIsValidated]           = useState(false)   // clôture par l'organisateur (tout l'événement)
+  const [sentIds, setSentIds]                   = useState<Set<string>>(new Set())  // joueurs dont la carte est envoyée
 
 const [allFlights, setAllFlights]             = useState<PrintPlayer[][]>([])
 const [teamFormat, setTeamFormat]             = useState<TeamFormat>('individual')
@@ -104,26 +105,39 @@ useEffect(() => {
   const playerRef    = useRef<string | null>(null)
   const saveTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const autoSave = useCallback(async (newScores: ScoreMap, evId: string, scId: string) => {
+  // Cases modifiées sur CET appareil et pas encore enregistrées (clé "joueur|trou").
+  // On n'envoie que celles-là : sinon l'appareil de A écraserait avec d'anciennes valeurs
+  // les scores que B saisit en même temps sur son propre téléphone.
+  const pendingRef    = useRef<Map<string, { pid: string; hole: number; strokes: number }>>(new Map())
+  const sentIdsRef    = useRef<Set<string>>(new Set())
+  const flightIdsRef  = useRef<string[]>([])
+
+  async function flushPending(): Promise<boolean> {
+    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
+    const scId = scorecardRef.current; const evId = eventRef.current
+    if (!scId || !evId || pendingRef.current.size === 0) return true
+    const batch = Array.from(pendingRef.current.entries())
+    pendingRef.current = new Map()
+    const rows = batch.map(([, c]) => ({
+      scorecard_id: scId, event_id: evId, player_id: c.pid, hole: c.hole, strokes: c.strokes,
+    }))
+    try {
+      const { error } = await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+      if (error) throw error
+      return true
+    } catch (e) {
+      // on remet les cases en attente (sans écraser une saisie plus récente)
+      batch.forEach(([k, c]) => { if (!pendingRef.current.has(k)) pendingRef.current.set(k, c) })
+      console.error('auto-save error', e)
+      Sentry.captureException(e)
+      setSaveStatus('error')
+      return false
+    }
+  }
+
+  const scheduleSave = useCallback(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(async () => {
-      try {
-        const rows = Object.entries(newScores).flatMap(([pid, holeMap]) =>
-          Object.entries(holeMap).filter(([, s]) => s != null).map(([hole, strokes]) => ({
-            scorecard_id: scId, event_id: evId, player_id: pid,
-            hole: Number(hole), strokes: strokes as number,
-          }))
-        )
-        if (rows.length > 0) {
-          const { error } = await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
-          if (error) throw error
-        }
-      } catch (e) {
-        console.error('auto-save error', e)
-        Sentry.captureException(e)
-        setSaveStatus('error')
-      }
-    }, 800)
+    saveTimer.current = setTimeout(() => { flushPending() }, 800)
   }, [])
 
   const isReadOnly = isPastEvent || isValidated
@@ -132,35 +146,69 @@ useEffect(() => {
     if (isReadOnly) return
     setScores(prev => {
       const updated = typeof newScores === 'function' ? newScores(prev) : newScores
+      // repère les cases réellement modifiées (hors joueurs dont la carte est déjà envoyée)
+      Object.entries(updated).forEach(([pid, holeMap]) => {
+        if (sentIdsRef.current.has(pid)) return
+        Object.entries(holeMap ?? {}).forEach(([hole, strokes]) => {
+          if (strokes == null || prev[pid]?.[Number(hole)] === strokes) return
+          pendingRef.current.set(`${pid}|${hole}`, { pid, hole: Number(hole), strokes: strokes as number })
+        })
+      })
       scoresRef.current = updated
-      const scId = scorecardRef.current; const evId = eventRef.current
-      if (scId && evId) autoSave(updated, evId, scId)
+      scheduleSave()
       return updated
     })
   }
 
-    // Signe la carte du flight (tous les scores saisis pour ce flight) et l'envoie au leaderboard
+  function markSent(ids: Set<string>) {
+    sentIdsRef.current = ids
+    setSentIds(ids)
+  }
+
+  // Envoie la carte des joueurs du flight qui ont des scores et ne l'ont pas encore envoyée.
+  // Chacun peut envoyer pour lui seul, pour une partie du flight ou pour tout le flight :
+  // les scores viennent de la base, donc ceux saisis sur les autres téléphones sont inclus.
   async function handleSignScorecard() {
     const scId = scorecardRef.current; const evId = eventRef.current
     if (!scId || !evId || isValidated) return
-    if (!window.confirm(t('scorecard.signConfirm'))) return
     setSaving(true); setSaveStatus('saving')
     try {
-      const rows = Object.entries(scoresRef.current).flatMap(([pid, holeScores]) =>
-        Object.entries(holeScores).filter(([, s]) => s != null).map(([hole, strokes]) => ({
-          scorecard_id: scId, event_id: evId, player_id: pid,
-          hole: Number(hole), strokes: strokes as number,
-          saved_at: new Date().toISOString(),
-        }))
-      )
-      if (rows.length > 0) {
-        const { error } = await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
-        if (error) throw error
+      if (!(await flushPending())) throw new Error('flush failed')
+
+      const { data: dbScores, error: readErr } = await supabase.from('scores')
+        .select('player_id, hole, strokes')
+        .eq('scorecard_id', scId).eq('event_id', evId)
+        .in('player_id', flightIdsRef.current)
+      if (readErr) throw readErr
+
+      const toSend = (dbScores ?? []).filter(r => r.strokes != null && !sentIdsRef.current.has(r.player_id))
+      const sendIds: string[] = Array.from(new Set<string>(toSend.map(r => r.player_id as string)))
+      if (sendIds.length === 0) {
+        toast(t('scorecard.nothingToSend'))
+        setSaveStatus('idle'); return
       }
-      // Pas de scorecards.validated_at ici : il n'y a qu'UNE scorecard par événement,
-      // la poser verrouillait les cartes de tous les flights. La carte envoyée verrouille
-      // uniquement ce flight (détecté au chargement via saved_scorecards).
-      setIsValidated(true)
+
+      const names = sendIds
+        .map(id => flightPlayers.find(p => p.id === id))
+        .filter(Boolean)
+        .map(p => `${p!.first_name} ${p!.surname}`)
+        .join(', ')
+      if (!window.confirm(t('scorecard.signConfirmPlayers', { names }))) { setSaveStatus('idle'); return }
+
+      const now = new Date().toISOString()
+      const rows = toSend.map(r => ({
+        scorecard_id: scId, event_id: evId, player_id: r.player_id,
+        hole: r.hole, strokes: r.strokes, saved_at: now,
+      }))
+      const { error } = await supabase.from('saved_scorecards').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
+      if (error) throw error
+
+      // affiche les scores à jour (y compris ceux saisis sur les autres téléphones)
+      const map: ScoreMap = { ...scoresRef.current }
+      ;(dbScores ?? []).forEach(r => { map[r.player_id] = { ...(map[r.player_id] ?? {}), [r.hole]: r.strokes } })
+      scoresRef.current = map; setScores(map)
+
+      markSent(new Set<string>([...sentIdsRef.current, ...sendIds]))
       setSaveStatus('sent')
     } catch (e) {
       console.error('sign scorecard error', e)
@@ -331,6 +379,9 @@ useEffect(() => {
       const { data: fp } = await supabase.from('flight_players').select('player_id').eq('flight_id', flightId)
       flightPlayerIds = (fp || []).map(f => f.player_id)
     }
+    flightIdsRef.current = flightPlayerIds
+    pendingRef.current = new Map()
+    markSent(new Set())
 
     const { data: participants } = await supabase.from('event_participants')
       .select('player_id, tee_id, players(id, first_name, surname, whs, default_tee_color, gender)')
@@ -374,8 +425,8 @@ useEffect(() => {
     liveData?.forEach(s => { if (map[s.player_id]) map[s.player_id][s.hole] = s.strokes })
     savedData?.forEach(s => { if (map[s.player_id]) map[s.player_id][s.hole] = s.strokes })
     setScores(map); scoresRef.current = map
-    // Carte déjà envoyée par ce flight → lecture seule pour ce flight uniquement
-    if ((savedData?.length ?? 0) > 0) setIsValidated(true)
+    // Joueurs dont la carte est déjà envoyée → verrouillés individuellement
+    markSent(new Set((savedData ?? []).map(s => s.player_id)))
   }
 
   function requireOwner(): boolean {
@@ -492,6 +543,13 @@ useEffect(() => {
     const solo = group.find(p => p.id === activePlayerId) ?? group[0]
     return solo ? [{ id: solo.id, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
   }
+
+  // Joueurs qui portent un score sur les cartes de ce flight (ancre d'équipe en team2/team3_4)
+  const entrantIds = teamGroups.flatMap(g => buildCardPlayers(g).map(e => e.id))
+  const allSent    = entrantIds.length > 0 && entrantIds.every(id => sentIds.has(id))
+  const sentNames  = flightPlayers.filter(p => sentIds.has(p.id)).map(p => `${p.first_name} ${p.surname}`).join(', ')
+  const cardPlayers = buildCardPlayers(activeGroup.length ? activeGroup : (activePlayer ? [activePlayer] : []))
+  const cardLocked  = cardPlayers.length > 0 && cardPlayers.every(e => sentIds.has(e.id))
 
   return (
    <div className="p-5 sm:p-6 max-w-2xl">
@@ -617,7 +675,7 @@ useEffect(() => {
 
       {!scorecardLoading && activePlayer && (
         <div className="flex items-center justify-end gap-2 mb-5">
-          {isValidated ? (
+          {isValidated || allSent ? (
             <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
               <span className="text-[13px]">🏆</span>
               <span className="text-[11px] font-bold text-amber-700">{t('scorecard.closed')}</span>
@@ -625,6 +683,9 @@ useEffect(() => {
           ) : (
             <>
               <SaveFeedback status={saveStatus} />
+              {sentIds.size > 0 && saveStatus !== 'sent' && (
+                <span className="text-[11px] font-semibold text-emerald-700 on-bg">{t('scorecard.sentFor', { names: sentNames })}</span>
+              )}
               {isPastEvent && (
                 <span className="text-[10px] text-slate-400 font-medium on-bg">{t('scorecard.readOnly')}</span>
               )}
@@ -648,9 +709,11 @@ useEffect(() => {
           style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <ScorecardTable
             holes={holes}
-            players={buildCardPlayers(activeGroup.length ? activeGroup : (activePlayer ? [activePlayer] : []))}
+            players={cardPlayers}
             scores={scores}
-            setScores={handleSetScores} eventFormat={eventFormat} readOnly={isReadOnly}
+            setScores={handleSetScores} eventFormat={eventFormat}
+            readOnly={isReadOnly || cardLocked}
+            lockedIds={Array.from(sentIds)}
           />
         </div>
       )}

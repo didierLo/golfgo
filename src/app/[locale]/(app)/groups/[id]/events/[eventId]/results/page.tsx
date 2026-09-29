@@ -142,6 +142,8 @@ export default function ResultsPage() {
   // true tant que des modifications de l'organisateur ne sont pas encore enregistrées :
   // empêche le rafraîchissement automatique (30 s) d'écraser la saisie en cours
   const dirtyRef    = useRef(false)
+  // cases modifiées par l'organisateur, seules envoyées (n'écrase pas les saisies des joueurs sur le terrain)
+  const pendingRef  = useRef<Map<string, { pid: string; hole: number; strokes: number }>>(new Map())
 
   useEffect(() => { selectedRef.current = selectedId }, [selectedId])
 
@@ -184,6 +186,7 @@ export default function ResultsPage() {
 
   async function loadScorecard(evtId: string, courseId: string | null) {
     setLoading(true)
+    pendingRef.current = new Map(); dirtyRef.current = false
     try {
       let holesData: Hole[] = fallbackHoles()
       let teesData: TeeInfo[] = []
@@ -259,22 +262,20 @@ export default function ResultsPage() {
     const evId = selectedRef.current
     if (!scId || !evId) return false
     if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
-    const rows = playersRef.current.flatMap(player =>
-      Object.entries(scoresRef.current[player.id] ?? {})
-        .filter(([, s]) => s != null)
-        .map(([hole, strokes]) => ({
-          scorecard_id: scId, event_id: evId,
-          player_id: player.id, hole: Number(hole), strokes: strokes as number,
-        }))
-    )
+    const batch = Array.from(pendingRef.current.entries())
+    pendingRef.current = new Map()
+    const rows = batch.map(([, c]) => ({
+      scorecard_id: scId, event_id: evId, player_id: c.pid, hole: c.hole, strokes: c.strokes,
+    }))
     try {
       if (rows.length > 0) {
         const { error } = await supabase.from('scores').upsert(rows, { onConflict: 'scorecard_id,player_id,hole' })
         if (error) throw error
       }
-      dirtyRef.current = false
+      if (pendingRef.current.size === 0) dirtyRef.current = false
       return true
     } catch (e) {
+      batch.forEach(([k, c]) => { if (!pendingRef.current.has(k)) pendingRef.current.set(k, c) })
       console.error('results save error', e)
       Sentry.captureException(e)
       return false
@@ -282,7 +283,14 @@ export default function ResultsPage() {
   }
 
   function handleOwnerEdit(newScores: ScoreMap | ((prev: ScoreMap) => ScoreMap)) {
-    const updated = typeof newScores === 'function' ? newScores(scoresRef.current) : newScores
+    const prev = scoresRef.current
+    const updated = typeof newScores === 'function' ? newScores(prev) : newScores
+    Object.entries(updated).forEach(([pid, holeMap]) => {
+      Object.entries(holeMap ?? {}).forEach(([hole, strokes]) => {
+        if (strokes == null || prev[pid]?.[Number(hole)] === strokes) return
+        pendingRef.current.set(`${pid}|${hole}`, { pid, hole: Number(hole), strokes: strokes as number })
+      })
+    })
     scoresRef.current = updated
     setScores(updated)
     dirtyRef.current = true

@@ -19,6 +19,9 @@ type Props = {
   setScores: React.Dispatch<React.SetStateAction<ScoreMap>>
   eventFormat: 'stroke' | 'stableford'
   readOnly?: boolean
+  // Joueurs dont la carte est déjà envoyée : leurs cases passent en lecture seule,
+  // les autres joueurs de la même carte (4BBB) restent modifiables
+  lockedIds?: string[]
 }
 
 function holeValues(player: ScoreEntrant, hole: Hole, scores: ScoreMap) {
@@ -54,7 +57,9 @@ function bestBallSubtotal(holesList: Hole[], players: ScoreEntrant[], scores: Sc
   return { parSum, sum: count ? sum : null }
 }
 
-export default function ScorecardTable({ holes, players, scores, setScores, eventFormat, readOnly = false }: Props) {
+export default function ScorecardTable({ holes, players, scores, setScores, eventFormat, readOnly = false, lockedIds = [] }: Props) {
+  const lockedKey = lockedIds.join('|')
+  const locked = useMemo(() => new Set(lockedKey ? lockedKey.split('|') : []), [lockedKey])
   const t = useTranslations()
   const isStableford = eventFormat === 'stableford'
   const isPair        = players.length === 2 // 4BBB
@@ -62,7 +67,7 @@ export default function ScorecardTable({ holes, players, scores, setScores, even
   const back9  = holes.filter(h => h.hole_number > 9)
 
   function updateScore(pid: string, hole: number, delta: number, par: number) {
-    if (readOnly) return
+    if (readOnly || locked.has(pid)) return
     setScores((prev: ScoreMap) => {
       // Trou vide : on part du par (− = par-1, + = par+1, toucher le chiffre = par)
       const current = prev[pid]?.[hole] ?? par
@@ -99,13 +104,13 @@ export default function ScorecardTable({ holes, players, scores, setScores, even
         <tbody>
           {front9.map(h => (
             <HoleBlock key={h.hole_number} h={h} players={players} scores={scores}
-              onUpdate={updateScore} isStableford={isStableford} readOnly={readOnly} />
+              onUpdate={updateScore} isStableford={isStableford} readOnly={readOnly} locked={locked} />
           ))}
           <SubtotalBlock label="OUT" players={players} subs={subs.map(s => s.out)} bestSub={bestSubs?.out}
             isStableford={isStableford} count={front9.length} />
           {back9.map(h => (
             <HoleBlock key={h.hole_number} h={h} players={players} scores={scores}
-              onUpdate={updateScore} isStableford={isStableford} readOnly={readOnly} />
+              onUpdate={updateScore} isStableford={isStableford} readOnly={readOnly} locked={locked} />
           ))}
           <SubtotalBlock label="IN" players={players} subs={subs.map(s => s.in)} bestSub={bestSubs?.in}
             isStableford={isStableford} count={back9.length} />
@@ -126,9 +131,10 @@ type HoleBlockProps = {
   onUpdate: (pid: string, hole: number, delta: number, par: number) => void
   isStableford: boolean
   readOnly: boolean
+  locked: Set<string>
 }
 
-function HoleBlock({ h, players, scores, onUpdate, isStableford, readOnly }: HoleBlockProps) {
+function HoleBlock({ h, players, scores, onUpdate, isStableford, readOnly, locked }: HoleBlockProps) {
   const rows = players.map(p => ({ player: p, ...holeValues(p, h, scores) }))
   const isPair = players.length === 2
   const bothEntered = isPair && rows[0].brut != null && rows[1].brut != null
@@ -161,7 +167,7 @@ function HoleBlock({ h, players, scores, onUpdate, isStableford, readOnly }: Hol
                 onDecrement={() => onUpdate(row.player.id, h.hole_number, -1, h.par)}
                 onIncrement={() => onUpdate(row.player.id, h.hole_number, +1, h.par)}
                 onSetDefault={() => onUpdate(row.player.id, h.hole_number, 0, h.par)}
-                readOnly={readOnly}
+                readOnly={readOnly || locked.has(row.player.id)}
               />
             </td>
             <td className="py-2 text-center text-slate-600 text-[13px]">{row.brut ?? 0}</td>
