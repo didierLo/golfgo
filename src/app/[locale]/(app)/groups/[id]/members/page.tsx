@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations, useLocale } from 'next-intl'
+import WelcomeNewMemberModal from '@/components/members/WelcomeNewMemberModal'
 
 
 const supabase = createClient()
@@ -29,6 +30,7 @@ export default function MembersPage() {
   const [sortKey,      setSortKey]      = useState<SortKey>('surname')
   const [userRole,     setUserRole]     = useState<string | null>(null)
   const [toast,        setToast]        = useState<string | null>(null)
+  const [showWelcome,  setShowWelcome]  = useState(false)
 
   // Compteur : membres + administrateurs (les administrateurs SONT des membres), visiteurs comptés à part.
   const adminCount = members.filter(m => m.role === 'owner').length
@@ -59,9 +61,6 @@ export default function MembersPage() {
       .select('id').eq('user_id', user!.id).single()
 
     const myRow = (data || []).find((row: any) => row.player?.id === player?.id)
-    console.log('data:', data)
-    console.log('player:', player)
-    console.log('myRow:', myRow)
     setUserRole(myRow?.role ?? null)
     setMembers((data || []).map((row: any) => ({ ...row.player, role: row.role })))
     setLoading(false)
@@ -189,7 +188,15 @@ export default function MembersPage() {
           }`}>
           + {t('members.addMember')}
         </button>
+        {userRole === 'owner' && (
+          <button onClick={() => setShowWelcome(true)}
+            className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] transition-colors">
+            📱 {t('members.welcome.button')}
+          </button>
+        )}
       </div>
+
+      {showWelcome && <WelcomeNewMemberModal groupId={groupId} onClose={() => setShowWelcome(false)} />}
 
      
       {/* ── Liste membres ── */}
