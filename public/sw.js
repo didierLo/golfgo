@@ -1,10 +1,11 @@
-const CACHE_NAME = 'golfgo-v3'
+const CACHE_NAME = 'golfgo-v4'
 
 const STATIC_ASSETS = [
   '/golf-bg.jpg',
   '/icon-192.png',
   '/icon-512.png',
   '/logo/GG_Logo_transparent.png',
+  '/logo/GG_Favicon.png',
   '/favicon.ico',
 ]
 

@@ -1,4 +1,5 @@
 import { pairKey, hasPair } from '@/lib/utils/pairs'
+import { shuffle } from '@/lib/utils/shuffle'
 
 export type Player4BBB = {
   id: string
@@ -185,7 +186,7 @@ export function generate4BBB(
         ev.going.some(p => p.id === player.id) && (slotsLeft.get(ev.eventId) ?? 0) > 0
       )
       // Mélanger pour varier
-      const shuffledEvents = [...eventsOk].sort(() => Math.random() - 0.5)
+      const shuffledEvents = shuffle(eventsOk)   // mélange équitable (le tri aléatoire favorisait certains ordres)
       let assigned = 0
       for (const ev of shuffledEvents) {
         if (assigned >= minReq) break
