@@ -2,6 +2,7 @@ import type { Hole, TeeInfo } from './scorecard-types'
 import type { EmailT } from '@/lib/i18n/types'
 import { composeCards, type TeamFormat, type ComposedCard } from '@/lib/golf/scorecards/composeCards'
 import { strokesReceived } from '@/lib/golf/scoring/stableford'
+import { DEFAULT_HCP_RULE, type HcpRule } from '@/lib/golf/scoring/handicapAllowance'
 
 const DEFAULT_LOGO_URL = 'https://golfgo.be/logo/GG_Logo_avec_nom_bandeau.jpeg'
 
@@ -18,7 +19,7 @@ export function buildScorecardCardsHtml(
   i18n: { t: EmailT; lang: string },
   players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
   clubName: string, courseName: string, logoUrl: string | null = null,
-  teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
+  teamFormat: TeamFormat = 'individual', hcpRule: HcpRule = DEFAULT_HCP_RULE,
   formatName: string = '', scorecardNotes: string = '',
   cardIndex?: number,   // si fourni : n'affiche que cette carte du flight (envoi par email au joueur concerné)
 ): string {
@@ -36,7 +37,7 @@ export function buildScorecardCardsHtml(
     return set.reduce((s, h) => s + strokesReceived(playingHcp, h.stroke_index), 0)
   }
 
-  const composed: ComposedCard[] = composeCards(players, teamFormat, hcpPercentage, n => t('scoring.team', { n }))
+  const composed: ComposedCard[] = composeCards(players, teamFormat, hcpRule, n => t('scoring.team', { n }))
 
   const shown = cardIndex != null && composed[cardIndex] ? [composed[cardIndex]] : composed
 
@@ -189,12 +190,12 @@ export function buildScorecardHtml(
   i18n: { t: EmailT; lang: string },
   players: PrintPlayer[], holes: Hole[], eventTitle: string, eventDate: string,
   clubName: string, courseName: string, logoUrl: string | null = null,
-  teamFormat: TeamFormat = 'individual', hcpPercentage: number = 100,
+  teamFormat: TeamFormat = 'individual', hcpRule: HcpRule = DEFAULT_HCP_RULE,
   formatName: string = '', scorecardNotes: string = '',
   cardIndex?: number,
 ): string {
   const { t, lang } = i18n
-  const cards = buildScorecardCardsHtml(i18n, players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage, formatName, scorecardNotes, cardIndex)
+  const cards = buildScorecardCardsHtml(i18n, players, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpRule, formatName, scorecardNotes, cardIndex)
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>

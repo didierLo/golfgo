@@ -8,7 +8,7 @@ import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
 import Leaderboard from '@/components/scorecards/Leaderboard'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useEventScoring } from '@/lib/hooks/useEventScoring'
-import { getTeamGroups, playingHcp, teamPhcp } from '@/lib/golf/scorecards/composeCards'
+import { getTeamGroups, cardEntrants } from '@/lib/golf/scorecards/composeCards'
 import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
 import { useTranslations, useLocale } from 'next-intl'
@@ -131,7 +131,7 @@ export default function ResultsPage() {
 
   // Formule/équipe/%HCP centralisés — se rafraîchit automatiquement au retour de focus sur l'onglet
   const eventScoring = useEventScoring(selectedId)
-  const { eventFormat, teamFormat, hcpPercentage } = eventScoring
+  const { eventFormat, teamFormat, hcpRule } = eventScoring
 
   const scIdRef     = useRef<string | null>(null)
   const playersRef  = useRef<Player[]>([])
@@ -339,16 +339,9 @@ export default function ResultsPage() {
   const activeGroup = activeTeamGroups.find(g => g.some(p => p.id === activePlayerId)) ?? []
 
   function buildCardPlayers(group: Player[]): ScoreEntrant[] {
-    if (teamFormat === '4bbb') {
-      return group.map(p => ({ id: p.id, phcp: playingHcp(p.phcp, hcpPercentage) }))
-    }
-    if (teamFormat === 'team2' || teamFormat === 'team3_4') {
-      if (!group.length) return []
-      return [{ id: group[0].id, phcp: teamPhcp(group, hcpPercentage) }]
-    }
-    const solo = group.find(p => p.id === activePlayerId) ?? group[0]
-    return solo ? [{ id: solo.id, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
+    return cardEntrants(group, teamFormat, hcpRule, activePlayerId, activeFlight)
   }
+
 
   if (roleLoading) return (
     <div className="p-6 space-y-3 max-w-2xl">
@@ -488,7 +481,7 @@ export default function ResultsPage() {
                     <p className="text-[14px] font-black text-slate-900">{activePlayer.first_name} {activePlayer.surname}</p>
                     <div className="flex gap-3 mt-0.5">
                       <span className="text-[12px] text-slate-500">Hcp <span className="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded-lg text-[11px] ml-0.5">{activePlayer.whs}</span></span>
-                      <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{activePlayer.phcp}</span></span>
+                      <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{(() => { const c = buildCardPlayers(activeGroup.length ? activeGroup : [activePlayer]); return (c.find(e => e.id === activePlayer.id) ?? c[0])?.phcp ?? activePlayer.phcp })()}</span></span>
                       {activePlayer.tee && <span className="text-[12px] text-slate-500">{t('clubs.colTee')} <span className="font-bold text-slate-800 ml-0.5">{activePlayer.tee.tee_name}</span></span>}
                     </div>
                   </div>

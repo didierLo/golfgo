@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { resolveHcpRule, formatAllowances } from '@/lib/golf/scoring/handicapAllowance'
 import { useTranslations } from 'next-intl'
 
 const supabase = createClient()
@@ -143,7 +144,7 @@ export default function EditEventPage() {
   const [maxParticipants, setMaxParticipants]           = useState('')
   const [clubs, setClubs]     = useState<{ id: string; name: string; country: string }[]>([])
   const [courses, setCourses] = useState<{ id: string; course_name: string }[]>([])
-  const [formats, setFormats] = useState<{ id: string; name: string; team_format: string; hcp_percentage: number }[]>([])
+  const [formats, setFormats] = useState<{ id: string; name: string; team_format: string; hcp_percentage: number; hcp_allowances: number[] | null; match_play: boolean }[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
@@ -178,7 +179,7 @@ export default function EditEventPage() {
 
   const [{ data: clubsData }, { data: formatsData }] = await Promise.all([
   supabase.from('clubs').select('id, name, country').order('country, name'),
-  supabase.from('competition_formats').select('id, name, team_format, hcp_percentage').order('name'),
+  supabase.from('competition_formats').select('id, name, team_format, hcp_percentage, hcp_allowances, match_play').order('name'),
 ])
 setClubs(clubsData || [])
 setFormats(formatsData || [])
@@ -333,16 +334,18 @@ async function handleSubmit(e: React.FormEvent) {
               </select>
               {(() => {
               const selected = formats.find(f => f.id === competitionFormatId)
-              if (!selected || selected.team_format === 'individual') return null
+              if (!selected) return null
+                const rule = resolveHcpRule(selected)
               return (
                 <div className="mt-3">
                   <label className="block text-[12px] font-semibold text-slate-600 mb-1.5 on-bg">
-                    {t('editEvent.hcpPercent')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.hcpDefault', { value: selected.hcp_percentage })}</span>
+                    {t('editEvent.hcpPercent')} <span className="text-slate-400 font-normal on-bg">— {t('editEvent.hcpDefault', { value: formatAllowances(rule.allowances) })}</span>
                   </label>
                   <input type="number" min={0} max={100} step={5}
                     value={hcpOverride} onChange={e => setHcpOverride(e.target.value)}
-                    placeholder={String(selected.hcp_percentage)}
+                    placeholder={String(rule.allowances[0])}
                     className={inputClass} />
+                    <p className="text-[11px] text-slate-400 mt-1 on-bg">{t('editEvent.hcpOverrideHint')}</p>
     </div>
   )
 })()}

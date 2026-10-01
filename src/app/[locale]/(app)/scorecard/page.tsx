@@ -10,7 +10,8 @@ import * as Sentry from '@sentry/nextjs'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useGroupDocI18n } from '@/lib/i18n/client'
 import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
-import { getTeamGroups, playingHcp, teamPhcp, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
+import { getTeamGroups, cardEntrants, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
+import { resolveHcpRule, DEFAULT_HCP_RULE, type HcpRule } from '@/lib/golf/scoring/handicapAllowance'
 import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
 import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 
@@ -88,7 +89,7 @@ export default function MyScorecardPage() {
 
 const [allFlights, setAllFlights]             = useState<PrintPlayer[][]>([])
 const [teamFormat, setTeamFormat]             = useState<TeamFormat>('individual')
-const [hcpPercentage, setHcpPercentage]       = useState<number>(100)
+const [hcpRule, setHcpRule]                   = useState<HcpRule>(DEFAULT_HCP_RULE)
 const [formatName, setFormatName]             = useState('')
 const [scorecardNotes, setScorecardNotes]     = useState('')
 const [bulkSending, setBulkSending]           = useState(false)
@@ -325,7 +326,7 @@ useEffect(() => {
     .select('event_id, tee_id')
     .eq('player_id', pId).eq('status', 'GOING'),
   supabase.from('events')
-    .select('id, title, starts_at, course_id, group_id, scorecard_notes, competition_formats(name, scoring_type, team_format, hcp_percentage), courses(course_name, clubs(name)), hcp_percentage_override')
+    .select('id, title, starts_at, course_id, group_id, scorecard_notes, competition_formats(name, scoring_type, team_format, hcp_percentage, hcp_allowances, match_play), courses(course_name, clubs(name)), hcp_percentage_override')
     .eq('id', evId).limit(1),
 ])
       const event = events?.[0] as any
@@ -340,7 +341,7 @@ useEffect(() => {
       setEventStartsAt(event.starts_at)
       setEventFormat((event.competition_formats as any)?.scoring_type ?? 'stableford')
       setTeamFormat((event.competition_formats as any)?.team_format ?? 'individual')
-      setHcpPercentage(event.hcp_percentage_override ?? (event.competition_formats as any)?.hcp_percentage ?? 100)
+      setHcpRule(resolveHcpRule(event.competition_formats as any, event.hcp_percentage_override))
       setFormatName((event.competition_formats as any)?.name ?? '')
       setScorecardNotes(event.scorecard_notes ?? '')
       setClubName((event.courses as any)?.clubs?.name ?? '')
@@ -481,7 +482,7 @@ useEffect(() => {
 
     const htmlBody = allFlights
       .map(flightPlayers => buildScorecardCardsHtml(
-       doc, flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpPercentage, formatName, scorecardNotes
+       doc, flightPlayers, holes, eventTitle, eventDate, clubName, courseName, logoUrl, teamFormat, hcpRule, formatName, scorecardNotes
       ))
       .join('')
 
@@ -567,16 +568,9 @@ useEffect(() => {
   // Construit le tableau players[] pour ScorecardTable selon la formule, en appliquant le % HCP
   // de l'événement (event override > format > 100) — jusqu'ici jamais appliqué à la carte digitale.
   function buildCardPlayers(group: PrintPlayer[]): ScoreEntrant[] {
-    if (teamFormat === '4bbb') {
-      return group.map(p => ({ id: p.id, phcp: playingHcp(p.phcp, hcpPercentage) }))
-    }
-    if (teamFormat === 'team2' || teamFormat === 'team3_4') {
-      if (!group.length) return []
-      return [{ id: group[0].id, phcp: teamPhcp(group, hcpPercentage) }]
-    }
-    const solo = group.find(p => p.id === activePlayerId) ?? group[0]
-    return solo ? [{ id: solo.id, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
+    return cardEntrants(group, teamFormat, hcpRule, activePlayerId, orderedFlight)
   }
+
 
   // Joueurs qui portent un score sur les cartes de ce flight (ancre d'équipe en team2/team3_4)
   const entrantIds = teamGroups.flatMap(g => buildCardPlayers(g).map(e => e.id))
@@ -713,7 +707,7 @@ useEffect(() => {
           </div>
           <div className="flex gap-3 mt-1">
             <span className="text-[12px] text-slate-500">WHS <span className="font-bold text-slate-800 ml-0.5">{activePlayer.whs}</span></span>
-            <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{activePlayer.phcp}</span></span>
+            <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{(cardPlayers.find(e => e.id === activePlayer.id) ?? cardPlayers[0])?.phcp ?? activePlayer.phcp}</span></span>
           </div>
         </div>
       )}

@@ -2,6 +2,7 @@ import { writeFileSync } from 'fs'
 import { execSync } from 'child_process'
 import { buildScorecardHtml, type PrintPlayer } from '../src/components/scorecards/buildScorecardHtml'
 import type { TeamFormat } from '../src/lib/golf/scorecards/composeCards'
+import type { HcpRule } from '../src/lib/golf/scoring/handicapAllowance'
 import type { Hole } from '../src/components/scorecards/scorecard-types'
 import { serverT, normalizeLocale } from '../src/lib/i18n/server'
 
@@ -26,20 +27,23 @@ const players: PrintPlayer[] = [
   mockPlayer('4', 'Luc', 'Janssens', 8),
 ]
 
-const formats: { format: TeamFormat; pct: number; label: string }[] = [
-  { format: 'individual', pct: 100, label: 'stroke-stableford' },
-  { format: '4bbb',       pct: 90,  label: '4bbb' },
-  { format: 'team2',      pct: 50,  label: 'team2' },
-  { format: 'team3_4',    pct: 25,  label: 'team3-4' },
+// Coefficients WHS (Appendice C), du plus bas handicap au plus haut
+const formats: { format: TeamFormat; rule: HcpRule; label: string }[] = [
+  { format: 'individual', rule: { allowances: [100], matchPlay: false },          label: 'stroke-stableford' },
+  { format: 'individual', rule: { allowances: [100], matchPlay: true },           label: 'matchplay' },
+  { format: '4bbb',       rule: { allowances: [85], matchPlay: false },           label: '4bbb' },
+  { format: 'team2',      rule: { allowances: [60, 40], matchPlay: false },       label: 'greensome' },
+  { format: 'team2',      rule: { allowances: [35, 15], matchPlay: false },       label: 'scramble2' },
+  { format: 'team3_4',    rule: { allowances: [25, 20, 15, 10], matchPlay: false }, label: 'scramble4' },
 ]
 
-for (const { format, pct, label } of formats) {
+for (const { format, rule, label } of formats) {
   const html = buildScorecardHtml(
     i18n, players, fallbackHoles(), `Test — ${label}`, '31 juillet 2026',
-    'Royal Golf Club', 'Parcours 18 trous', null, format, pct,
+    'Royal Golf Club', 'Parcours 18 trous', null, format, rule,
   )
   const path = `/tmp/scorecard-test-${label}.html`
   writeFileSync(path, html)
   console.log('Généré :', path)
-  try { execSync(`open "${path}"`) } catch {}
+  try { execSync(`open "${path}"`, { stdio: "ignore" }) } catch {}
 }

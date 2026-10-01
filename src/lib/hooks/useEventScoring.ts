@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getTeamGroups, teamPhcp, playingHcp, type TeamFormat } from '@/lib/golf/scorecards/composeCards'
-import type { Player } from '@/components/scorecards/scorecard-types'
+import { type TeamFormat } from '@/lib/golf/scorecards/composeCards'
+import { resolveHcpRule, DEFAULT_HCP_RULE, type HcpRule } from '@/lib/golf/scoring/handicapAllowance'
 
 const supabase = createClient()
 
@@ -17,7 +17,7 @@ export function useEventScoring(eventId: string | null) {
   const [courseName, setCourseName]         = useState('')
   const [eventFormat, setEventFormat]       = useState<'stroke' | 'stableford'>('stableford')
   const [teamFormat, setTeamFormat]         = useState<TeamFormat>('individual')
-  const [hcpPercentage, setHcpPercentage]   = useState<number>(100)
+  const [hcpRule, setHcpRule]               = useState<HcpRule>(DEFAULT_HCP_RULE)
   const [formatName, setFormatName]         = useState('')
   const [scorecardNotes, setScorecardNotes] = useState('')
 
@@ -27,7 +27,7 @@ export function useEventScoring(eventId: string | null) {
     const { data: event } = await supabase.from('events')
       .select(`
         title, starts_at, course_id, group_id, scorecard_notes, hcp_percentage_override,
-        competition_formats(name, scoring_type, team_format, hcp_percentage),
+        competition_formats(name, scoring_type, team_format, hcp_percentage, hcp_allowances, match_play),
         courses(course_name, clubs(name))
       `)
       .eq('id', eventId).single()
@@ -41,7 +41,7 @@ export function useEventScoring(eventId: string | null) {
       setScorecardNotes(event.scorecard_notes ?? '')
       setEventFormat(fmt?.scoring_type ?? 'stableford')
       setTeamFormat(fmt?.team_format ?? 'individual')
-      setHcpPercentage(event.hcp_percentage_override ?? fmt?.hcp_percentage ?? 100)
+      setHcpRule(resolveHcpRule(fmt, event.hcp_percentage_override))
       setFormatName(fmt?.name ?? '')
       setClubName((event.courses as any)?.clubs?.name ?? '')
       setCourseName((event.courses as any)?.course_name ?? '')
@@ -64,35 +64,9 @@ export function useEventScoring(eventId: string | null) {
     }
   }, [load])
 
-  // Construit le tableau `players[]` à passer à ScorecardTable pour un joueur donné,
-  // en tenant compte de la formule ET du % HCP variable (event override > format > 100).
-  //   - individuel : [lui-même], hcp ajusté au %
-  //   - 4bbb       : [lui, son partenaire], hcp de CHACUN ajusté au % (chacun sa balle)
-  //   - team2/team3_4 : [carte virtuelle unique], hcp = somme équipe ajustée au %
-  function getPlayersForCard(orderedFlightPlayers: Player[], targetPlayerId: string): Player[] {
-    if (teamFormat === '4bbb') {
-      const groups = getTeamGroups(orderedFlightPlayers, '4bbb')
-      const group = groups.find(g => g.some(p => p.id === targetPlayerId))
-        ?? orderedFlightPlayers.filter(p => p.id === targetPlayerId)
-      return group.map(p => ({ ...p, phcp: playingHcp(p.phcp, hcpPercentage) }))
-    }
-    if (teamFormat === 'team2' || teamFormat === 'team3_4') {
-      const groups = getTeamGroups(orderedFlightPlayers, teamFormat)
-      const group = groups.find(g => g.some(p => p.id === targetPlayerId))
-      if (!group) {
-        const solo = orderedFlightPlayers.find(p => p.id === targetPlayerId)
-        return solo ? [{ ...solo, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
-      }
-      const anchor = group[0]
-      return [{ ...anchor, phcp: teamPhcp(group, hcpPercentage) }]
-    }
-    const player = orderedFlightPlayers.find(p => p.id === targetPlayerId)
-    return player ? [{ ...player, phcp: playingHcp(player.phcp, hcpPercentage) }] : []
-  }
-
   return {
     loading, eventTitle, eventStartsAt, courseId, groupId, clubName, courseName,
-    eventFormat, teamFormat, hcpPercentage, formatName, scorecardNotes,
-    getPlayersForCard, refresh: load,
+    eventFormat, teamFormat, hcpRule, formatName, scorecardNotes,
+    refresh: load,
   }
 }

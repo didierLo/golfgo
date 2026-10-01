@@ -7,10 +7,12 @@ import ScorecardTable from '@/components/scorecards/ScorecardTable'
 import type { ScoreEntrant } from '@/components/scorecards/ScorecardTable'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useEventScoring } from '@/lib/hooks/useEventScoring'
-import { getTeamGroups, playingHcp, teamPhcp } from '@/lib/golf/scorecards/composeCards'
+import { getTeamGroups, cardEntrants } from '@/lib/golf/scorecards/composeCards'
 import type { Hole, TeeInfo, Player, ScoreMap } from '@/components/scorecards/scorecard-types'
 import { computePhcp, findDefaultTee } from '@/components/scorecards/scorecard-types'
 import { useTranslations, useLocale } from 'next-intl'
+import { useGroupDocI18n } from '@/lib/i18n/client'
+import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES } from '@/components/scorecards/buildScorecardHtml'
 
 const supabase = createClient()
 
@@ -19,20 +21,6 @@ export { computePhcp }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function strokesReceived(phcp: number, strokeIndex: number): number {
-  if (phcp <= 0) return 0
-  const full = Math.floor(phcp / 18)
-  const remainder = phcp % 18
-  return full + (strokeIndex <= remainder ? 1 : 0)
-}
-
-const thStyle: React.CSSProperties = {
-  padding: '2px 3px', textAlign: 'center', fontWeight: '700',
-  borderBottom: '1px solid #CBD5E1', color: '#475569',
-}
-const tdStyle: React.CSSProperties = {
-  padding: '2px 3px', textAlign: 'center', color: '#334155',
-}
 
 type EventItem = { id: string; title: string; starts_at: string; isPast: boolean }
 
@@ -109,7 +97,13 @@ export default function ScorecardsPage() {
   // au retour de focus sur l'onglet (corrige le cas où la formule change pendant que
   // cette page reste ouverte en arrière-plan).
   const eventScoring = useEventScoring(activeEventId)
-  const { eventFormat, teamFormat, hcpPercentage, clubName, courseName, courseId } = eventScoring
+  const { eventFormat, teamFormat, hcpRule, clubName, courseName, courseId } = eventScoring
+  const doc = useGroupDocI18n(groupId)   // langue du GROUPE pour les documents imprimés
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  useEffect(() => {
+    supabase.from('groups').select('template_logo_url').eq('id', groupId).single()
+      .then(({ data }) => setLogoUrl(data?.template_logo_url ?? null))
+  }, [groupId])
 
   const [allEvents, setAllEvents]               = useState<EventItem[]>([])
   const [eventsLoading, setEventsLoading]       = useState(true)
@@ -302,17 +296,31 @@ export default function ScorecardsPage() {
 
   // Construit le tableau players[] pour ScorecardTable selon la formule, en appliquant le % HCP
   // de l'événement (event override > format > 100) — jusqu'ici jamais appliqué à cette page.
-  function buildCardPlayers(group: Player[]): ScoreEntrant[] {
-    if (teamFormat === '4bbb') {
-      return group.map(p => ({ id: p.id, phcp: playingHcp(p.phcp, hcpPercentage) }))
-    }
-    if (teamFormat === 'team2' || teamFormat === 'team3_4') {
-      if (!group.length) return []
-      return [{ id: group[0].id, phcp: teamPhcp(group, hcpPercentage) }]
-    }
-    const solo = group.find(p => p.id === activePlayerId) ?? group[0]
-    return solo ? [{ id: solo.id, phcp: playingHcp(solo.phcp, hcpPercentage) }] : []
+  // Impression : même mise en page et mêmes calculs (formule, équipes, coefficients WHS) que
+  // « Ma carte » et Communications — remplace l'ancienne impression individuelle à 100 %.
+  function printCards() {
+    if (holes.length === 0) return
+    const ev = activeEvent
+    const eventDate = ev?.starts_at
+      ? new Date(ev.starts_at).toLocaleDateString(doc.dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
+      : ''
+    const groupsToPrint = [...flights, ...unassigned.map(p => [p])]
+    const body = groupsToPrint
+      .map(fl => buildScorecardCardsHtml(doc, fl, holes, ev?.title ?? '', eventDate, clubName, courseName, logoUrl,
+        teamFormat, hcpRule, eventScoring.formatName, eventScoring.scorecardNotes))
+      .join('')
+    const w = window.open('', '_blank')
+    if (!w) return
+    w.document.write(`<!DOCTYPE html><html lang="${doc.lang}"><head><meta charset="UTF-8"/>
+<title>${doc.t('scoring.printTitle', { title: ev?.title ?? '' })}</title><style>${SCORECARD_PRINT_STYLES}</style></head>
+<body>${body}<script>window.onload = () => window.print()</script></body></html>`)
+    w.document.close()
   }
+
+  function buildCardPlayers(group: Player[]): ScoreEntrant[] {
+    return cardEntrants(group, teamFormat, hcpRule, activePlayerId, activeFlight)
+  }
+
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
@@ -453,7 +461,7 @@ export default function ScorecardsPage() {
                   <p className="text-[14px] font-black text-slate-900 truncate">{activePlayer.first_name} {activePlayer.surname}</p>
                   <div className="flex gap-3 mt-0.5">
                     <span className="text-[12px] text-slate-500">Hcp <span className="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded-lg text-[11px] ml-0.5">{activePlayer.whs}</span></span>
-                    <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{activePlayer.phcp}</span></span>
+                    <span className="text-[12px] text-slate-500">Phcp <span className="font-bold text-slate-800 ml-0.5">{(() => { const c = buildCardPlayers(activeGroup.length ? activeGroup : [activePlayer]); return (c.find(e => e.id === activePlayer.id) ?? c[0])?.phcp ?? activePlayer.phcp })()}</span></span>
                     {activePlayer.tee && <span className="text-[12px] text-slate-500">{t('clubs.colTee')} <span className="font-bold text-slate-800 ml-0.5">{activePlayer.tee.tee_name}</span></span>}
                   </div>
                 </div>
@@ -489,7 +497,7 @@ export default function ScorecardsPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 {players.length > 0 && holes.length > 0 && (
-                  <IconBtn onClick={() => window.print()} title={t('scoring.printCards')}>🖨</IconBtn>
+                  <IconBtn onClick={printCards} title={t('scoring.printCards')}>🖨</IconBtn>
                 )}
                 {players.length > 0 && (
                   <IconBtn href={buildWhatsAppLeaderboard()} title={t('scorecards.whatsapp')}>💬</IconBtn>
@@ -532,159 +540,7 @@ export default function ScorecardsPage() {
         </div>
       )}
 
-      {/* ── Cartes à imprimer ── */}
-      {players.length > 0 && holes.length > 0 && (
-        <PrintScorecards
-          players={players}
-          holes={holes}
-          eventTitle={activeEvent?.title ?? ''}
-          clubName={clubName}
-          courseName={courseName}
-          eventDate={activeEvent
-            ? new Date(activeEvent.starts_at).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
-            : ''}
-        />
-      )}
 
     </div>
-  )
-}
-
-// ── PrintScorecards ───────────────────────────────────────────────────────────
-// Note : ce bloc d'impression reste en individuel simple, pas encore aligné sur
-// buildScorecardCardsHtml/composeCards (Phase 1). À harmoniser dans un futur chantier
-// si l'impression "rapide" (bouton 🖨 ci-dessus) doit aussi refléter les formules/équipes.
-
-function PrintScorecards({
-  players, holes, eventTitle, clubName, courseName, eventDate,
-}: {
-  players: Player[]
-  holes: Hole[]
-  eventTitle: string
-  clubName: string
-  courseName: string
-  eventDate: string
-}) {
-  const t = useTranslations()
-  const front9 = holes.filter(h => h.hole_number <= 9)
-  const back9  = holes.filter(h => h.hole_number > 9)
-
-  return (
-    <div className="hidden print:block">
-      <style>{`
-        @media print {
-          @page { size: A4 portrait; margin: 8mm; }
-          body * { visibility: hidden; }
-          .print-area, .print-area * { visibility: visible; }
-          .print-area { position: fixed; top: 0; left: 0; width: 100%; }
-          .print-page { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-bottom: 6mm; page-break-after: always; }
-          .print-page:last-child { page-break-after: auto; }
-          .print-card { break-inside: avoid; }
-        }
-      `}</style>
-      <div className="print-area">
-        {Array.from({ length: Math.ceil(players.length / 2) }, (_, pageIdx) => {
-          const pagePlayers = players.slice(pageIdx * 2, pageIdx * 2 + 2)
-          return (
-            <div key={pageIdx} className="print-page">
-              {pagePlayers.map(player => (
-                <div key={player.id} className="print-card" style={{
-                  fontFamily: 'Arial, sans-serif', fontSize: '8px',
-                  border: '1px solid #CBD5E1', borderRadius: '4px', padding: '5px',
-                }}>
-                  {/* En-tête */}
-                  <div style={{ borderBottom: '2px solid #185FA5', paddingBottom: '4px', marginBottom: '4px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: '900', color: '#0F172A' }}>
-                      {player.first_name} {player.surname}
-                    </div>
-                    <div style={{ display: 'flex', gap: '6px', marginTop: '2px', color: '#64748B', fontSize: '7px', flexWrap: 'wrap' }}>
-                      {clubName && <span>{clubName}</span>}
-                      {courseName && <><span>·</span><span>{courseName}</span></>}
-                      {eventDate && <><span>·</span><span>{eventDate}</span></>}
-                      <span>·</span>
-                      <span>HCP {player.whs}</span>
-                      <span>·</span>
-                      <span>Phcp {player.phcp}</span>
-                    </div>
-                    {eventTitle && (
-                      <div style={{ fontSize: '7px', color: '#185FA5', fontWeight: '600', marginTop: '1px' }}>{eventTitle}</div>
-                    )}
-                  </div>
-
-                  {/* Tableau */}
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '7.5px' }}>
-                    <thead>
-                      <tr style={{ background: '#F1F5F9' }}>
-                        <th style={thStyle}>{t('scoring.hole')}</th>
-                        <th style={thStyle}>Par</th>
-                        <th style={thStyle}>SI</th>
-                        <th style={thStyle}>{t('scoring.received')}</th>
-                        <th style={{ ...thStyle, width: '22px', background: '#EBF3FC' }}>{t('scoring.gross')}</th>
-                        <th style={{ ...thStyle, width: '22px', background: '#EAF3DE' }}>{t('scoring.pts')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {front9.map(h => {
-                        const recv = strokesReceived(player.phcp, h.stroke_index)
-                        return (
-                          <tr key={h.hole_number} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                            <td style={{ ...tdStyle, fontWeight: '700' }}>{h.hole_number}</td>
-                            <td style={tdStyle}>{h.par}</td>
-                            <td style={{ ...tdStyle, color: '#94A3B8' }}>{h.stroke_index}</td>
-                            <td style={{ ...tdStyle, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0' }}>
-                              {recv > 0 ? '*'.repeat(recv) : '·'}
-                            </td>
-                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
-                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
-                          </tr>
-                        )
-                      })}
-                      <SubtotalPrintRow label="OUT" holes={front9} />
-                      {back9.map(h => {
-                        const recv = strokesReceived(player.phcp, h.stroke_index)
-                        return (
-                          <tr key={h.hole_number} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                            <td style={{ ...tdStyle, fontWeight: '700' }}>{h.hole_number}</td>
-                            <td style={tdStyle}>{h.par}</td>
-                            <td style={{ ...tdStyle, color: '#94A3B8' }}>{h.stroke_index}</td>
-                            <td style={{ ...tdStyle, fontWeight: '700', color: recv > 0 ? '#185FA5' : '#E2E8F0' }}>
-                              {recv > 0 ? '*'.repeat(recv) : '·'}
-                            </td>
-                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
-                            <td style={{ ...tdStyle, background: '#F8FAFC', borderLeft: '1px solid #E2E8F0' }}></td>
-                          </tr>
-                        )
-                      })}
-                      <SubtotalPrintRow label="IN" holes={back9} />
-                      <SubtotalPrintRow label="TOT" holes={holes} isTot />
-                    </tbody>
-                  </table>
-
-                  {/* Signature */}
-                  <div style={{ marginTop: '4px', borderTop: '1px solid #E2E8F0', paddingTop: '3px', display: 'flex', justifyContent: 'space-between', color: '#94A3B8', fontSize: '7px' }}>
-                    <span>{t('scoring.markerSignature')} : _______________</span>
-                    <span>{t('scoring.playerSignature')} : _______________</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-function SubtotalPrintRow({ label, holes, isTot = false }: { label: string; holes: Hole[]; isTot?: boolean }) {
-  const parSum = holes.reduce((s, h) => s + h.par, 0)
-  return (
-    <tr style={{ background: isTot ? '#CBD5E1' : '#E2E8F0', fontWeight: '700', borderTop: '1px solid #94A3B8' }}>
-      <td style={{ ...tdStyle, fontWeight: '900' }}>{label}</td>
-      <td style={tdStyle}>{parSum}</td>
-      <td style={tdStyle}></td>
-      <td style={tdStyle}></td>
-      <td style={{ ...tdStyle, borderLeft: '1px solid #CBD5E1' }}></td>
-      <td style={{ ...tdStyle, borderLeft: '1px solid #CBD5E1' }}></td>
-    </tr>
   )
 }

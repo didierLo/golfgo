@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { buildScorecardHtml, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
+import { resolveHcpRule } from '@/lib/golf/scoring/handicapAllowance'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale } from '@/lib/i18n/server'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
     const supabase = await createServerClient()
 
     const { data: event } = await supabase.from('events')
-      .select('title, starts_at, course_id, group_id, scorecard_notes, hcp_percentage_override, competition_formats(name, team_format, hcp_percentage), courses(course_name, clubs(name))')
+      .select('title, starts_at, course_id, group_id, scorecard_notes, hcp_percentage_override, competition_formats(name, team_format, hcp_percentage, hcp_allowances, match_play), courses(course_name, clubs(name))')
       .eq('id', eventId).single()
 
     if (!event) return Response.json({ success: false, error: 'Événement introuvable' }, { status: 404 })
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
     // Mêmes informations que la version imprimée (page « Ma carte de score ») : format, % de handicap, notes de l'organisateur
     const format = (event as any).competition_formats
     const teamFormat: TeamFormat = format?.team_format ?? 'individual'
-    const hcpPercentage: number  = (event as any).hcp_percentage_override ?? format?.hcp_percentage ?? 100
+    const hcpRule                = resolveHcpRule(format, (event as any).hcp_percentage_override)
     const formatName: string     = format?.name ?? ''
     const scorecardNotes: string = (event as any).scorecard_notes ?? ''
     const clubName   = (event as any).courses?.clubs?.name ?? ''
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
 
       const html = buildScorecardHtml(
         { t, lang: gl }, cardPlayers, holes, event.title, eventDate, clubName, courseName, logoUrl,
-        cardFormat, hcpPercentage, formatName, scorecardNotes, cardIndex >= 0 ? cardIndex : undefined,
+        cardFormat, hcpRule, formatName, scorecardNotes, cardIndex >= 0 ? cardIndex : undefined,
       )
 
       const result = await sendOrQueueEmail({

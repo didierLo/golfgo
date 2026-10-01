@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 import { useTranslations, useLocale } from 'next-intl'
 import { buildScorecardCardsHtml, SCORECARD_PRINT_STYLES, type PrintPlayer } from '@/components/scorecards/buildScorecardHtml'
+import { resolveHcpRule, DEFAULT_HCP_RULE, type HcpRule } from '@/lib/golf/scoring/handicapAllowance'
 import type { TeamFormat } from '@/lib/golf/scorecards/composeCards'
 import type { Hole, TeeInfo } from '@/components/scorecards/scorecard-types'
 import { computePhcp } from '@/components/scorecards/scorecard-types'
@@ -136,7 +137,7 @@ const [printClubName,   setPrintClubName]   = useState('')
 const [printCourseName, setPrintCourseName] = useState('')
 const [printFlights, setPrintFlights]         = useState<PrintPlayer[][]>([])
 const [printTeamFormat, setPrintTeamFormat]   = useState<TeamFormat>('individual')
-const [printHcpPercentage, setPrintHcpPercentage] = useState<number>(100)
+const [printHcpRule, setPrintHcpRule] = useState<HcpRule>(DEFAULT_HCP_RULE)
 const [printFormatName, setPrintFormatName]     = useState('')
 const [printScorecardNotes, setPrintScorecardNotes] = useState('')
 
@@ -433,13 +434,13 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
   )
 async function loadPrintHoles(eventId: string) {
   const { data: event } = await supabase.from('events')
-    .select('course_id, scorecard_notes, competition_formats(name, team_format, hcp_percentage), courses(course_name, clubs(name))')
+    .select('course_id, scorecard_notes, hcp_percentage_override, competition_formats(name, team_format, hcp_percentage, hcp_allowances, match_play), courses(course_name, clubs(name))')
     .eq('id', eventId).single()
 
   setPrintClubName((event as any)?.courses?.clubs?.name ?? '')
   setPrintCourseName((event as any)?.courses?.course_name ?? '')
   setPrintTeamFormat((event as any)?.competition_formats?.team_format ?? 'individual')
-  setPrintHcpPercentage((event as any)?.hcp_percentage_override ?? (event as any)?.competition_formats?.hcp_percentage ?? 100)
+  setPrintHcpRule(resolveHcpRule((event as any)?.competition_formats, (event as any)?.hcp_percentage_override))
   setPrintFormatName((event as any)?.competition_formats?.name ?? '')
   setPrintScorecardNotes((event as any)?.scorecard_notes ?? '')
 
@@ -517,7 +518,7 @@ function handleFilterEventChange(eventId: string) {
       const htmlBody = printFlights
         .map(flightPlayers => buildScorecardCardsHtml(
           docI18n, flightPlayers, printHoles, activeEvent?.title ?? '', eventDate,
-          printClubName, printCourseName, groupTemplate.template_logo_url, printTeamFormat, printHcpPercentage,
+          printClubName, printCourseName, groupTemplate.template_logo_url, printTeamFormat, printHcpRule,
 printFormatName, printScorecardNotes
         ))
         .join('')
