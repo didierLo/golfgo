@@ -10,12 +10,19 @@ const supabase = createClient()
 type PlayerPreview = {
   federal_no: string; first_name: string; surname: string; whs: number | null
   email: string | null; phone: string | null; home_club: string | null
-  status: 'NEW' | 'UPDATE' | 'EXISTS'
+  status: 'NEW' | 'UPDATE' | 'JOIN' | 'EXISTS'
+  id: string | null          // identifiant du joueur s'il est déjà connu de GolfGo
+  inGroup: boolean           // déjà membre du groupe choisi
 }
 
+// NEW    : inconnu de GolfGo → créé (et ajouté au groupe choisi)
+// UPDATE : déjà connu, le fichier apporte des changements
+// JOIN   : déjà connu, rien à modifier, mais pas encore membre du groupe choisi → ajouté au groupe
+// EXISTS : déjà connu et déjà dans le groupe (ou aucun groupe choisi) → rien à faire
 const STATUS_STYLE = {
   NEW:    { labelKey: 'playersImport.statusNew',    bg: '#EAF3DE', text: '#3B6D11' },
   UPDATE: { labelKey: 'playersImport.statusUpdate', bg: '#FAEEDA', text: '#854F0B' },
+  JOIN:   { labelKey: 'playersImport.statusJoin',   bg: '#E6F1FB', text: '#0C447C' },
   EXISTS: { labelKey: 'playersImport.statusExists', bg: '#F1F5F9', text: '#64748B' },
 }
 
@@ -57,10 +64,15 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
   const [preview, setPreview]   = useState<PlayerPreview[]>([])
   const [loading, setLoading]   = useState(false)
   const [groups, setGroups]     = useState<{ id: string; name: string }[]>([])
-  const [groupId, setGroupId]   = useState('')
+  // Ouvert depuis un groupe : ce groupe est présélectionné (avant, « Sans groupe » restait choisi
+  // et aucun joueur n'était ajouté au groupe)
+  const [groupId, setGroupId]   = useState(currentGroupId ?? '')
   const [mode, setMode]         = useState<'insert' | 'update'>('insert')
+  const [rows, setRows]         = useState<any[] | null>(null)   // lignes du fichier, normalisées
 
   useEffect(() => { loadGroups() }, [])
+  // L'appartenance au groupe dépend du groupe choisi : on recalcule l'aperçu quand il change
+  useEffect(() => { if (rows) buildPreview(rows) }, [groupId])  // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadGroups() {
     const { data } = await supabase.from('groups').select('id, name').order('name')
@@ -76,6 +88,7 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
     const sheet = workbook.Sheets[workbook.SheetNames[0]]
     const raw: any[] = XLSX.utils.sheet_to_json(sheet)
     const normalized = raw.map(row => { const obj: any = {}; Object.keys(row).forEach(k => { obj[normalizeColumn(k)] = row[k] }); return obj })
+    setRows(normalized)
     await buildPreview(normalized)
   }
 
@@ -93,6 +106,14 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
       existing = found ?? []
     }
     const map = new Map(); existing.forEach(p => map.set(p.federal_no, p))
+
+    // Qui est déjà membre du groupe choisi ?
+    const memberIds = new Set<string>()
+    if (groupId && existing.length > 0) {
+      const { data: gp } = await supabase.from('groups_players').select('player_id')
+        .eq('group_id', groupId).in('player_id', existing.map(e => e.id))
+      gp?.forEach(m => memberIds.add(m.player_id))
+    }
     const previewRows: PlayerPreview[] = data.map((r, i) => {
       let federal = String(r.federal_no || '').trim().toUpperCase()
       if (!federal) federal = `AUTO_${Date.now()}_${i}`
@@ -103,7 +124,8 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
       const phone       = cleanPhone(r.phone)
       const home_club   = r.home_club || null
       const existingPlayer = map.get(federal)
-      let status: 'NEW' | 'UPDATE' | 'EXISTS' = 'NEW'
+      let status: PlayerPreview['status'] = 'NEW'
+      const inGroup = !!existingPlayer && memberIds.has(existingPlayer.id)
       if (existingPlayer && existingPlayer.visible === false) {
         status = 'EXISTS'   // joueur d'un autre groupe : reconnu, jamais modifié depuis cet import
       } else if (existingPlayer) {
@@ -118,7 +140,10 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
           (!!home_club && home_club !== existingPlayer.home_club)
         status = changed ? 'UPDATE' : 'EXISTS'
       }
-      return { federal_no: federal, first_name, surname, whs, email, phone, home_club, status }
+      // Connu de GolfGo mais pas encore dans le groupe choisi : il sera ajouté au groupe
+      if (status === 'EXISTS' && existingPlayer && groupId && !inGroup) status = 'JOIN'
+      return { federal_no: federal, first_name, surname, whs, email, phone, home_club, status,
+        id: existingPlayer?.id ?? null, inGroup }
     })
     const map2 = new Map(); previewRows.forEach(p => map2.set(p.federal_no, p))
     setPreview(Array.from(map2.values()))
@@ -164,23 +189,40 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
       if (data?.[0]?.id) touchedIds.push(data[0].id)
     }
 
-    const allIds = [...insertedIds, ...touchedIds]
-    if (groupId && allIds.length > 0) {
-      const { data: existingMembers } = await supabase.from('groups_players').select('player_id, role').eq('group_id', groupId).in('player_id', allIds)
-      const existingRoleMap: Record<string, string> = {}; existingMembers?.forEach(m => { existingRoleMap[m.player_id] = m.role })
-      const newMembers = allIds.filter(id => !existingRoleMap[id])
-      if (newMembers.length > 0) await supabase.from('groups_players').insert(newMembers.map(id => ({ group_id: groupId, player_id: id, role: 'member' })))
+    // Ajout au groupe : les nouveaux joueurs + tous les joueurs déjà connus qui n'en sont pas encore
+    // membres (quel que soit le mode : rejoindre un groupe ne modifie pas la fiche du joueur)
+    let joined = 0
+    if (groupId) {
+      const candidates = Array.from(new Set([
+        ...insertedIds, ...touchedIds,
+        ...preview.filter(p => p.id && !p.inGroup).map(p => p.id as string),
+      ]))
+      if (candidates.length > 0) {
+        const { data: existingMembers } = await supabase.from('groups_players').select('player_id').eq('group_id', groupId).in('player_id', candidates)
+        const already = new Set((existingMembers ?? []).map(m => m.player_id))
+        const newMembers = candidates.filter(id => !already.has(id))
+        if (newMembers.length > 0) {
+          const { error } = await supabase.from('groups_players').insert(newMembers.map(id => ({ group_id: groupId, player_id: id, role: 'member' })))
+          if (error) { alert(error.message); setLoading(false); return }
+          joined = newMembers.length
+        }
+      }
     }
 
-    alert(t('playersImport.resultAlert', { added: newRows.length, updated: updateRows.length }))
-    setPreview([]); setLoading(false)
+    alert(t('playersImport.resultAlert', { added: newRows.length, updated: updateRows.length, joined }))
+    setPreview([]); setRows(null); setFileName(''); setLoading(false)
   }
 
-const { newCount, updateCount, existsCount } = useMemo(() => ({
-  newCount:    preview.filter(p => p.status === 'NEW').length,
-  updateCount: preview.filter(p => p.status === 'UPDATE').length,
-  existsCount: preview.filter(p => p.status === 'EXISTS').length,
-}), [preview])
+const { newCount, updateCount, joinCount, existsCount, actionCount } = useMemo(() => {
+  const newCount    = preview.filter(p => p.status === 'NEW').length
+  const updateCount = preview.filter(p => p.status === 'UPDATE').length
+  const joinCount   = preview.filter(p => p.status === 'JOIN').length
+  const existsCount = preview.filter(p => p.status === 'EXISTS').length
+  // Joueurs concernés par l'import : créés, mis à jour (selon le mode) ou ajoutés au groupe
+  const updatesNotInGroup = groupId ? preview.filter(p => p.status === 'UPDATE' && !p.inGroup).length : 0
+  const actionCount = newCount + joinCount + (mode === 'update' ? updateCount : updatesNotInGroup)
+  return { newCount, updateCount, joinCount, existsCount, actionCount }
+}, [preview, mode, groupId])
 
 
   return (
@@ -225,9 +267,11 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
       {preview.length > 0 && (
         <>
           <div className="flex gap-2 flex-wrap">
-            {[{ n: newCount, ...STATUS_STYLE.NEW }, { n: updateCount, ...STATUS_STYLE.UPDATE }, { n: existsCount, ...STATUS_STYLE.EXISTS }].map(({ n, labelKey, bg, text }) => (
+            {[{ n: newCount, ...STATUS_STYLE.NEW }, { n: updateCount, ...STATUS_STYLE.UPDATE }, { n: joinCount, ...STATUS_STYLE.JOIN }, { n: existsCount, ...STATUS_STYLE.EXISTS }]
+              .filter(b => b.n > 0 || b.labelKey !== STATUS_STYLE.JOIN.labelKey)
+              .map(({ n, labelKey, bg, text }) => (
               <div key={labelKey} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold" style={{ background: bg, color: text }}>
-                <span className="font-black">{n}</span> {t(labelKey)}
+                <span className="font-black">{n}</span> {t(labelKey === STATUS_STYLE.EXISTS.labelKey && groupId ? 'playersImport.statusInGroup' : labelKey)}
               </div>
             ))}
           </div>
@@ -249,17 +293,17 @@ const { newCount, updateCount, existsCount } = useMemo(() => ({
                   <span className="font-medium text-slate-800">{p.first_name} {p.surname}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-slate-400 font-mono">{p.federal_no}</span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: s.bg, color: s.text }}>{t(s.labelKey)}</span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: s.bg, color: s.text }}>{t(p.status === 'EXISTS' && groupId ? 'playersImport.statusInGroup' : s.labelKey)}</span>
                   </div>
                 </div>
               )
             })}
           </div>
 
-          <button onClick={importPlayers} disabled={loading}
+          <button onClick={importPlayers} disabled={loading || actionCount === 0}
             className="flex items-center gap-2 bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-[#0C447C] disabled:opacity-50 transition-colors">
             {loading && <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-            {loading ? t('playersImport.importing') : t('playersImport.importCount', { count: mode === 'insert' ? newCount : newCount + updateCount })}
+            {loading ? t('playersImport.importing') : t('playersImport.importCount', { count: actionCount })}
           </button>
         </>
       )}
