@@ -238,9 +238,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       { href: paymentsHref ?? '/groups',    icon: Icons.payments,       label: t('nav.payments'),       color: '#3B6D11', active: !!paymentsHref && isActive(paymentsHref ?? '') },  // ← ici
       { href: flightsHref ?? '/groups',     icon: Icons.flights,        label: t('nav.flights'),        color: '#EF9F27', active: !!flightsHref && isActive(flightsHref) },
       { href: resultsHref ?? '/groups',     icon: Icons.results,        label: t('nav.results'),        color: '#3B6D11', active: !!resultsHref && isActive(resultsHref) },
-      { href: statsHref ?? '/groups',       icon: Icons.stats,          label: t('nav.stats'),          color: '#7F77DD', active: !!statsHref && isActive(statsHref) },
       { href: clubsHref,                    icon: Icons.clubs,          label: t('nav.clubs'),          color: '#EF9F27', active: isAnyOwner && isActive('/admin/clubs') },
       { href: communicationsHref,           icon: Icons.communications, label: t('nav.communications'), color: '#D4537E', active: !!gid && isActive(`/groups/${gid}/communications`) },
+      { href: statsHref ?? '/groups',       icon: Icons.stats,          label: t('nav.stats'),          color: '#7F77DD', active: !!statsHref && isActive(statsHref) },
     ]
 
   return (
@@ -498,9 +498,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem href={paymentsHref ?? '/groups'} icon={Icons.payments} iconColor="#3B6D11" label={t('nav.payments')} active={!!paymentsHref && isActive(paymentsHref)} />
             <NavItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
             <NavItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
-            <NavItem href={statsHref ?? '/groups'}        icon={Icons.stats}          iconColor="#7F77DD" label={t('nav.stats')}          active={!!statsHref && isActive(statsHref)} />
             <NavItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
             <NavItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
+            <NavItem href={statsHref ?? '/groups'}        icon={Icons.stats}          iconColor="#7F77DD" label={t('nav.stats')}          active={!!statsHref && isActive(statsHref)} />
           </SidebarSection>
 
           <div className="mt-auto pt-4 flex flex-col gap-1 border-t border-slate-100 mx-1">
@@ -533,9 +533,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem href={paymentsHref ?? '/groups'}     icon={Icons.payments}       iconColor="#3B6D11" label={t('nav.payments')}       active={!!paymentsHref && isActive(paymentsHref ?? '')} />
             <NavIconItem href={flightsHref ?? '/groups'}      icon={Icons.flights}        iconColor="#EF9F27" label={t('nav.flights')}        active={!!flightsHref && isActive(flightsHref)} />
             <NavIconItem href={resultsHref ?? '/groups'}      icon={Icons.results}        iconColor="#3B6D11" label={t('nav.results')}        active={!!resultsHref && isActive(resultsHref)} />
-            <NavIconItem href={statsHref ?? '/groups'}        icon={Icons.stats}          iconColor="#7F77DD" label={t('nav.stats')}          active={!!statsHref && isActive(statsHref)} />
             <NavIconItem href={clubsHref}                     icon={Icons.clubs}          iconColor="#D4537E" label={t('nav.clubs')}          active={isAnyOwner && isActive('/admin/clubs')} />
             <NavIconItem href={communicationsHref}            icon={Icons.communications} iconColor="#D4537E" label={t('nav.communications')} active={!!gid && isActive(`/groups/${gid}/communications`)} />
+            <NavIconItem href={statsHref ?? '/groups'}        icon={Icons.stats}          iconColor="#7F77DD" label={t('nav.stats')}          active={!!statsHref && isActive(statsHref)} />
           </div>
         </aside>
 
