@@ -400,6 +400,11 @@ const flightGroups = useMemo(() =>
                   className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors">
                   {t('flights.constraints')}
                 </a>
+                <span className="text-slate-200 text-[10px]">·</span>
+                <a href={`/groups/${groupId}/stats`}
+                  className="text-[11px] font-medium text-slate-800 hover:text-[#185FA5] transition-colors">
+                  {t('nav.stats')}
+                </a>
               </div>
             </div>
 
