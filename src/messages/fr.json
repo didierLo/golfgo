@@ -904,6 +904,19 @@
     "removeFailed": "Le retrait n'a pas été effectué (droits insuffisants ?). Réessaie ou contacte le support.",
     "adminsIncluded": "dont {count} admin(s)",
     "guestsCount": "{count} visiteur(s)",
+    "sendList": {
+      "button": "Envoyer la liste par e-mail",
+      "title": "Envoyer la liste des membres",
+      "hint": "La liste (noms, WHS, statut) sera envoyée par e-mail à l'adresse saisie. Les adresses et téléphones des membres ne sont pas transmis.",
+      "emailLabel": "Adresse du destinataire",
+      "placeholder": "nom@exemple.be",
+      "send": "Envoyer",
+      "sending": "Envoi en cours…",
+      "cancel": "Annuler",
+      "sent": "Liste envoyée à {email}.",
+      "invalidEmail": "Cette adresse e-mail n'a pas l'air valide.",
+      "error": "L'envoi a échoué. Réessayez plus tard."
+    },
     "welcome": {
       "button": "Nouveau membre",
       "title": "Accueillir un nouveau membre",
@@ -1610,6 +1623,11 @@
     },
     "scorecard": {
       "subject": "Ta carte de score — {title}"
+    },
+    "membersList": {
+      "subject": "{group} — Liste des membres",
+      "docTitle": "Liste des membres — {group}",
+      "intro": "{sender} vous envoie la liste des membres du groupe {group}."
     },
     "groupInvite": {
       "subject": "Invitation à rejoindre {group} sur GolfGo",

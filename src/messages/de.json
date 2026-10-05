@@ -903,6 +903,19 @@
     "removeFailed": "Die Entfernung wurde nicht durchgeführt (unzureichende Rechte?). Versuchen Sie es erneut oder kontaktieren Sie den Support.",
     "adminsIncluded": "davon {count} Admin(s)",
     "guestsCount": "{count} Besucher",
+    "sendList": {
+      "button": "Liste per E-Mail senden",
+      "title": "Mitgliederliste senden",
+      "hint": "Die Liste (Namen, WHS, Status) wird per E-Mail an die eingegebene Adresse gesendet. E-Mail-Adressen und Telefonnummern der Mitglieder werden nicht übermittelt.",
+      "emailLabel": "E-Mail-Adresse des Empfängers",
+      "placeholder": "name@beispiel.de",
+      "send": "Senden",
+      "sending": "Wird gesendet…",
+      "cancel": "Abbrechen",
+      "sent": "Liste an {email} gesendet.",
+      "invalidEmail": "Diese E-Mail-Adresse scheint ungültig zu sein.",
+      "error": "Das Senden ist fehlgeschlagen. Bitte versuchen Sie es später erneut."
+    },
     "welcome": {
       "button": "Neues Mitglied",
       "title": "Ein neues Mitglied begrüßen",
@@ -1612,6 +1625,11 @@
     },
     "scorecard": {
       "subject": "Ihre Scorekarte — {title}"
+    },
+    "membersList": {
+      "subject": "{group} — Mitgliederliste",
+      "docTitle": "Mitgliederliste — {group}",
+      "intro": "{sender} sendet Ihnen die Mitgliederliste der Gruppe {group}."
     },
     "groupInvite": {
       "subject": "Einladung, {group} auf GolfGo beizutreten",

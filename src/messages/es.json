@@ -903,6 +903,19 @@
     "removeFailed": "La baja no se realizó (¿permisos insuficientes?). Vuelve a intentarlo o contacta con soporte.",
     "adminsIncluded": "de los cuales {count} admin(s)",
     "guestsCount": "{count} visitante(s)",
+    "sendList": {
+      "button": "Enviar la lista por correo",
+      "title": "Enviar la lista de miembros",
+      "hint": "La lista (nombres, WHS, estado) se enviará por correo a la dirección indicada. No se transmiten los correos ni los teléfonos de los miembros.",
+      "emailLabel": "Correo del destinatario",
+      "placeholder": "nombre@ejemplo.es",
+      "send": "Enviar",
+      "sending": "Enviando…",
+      "cancel": "Cancelar",
+      "sent": "Lista enviada a {email}.",
+      "invalidEmail": "Este correo no parece válido.",
+      "error": "Error al enviar. Inténtelo de nuevo más tarde."
+    },
     "welcome": {
       "button": "Nuevo miembro",
       "title": "Dar la bienvenida a un nuevo miembro",
@@ -1611,6 +1624,11 @@
     },
     "scorecard": {
       "subject": "Tu tarjeta de juego — {title}"
+    },
+    "membersList": {
+      "subject": "{group} — Lista de miembros",
+      "docTitle": "Lista de miembros — {group}",
+      "intro": "{sender} le envía la lista de miembros del grupo {group}."
     },
     "groupInvite": {
       "subject": "Invitación para unirte a {group} en GolfGo",

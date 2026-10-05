@@ -902,6 +902,19 @@
     "removeFailed": "Verwijderen is niet gelukt (onvoldoende rechten?). Probeer opnieuw of neem contact op met support.",
     "adminsIncluded": "waarvan {count} admin(s)",
     "guestsCount": "{count} bezoeker(s)",
+    "sendList": {
+      "button": "Lijst per e-mail versturen",
+      "title": "De ledenlijst versturen",
+      "hint": "De lijst (namen, WHS, status) wordt per e-mail verstuurd naar het opgegeven adres. E-mailadressen en telefoonnummers van de leden worden niet meegestuurd.",
+      "emailLabel": "E-mailadres van de ontvanger",
+      "placeholder": "naam@voorbeeld.be",
+      "send": "Versturen",
+      "sending": "Bezig met versturen…",
+      "cancel": "Annuleren",
+      "sent": "Lijst verstuurd naar {email}.",
+      "invalidEmail": "Dit e-mailadres lijkt niet geldig.",
+      "error": "Versturen mislukt. Probeer het later opnieuw."
+    },
     "welcome": {
       "button": "Nieuw lid",
       "title": "Een nieuw lid verwelkomen",
@@ -1609,6 +1622,11 @@
     },
     "scorecard": {
       "subject": "Je scorekaart — {title}"
+    },
+    "membersList": {
+      "subject": "{group} — Ledenlijst",
+      "docTitle": "Ledenlijst — {group}",
+      "intro": "{sender} stuurt je de ledenlijst van de groep {group}."
     },
     "groupInvite": {
       "subject": "Uitnodiging om lid te worden van {group} op GolfGo",

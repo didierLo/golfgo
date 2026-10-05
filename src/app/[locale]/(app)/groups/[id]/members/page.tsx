@@ -31,6 +31,10 @@ export default function MembersPage() {
   const [userRole,     setUserRole]     = useState<string | null>(null)
   const [toast,        setToast]        = useState<string | null>(null)
   const [showWelcome,  setShowWelcome]  = useState(false)
+  const [showSend,     setShowSend]     = useState(false)
+  const [sendTo,       setSendTo]       = useState('')
+  const [sending,      setSending]      = useState(false)
+  const [sendError,    setSendError]    = useState<string | null>(null)
 
   // Compteur : membres + administrateurs (les administrateurs SONT des membres), visiteurs comptés à part.
   const adminCount = members.filter(m => m.role === 'owner').length
@@ -127,6 +131,36 @@ export default function MembersPage() {
     win.document.write(html); win.document.close(); win.focus(); win.print()
   }
 
+  async function sendListByEmail() {
+    const to = sendTo.trim()
+    if (!/^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]{2,}$/.test(to)) {
+      setSendError(t('members.sendList.invalidEmail')); return
+    }
+    setSending(true); setSendError(null)
+    try {
+      const res  = await fetch('/api/send-members-list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groupId, to, sortKey }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (res.ok && json.success) {
+        setShowSend(false); setSendTo('')
+        showToast(t('members.sendList.sent', { email: to }))
+      } else if (res.status === 400 && json.error === 'INVALID_EMAIL') {
+        setSendError(t('members.sendList.invalidEmail'))
+      } else if (res.status === 401 || res.status === 403) {
+        setSendError(t('members.adminOnly'))
+      } else {
+        setSendError(t('members.sendList.error'))
+      }
+    } catch {
+      setSendError(t('members.sendList.error'))
+    } finally {
+      setSending(false)
+    }
+  }
+
   function buildWhatsApp() {
     const lines = sortedMembers.map(m => `• ${m.first_name} ${m.surname}${m.whs != null ? ` (${m.whs})` : ''}`)
     return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`
@@ -171,7 +205,12 @@ export default function MembersPage() {
           <button type="button" onClick={printList}
             className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">👁</button>
           <button type="button"
-            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">📤</button>
+            title={t('members.sendList.button')} aria-label={t('members.sendList.button')}
+            onClick={() => {
+              if (userRole !== 'owner') { showToast(t('members.adminOnly')); return }
+              setSendError(null); setShowSend(true)
+            }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">✉️</button>
           <button type="button" onClick={() => window.open(buildWhatsApp(), '_blank')}
             className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-[16px] text-slate-600 hover:bg-slate-50 transition-colors">💬</button>
         </div>
@@ -197,6 +236,37 @@ export default function MembersPage() {
       </div>
 
       {showWelcome && <WelcomeNewMemberModal groupId={groupId} onClose={() => setShowWelcome(false)} />}
+
+      {showSend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+          onClick={() => { if (!sending) setShowSend(false) }}>
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-5"
+            onClick={e => e.stopPropagation()}>
+            <p className="text-[15px] font-bold text-slate-800">{t('members.sendList.title')}</p>
+            <p className="text-[12px] text-slate-500 mt-1 mb-4">{t('members.sendList.hint')}</p>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              {t('members.sendList.emailLabel')}
+            </label>
+            <input type="email" inputMode="email" autoComplete="off" autoFocus
+              value={sendTo}
+              onChange={e => { setSendTo(e.target.value); setSendError(null) }}
+              onKeyDown={e => { if (e.key === 'Enter' && !sending) sendListByEmail() }}
+              placeholder={t('members.sendList.placeholder')}
+              className="w-full text-[14px] px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-[#185FA5]" />
+            {sendError && <p className="text-[12px] text-red-600 mt-2">{sendError}</p>}
+            <div className="flex justify-end gap-2 mt-5">
+              <button type="button" disabled={sending} onClick={() => setShowSend(false)}
+                className="text-[13px] font-semibold px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-60">
+                {t('members.sendList.cancel')}
+              </button>
+              <button type="button" disabled={sending || !sendTo.trim()} onClick={sendListByEmail}
+                className="text-[13px] font-semibold px-4 py-2 rounded-xl bg-[#185FA5] text-white hover:bg-[#0C447C] disabled:opacity-60">
+                {sending ? t('members.sendList.sending') : t('members.sendList.send')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
      
       {/* ── Liste membres ── */}

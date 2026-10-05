@@ -904,6 +904,19 @@
     "removeFailed": "The removal did not go through (insufficient permissions?). Try again or contact support.",
     "adminsIncluded": "including {count} admin(s)",
     "guestsCount": "{count} visitor(s)",
+    "sendList": {
+      "button": "Send the list by email",
+      "title": "Send the member list",
+      "hint": "The list (names, WHS, status) will be emailed to the address you enter. Members' email addresses and phone numbers are not included.",
+      "emailLabel": "Recipient's email address",
+      "placeholder": "name@example.com",
+      "send": "Send",
+      "sending": "Sending…",
+      "cancel": "Cancel",
+      "sent": "List sent to {email}.",
+      "invalidEmail": "This email address doesn't look valid.",
+      "error": "Sending failed. Please try again later."
+    },
     "welcome": {
       "button": "New member",
       "title": "Welcome a new member",
@@ -1612,6 +1625,11 @@
     },
     "scorecard": {
       "subject": "Your scorecard — {title}"
+    },
+    "membersList": {
+      "subject": "{group} — Member list",
+      "docTitle": "Member list — {group}",
+      "intro": "{sender} is sending you the member list of the group {group}."
     },
     "groupInvite": {
       "subject": "Invitation to join {group} on GolfGo",
