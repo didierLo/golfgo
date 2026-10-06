@@ -336,7 +336,9 @@ const eventIsGolf = (eventResult.data as any)?.is_golf ?? true
 const logoUrl    = (group as any)?.template_logo_url ?? null
 
 
-      const hasButtons = commBody.includes('{{yes_button}}')
+      const wantsButtons = commBody.includes('{{yes_button}}')
+      // Même règle que l'envoi : sans événement, les boutons ne sont pas envoyés
+      const hasButtons   = wantsButtons && !!eventId
 
       const vars: Record<string, string> = {
         first_name: t('email.preview.firstName'), surname: t('email.preview.surname'), player_name: t('email.preview.fullName'),
@@ -359,7 +361,11 @@ const logoUrl    = (group as any)?.template_logo_url ?? null
         noLink:        `${appUrl}/${gl}/invite/no?token=PREVIEW`,
         logoUrl,
       })
-      return Response.json({ html, subject: resolvedSubject })
+      const noEventWarning = wantsButtons && !eventId
+        ? `<div style="background:#FEE2E2;border:1px solid #DC2626;color:#991B1B;font-family:sans-serif;font-size:13px;font-weight:600;padding:12px 16px;text-align:center;">⚠ Aucun événement sélectionné : les boutons de réponse ne seront pas dans l'email, et l'envoi sera refusé.</div>`
+        : ''
+      const finalHtml = noEventWarning ? html.replace(/(<body[^>]*>)/i, `$1${noEventWarning}`) : html
+      return Response.json({ html: finalHtml, subject: resolvedSubject })
     }
 
     return Response.json({ error: 'Type invalide' }, { status: 400 })

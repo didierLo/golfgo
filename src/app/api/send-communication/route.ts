@@ -214,6 +214,14 @@ export async function POST(req: Request) {
     const auth = await requireGroupOwner(groupId)
     if (!auth.ok) return Response.json({ success: false, error: 'Unauthorized' }, { status: auth.status })
 
+    // {{yes_button}} a besoin d'un événement (liens RSVP) : on refuse plutôt que d'envoyer sans boutons
+    if (commBody.includes('{{yes_button}}') && !eventId) {
+      return Response.json({
+        success: false,
+        error: "Les boutons de réponse nécessitent un événement : sélectionne un événement ou retire {{yes_button}} du message.",
+      }, { status: 400 })
+    }
+
     const supabase = await createServerClient()
     const gl: Locale = await getGroupLocale(supabase, groupId)   // langue du groupe
     const t  = serverT(gl)
@@ -286,6 +294,7 @@ const hasYesButton = commBody.includes('{{yes_button}}') && !!eventId
 
 // ── Upsert event_participants + tokens ───────────────────────────────────
 const participantTokens: Record<string, string> = {}
+const tokenErrors: Record<string, string> = {}
 
 if (eventId) {
   const { data: existing } = await supabase
@@ -306,11 +315,16 @@ if (eventId) {
           let token = existingMap[playerId].token
           if (!token) {
             token = randomUUID()
-            await supabase
+            const { error: updErr } = await supabase
               .from('event_participants')
               .update({ invite_token: token })
               .eq('event_id', eventId)
               .eq('player_id', playerId)
+            if (updErr) {
+              console.error('[UPDATE TOKEN]', updErr.message)
+              tokenErrors[playerId] = updErr.message
+              continue
+            }
           }
           participantTokens[playerId] = token
         } else {
@@ -328,6 +342,7 @@ if (eventId) {
             participantTokens[playerId] = token
           } else {
             console.error('[INSERT PARTICIPANT]', insertErr.message)
+            tokenErrors[playerId] = insertErr.message
           }
         }
       }
@@ -347,6 +362,12 @@ if (eventId) {
       if (optOutSet.has(player.id)) { skipped++; continue }
 
       const token         = participantTokens[player.id]
+
+      // Boutons demandés mais lien RSVP impossible : on n'envoie pas un email sans boutons
+      if (hasYesButton && !token) {
+        errors.push(`${player.first_name} ${player.surname}: lien de réponse non créé (${tokenErrors[player.id] ?? 'token manquant'})`)
+        continue
+      }
       const yes18Link     = token ? `${appUrl}/${gl}/invite/yes?token=${token}&holes=18` : eventLink
       const yes9frontLink = token ? `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=out` : eventLink
       const yes9backLink  = token ? `${appUrl}/${gl}/invite/yes?token=${token}&holes=9&section=in` : eventLink
