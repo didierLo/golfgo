@@ -436,6 +436,10 @@
     "remove": "Supprimer"
   },
   "editEvent": {
+    "kindLabel": "Type de partie (pour les statistiques)",
+    "kindCompetition": "Compétition",
+    "kindPrize": "Prix",
+    "kindHint": "Les « Prix » (Prix des amis, Prix des Vendanges…) sont comptés à part dans les statistiques.",
     "title": "Modifier l'événement",
     "titleLabel": "Titre *",
     "location": "Lieu",
@@ -513,6 +517,13 @@
     "backgroundReset": "Revenir à la photo par défaut"
   },
   "stats": {
+    "kind": "Type de partie",
+    "kinds": { "all": "Toutes", "competition": "Compétitions", "prize": "Prix" },
+    "dateFrom": "Du",
+    "dateTo": "au",
+    "clearDates": "Effacer les dates",
+    "rangeInvalid": "La date de début doit précéder la date de fin.",
+    "badgePrize": "Prix",
     "title": "Statistiques du groupe",
     "subtitle": "Parties jouées, flights et participation des joueurs",
     "toEvents": "← Événements",
@@ -521,7 +532,8 @@
       "all": "Tout",
       "1y": "1 an",
       "6m": "6 mois",
-      "3m": "3 mois"
+      "3m": "3 mois",
+      "custom": "Dates…"
     },
     "empty": "Aucune partie avec des flights sur cette période.",
     "kpiGames": "Parties jouées",
@@ -1183,6 +1195,10 @@
     "confirmButton": "Confirmer mon forfait"
   },
   "addEvent": {
+    "kindLabel": "Type de partie (pour les statistiques)",
+    "kindCompetition": "Compétition",
+    "kindPrize": "Prix",
+    "kindHint": "Les « Prix » (Prix des amis, Prix des Vendanges…) sont comptés à part dans les statistiques.",
     "title": "Nouvel événement",
     "subtitle": "Ajouter un événement au groupe",
     "titleLabel": "Titre *",

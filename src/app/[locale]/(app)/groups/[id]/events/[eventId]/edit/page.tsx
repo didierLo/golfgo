@@ -137,6 +137,7 @@ export default function EditEventPage() {
   const [selectedClubId, setSelectedClubId]             = useState('')
   const [selectedCountry, setSelectedCountry]           = useState('')
   const [isGolf, setIsGolf]                             = useState(true)
+  const [eventKind, setEventKind]                       = useState<'competition' | 'prize'>('competition')
   const [fee, setFee]                                   = useState('')
   const [emailMessage, setEmailMessage]                 = useState('')
   const [scorecardNotes, setScorecardNotes] = useState('')
@@ -159,7 +160,7 @@ export default function EditEventPage() {
     setLoading(true)
     const { data: event, error: evErr } = await supabase
       .from('events')
-     .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, fee_per_person, email_message, max_participants, scorecard_notes, hcp_percentage_override, extra_activity_label')
+     .select('title, location, starts_at, ends_at, course_id, competition_format_id, is_golf, event_kind, fee_per_person, email_message, max_participants, scorecard_notes, hcp_percentage_override, extra_activity_label')
       .eq('id', eventId).single()
     if (evErr || !event) { alert(t('editEvent.notFound')); window.location.href = `/groups/${groupId}/events`; return }
 
@@ -171,6 +172,7 @@ export default function EditEventPage() {
     setCompetitionFormatId(event.competition_format_id || '')
     setHcpOverride(event.hcp_percentage_override != null ? String(event.hcp_percentage_override) : '')
     setIsGolf(event.is_golf ?? true)
+    setEventKind(event.event_kind === 'prize' ? 'prize' : 'competition')
     setFee(event.fee_per_person ? String(event.fee_per_person) : '')
     setEmailMessage(event.email_message || '')
     setScorecardNotes(event.scorecard_notes || '')
@@ -231,7 +233,8 @@ async function handleSubmit(e: React.FormEvent) {
       competition_format_id: competitionFormatId || null,
       hcp_percentage_override: hcpOverride ? parseFloat(hcpOverride) : null,
       is_golf:               isGolf,
-      fee_per_person:        fee ? parseFloat(fee.replace(',', '.')) : null,
+      event_kind:            isGolf ? eventKind : 'competition',
+      fee_per_person:       fee ? parseFloat(fee.replace(',', '.')) : null,
       email_message:         emailMessage || null,
       max_participants:      maxParticipants ? parseInt(maxParticipants) : null,
       scorecard_notes:       scorecardNotes || null,
@@ -295,6 +298,23 @@ async function handleSubmit(e: React.FormEvent) {
 
         {isGolf && (
           <>
+            <div>
+              <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('editEvent.kindLabel')}</label>
+              <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit">
+                <button type="button" onClick={() => setEventKind('competition')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
+                    eventKind === 'competition' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                  {t('editEvent.kindCompetition')}
+                </button>
+                <button type="button" onClick={() => setEventKind('prize')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
+                    eventKind === 'prize' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                  {t('editEvent.kindPrize')}
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1.5 on-bg">{t('editEvent.kindHint')}</p>
+            </div>
+
            <div>
               <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editEvent.club')}</label>
               <div className="flex gap-2">

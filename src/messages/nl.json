@@ -434,6 +434,10 @@
     "remove": "Verwijderen"
   },
   "editEvent": {
+    "kindLabel": "Type partij (voor de statistieken)",
+    "kindCompetition": "Wedstrijd",
+    "kindPrize": "Prijs",
+    "kindHint": "‘Prijs’-evenementen (prijs van de vrienden, seizoensprijs…) worden apart geteld in de statistieken.",
     "title": "Evenement bewerken",
     "titleLabel": "Titel *",
     "location": "Locatie",
@@ -511,6 +515,13 @@
     "backgroundReset": "Terug naar standaardfoto"
   },
   "stats": {
+    "kind": "Type partij",
+    "kinds": { "all": "Alle", "competition": "Wedstrijden", "prize": "Prijzen" },
+    "dateFrom": "Van",
+    "dateTo": "tot",
+    "clearDates": "Data wissen",
+    "rangeInvalid": "De startdatum moet vóór de einddatum liggen.",
+    "badgePrize": "Prijs",
     "title": "Groepsstatistieken",
     "subtitle": "Gespeelde rondes, flights en deelname van spelers",
     "toEvents": "← Evenementen",
@@ -519,7 +530,8 @@
       "all": "Alles",
       "1y": "1 jaar",
       "6m": "6 maanden",
-      "3m": "3 maanden"
+      "3m": "3 maanden",
+      "custom": "Eigen data"
     },
     "empty": "Geen rondes met flights in deze periode.",
     "kpiGames": "Gespeelde rondes",
@@ -1181,6 +1193,10 @@
     "confirmButton": "Afmelding bevestigen"
   },
   "addEvent": {
+    "kindLabel": "Type partij (voor de statistieken)",
+    "kindCompetition": "Wedstrijd",
+    "kindPrize": "Prijs",
+    "kindHint": "‘Prijs’-evenementen (prijs van de vrienden, seizoensprijs…) worden apart geteld in de statistieken.",
     "title": "Nieuw evenement",
     "subtitle": "Een evenement aan de groep toevoegen",
     "titleLabel": "Titel *",

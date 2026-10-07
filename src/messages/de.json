@@ -435,6 +435,10 @@
     "remove": "Entfernen"
   },
   "editEvent": {
+    "kindLabel": "Spieltyp (für die Statistiken)",
+    "kindCompetition": "Wettspiel",
+    "kindPrize": "Preis",
+    "kindHint": "„Preis“-Turniere (Freundepreis, Saisonpreis …) werden in den Statistiken getrennt gezählt.",
     "title": "Veranstaltung bearbeiten",
     "titleLabel": "Titel *",
     "location": "Ort",
@@ -512,6 +516,13 @@
     "backgroundReset": "Zum Standardfoto zurücksetzen"
   },
   "stats": {
+    "kind": "Spieltyp",
+    "kinds": { "all": "Alle", "competition": "Wettspiele", "prize": "Preise" },
+    "dateFrom": "Von",
+    "dateTo": "bis",
+    "clearDates": "Datum löschen",
+    "rangeInvalid": "Das Startdatum muss vor dem Enddatum liegen.",
+    "badgePrize": "Preis",
     "title": "Gruppenstatistiken",
     "subtitle": "Gespielte Runden, Flights und Teilnahme der Spieler",
     "toEvents": "← Events",
@@ -520,7 +531,8 @@
       "all": "Alle",
       "1y": "1 Jahr",
       "6m": "6 Monate",
-      "3m": "3 Monate"
+      "3m": "3 Monate",
+      "custom": "Eigener Zeitraum"
     },
     "empty": "Keine Runden mit Flights in diesem Zeitraum.",
     "kpiGames": "Gespielte Runden",
@@ -1182,6 +1194,10 @@
     "confirmButton": "Absage bestätigen"
   },
   "addEvent": {
+    "kindLabel": "Spieltyp (für die Statistiken)",
+    "kindCompetition": "Wettspiel",
+    "kindPrize": "Preis",
+    "kindHint": "„Preis“-Turniere (Freundepreis, Saisonpreis …) werden in den Statistiken getrennt gezählt.",
     "title": "Neue Veranstaltung",
     "subtitle": "Eine Veranstaltung zur Gruppe hinzufügen",
     "titleLabel": "Titel *",

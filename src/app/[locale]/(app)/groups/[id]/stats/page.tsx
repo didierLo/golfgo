@@ -9,15 +9,21 @@ import { useTranslations, useLocale } from 'next-intl'
 const supabase = createClient()
 
 type PlayerInfo = { id: string; first_name: string; surname: string }
-type EventRow   = { id: string; title: string | null; starts_at: string; is_golf: boolean | null }
+type EventKind  = 'competition' | 'prize'
+type KindFilter = 'all' | EventKind
+type EventRow   = { id: string; title: string | null; starts_at: string; is_golf: boolean | null; event_kind: EventKind | null }
 type GameRow    = {
   eventId: string
   title: string
   date: string
+  kind: EventKind
   nbFlights: number
   playerIds: string[]
   flightSizes: number[]
 }
+
+// Valeur spéciale de periodDays : l'utilisateur choisit lui-même une date de début et/ou de fin
+const CUSTOM_PERIOD = -1
 
 function Bar({ value, max, color = '#185FA5' }: { value: number; max: number; color?: string }) {
   return (
@@ -36,24 +42,44 @@ export default function GroupStatsPage() {
 
   const [loading,    setLoading]    = useState(true)
   const [periodDays, setPeriodDays] = useState<number>(0)
+  const [dateFrom,   setDateFrom]   = useState('')   // AAAA-MM-JJ (période personnalisée)
+  const [dateTo,     setDateTo]     = useState('')   // AAAA-MM-JJ (période personnalisée)
+  const [kind,       setKind]       = useState<KindFilter>('all')
   const [games,      setGames]      = useState<GameRow[]>([])
   const [names,      setNames]      = useState<Record<string, PlayerInfo>>({})
   const [showAll,    setShowAll]    = useState(false)
 
-  useEffect(() => { loadData() }, [groupId, periodDays]) // eslint-disable-line react-hooks/exhaustive-deps
+  const isCustom     = periodDays === CUSTOM_PERIOD
+  const rangeInvalid = isCustom && !!dateFrom && !!dateTo && dateFrom > dateTo
+
+  useEffect(() => { loadData() }, [groupId, periodDays, dateFrom, dateTo, kind]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadData() {
+    // Dates incohérentes (début après fin) : rien à afficher, un message l'explique
+    if (rangeInvalid) {
+      setGames([]); setNames({}); setLoading(false)
+      return
+    }
+
     setLoading(true)
 
     // 1. Événements passés du groupe
     let evQuery = supabase
       .from('events')
-      .select('id, title, starts_at, is_golf')
+      .select('id, title, starts_at, is_golf, event_kind')
       .eq('group_id', groupId)
       .lt('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: false })
 
-    if (periodDays > 0) {
+    if (kind !== 'all') {
+      evQuery = evQuery.eq('event_kind', kind)
+    }
+
+    if (isCustom) {
+      // starts_at est stocké en heure locale belge : on compare donc sans fuseau, à la journée entière
+      if (dateFrom) evQuery = evQuery.gte('starts_at', `${dateFrom}T00:00:00`)
+      if (dateTo)   evQuery = evQuery.lte('starts_at', `${dateTo}T23:59:59`)
+    } else if (periodDays > 0) {
       const since = new Date()
       since.setDate(since.getDate() - periodDays)
       evQuery = evQuery.gte('starts_at', since.toISOString())
@@ -90,6 +116,7 @@ export default function GroupStatsPage() {
         eventId:     e.id,
         title:       e.title ?? '',
         date:        e.starts_at,
+        kind:        e.event_kind === 'prize' ? 'prize' : 'competition',
         nbFlights:   agg.sizes.length,
         playerIds:   [...agg.players],
         flightSizes: agg.sizes,
@@ -160,10 +187,17 @@ export default function GroupStatsPage() {
   }
 
   const PERIOD_OPTIONS = [
-    { label: t('stats.periods.all'), value: 0   },
-    { label: t('stats.periods.1y'),  value: 365 },
-    { label: t('stats.periods.6m'),  value: 180 },
-    { label: t('stats.periods.3m'),  value: 90  },
+    { label: t('stats.periods.all'),    value: 0             },
+    { label: t('stats.periods.1y'),     value: 365           },
+    { label: t('stats.periods.6m'),     value: 180           },
+    { label: t('stats.periods.3m'),     value: 90            },
+    { label: t('stats.periods.custom'), value: CUSTOM_PERIOD },
+  ]
+
+  const KIND_OPTIONS: { label: string; value: KindFilter }[] = [
+    { label: t('stats.kinds.all'),         value: 'all'         },
+    { label: t('stats.kinds.competition'), value: 'competition' },
+    { label: t('stats.kinds.prize'),       value: 'prize'       },
   ]
 
   const maxByFlightCount = Math.max(1, ...stats.byFlightCount.map(r => r.count))
@@ -174,6 +208,7 @@ export default function GroupStatsPage() {
 
   const cardCls  = 'rounded-xl border border-slate-200 bg-white shadow-sm p-4 sm:p-5'
   const titleCls = 'text-[10px] font-black text-slate-500 uppercase tracking-[0.14em] mb-3'
+  const dateCls  = 'border border-slate-200 rounded-lg px-2.5 py-1.5 text-[12px] text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5]'
 
   return (
     <div className="p-5 sm:p-6 max-w-4xl">
@@ -190,18 +225,59 @@ export default function GroupStatsPage() {
         </Link>
       </div>
 
-      {/* Période */}
-      <div className="flex flex-col gap-1 mb-5">
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">{t('stats.period')}</span>
-        <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-          {PERIOD_OPTIONS.map(opt => (
-            <button key={opt.value} onClick={() => setPeriodDays(opt.value)}
-              className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                periodDays === opt.value ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-              }`}>
-              {opt.label}
-            </button>
-          ))}
+      {/* Filtres : type de partie + période */}
+      <div className="flex flex-wrap gap-x-6 gap-y-4 mb-5">
+
+        {/* Type de partie : compétitions / prix */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">{t('stats.kind')}</span>
+          <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+            {KIND_OPTIONS.map(opt => (
+              <button key={opt.value} onClick={() => setKind(opt.value)}
+                className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  kind === opt.value ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Période */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">{t('stats.period')}</span>
+          <div className="flex flex-wrap gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+            {PERIOD_OPTIONS.map(opt => (
+              <button key={opt.value} onClick={() => setPeriodDays(opt.value)}
+                className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  periodDays === opt.value ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {isCustom && (
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <label className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-600 on-bg">
+                {t('stats.dateFrom')}
+                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className={dateCls} />
+              </label>
+              <label className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-600 on-bg">
+                {t('stats.dateTo')}
+                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className={dateCls} />
+              </label>
+              {(dateFrom || dateTo) && (
+                <button onClick={() => { setDateFrom(''); setDateTo('') }}
+                  className="text-[11px] font-semibold text-[#185FA5] hover:underline">
+                  {t('stats.clearDates')}
+                </button>
+              )}
+            </div>
+          )}
+          {rangeInvalid && (
+            <p className="text-[11px] text-red-600 mt-1">{t('stats.rangeInvalid')}</p>
+          )}
         </div>
       </div>
 
@@ -327,7 +403,14 @@ export default function GroupStatsPage() {
                   {games.map(g => (
                     <tr key={g.eventId} className="border-t border-slate-100">
                       <td className="py-1.5 pr-3 text-slate-500 whitespace-nowrap">{formatDate(g.date)}</td>
-                      <td className="py-1.5 pr-3 font-semibold text-slate-700">{g.title}</td>
+                      <td className="py-1.5 pr-3 font-semibold text-slate-700">
+                        {g.title}
+                        {g.kind === 'prize' && (
+                          <span className="ml-2 align-middle text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700">
+                            {t('stats.badgePrize')}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-1.5 pr-3 text-right font-bold text-slate-800">{g.playerIds.length}</td>
                       <td className="py-1.5 text-right font-bold text-slate-800">{g.nbFlights}</td>
                     </tr>

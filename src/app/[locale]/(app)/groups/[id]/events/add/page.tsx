@@ -18,6 +18,7 @@ export default function AddEventPage() {
   const [start, setStart]               = useState('')
   const [end, setEnd]                   = useState('')
   const [isGolf, setIsGolf]             = useState(true)
+  const [eventKind, setEventKind]       = useState<'competition' | 'prize'>('competition')
   const [fee, setFee]                   = useState('')
   const [emailMessage, setEmailMessage] = useState('')
   const [scorecardNotes, setScorecardNotes] = useState('')
@@ -76,6 +77,7 @@ export default function AddEventPage() {
         starts_at:             start,
         ends_at:               end || null,
         is_golf:               isGolf,
+        event_kind:            isGolf ? eventKind : 'competition',
         course_id:             courseId || null,
         competition_format_id: competitionFormatId || null,
         hcp_percentage_override: hcpOverride ? parseFloat(hcpOverride) : null,
@@ -149,6 +151,23 @@ export default function AddEventPage() {
         {isGolf && (
           <>
             <div className="h-px bg-white/40" />
+
+            <div>
+              <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('addEvent.kindLabel')}</label>
+              <div className="flex gap-1 p-1 bg-white/40 rounded-xl w-fit">
+                <button type="button" onClick={() => setEventKind('competition')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
+                    eventKind === 'competition' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                  {t('addEvent.kindCompetition')}
+                </button>
+                <button type="button" onClick={() => setEventKind('prize')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
+                    eventKind === 'prize' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                  {t('addEvent.kindPrize')}
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1.5 on-bg">{t('addEvent.kindHint')}</p>
+            </div>
 
             <div>
               <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('addEvent.club')}</label>

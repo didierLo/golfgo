@@ -435,6 +435,10 @@
     "remove": "Eliminar"
   },
   "editEvent": {
+    "kindLabel": "Tipo de partida (para las estadísticas)",
+    "kindCompetition": "Competición",
+    "kindPrize": "Premio",
+    "kindHint": "Los eventos «Premio» (premio de los amigos, premio de temporada…) se cuentan aparte en las estadísticas.",
     "title": "Editar evento",
     "titleLabel": "Título *",
     "location": "Lugar",
@@ -512,6 +516,13 @@
     "backgroundReset": "Volver a la foto predeterminada"
   },
   "stats": {
+    "kind": "Tipo de partida",
+    "kinds": { "all": "Todas", "competition": "Competiciones", "prize": "Premios" },
+    "dateFrom": "Del",
+    "dateTo": "al",
+    "clearDates": "Borrar fechas",
+    "rangeInvalid": "La fecha de inicio debe ser anterior a la fecha de fin.",
+    "badgePrize": "Premio",
     "title": "Estadísticas del grupo",
     "subtitle": "Partidas jugadas, flights y participación de los jugadores",
     "toEvents": "← Eventos",
@@ -520,7 +531,8 @@
       "all": "Todo",
       "1y": "1 año",
       "6m": "6 meses",
-      "3m": "3 meses"
+      "3m": "3 meses",
+      "custom": "Fechas…"
     },
     "empty": "Ninguna partida con flights en este período.",
     "kpiGames": "Partidas jugadas",
@@ -1182,6 +1194,10 @@
     "confirmButton": "Confirmar mi baja"
   },
   "addEvent": {
+    "kindLabel": "Tipo de partida (para las estadísticas)",
+    "kindCompetition": "Competición",
+    "kindPrize": "Premio",
+    "kindHint": "Los eventos «Premio» (premio de los amigos, premio de temporada…) se cuentan aparte en las estadísticas.",
     "title": "Nuevo evento",
     "subtitle": "Añadir un evento al grupo",
     "titleLabel": "Título *",
