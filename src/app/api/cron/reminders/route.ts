@@ -746,6 +746,22 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
     console.error('[CRON flight-watch]', e)
   }
 
-  console.log('[CRON reminders]', JSON.stringify({ ...results, flightWatch }))
-  return Response.json({ success: true, ...results, flightWatch })
+  // ── Sauvegarde hebdomadaire de la base ─────────────────────────────────────
+  //    La route /api/cron/backup décide elle-même (ne sauvegarde que si la dernière
+  //    sauvegarde réussie a plus de 6 jours ; réessaie le lendemain en cas d'échec).
+  //    Bloc isolé : un problème de sauvegarde ne doit JAMAIS empêcher les rappels.
+  let backup: unknown = 'non exécutée'
+  try {
+    const backupRes = await fetch(`${appUrl}/api/cron/backup`, {
+      headers: { authorization: `Bearer ${CRON_SECRET ?? ''}` },
+      signal: AbortSignal.timeout(55_000),
+    })
+    backup = await backupRes.json().catch(() => ({ status: backupRes.status }))
+  } catch (e) {
+    console.error('[CRON backup]', e)
+    backup = { ok: false, error: e instanceof Error ? e.message : String(e) }
+  }
+
+  console.log('[CRON reminders]', JSON.stringify({ ...results, flightWatch, backup }))
+  return Response.json({ success: true, ...results, flightWatch, backup })
 }

@@ -78,6 +78,7 @@ export async function GET() {
     { count: pendingCount },
     { count: failedCount },
     { data: dmarcLog },
+    { data: backupLog },
     sentry,
   ] = await Promise.all([
     supabaseAdmin.from('email_queue').select('id, status, category, group_id, event_id, player_id, to_email, subject, last_error, attempts, created_at, sent_at').eq('status', 'pending').order('created_at', { ascending: true }).limit(50),
@@ -85,8 +86,13 @@ export async function GET() {
     supabaseAdmin.from('email_queue').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabaseAdmin.from('email_queue').select('*', { count: 'exact', head: true }).is('resolved_at', null).eq('status', 'failed'),
     supabaseAdmin.from('system_health_log').select('*').eq('job', 'dmarc-report').order('run_at', { ascending: false }).limit(1),
+    supabaseAdmin.from('system_health_log').select('run_at, summary').eq('job', 'backup').order('run_at', { ascending: false }).limit(10),
     fetchSentrySummary(),
   ])
+
+  // Dernière tentative (réussie ou non) + dernière sauvegarde réussie
+  const lastAttempt = backupLog?.[0] ?? null
+  const lastOk      = backupLog?.find(r => r.summary?.ok === true) ?? null
 
   return Response.json({
     emailQueue: {
@@ -95,6 +101,7 @@ export async function GET() {
       counts:  { pending: pendingCount ?? 0, failed: failedCount ?? 0 },
     },
     dmarc: dmarcLog?.[0] ?? null,
+    backup: { lastOk, lastAttempt },
     sentry,
   })
 }

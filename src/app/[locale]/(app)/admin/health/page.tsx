@@ -8,9 +8,11 @@ const supabase = createClient()
 
 type EmailRow = { id: string; to_email: string; subject: string; last_error: string | null; created_at: string }
 type SentryIssue = { title: string; level: string; count: number; lastSeen: string; url: string }
+type BackupLogRow = { run_at: string; summary: { ok: boolean; bytes?: number; tables?: number; rows?: number; trigger?: string; error?: string } }
 type HealthData = {
   emailQueue: { pending: EmailRow[]; failed: EmailRow[]; counts: { pending: number; failed: number } }
   dmarc: { run_at: string; summary: any } | null
+  backup: { lastOk: BackupLogRow | null; lastAttempt: BackupLogRow | null }
   sentry: { available: boolean; reason?: string; unresolvedCount?: number; issues?: SentryIssue[] }
 }
 
@@ -41,6 +43,16 @@ export default function HealthDashboardPage() {
     setBusy(false)
   }
 
+  async function handleBackupNow() {
+    setBusy(true)
+    const res = await fetch('/api/admin/backup', { method: 'POST' })
+    const body = await res.json().catch(() => null)
+    if (res.ok) toast.success('Sauvegarde envoyée par email')
+    else toast.error(`Échec de la sauvegarde${body?.error ? ` : ${body.error}` : ''}`)
+    await load()
+    setBusy(false)
+  }
+
   async function handleDrainNow() {
     setBusy(true)
     const res = await fetch('/api/admin/email-queue/drain', { method: 'POST' })
@@ -51,6 +63,13 @@ export default function HealthDashboardPage() {
 
   if (loading) return <div className="p-6 text-slate-400 text-[13px]">Chargement…</div>
   if (!data)   return <div className="p-6 text-red-500 text-[13px]">Accès refusé ou erreur de chargement.</div>
+
+  // ── Sauvegarde : état affiché ──
+  const { lastOk, lastAttempt } = data.backup
+  const backupAgeDays = lastOk ? Math.floor((Date.now() - new Date(lastOk.run_at).getTime()) / 86_400_000) : null
+  const lastAttemptFailed = !!lastAttempt && !lastAttempt.summary.ok
+  const backupLate = backupAgeDays === null || backupAgeDays > 10
+  const formatSize = (b?: number) => !b ? '—' : b < 1024 * 1024 ? `${Math.round(b / 1024)} Ko` : `${(b / 1024 / 1024).toFixed(1)} Mo`
 
   return (
     <div className="p-6 max-w-4xl space-y-6">
@@ -96,6 +115,39 @@ export default function HealthDashboardPage() {
         {data.emailQueue.counts.pending === 0 && data.emailQueue.counts.failed === 0 && (
           <p className="text-[12px] text-slate-400">Rien en attente, rien en échec. ✓</p>
         )}
+      </div>
+
+      {/* ── Sauvegarde de la base ── */}
+      <div className={cardClass}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[14px] font-semibold text-slate-800">💾 Sauvegarde de la base</h2>
+          <button onClick={handleBackupNow} disabled={busy}
+            className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-40">
+            Sauvegarder maintenant
+          </button>
+        </div>
+        {!lastOk ? (
+          <p className="text-[12px] text-red-500 font-medium">⚠️ Aucune sauvegarde enregistrée pour l'instant.</p>
+        ) : (
+          <div className="text-[13px] text-slate-700 space-y-1">
+            <p className={backupLate ? 'text-red-500 font-medium' : 'text-[#3B6D11] font-medium'}>
+              {backupLate
+                ? `⚠️ Dernière sauvegarde réussie il y a ${backupAgeDays} jours — trop ancienne`
+                : `✓ Dernière sauvegarde réussie : ${new Date(lastOk.run_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })}${backupAgeDays === 0 ? ' (aujourd\'hui)' : ` (il y a ${backupAgeDays} jour${backupAgeDays > 1 ? 's' : ''})`}`}
+            </p>
+            <p className="text-[12px] text-slate-500">
+              {lastOk.summary.tables} tables · {lastOk.summary.rows} lignes · pièce jointe de {formatSize(lastOk.summary.bytes)}
+            </p>
+          </div>
+        )}
+        {lastAttemptFailed && (
+          <p className="text-[12px] text-red-500 mt-2">
+            ⚠️ La dernière tentative ({new Date(lastAttempt!.run_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'long' })}) a échoué : {lastAttempt!.summary.error ?? 'erreur inconnue'}. Nouvel essai automatique demain.
+          </p>
+        )}
+        <p className="text-[11px] text-slate-400 mt-3">
+          Automatique chaque semaine, envoyée par email en pièce jointe. Ne contient pas les mots de passe ni les règles de sécurité de la base.
+        </p>
       </div>
 
       {/* ── Sentry, en clair ── */}
