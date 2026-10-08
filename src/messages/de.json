@@ -1673,9 +1673,9 @@
     },
     "defaults": {
       "reminderSubject": "⏰ Erinnerung — {{event_title}} in 3 Tagen",
-      "reminderBody": "Hallo {{first_name}},\n\nErinnerung an {{event_title}}, das in 3 Tagen stattfindet.\n\nBis bald,\n{{owner_name}}",
-      "invitationSubject": "Einladung: {{event_title}}",
-      "invitationBody": "Hallo {{first_name}},\n\nich freue mich, Sie zu unserem nächsten Treffen einzuladen.\nSind Sie dabei?\n\nIch freue mich darauf, Sie wiederzusehen,\n{{owner_name}}",
+      "reminderBody": "Hallo {{first_name}},\n\nes sind noch {{places_restantes}} Platz/Plätze für unser nächstes Treffen am {{event_date}} um {{event_time}} frei.\n\nBitte prüfen Sie auf GolfGo.be, ob Sie angemeldet sind.\n\nWenn Sie spielen möchten und noch nicht angemeldet sind, klicken Sie auf einen der untenstehenden Links.\n\nBis bald auf dem Platz,\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitationSubject": "Einladung — {{event_title}} {{event_date}}",
+      "invitationBody": "Hallo {{first_name}},\n\nich freue mich, Sie zu unserem nächsten Treffen am {{event_date}} ab {{event_time}} einzuladen.\n\nKönnen Sie dabei sein? Klicken Sie für Ihre Antwort auf einen der untenstehenden Links.\n\nWenn Sie bereits über GolfGo geantwortet haben, ignorieren Sie diese Nachricht bitte: Sie müssen sich nicht erneut anmelden.\n\nBis bald auf dem Platz,\n\n{{owner_name}}\n\n{{yes_button}}",
       "teesheetSubject": "Startliste — {{event_title}}",
       "teesheetBody": "Hallo {{first_name}},\n\nhier ist die Startreihenfolge für {{event_title}}.\n\n{{teesheet}}"
     },

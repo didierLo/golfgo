@@ -1670,9 +1670,9 @@
     },
     "defaults": {
       "reminderSubject": "⏰ Herinnering — {{event_title}} over 3 dagen",
-      "reminderBody": "Hallo {{first_name}},\n\nHerinnering voor {{event_title}}, dat over 3 dagen plaatsvindt.\n\nTot snel,\n{{owner_name}}",
-      "invitationSubject": "Uitnodiging: {{event_title}}",
-      "invitationBody": "Hallo {{first_name}},\n\nMet plezier nodig ik je uit voor onze volgende bijeenkomst.\nKun je erbij zijn?\n\nIk hoop je snel weer te zien,\n{{owner_name}}",
+      "reminderBody": "Hallo {{first_name}},\n\nEr zijn nog {{places_restantes}} plaats(en) vrij voor onze volgende bijeenkomst op {{event_date}} om {{event_time}}.\n\nControleer op GolfGo.be of je correct bent ingeschreven.\n\nWil je meespelen en ben je nog niet ingeschreven, klik dan op een van de onderstaande links.\n\nTot snel op de baan,\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitationSubject": "Uitnodiging — {{event_title}} {{event_date}}",
+      "invitationBody": "Hallo {{first_name}},\n\nMet plezier nodig ik je uit voor een volgende bijeenkomst op {{event_date}}, vanaf {{event_time}}.\n\nKun je erbij zijn? Klik voor je antwoord op een van de onderstaande links.\n\nAls je al via GolfGo hebt geantwoord, hoef je dit bericht niet te beantwoorden: je hoeft je niet opnieuw in te schrijven.\n\nTot snel op de baan,\n\n{{owner_name}}\n\n{{yes_button}}",
       "teesheetSubject": "Startlijst — {{event_title}}",
       "teesheetBody": "Hallo {{first_name}},\n\nHier is de startvolgorde voor {{event_title}}.\n\n{{teesheet}}"
     },

@@ -1671,9 +1671,9 @@
     },
     "defaults": {
       "reminderSubject": "⏰ Rappel — {{event_title}} dans 3 jours",
-      "reminderBody": "Bonjour {{first_name}},\n\nRappel pour {{event_title}} qui a lieu dans 3 jours.\n\nAu plaisir de te voir,\n{{owner_name}}",
-      "invitationSubject": "Invitation : {{event_title}}",
-      "invitationBody": "Bonjour {{first_name}},\n\nJ'ai le plaisir de t'inviter à notre prochaine rencontre.\nPourras-tu être des nôtres ?\n\nAu plaisir de te revoir,\n{{owner_name}}",
+      "reminderBody": "Bonjour {{first_name}},\n\nIl reste {{places_restantes}} place(s) pour notre prochaine rencontre le {{event_date}} à {{event_time}}.\n\nVérifie sur GolfGo.be si tu es bien inscrit(e).\n\nSi tu veux jouer et que tu n'es pas encore inscrit(e), clique sur un des liens ci-dessous.\n\nA bientôt sur le parcours,\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitationSubject": "Invitation — {{event_title}} {{event_date}}",
+      "invitationBody": "Bonjour {{first_name}},\n\nJ’ai le plaisir de t’inviter à une prochaine rencontre qui aura lieu le {{event_date}} à partir de {{event_time}}.\n\nPourras-tu être des nôtres ? Pour ta réponse, clique sur un des liens ci-dessous.\n\nSi tu as déjà répondu par GolfGo, ne tiens pas compte de ce message : pas besoin de te réinscrire.\n\nA bientôt sur le parcours,\n\n{{owner_name}}\n\n{{yes_button}}",
       "teesheetSubject": "Tee Sheet — {{event_title}}",
       "teesheetBody": "Bonjour {{first_name}},\n\nVoici l'ordre de départ pour {{event_title}}.\n\n{{teesheet}}"
     },

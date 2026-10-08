@@ -315,10 +315,11 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
         player_surname: player.surname, first_name: player.first_name,
         event_title: event.title, event_date: eventDate,
         event_time: eventTime, owner_name: ownerName,
+        yes_button: '', // les boutons de réponse sont ajoutés automatiquement sous le message
       }
 
       const subject      = applyTemplateVariables(subjectTemplate, templateVars)
-      const resolvedBody = applyTemplateVariables(bodyTemplate, templateVars)
+      const resolvedBody = applyTemplateVariables(bodyTemplate, templateVars).trim()
       const practicalNote = event.email_message?.trim()
         ? applyTemplateVariables(event.email_message.trim(), templateVars) : null
       const resolvedMessage = practicalNote ? `${resolvedBody}\n\n${practicalNote}` : resolvedBody

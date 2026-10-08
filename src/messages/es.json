@@ -1672,9 +1672,9 @@
     },
     "defaults": {
       "reminderSubject": "⏰ Recordatorio — {{event_title}} en 3 días",
-      "reminderBody": "Hola {{first_name}},\n\nRecordatorio de {{event_title}}, que tendrá lugar dentro de 3 días.\n\nHasta pronto,\n{{owner_name}}",
-      "invitationSubject": "Invitación: {{event_title}}",
-      "invitationBody": "Hola {{first_name}},\n\nTengo el placer de invitarte a nuestro próximo encuentro.\n¿Podrás acompañarnos?\n\nEspero volver a verte,\n{{owner_name}}",
+      "reminderBody": "Hola {{first_name}},\n\nQuedan {{places_restantes}} plaza(s) para nuestro próximo encuentro el {{event_date}} a las {{event_time}}.\n\nComprueba en GolfGo.be que estás inscrito/a.\n\nSi quieres jugar y aún no estás inscrito/a, haz clic en uno de los enlaces de abajo.\n\nHasta pronto en el campo,\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitationSubject": "Invitación — {{event_title}} {{event_date}}",
+      "invitationBody": "Hola {{first_name}},\n\nTengo el placer de invitarte a un próximo encuentro que tendrá lugar el {{event_date}} a partir de las {{event_time}}.\n\n¿Podrás acompañarnos? Para responder, haz clic en uno de los enlaces de abajo.\n\nSi ya has respondido a través de GolfGo, ignora este mensaje: no hace falta que te inscribas de nuevo.\n\nHasta pronto en el campo,\n\n{{owner_name}}\n\n{{yes_button}}",
       "teesheetSubject": "Lista de salidas — {{event_title}}",
       "teesheetBody": "Hola {{first_name}},\n\nEste es el orden de salida de {{event_title}}.\n\n{{teesheet}}"
     },

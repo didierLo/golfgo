@@ -1673,9 +1673,9 @@
     },
     "defaults": {
       "reminderSubject": "⏰ Reminder — {{event_title}} in 3 days",
-      "reminderBody": "Hi {{first_name}},\n\nReminder for {{event_title}}, which takes place in 3 days.\n\nSee you soon,\n{{owner_name}}",
-      "invitationSubject": "Invitation: {{event_title}}",
-      "invitationBody": "Hi {{first_name}},\n\nI'm delighted to invite you to our next get-together.\nWill you be joining us?\n\nLooking forward to seeing you again,\n{{owner_name}}",
+      "reminderBody": "Hi {{first_name}},\n\nThere are {{places_restantes}} spot(s) left for our next get-together on {{event_date}} at {{event_time}}.\n\nPlease check on GolfGo.be that you are registered.\n\nIf you would like to play and are not registered yet, click one of the links below.\n\nSee you on the course,\n\n{{owner_name}}\n\n{{yes_button}}",
+      "invitationSubject": "Invitation — {{event_title}} {{event_date}}",
+      "invitationBody": "Hi {{first_name}},\n\nI'm delighted to invite you to an upcoming get-together on {{event_date}}, starting at {{event_time}}.\n\nWill you be able to join us? To reply, click one of the links below.\n\nIf you have already replied through GolfGo, please ignore this message: there is no need to register again.\n\nSee you on the course,\n\n{{owner_name}}\n\n{{yes_button}}",
       "teesheetSubject": "Tee Sheet — {{event_title}}",
       "teesheetBody": "Hi {{first_name}},\n\nHere is the starting order for {{event_title}}.\n\n{{teesheet}}"
     },

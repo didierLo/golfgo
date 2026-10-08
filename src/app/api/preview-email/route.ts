@@ -268,9 +268,10 @@ export async function POST(req: Request) {
       const vars: Record<string, string> = {
         first_name: t('email.preview.firstName'), player_name: t('email.preview.fullName'), player_surname: t('email.preview.surname'),
         event_title: event.title, event_date: eventDate, event_time: eventTime, owner_name: ownerName,
+        yes_button: '', // les boutons de réponse sont ajoutés automatiquement sous le message
       }
 
-      const resolvedBody = applyVars(event.email_message ?? bodyTemplate, vars)
+      const resolvedBody = applyVars(event.email_message ?? bodyTemplate, vars).trim()
       const html = buildInvitationHtml({
         t, lang: gl,
         eventTitle: event.title, eventDate, eventTime,

@@ -551,10 +551,11 @@ if (!EMAIL_ENABLED) { results.invitations.sent++; continue }
           event_title: event.title,
           event_date:  formatDate(event.starts_at, dl),
           event_time:  formatTime(event.starts_at, dl),
+          yes_button:  '', // les boutons de réponse sont ajoutés automatiquement sous le message
         }
 
         const subject  = applyTemplateVars(invitationSubjectTpl, vars)
-        const bodyText = applyTemplateVars(invitationBodyTpl, vars)
+        const bodyText = applyTemplateVars(invitationBodyTpl, vars).trim()
 
         const html = buildInvitationHtml({
           t, lang: gl,
