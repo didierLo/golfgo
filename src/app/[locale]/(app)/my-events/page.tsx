@@ -29,7 +29,7 @@ type MyEvent = {
       name: string
       color: string | null
     }
-    courses: { course_name: string; clubs: { name: string } | null } | null
+    courses: { course_name: string; clubs: { name: string; website: string | null } | null } | null
   }
 }
 
@@ -143,6 +143,9 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
   const mapsQuery = [e.events.location, e.events.courses?.course_name, e.events.courses?.clubs?.name]
     .filter(Boolean).join(' ')
   const showPhotos = true
+  // Garde-fou : on n'affiche le lien que pour une adresse http(s)
+  const clubWebsite = e.events.courses?.clubs?.website
+  const safeClubWebsite = clubWebsite && /^https?:\/\//i.test(clubWebsite) ? clubWebsite : null
 
   return (
     <div className={`bg-white border rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}>
@@ -231,6 +234,20 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path d="M8 1L1 5.5v7L8 15l7-2.5v-7L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
                 <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
+              </svg>
+            }
+          />
+        )}
+
+        {safeClubWebsite && (
+          <ActionPill
+            href={safeClubWebsite}
+            onClick={ev => ev.stopPropagation()}
+            label={t('clubs.openWebsite')}
+            icon={
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M1.5 8h13M8 1.5c1.8 1.9 2.7 4.1 2.7 6.5S9.8 12.6 8 14.5C6.2 12.6 5.3 10.4 5.3 8S6.2 3.4 8 1.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
               </svg>
             }
           />
@@ -598,7 +615,7 @@ async function loadData() {
         events(id, title, starts_at, location, group_id,
                max_participants, fee_per_person,
                groups!events_group_id_fkey(name, color),
-               courses(course_name, clubs(name)))`)
+               courses(course_name, clubs(name, website)))`)
       .eq('player_id', player.id)
       .order('starts_at', { foreignTable: 'events', ascending: false }),
 
