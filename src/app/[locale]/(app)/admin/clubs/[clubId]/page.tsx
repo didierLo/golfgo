@@ -39,6 +39,7 @@ export default function ClubDetailPage() {
   const [saving,  setSaving]  = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [editingWebsite, setEditingWebsite] = useState(false)
 
   useEffect(() => { loadClub() }, [clubId])
 
@@ -138,24 +139,42 @@ export default function ClubDetailPage() {
           placeholder={t('clubs.regionPlaceholder')}
           className="border border-gray-200 rounded-md px-2 py-1 text-[12px] bg-white focus:outline-none focus:border-blue-300 w-40"
         />
-        <input
-          type="url"
-          inputMode="url"
-          value={club.website ?? ''}
-          onChange={e => setClub({ ...club, website: e.target.value })}
-          onBlur={() => {
-            const normalized = normalizeWebsite(club.website ?? '')
-            if (normalized === undefined) {
-              toast.error(t('clubs.websiteInvalid'))
-              loadClub() // revient à la dernière valeur enregistrée
-              return
-            }
-            if (normalized !== club.website) setClub({ ...club, website: normalized })
-            saveClubInfo({ website: normalized })
-          }}
-          placeholder={t('clubs.websitePlaceholder')}
-          className="border border-gray-200 rounded-md px-2 py-1 text-[12px] bg-white focus:outline-none focus:border-blue-300 w-64"
-        />
+        {club.website && /^https?:\/\//i.test(club.website) && !editingWebsite ? (
+          // Un bouton plutôt que l'adresse brute, comme dans « Mes événements » ;
+          // le crayon permet de corriger l'adresse.
+          <span className="inline-flex items-center gap-1">
+            <a href={club.website} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 border border-gray-200 rounded-md px-2.5 py-1 text-[12px] font-medium text-[#185FA5] bg-white hover:bg-gray-50 hover:border-[#185FA5]/40 transition-colors">
+              🌐 {t('clubs.openWebsite')}
+            </a>
+            <button type="button" onClick={() => setEditingWebsite(true)} title={t('clubs.websitePlaceholder')}
+              className="text-[13px] text-gray-400 hover:text-gray-700 px-1">
+              ✎
+            </button>
+          </span>
+        ) : (
+          <input
+            type="url"
+            inputMode="url"
+            autoFocus={editingWebsite}
+            value={club.website ?? ''}
+            onChange={e => setClub({ ...club, website: e.target.value })}
+            onBlur={() => {
+              const normalized = normalizeWebsite(club.website ?? '')
+              if (normalized === undefined) {
+                toast.error(t('clubs.websiteInvalid'))
+                setEditingWebsite(false)
+                loadClub() // revient à la dernière valeur enregistrée
+                return
+              }
+              if (normalized !== club.website) setClub({ ...club, website: normalized })
+              saveClubInfo({ website: normalized })
+              setEditingWebsite(false)
+            }}
+            placeholder={t('clubs.websitePlaceholder')}
+            className="border border-gray-200 rounded-md px-2 py-1 text-[12px] bg-white focus:outline-none focus:border-blue-300 w-64"
+          />
+        )}
         {saving && <span className="text-[11px] text-gray-400 on-bg">{t('clubs.saving')}</span>}
 
         <div className="ml-auto flex items-center gap-2">

@@ -49,7 +49,29 @@ type ApiCourseDetail = { course: { id: number; club_name: string; course_name: s
 type FlyTeebox = { teebox_id: string; name: string; gender?: string; slope?: number; rating?: number; distances: number[] }
 type FlyGrid = { grid_id: string; par: number[]; handicap: number[]; teeboxes: FlyTeebox[] }
 type FlyScorecard = { scorecard_id: string; name: string; holesCount: number; grid: FlyGrid[] }
-type FlyProfile = { golf_id: string; name: string; slug: string; country?: string; region?: string; city?: string; address?: string; scorecards?: FlyScorecard[] }
+type FlyProfile = {
+  golf_id: string; name: string; slug: string; country?: string; region?: string; city?: string; address?: string
+  website?: string | null; latitude?: number | null; longitude?: number | null
+  location?: { latitude?: number | null; longitude?: number | null }
+  scorecards?: FlyScorecard[]
+}
+
+/** Adresse web propre pour la base (qui n'accepte que http/https sans espace) :
+ *  sans protocole → https:// ajouté ; invalide ou vide → null. */
+function cleanWebsite(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null
+  const v = raw.trim()
+  if (!v) return null
+  const withProto = /^[a-z][a-z0-9+.-]*:\/\//i.test(v) ? v : `https://${v}`
+  return /^https?:\/\/[^\s]+$/i.test(withProto) ? withProto : null
+}
+
+/** Coordonnée GPS valide (nombre fini dans la plage) ou null — la base refuse
+ *  les valeurs hors plage, ce qui ferait échouer toute la création du club. */
+function cleanCoord(raw: unknown, limit: number): number | null {
+  const n = typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN
+  return Number.isFinite(n) && Math.abs(n) <= limit ? n : null
+}
 
 const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   belgium: 'BE', france: 'FR', netherlands: 'NL', luxembourg: 'LU', germany: 'DE',
@@ -255,17 +277,35 @@ export default function AddClubPage() {
     const clubName = flyProfile.name
     const countryCode = COUNTRY_NAME_TO_CODE[(flyProfile.country ?? '').toLowerCase()] ?? 'OTHER'
 
-    // Club : retrouver ou créer (complète la région si elle manquait)
+    // Site web et GPS (FlyAway les renvoie au premier niveau, et aussi dans `location`)
+    const website = cleanWebsite(flyProfile.website)
+    const latitude  = cleanCoord(flyProfile.latitude  ?? flyProfile.location?.latitude, 90)
+    const longitude = cleanCoord(flyProfile.longitude ?? flyProfile.location?.longitude, 180)
+    const hasGps = latitude != null && longitude != null
+
+    // Club : retrouver ou créer (complète ce qui manquait : région, site, GPS —
+    // une valeur déjà renseignée n'est jamais remplacée)
     let clubId: string
-    const { data: existingClub } = await supabase.from('clubs').select('id, region').ilike('name', clubName).maybeSingle()
+    const { data: existingClub } = await supabase.from('clubs')
+      .select('id, region, website, latitude, longitude').ilike('name', clubName).maybeSingle()
     if (existingClub) {
       clubId = existingClub.id
-      if (!existingClub.region && flyProfile.region) {
-        await supabase.from('clubs').update({ region: flyProfile.region }).eq('id', clubId)
+      const patch: Record<string, string | number> = {}
+      if (!existingClub.region && flyProfile.region) patch.region = flyProfile.region
+      if (!existingClub.website && website) patch.website = website
+      if (existingClub.latitude == null && existingClub.longitude == null && hasGps) {
+        patch.latitude = latitude!
+        patch.longitude = longitude!
+      }
+      if (Object.keys(patch).length > 0) {
+        await supabase.from('clubs').update(patch).eq('id', clubId)
       }
     } else {
       const { data: newClub, error } = await supabase.from('clubs')
-        .insert({ name: clubName, country: countryCode, region: flyProfile.region ?? null })
+        .insert({
+          name: clubName, country: countryCode, region: flyProfile.region ?? null,
+          website, latitude: hasGps ? latitude : null, longitude: hasGps ? longitude : null,
+        })
         .select('id').single()
       if (error || !newClub) throw new Error(error?.message ?? t('clubsAdd.errorCreateClub'))
       clubId = newClub.id

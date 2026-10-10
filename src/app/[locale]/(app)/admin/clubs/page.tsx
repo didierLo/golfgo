@@ -12,7 +12,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
   GB: '🇬🇧', ES: '🇪🇸', PT: '🇵🇹', IT: '🇮🇹', CH: '🇨🇭', OTHER: '🌍',
 }
 
-type Club = { id: string; name: string; country: string; region: string | null }
+type Club = { id: string; name: string; country: string; region: string | null; website: string | null }
 
 const selectClass = "border border-gray-200 rounded-md px-3 py-2 text-[13px] bg-white focus:outline-none focus:border-blue-300"
 
@@ -77,7 +77,7 @@ export default function ClubsPage() {
 
   async function runSearch() {
     setLoading(true)
-    let query = supabase.from('clubs').select('id, name, country, region').order('name').limit(100)
+    let query = supabase.from('clubs').select('id, name, country, region, website').order('name').limit(100)
     if (search.trim().length >= 3) query = query.ilike('name', `%${search.trim()}%`)
     if (country) query = query.eq('country', country)
     if (region)  query = query.eq('region', region)
@@ -140,17 +140,25 @@ export default function ClubsPage() {
           ) : (
             <div className="divide-y divide-gray-100">
               {results.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => router.push(`/admin/clubs/${c.id}`)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-[13px] font-medium text-gray-900">{c.name}</span>
-                  <span className="text-[12px] text-gray-700 flex items-center gap-1.5">
-                    {c.region && <span>{c.region}</span>}
-                    <span>{COUNTRY_FLAGS[c.country] ?? ''} {c.country}</span>
-                  </span>
-                </button>
+                <div key={c.id} className="flex items-center hover:bg-gray-50 transition-colors">
+                  <button
+                    onClick={() => router.push(`/admin/clubs/${c.id}`)}
+                    className="flex-1 min-w-0 flex items-center justify-between gap-3 pl-4 pr-2 py-3 text-left"
+                  >
+                    <span className="text-[13px] font-medium text-gray-900 truncate">{c.name}</span>
+                    <span className="text-[12px] text-gray-700 flex items-center gap-1.5 flex-shrink-0">
+                      {c.region && <span>{c.region}</span>}
+                      <span>{COUNTRY_FLAGS[c.country] ?? ''} {c.country}</span>
+                    </span>
+                  </button>
+                  {/* Bouton « Site du club » — seulement si une adresse http(s) est renseignée */}
+                  {c.website && /^https?:\/\//i.test(c.website) && (
+                    <a href={c.website} target="_blank" rel="noopener noreferrer"
+                      className="mr-3 flex-shrink-0 inline-flex items-center gap-1 border border-gray-200 rounded-md px-2 py-1 text-[11px] font-medium text-[#185FA5] bg-white hover:border-[#185FA5]/40 transition-colors whitespace-nowrap">
+                      🌐 {t('clubs.openWebsite')}
+                    </a>
+                  )}
+                </div>
               ))}
             </div>
           )}
