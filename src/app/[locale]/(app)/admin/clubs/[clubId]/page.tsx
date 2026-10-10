@@ -16,7 +16,17 @@ const COUNTRIES = [
   { code: 'CH', flag: '🇨🇭' }, { code: 'OTHER', flag: '🌍' },
 ]
 
-type Club = { id: string; name: string; country: string; region: string | null }
+type Club = { id: string; name: string; country: string; region: string | null; website: string | null }
+
+/** Nettoie l'adresse saisie : vide → null ; sans protocole → https:// ajouté ;
+ *  protocole autre que http(s) ou espaces → refusé (undefined). */
+function normalizeWebsite(raw: string): string | null | undefined {
+  const v = raw.trim()
+  if (!v) return null
+  const withProto = /^[a-z][a-z0-9+.-]*:\/\//i.test(v) ? v : `https://${v}`
+  if (!/^https?:\/\/[^\s]+$/i.test(withProto)) return undefined
+  return withProto
+}
 
 export default function ClubDetailPage() {
   const params = useParams()
@@ -34,7 +44,7 @@ export default function ClubDetailPage() {
 
   async function loadClub() {
     setLoading(true)
-    const { data } = await supabase.from('clubs').select('id, name, country, region').eq('id', clubId).maybeSingle()
+    const { data } = await supabase.from('clubs').select('id, name, country, region, website').eq('id', clubId).maybeSingle()
     setClub(data)
     setLoading(false)
   }
@@ -127,6 +137,24 @@ export default function ClubDetailPage() {
           onBlur={() => saveClubInfo({ region: club.region?.trim() || null })}
           placeholder={t('clubs.regionPlaceholder')}
           className="border border-gray-200 rounded-md px-2 py-1 text-[12px] bg-white focus:outline-none focus:border-blue-300 w-40"
+        />
+        <input
+          type="url"
+          inputMode="url"
+          value={club.website ?? ''}
+          onChange={e => setClub({ ...club, website: e.target.value })}
+          onBlur={() => {
+            const normalized = normalizeWebsite(club.website ?? '')
+            if (normalized === undefined) {
+              toast.error(t('clubs.websiteInvalid'))
+              loadClub() // revient à la dernière valeur enregistrée
+              return
+            }
+            if (normalized !== club.website) setClub({ ...club, website: normalized })
+            saveClubInfo({ website: normalized })
+          }}
+          placeholder={t('clubs.websitePlaceholder')}
+          className="border border-gray-200 rounded-md px-2 py-1 text-[12px] bg-white focus:outline-none focus:border-blue-300 w-64"
         />
         {saving && <span className="text-[11px] text-gray-400 on-bg">{t('clubs.saving')}</span>}
 

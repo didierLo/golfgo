@@ -16,7 +16,7 @@ type EventDetail = {
   ends_at: string | null
   description: string | null
   competition_formats: { name: string } | null
-  courses: { course_name: string; clubs: { name: string } | null } | null
+  courses: { course_name: string; clubs: { name: string; website: string | null } | null } | null
   max_participants: number | null
 }
 type ParticipationStatus = 'GOING' | 'INVITED' | 'DECLINED' | 'WAITLIST' | null
@@ -57,7 +57,7 @@ export default function EventOverviewPage() {
   const [{ data: eventData }, { data: player }, { count }] = await Promise.all([
     supabase.from('events')
       .select(`id, title, location, starts_at, ends_at, description, max_participants,
-        competition_formats(name), courses(course_name, clubs(name))`)
+        competition_formats(name), courses(course_name, clubs(name, website))`)
       .eq('id', eventId).single(),
     user
       ? supabase.from('players').select('id').eq('user_id', user.id).single()
@@ -177,7 +177,7 @@ export default function EventOverviewPage() {
         )}
 
         {(event.courses?.course_name || event.location) && (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
               <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3"/>
               <path d="M8 5v3M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -195,6 +195,17 @@ export default function EventOverviewPage() {
                   target="_blank" rel="noopener noreferrer"
                   className="text-[12px] font-medium text-[#185FA5] hover:text-[#0C447C] whitespace-nowrap flex items-center gap-1">
                   🧭 {t('eventOverview.directions')}
+                </a>
+              ) : null
+            })()}
+            {(() => {
+              const website = event.courses?.clubs?.website
+              // Garde-fou : on n'affiche le lien que pour une adresse http(s)
+              return website && /^https?:\/\//i.test(website) ? (
+                <a href={website}
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-[12px] font-medium text-[#185FA5] hover:text-[#0C447C] whitespace-nowrap flex items-center gap-1">
+                  🌐 {t('clubs.openWebsite')}
                 </a>
               ) : null
             })()}
