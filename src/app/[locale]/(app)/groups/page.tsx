@@ -182,6 +182,7 @@ export default function GroupsPage() {
                   </button>
                 </div>
               </div>
+              {isOwner && (
               <div className="px-4 pb-3 flex gap-1.5" onClick={e => e.stopPropagation()}>
                 {[
                   { label: t('groups.members'), href: `/groups/${group.id}/members` },
@@ -193,6 +194,7 @@ export default function GroupsPage() {
                   </a>
                 ))}
               </div>
+              )}
             </div>
           )
         })}

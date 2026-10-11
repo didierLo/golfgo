@@ -15,8 +15,14 @@ type Pair = {
   player_a: string
   player_b: string
   constraint_type: ConstraintType
-  players_a: { first_name: string; surname: string }[]
-  players_b: { first_name: string; surname: string }[]
+  // PostgREST renvoie un objet (relation « plusieurs-à-un »), parfois un tableau selon la version : on gère les deux.
+  players_a: any
+  players_b: any
+}
+
+function embedded(v: any): { first_name?: string; surname?: string } | null {
+  if (!v) return null
+  return Array.isArray(v) ? (v[0] ?? null) : v
 }
 
 export default function ConstraintsPage() {
@@ -31,10 +37,35 @@ export default function ConstraintsPage() {
   const [playerB, setPlayerB] = useState('')
   const [type,    setType]    = useState<ConstraintType>('forbidden')
   const [adding,  setAdding]  = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => { load() }, [])
 
 async function load() {
+  // 1) Qui suis-je dans ce groupe ? Seuls les admins reçoivent des données.
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { setLoading(false); return }
+
+  const { data: me } = await supabase.from('players')
+    .select('id').eq('user_id', user.id).maybeSingle()
+
+  let admin = false
+  if (me) {
+    const { data: row } = await supabase.from('groups_players')
+      .select('role').eq('group_id', groupId).eq('player_id', me.id).maybeSingle()
+    admin = row?.role === 'owner'
+  }
+  if (!admin) {
+    const { data: grp } = await supabase.from('groups')
+      .select('owner_id').eq('id', groupId).maybeSingle()
+    admin = grp?.owner_id === user.id
+  }
+
+  if (!admin) { setIsAdmin(false); setLoading(false); return }
+  setIsAdmin(true)
+
+  // 2) Admin : membres du groupe + contraintes
   const [{ data: members }, { data: constraints }] = await Promise.all([
     supabase.from('groups_players')
       .select(`player:players(id, first_name, surname)`)
@@ -48,9 +79,16 @@ async function load() {
       .eq('group_id', groupId)
   ])
 
-  setPlayers((members || []).map((m: any) => m.player))
+  setPlayers((members || []).map((m: any) => m.player).filter(Boolean))
   setPairs((constraints || []) as any)
+  setLoading(false)
 }
+
+  // Nom affiché : d'abord la liste des membres du groupe, sinon la jointure.
+  function nameOf(id: string, joined: any) {
+    const p = players.find(x => x.id === id) ?? embedded(joined)
+    return p ? `${p.first_name ?? ''} ${p.surname ?? ''}`.trim() : '—'
+  }
 
   async function addConstraint() {
     if (!playerA || !playerB) return
@@ -76,6 +114,28 @@ async function load() {
 
   const forbidden = pairs.filter(p => p.constraint_type === 'forbidden')
   const preferred = pairs.filter(p => p.constraint_type === 'preferred')
+
+  if (loading) return (
+    <div className="p-6 space-y-2 max-w-2xl">
+      {[1,2,3].map(i => <div key={i} className="h-11 bg-white/40 rounded-xl animate-pulse" />)}
+    </div>
+  )
+
+  // Non-admin : aucune donnée affichée (ni paires, ni compteurs).
+  if (!isAdmin) return (
+    <div className="p-5 sm:p-6 max-w-2xl">
+      <button onClick={() => router.back()}
+        className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-4 on-bg">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {t('common.back')}
+      </button>
+      <div className="text-center py-16 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
+        {t('members.adminOnly')}
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-5 sm:p-6 max-w-2xl">
@@ -129,6 +189,7 @@ async function load() {
         title={t('constraints.forbidden.title')}
         description={t('constraints.forbidden.desc')}
         pairs={forbidden}
+        nameOf={nameOf}
         color={{ bg: '#FCEBEB', text: '#A32D2D', border: '#F7C1C1' }}
         emptyLabel={t('constraints.forbidden.empty')}
         removeLabel={t('constraints.remove')}
@@ -139,6 +200,7 @@ async function load() {
         title={t('constraints.preferred.title')}
         description={t('constraints.preferred.desc')}
         pairs={preferred}
+        nameOf={nameOf}
         color={{ bg: '#EAF3DE', text: '#3B6D11', border: '#C0DD97' }}
         emptyLabel={t('constraints.preferred.empty')}
         removeLabel={t('constraints.remove')}
@@ -148,10 +210,11 @@ async function load() {
   )
 }
 
-function ConstraintSection({ title, description, pairs, color, emptyLabel, removeLabel, onRemove }: {
+function ConstraintSection({ title, description, pairs, nameOf, color, emptyLabel, removeLabel, onRemove }: {
   title: string
   description: string
   pairs: Pair[]
+  nameOf: (id: string, joined: any) => string
   color: { bg: string; text: string; border: string }
   emptyLabel: string
   removeLabel: string
@@ -179,9 +242,9 @@ function ConstraintSection({ title, description, pairs, color, emptyLabel, remov
           pairs.map(p => (
             <div key={p.id} className="flex items-center gap-3 border border-slate-100 rounded-lg px-4 py-2.5">
               <span className="text-[13px] font-medium text-slate-800 flex-1">
-                {p.players_a?.[0]?.first_name} {p.players_a?.[0]?.surname}
+                {nameOf(p.player_a, p.players_a)}
                 <span className="text-slate-400 mx-2">×</span>
-                {p.players_b?.[0]?.first_name} {p.players_b?.[0]?.surname}
+                {nameOf(p.player_b, p.players_b)}
               </span>
               <button onClick={() => onRemove(p.id)}
                 className="text-[11px] font-semibold text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors flex-shrink-0">

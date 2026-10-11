@@ -59,14 +59,35 @@ export default function MembersPage() {
         .eq('group_id', groupId)
     ])
 
-    if (error) { console.error(error); return }
+    if (error) { console.error(error); setLoading(false); return }
 
     const { data: player } = await supabase.from('players')
-      .select('id').eq('user_id', user!.id).single()
+      .select('id').eq('user_id', user!.id).maybeSingle()
 
     const myRow = (data || []).find((row: any) => row.player?.id === player?.id)
-    setUserRole(myRow?.role ?? null)
-    setMembers((data || []).map((row: any) => ({ ...row.player, role: row.role })))
+
+    // Admin = rôle « owner » dans le groupe, ou propriétaire d'origine du groupe.
+    let isAdmin = myRow?.role === 'owner'
+    if (!isAdmin && user) {
+      const { data: grp } = await supabase.from('groups')
+        .select('owner_id').eq('id', groupId).maybeSingle()
+      isAdmin = grp?.owner_id === user.id
+    }
+
+    // Les non-admins ne reçoivent rien : ni liste, ni nombre.
+    if (!isAdmin) {
+      setUserRole(myRow?.role ?? 'member')
+      setMembers([])
+      setLoading(false)
+      return
+    }
+
+    setUserRole('owner')
+    setMembers(
+      (data || [])
+        .filter((row: any) => row.player)               // ligne sans joueur lisible : ignorée
+        .map((row: any) => ({ ...row.player, role: row.role }))
+    )
     setLoading(false)
   }
 
@@ -169,6 +190,22 @@ export default function MembersPage() {
   if (loading) return (
     <div className="p-6 space-y-2">
       {[1,2,3,4].map(i => <div key={i} className="h-11 bg-white/40 rounded-xl animate-pulse" />)}
+    </div>
+  )
+
+  // Non-admin : aucune donnée affichée (pas de noms, pas même le nombre de membres).
+  if (userRole !== 'owner') return (
+    <div className="p-5 sm:p-6">
+      <button onClick={() => router.back()}
+        className="inline-flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-slate-600 transition-colors mb-4 on-bg">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {t('common.back')}
+      </button>
+      <div className="text-center py-16 text-[13px] text-slate-500 border border-dashed border-slate-200 rounded-xl on-bg-card">
+        {t('members.adminOnly')}
+      </div>
     </div>
   )
 
@@ -307,7 +344,7 @@ export default function MembersPage() {
                     background: member.role === 'owner' ? '#185FA5' : member.role === 'guest' ? '#FEF3C7' : '#EBF3FC',
                     color:      member.role === 'owner' ? '#ffffff'  : member.role === 'guest' ? '#92400E' : '#0C447C',
                   }}>
-                  {member.first_name[0]}{member.surname[0]}
+                  {member.first_name?.[0]}{member.surname?.[0]}
                 </div>
                 <span className="text-[13px] font-semibold text-slate-900 truncate">
                   {sortKey === 'first_name'
