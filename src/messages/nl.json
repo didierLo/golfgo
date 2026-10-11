@@ -627,7 +627,11 @@
     "whatsapp": "WhatsApp",
     "pairMatrix": {
       "title": "Historiek van de paren",
-      "hint": "Aantal keren dat elk paar in de gekozen periode samen heeft gespeeld (donkerder = recenter). Kader: paar dat nu in dezelfde flight zit — groen als het nieuw is, rood als ze al samen hebben gespeeld.",
+      "hint": "Elk vierkantje is een paar spelers in de flight. Ga met de muis over een vierkantje om te zien hoe vaak het paar samen heeft gespeeld.",
+      "legendNew": "Nooit samen gespeeld",
+      "legendSeen": "Al eens samen gespeeld",
+      "legendOften": "Vaak of recent",
+      "newPairs": "{fresh} van de {total} paren zijn nieuw",
       "show": "Tonen",
       "hide": "Verbergen",
       "noHistory": "Geen historiek geladen: kies hierboven een periode."

@@ -628,7 +628,11 @@
     "whatsapp": "WhatsApp",
     "pairMatrix": {
       "title": "Paarungsverlauf",
-      "hint": "Wie oft jedes Paar im gewählten Zeitraum zusammengespielt hat (dunkler = aktueller). Rahmen: Paar, das aktuell im selben Flight spielt — grün, wenn neu, rot, wenn bereits zusammengespielt.",
+      "hint": "Jedes Quadrat steht für ein Spielerpaar im Flight. Fahren Sie mit der Maus über ein Quadrat, um zu sehen, wie oft das Paar zusammengespielt hat.",
+      "legendNew": "Noch nie zusammengespielt",
+      "legendSeen": "Schon zusammengespielt",
+      "legendOften": "Oft oder kürzlich",
+      "newPairs": "{fresh} von {total} Paaren sind neu",
       "show": "Anzeigen",
       "hide": "Ausblenden",
       "noHistory": "Kein Verlauf geladen: Wählen Sie oben einen Zeitraum."

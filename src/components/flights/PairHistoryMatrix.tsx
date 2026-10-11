@@ -6,17 +6,25 @@ import { buildPairHistory } from '@/lib/golf/flights/formats/simple'
 import { pairKey } from '@/lib/utils/pairs'
 
 type Props = {
-  /** Flights actuellement affichés (générés ou modifiés à la main) : seuls leurs joueurs figurent dans la matrice */
+  /** Flights actuellement affichés (générés ou modifiés à la main) : un petit tableau par flight */
   flights: any[]
   /** Flights des autres événements du groupe : { date, players: [{ id }] } */
   pastFlights: any[]
-  /** Date de l'événement en cours (sert à pondérer : plus c'est proche, plus c'est foncé) */
+  /** Date de l'événement en cours (sert à donner plus de poids aux parties proches) */
   referenceDate?: string | null
   /** Période d'historique choisie (jours) : 0 = aucun */
   historyWindow: number
 }
 
+type Level = 'new' | 'seen' | 'often'
+
 const WINDOW_KEY: Record<number, string> = { 0: 'none', 30: '30d', 90: '3m', 180: '6m', 365: '1y' }
+
+const STYLE: Record<Level, { bg: string; glyph: string }> = {
+  new:   { bg: '#3B6D11', glyph: '✓' },   // jamais joué ensemble
+  seen:  { bg: '#EF9F27', glyph: '•' },   // déjà joué ensemble, il y a un moment
+  often: { bg: '#A32D2D', glyph: '✕' },   // souvent ou récemment
+}
 
 function shortName(p: any) {
   const s = (p.surname ?? '').trim()
@@ -32,29 +40,41 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
     [pastFlights, referenceDate]
   )
 
-  // Ordre des lignes/colonnes : joueurs flight par flight (les flights forment des blocs
-  // le long de la diagonale). Seuls les joueurs placés dans un flight apparaissent.
-  const { ordered, flightOf } = useMemo(() => {
-    const flightOf = new Map<string, number>()
-    const ordered: any[] = []
-    const sortedFlights = [...flights].sort((a: any, b: any) => a.flight_no - b.flight_no)
-    for (const f of sortedFlights) {
-      for (const p of (Array.isArray(f.players) ? f.players : [])) {
-        if (!p?.id || flightOf.has(p.id)) continue
-        flightOf.set(p.id, f.flight_no)
-        ordered.push(p)
-      }
-    }
-    return { ordered, flightOf }
-  }, [flights])
+  function levelOf(a: string, b: string): { level: Level; count: number } {
+    const e = history.get(pairKey(a, b))
+    const count = e?.count ?? 0
+    if (count === 0) return { level: 'new', count: 0 }
+    // « souvent ou récemment » : plusieurs fois, ou une partie récente (poids ≥ 0,6 ≈ moins de 6 semaines)
+    return { level: (e!.weight >= 0.6 || count >= 3) ? 'often' : 'seen', count }
+  }
 
-  if (ordered.length === 0) return null
+  // Un bloc par flight (au moins 2 joueurs), avec le nombre de paires nouvelles.
+  const blocks = useMemo(() => {
+    return [...flights]
+      .sort((a: any, b: any) => a.flight_no - b.flight_no)
+      .map((f: any) => {
+        const ps: any[] = (Array.isArray(f.players) ? f.players : []).filter((p: any) => p?.id)
+        let total = 0, fresh = 0
+        for (let i = 0; i < ps.length; i++) {
+          for (let j = i + 1; j < ps.length; j++) {
+            total++
+            if (!history.has(pairKey(ps[i].id, ps[j].id))) fresh++
+          }
+        }
+        return { flight_no: f.flight_no, label: f.groupLabel ?? null, players: ps, total, fresh }
+      })
+      .filter(b => b.players.length >= 2)
+  }, [flights, history])
 
+  if (blocks.length === 0) return null
+
+  const totalPairs = blocks.reduce((s, b) => s + b.total, 0)
+  const totalFresh = blocks.reduce((s, b) => s + b.fresh, 0)
   const windowLabel = t(`flights.historyOptions.${WINDOW_KEY[historyWindow] ?? '6m'}`)
 
   return (
     <div className="mt-8">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 gap-3">
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest on-bg">
           {t('flights.pairMatrix.title')}
           <span className="ml-2 normal-case font-semibold text-slate-400">· {windowLabel}</span>
@@ -70,59 +90,81 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
           <p className="text-[12px] text-slate-500 on-bg">{t('flights.pairMatrix.noHistory')}</p>
         ) : (
           <>
+            {/* Légende */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-2">
+              {(['new', 'seen', 'often'] as Level[]).map(l => (
+                <span key={l} className="inline-flex items-center gap-2 text-[12px] font-medium text-slate-700">
+                  <span className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[11px] font-bold"
+                    style={{ background: STYLE[l].bg }}>{STYLE[l].glyph}</span>
+                  {t(`flights.pairMatrix.legend${l === 'new' ? 'New' : l === 'seen' ? 'Seen' : 'Often'}`)}
+                </span>
+              ))}
+              <span className="text-[12px] font-semibold text-slate-600">
+                · {t('flights.pairMatrix.newPairs', { fresh: totalFresh, total: totalPairs })}
+              </span>
+            </div>
             <p className="text-[11px] text-slate-500 mb-3 on-bg">{t('flights.pairMatrix.hint')}</p>
 
-            <div className="overflow-auto max-h-[70vh] rounded-xl border border-slate-200 bg-white">
-              <table className="border-separate border-spacing-0 text-[11px]">
-                <thead>
-                  <tr>
-                    <th className="sticky left-0 top-0 z-30 bg-white border-b border-slate-100" />
-                    {ordered.map((c: any) => (
-                      <th key={c.id}
-                        className="sticky top-0 z-20 bg-white border-b border-slate-100 px-0 pb-1 pt-2 font-semibold text-slate-600 align-bottom">
-                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-                          className="whitespace-nowrap mx-auto h-[84px] text-left">
-                          {shortName(c)}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {ordered.map((r: any) => (
-                    <tr key={r.id}>
-                      <th className="sticky left-0 z-10 bg-white border-b border-slate-50 px-3 py-0.5 text-left font-semibold text-slate-700 whitespace-nowrap">
-                        {shortName(r)}
-                        {flightOf.has(r.id) && (
-                          <span className="ml-1.5 text-[10px] font-medium text-slate-400">F{flightOf.get(r.id)}</span>
-                        )}
-                      </th>
-                      {ordered.map((c: any) => {
-                        if (r.id === c.id) {
-                          return <td key={c.id} className="w-7 h-7 min-w-[28px] bg-slate-200 border-b border-slate-50" />
-                        }
-                        const e = history.get(pairKey(r.id, c.id))
-                        const count = e?.count ?? 0
-                        const same  = flightOf.has(r.id) && flightOf.get(r.id) === flightOf.get(c.id)
-                        const alpha = count > 0 ? 0.12 + 0.55 * Math.min(1, e!.weight) : 0
-                        const ring  = same ? (count === 0 ? '#3B6D11' : '#A32D2D') : null
-                        return (
-                          <td key={c.id}
-                            className="w-7 h-7 min-w-[28px] text-center border-b border-slate-50"
-                            style={{
-                              background: count > 0 ? `rgba(24,95,165,${alpha.toFixed(2)})` : undefined,
-                              color: alpha > 0.45 ? '#ffffff' : '#334155',
-                              boxShadow: ring ? `inset 0 0 0 2px ${ring}` : undefined,
-                              fontWeight: same ? 700 : 500,
-                            }}>
-                            {count > 0 ? count : <span className="text-slate-300">·</span>}
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {blocks.map(b => {
+                const cols = b.players.slice(0, -1)   // colonnes : tous sauf le dernier
+                const rows = b.players.slice(1)       // lignes : tous sauf le premier
+                return (
+                  <div key={b.flight_no} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                      <span className="text-[13px] font-bold text-slate-800">
+                        Flight {b.flight_no}{b.label ? ` · ${b.label}` : ''}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        b.fresh === b.total ? 'bg-[#EAF3DE] text-[#3B6D11]' : 'bg-amber-50 text-amber-700'}`}>
+                        {t('flights.pairMatrix.newPairs', { fresh: b.fresh, total: b.total })}
+                      </span>
+                    </div>
+
+                    <div className="p-3 overflow-x-auto">
+                      <table className="border-separate" style={{ borderSpacing: 3 }}>
+                        <thead>
+                          <tr>
+                            <th />
+                            {cols.map((c: any) => (
+                              <th key={c.id} className="font-semibold text-[11px] text-slate-600 align-bottom px-0">
+                                <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                                  className="whitespace-nowrap mx-auto h-[78px] text-left">
+                                  {shortName(c)}
+                                </div>
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map((r: any, ri: number) => (
+                            <tr key={r.id}>
+                              <th className="text-right pr-2 text-[12px] font-semibold text-slate-700 whitespace-nowrap">
+                                {shortName(r)}
+                              </th>
+                              {cols.map((c: any, ci: number) => {
+                                // triangle : on ne montre que les paires (ligne i+1, colonne j) avec j ≤ i
+                                if (ci > ri) return <td key={c.id} />
+                                const { level, count } = levelOf(r.id, c.id)
+                                const st = STYLE[level]
+                                return (
+                                  <td key={c.id}>
+                                    <div title={`${shortName(c)} × ${shortName(r)} — ${count}×`}
+                                      className="w-8 h-8 rounded-md flex items-center justify-center text-white text-[13px] font-bold"
+                                      style={{ background: st.bg }}>
+                                      {st.glyph}
+                                    </div>
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </>
         )

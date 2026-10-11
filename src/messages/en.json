@@ -629,7 +629,11 @@
     "whatsapp": "WhatsApp",
     "pairMatrix": {
       "title": "Pair history",
-      "hint": "Number of times each pair has played together over the selected period (darker = more recent). Frame: pair currently in the same flight — green if new, red if they have already played together.",
+      "hint": "Each square is a pair of players in the flight. Hover a square to see how many times the pair has played together.",
+      "legendNew": "Never played together",
+      "legendSeen": "Played together before",
+      "legendOften": "Often or recently",
+      "newPairs": "{fresh} of {total} pairs are new",
       "show": "Show",
       "hide": "Hide",
       "noHistory": "No history loaded: choose a period above."
