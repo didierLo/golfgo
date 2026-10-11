@@ -628,10 +628,9 @@
     "whatsapp": "WhatsApp",
     "pairMatrix": {
       "title": "Historial de parejas",
-      "hint": "Cada cuadrado es una pareja de jugadores del flight. Pase el ratón sobre un cuadrado para ver cuántas veces ha jugado junta la pareja.",
+      "hint": "Cada cuadrado es una pareja de jugadores del flight; el número indica cuántas veces ha jugado junta la pareja en el período elegido.",
       "legendNew": "Nunca han jugado juntos",
-      "legendSeen": "Ya han jugado juntos",
-      "legendOften": "A menudo o recientemente",
+      "legendRecent": "Azul claro = más antiguo, azul oscuro = más reciente",
       "newPairs": "{fresh} de {total} parejas son nuevas",
       "show": "Mostrar",
       "hide": "Ocultar",

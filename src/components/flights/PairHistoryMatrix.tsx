@@ -16,14 +16,18 @@ type Props = {
   historyWindow: number
 }
 
-type Level = 'new' | 'seen' | 'often'
-
 const WINDOW_KEY: Record<number, string> = { 0: 'none', 30: '30d', 90: '3m', 180: '6m', 365: '1y' }
 
-const STYLE: Record<Level, { bg: string; glyph: string }> = {
-  new:   { bg: '#3B6D11', glyph: '✓' },   // jamais joué ensemble
-  seen:  { bg: '#EF9F27', glyph: '•' },   // déjà joué ensemble, il y a un moment
-  often: { bg: '#A32D2D', glyph: '✕' },   // souvent ou récemment
+// Couleur d'un carré : vert pour « jamais ensemble », sinon un bleu d'autant plus foncé que la paire a joué
+// récemment (pas de rouge : avec peu de joueurs, beaucoup de paires ont déjà joué ensemble).
+function cellStyle(count: number, weight: number): { background: string; color: string; border: string } {
+  if (count === 0) return { background: '#EAF3DE', color: '#3B6D11', border: '1px solid #C0DD97' }
+  const alpha = 0.15 + 0.65 * Math.min(1, weight)
+  return {
+    background: `rgba(24,95,165,${alpha.toFixed(2)})`,
+    color: alpha > 0.5 ? '#ffffff' : '#0C447C',
+    border: '1px solid rgba(24,95,165,0.25)',
+  }
 }
 
 function shortName(p: any) {
@@ -39,14 +43,6 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
     () => buildPairHistory(pastFlights, referenceDate),
     [pastFlights, referenceDate]
   )
-
-  function levelOf(a: string, b: string): { level: Level; count: number } {
-    const e = history.get(pairKey(a, b))
-    const count = e?.count ?? 0
-    if (count === 0) return { level: 'new', count: 0 }
-    // « souvent ou récemment » : plusieurs fois, ou une partie récente (poids ≥ 0,6 ≈ moins de 6 semaines)
-    return { level: (e!.weight >= 0.6 || count >= 3) ? 'often' : 'seen', count }
-  }
 
   // Un bloc par flight (au moins 2 joueurs), avec le nombre de paires nouvelles.
   const blocks = useMemo(() => {
@@ -92,13 +88,20 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
           <>
             {/* Légende */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-2">
-              {(['new', 'seen', 'often'] as Level[]).map(l => (
-                <span key={l} className="inline-flex items-center gap-2 text-[12px] font-medium text-slate-700">
-                  <span className="w-5 h-5 rounded-md flex items-center justify-center text-white text-[11px] font-bold"
-                    style={{ background: STYLE[l].bg }}>{STYLE[l].glyph}</span>
-                  {t(`flights.pairMatrix.legend${l === 'new' ? 'New' : l === 'seen' ? 'Seen' : 'Often'}`)}
+              <span className="inline-flex items-center gap-2 text-[12px] font-medium text-slate-700">
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px] font-bold"
+                  style={cellStyle(0, 0)}>0</span>
+                {t('flights.pairMatrix.legendNew')}
+              </span>
+              <span className="inline-flex items-center gap-2 text-[12px] font-medium text-slate-700">
+                <span className="inline-flex gap-1">
+                  <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px] font-bold"
+                    style={cellStyle(1, 0.1)}>1</span>
+                  <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px] font-bold"
+                    style={cellStyle(1, 1)}>1</span>
                 </span>
-              ))}
+                {t('flights.pairMatrix.legendRecent')}
+              </span>
               <span className="text-[12px] font-semibold text-slate-600">
                 · {t('flights.pairMatrix.newPairs', { fresh: totalFresh, total: totalPairs })}
               </span>
@@ -145,14 +148,14 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
                               {cols.map((c: any, ci: number) => {
                                 // triangle : on ne montre que les paires (ligne i+1, colonne j) avec j ≤ i
                                 if (ci > ri) return <td key={c.id} />
-                                const { level, count } = levelOf(r.id, c.id)
-                                const st = STYLE[level]
+                                const e = history.get(pairKey(r.id, c.id))
+                                const count = e?.count ?? 0
                                 return (
                                   <td key={c.id}>
                                     <div title={`${shortName(c)} × ${shortName(r)} — ${count}×`}
-                                      className="w-8 h-8 rounded-md flex items-center justify-center text-white text-[13px] font-bold"
-                                      style={{ background: st.bg }}>
-                                      {st.glyph}
+                                      className="w-9 h-9 rounded-md flex items-center justify-center text-[14px] font-bold"
+                                      style={cellStyle(count, e?.weight ?? 0)}>
+                                      {count}
                                     </div>
                                   </td>
                                 )

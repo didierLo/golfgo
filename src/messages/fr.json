@@ -629,10 +629,9 @@
     "whatsapp": "WhatsApp",
     "pairMatrix": {
       "title": "Historique des paires",
-      "hint": "Chaque carré représente une paire de joueurs du flight. Passez la souris sur un carré pour voir combien de fois la paire a joué ensemble.",
+      "hint": "Chaque carré représente une paire de joueurs du flight ; le chiffre indique combien de fois elle a joué ensemble sur la période choisie.",
       "legendNew": "Jamais joué ensemble",
-      "legendSeen": "Déjà joué ensemble",
-      "legendOften": "Souvent ou récemment",
+      "legendRecent": "Bleu clair = plus ancien, bleu foncé = plus récent",
       "newPairs": "{fresh} sur {total} paires nouvelles",
       "show": "Afficher",
       "hide": "Masquer",
