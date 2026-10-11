@@ -597,6 +597,7 @@
     },
     "holes9Warning": "{count} speler(s) speelt 9 holes",
     "holes9Question": "Hoe opnemen in flights?",
+    "holes9Distribution": "In gemengde modus worden de 9-holes Front-spelers gelijk over de flights verdeeld en vervangt elke 9-holes Back-speler bij voorrang een Front-speler.",
     "mixed": "Gemengd",
     "separated": "Gescheiden",
     "clear": "Wissen",

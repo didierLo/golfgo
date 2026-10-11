@@ -599,6 +599,7 @@
     },
     "holes9Warning": "{count} player(s) playing 9 holes",
     "holes9Question": "How to include them in flights?",
+    "holes9Distribution": "In mixed mode, 9-hole Front players are spread evenly across the flights, and each 9-hole Back player replaces a Front player first.",
     "mixed": "Mixed",
     "separated": "Separated",
     "clear": "Clear",

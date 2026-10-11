@@ -12,6 +12,12 @@ import { pairKey } from "@/lib/utils/pairs"
  *     en gardant les échanges qui font baisser la pénalité totale (avec un peu de
  *     « recuit simulé » pour ne pas rester coincé) ;
  *  3. on recommence plusieurs fois depuis des départs différents et on garde le meilleur.
+ *
+ * Contrainte permanente « 9 trous » (flights mixtes) :
+ *  - les joueurs 9 trous Front (9F) sont répartis équitablement entre les flights ;
+ *  - les joueurs 9 trous Back (9B) aussi, en commençant par les flights où il y a un 9F à remplacer
+ *    (au 10e trou, le 9B prend la place du 9F qui s'arrête).
+ *  Cette contrainte passe avant l'historique et les handicaps ; seules les paires interdites la dépassent.
  */
 
 // ── Réglages ────────────────────────────────────────────────────────────────
@@ -23,6 +29,26 @@ const HISTORY_WEIGHT    = 100     // pénalité de base d'une paire déjà joué
 const FORBIDDEN_PENALTY = 10000
 const PREFERRED_BONUS   = 500
 const DAY_MS            = 24 * 60 * 60 * 1000
+const BALANCE_WEIGHT    = 2000    // répartition 9F / 9B : bien au-dessus de l'historique, sous les paires interdites
+
+// Catégorie d'un joueur : 0 = normal (18 trous ou 9 trous sans section), 1 = 9 trous Front, 2 = 9 trous Back
+type Cat = 0 | 1 | 2
+function categoryOf(p: any): Cat {
+  if (p?.holes_played === 9) {
+    if (p.holes_section === 'out') return 1
+    if (p.holes_section === 'in')  return 2
+  }
+  return 0
+}
+
+/**
+ * Coût de répartition d'un flight : nF² + nB² + (nF − nB)².
+ * Minimal quand les 9F sont répartis également, les 9B aussi, et que chaque flight
+ * a autant de 9B que de 9F (le 9B remplace le 9F).
+ */
+function balanceCost(nF: number, nB: number): number {
+  return nF * nF + nB * nB + (nF - nB) * (nF - nB)
+}
 
 // ── Historique des paires (utilisé aussi par la matrice affichée sous les flights) ──
 
@@ -142,22 +168,58 @@ function totalPenalty(flights: number[][], pen: number[][]): number {
 
 // ── Recherche par échanges (recuit simulé avec redémarrages) ────────────────
 
-function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: number): number[][] {
-  const base = Array.from({ length: n }, (_, i) => i)
+/**
+ * Répartition de départ qui respecte déjà la contrainte 9F / 9B :
+ * les 9F sont distribués un par flight (tour à tour), puis les 9B dans le même ordre de flights
+ * (donc d'abord là où il y a un 9F), puis tous les autres joueurs remplissent les places libres.
+ */
+function buildInitial(n: number, sizes: number[], cat: Cat[]): number[][] {
+  const all = shuffle(Array.from({ length: n }, (_, i) => i))
+  const flights: number[][] = sizes.map(() => [])
+  const order = shuffle(sizes.map((_, i) => i))
 
+  const placeRoundRobin = (members: number[]) => {
+    let ptr = 0
+    for (const idx of members) {
+      let guard = 0
+      while (flights[order[ptr % order.length]].length >= sizes[order[ptr % order.length]] && guard++ < order.length) ptr++
+      const f = order[ptr % order.length]
+      if (flights[f].length < sizes[f]) flights[f].push(idx)
+      ptr++
+    }
+  }
+
+  placeRoundRobin(all.filter(i => cat[i] === 1))
+  placeRoundRobin(all.filter(i => cat[i] === 2))
+
+  const others = all.filter(i => cat[i] === 0)
+  let o = 0
+  for (let f = 0; f < flights.length; f++) {
+    while (flights[f].length < sizes[f] && o < others.length) flights[f].push(others[o++])
+  }
+  return flights
+}
+
+function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: number, cat: Cat[]): number[][] {
   // Un seul flight, ou aucun échange possible : rien à optimiser.
-  if (sizes.length < 2) return splitBySizes(shuffle(base), sizes)
+  if (sizes.length < 2) return buildInitial(n, sizes, cat)
 
   const restarts      = 6
   const stepsPerStart = Math.max(500, Math.floor(totalSteps / restarts))
   const T0            = HISTORY_WEIGHT * 0.8   // température de départ (≈ une paire récente)
 
-  let best: number[][] = splitBySizes(shuffle(base), sizes)
-  let bestScore = totalPenalty(best, pen)
+  const countOf = (flight: number[], c: Cat) => flight.reduce((k, idx) => k + (cat[idx] === c ? 1 : 0), 0)
+  const structural = (flights: number[][]) =>
+    flights.reduce((sum, f) => sum + balanceCost(countOf(f, 1), countOf(f, 2)), 0) * BALANCE_WEIGHT
+
+  let best: number[][] = buildInitial(n, sizes, cat)
+  let bestScore = totalPenalty(best, pen) + structural(best)
 
   for (let r = 0; r < restarts; r++) {
-    const cur = splitBySizes(shuffle(base), sizes)
-    let curScore = totalPenalty(cur, pen)
+    const cur = buildInitial(n, sizes, cat)
+    let curScore = totalPenalty(cur, pen) + structural(cur)
+    const nF = cur.map(f => countOf(f, 1))
+    const nB = cur.map(f => countOf(f, 2))
 
     if (curScore < bestScore) { best = cur.map(f => f.slice()); bestScore = curScore }
 
@@ -178,10 +240,25 @@ function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: num
       for (const z of fi) if (z !== x) delta += pen[y][z] - pen[x][z]
       for (const z of fj) if (z !== y) delta += pen[x][z] - pen[y][z]
 
+      // Variation de la contrainte 9F / 9B (seulement si on échange deux catégories différentes).
+      const cx = cat[x], cy = cat[y]
+      let newFi = nF[i], newBi = nB[i], newFj = nF[j], newBj = nB[j]
+      if (cx !== cy) {
+        newFi += (cy === 1 ? 1 : 0) - (cx === 1 ? 1 : 0)
+        newBi += (cy === 2 ? 1 : 0) - (cx === 2 ? 1 : 0)
+        newFj += (cx === 1 ? 1 : 0) - (cy === 1 ? 1 : 0)
+        newBj += (cx === 2 ? 1 : 0) - (cy === 2 ? 1 : 0)
+        delta += BALANCE_WEIGHT * (
+          balanceCost(newFi, newBi) + balanceCost(newFj, newBj)
+          - balanceCost(nF[i], nB[i]) - balanceCost(nF[j], nB[j])
+        )
+      }
+
       const temperature = T0 * (1 - s / stepsPerStart) + 0.01
       if (delta <= 0 || Math.random() < Math.exp(-delta / temperature)) {
         fi[xi] = y
         fj[yi] = x
+        nF[i] = newFi; nB[i] = newBi; nF[j] = newFj; nB[j] = newBj
         curScore += delta
         if (curScore < bestScore - 1e-9) {
           best = cur.map(f => f.slice())
@@ -211,7 +288,8 @@ export function simpleFlights(players: any[], options: any) {
 
   // « iterations » du formulaire = nombre d'essais ; ici chaque essai est un échange de joueurs (très rapide).
   const totalSteps = Math.max(3000, iterations * 40)
-  const best       = searchBest(players.length, sizes, pen, totalSteps)
+  const cat: Cat[] = players.map(categoryOf)
+  const best       = searchBest(players.length, sizes, pen, totalSteps, cat)
 
   let flightArrays: any[][] = best.map(flight => flight.map(idx => players[idx]))
 

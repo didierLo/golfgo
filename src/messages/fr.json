@@ -599,6 +599,7 @@
     },
     "holes9Warning": "{count} joueur(s) jouant 9 trous",
     "holes9Question": "Comment les inclure dans les flights ?",
+    "holes9Distribution": "En mode mixte, les 9 trous Front sont répartis équitablement entre les flights, et chaque 9 trous Back remplace en priorité un 9 trous Front.",
     "mixed": "Mixte",
     "separated": "Séparé",
     "clear": "Effacer",

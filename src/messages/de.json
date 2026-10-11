@@ -598,6 +598,7 @@
     },
     "holes9Warning": "{count} Spieler spielt 9 Löcher",
     "holes9Question": "Wie in Flights einbeziehen?",
+    "holes9Distribution": "Im gemischten Modus werden die 9-Loch-Front-Spieler gleichmäßig auf die Flights verteilt, und jeder 9-Loch-Back-Spieler ersetzt vorrangig einen Front-Spieler.",
     "mixed": "Gemischt",
     "separated": "Getrennt",
     "clear": "Löschen",

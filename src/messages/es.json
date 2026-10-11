@@ -598,6 +598,7 @@
     },
     "holes9Warning": "{count} jugador(es) juega 9 hoyos",
     "holes9Question": "¿Cómo incluirlos en los flights?",
+    "holes9Distribution": "En modo mixto, los jugadores de 9 hoyos Front se reparten por igual entre los flights, y cada jugador de 9 hoyos Back sustituye en primer lugar a uno de Front.",
     "mixed": "Mixto",
     "separated": "Separado",
     "clear": "Borrar",

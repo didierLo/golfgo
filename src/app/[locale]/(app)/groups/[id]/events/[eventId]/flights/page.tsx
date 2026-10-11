@@ -467,6 +467,9 @@ const flightGroups = useMemo(() =>
                       {players9front.length > 0 && <span className="ml-1 font-normal text-amber-700">({players9front.length} 9F{players9back.length > 0 ? ` · ${players9back.length} 9B` : ''})</span>}
                     </p>
                     <p className="text-[11px] text-amber-600 mt-0.5">{t('flights.holes9Question')}</p>
+                    {holesMode === 'mixed' && (
+                      <p className="text-[11px] text-amber-700 mt-1">{t('flights.holes9Distribution')}</p>
+                    )}
                   </div>
                   <div className="ml-auto flex gap-1 p-0.5 bg-amber-100 rounded-xl">
                     <button onClick={() => isOwner ? setHolesMode('mixed') : showAdminToast()}
