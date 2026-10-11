@@ -624,7 +624,14 @@
     "holes9Badge": "9G",
     "tabStandard": "Flights",
     "tab4bbb": "4BBB Challenge",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "pairMatrix": {
+      "title": "Historiek van de paren",
+      "hint": "Aantal keren dat elk paar in de gekozen periode samen heeft gespeeld (donkerder = recenter). Kader: paar dat nu in dezelfde flight zit — groen als het nieuw is, rood als ze al samen hebben gespeeld.",
+      "show": "Tonen",
+      "hide": "Verbergen",
+      "noHistory": "Geen historiek geladen: kies hierboven een periode."
+    }
   },
   "challenge4bbb": {
     "parameters": "4BBB Challenge — Instellingen",

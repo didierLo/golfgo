@@ -626,7 +626,14 @@
     "holes9Badge": "9T",
     "tabStandard": "Flights",
     "tab4bbb": "Challenge 4BBB",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "pairMatrix": {
+      "title": "Historique des paires",
+      "hint": "Nombre de fois où chaque paire a joué ensemble sur la période choisie (plus foncé = plus récent). Cadre : paire actuellement dans le même flight — vert si c'est une nouveauté, rouge si elle a déjà joué ensemble.",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "noHistory": "Aucun historique chargé : choisissez une période ci-dessus."
+    }
   },
   "challenge4bbb": {
     "parameters": "Challenge 4BBB — Paramètres",

@@ -8,6 +8,7 @@ import { pairKey } from '@/lib/utils/pairs'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useTranslations, useLocale } from 'next-intl'
 import Challenge4BBBTab from '@/components/flights/Challenge4BBBTab'
+import PairHistoryMatrix from '@/components/flights/PairHistoryMatrix'
 
 
 const supabase = createClient()
@@ -73,6 +74,7 @@ export default function FlightsPage() {
   }
 
   const { players, flights, setFlights, loading, loadData, generate, save, remove } = useFlights(activeEventId)
+  const activeEvent = events.find(e => e.id === activeEventId)
 
   useEffect(() => { if (activeEventId) loadData() }, [activeEventId])
 
@@ -122,19 +124,22 @@ export default function FlightsPage() {
     since.setDate(since.getDate() - historyWindowDays)
     const { data: groupEvents } = await supabase
       .from('events')
-      .select('id')
+      .select('id, starts_at')
       .eq('group_id', groupId)
       .neq('id', activeEventId)
       .gte('starts_at', since.toISOString())
     const eventIds = (groupEvents ?? []).map((e: any) => e.id)
     if (!eventIds.length) { setPastFlights([]); return }
+    // Date de chaque événement : c'est elle (et non la date de création du flight) qui sert
+    // à donner plus de poids aux parties récentes.
+    const eventDate = new Map<string, string>((groupEvents ?? []).map((e: any) => [e.id, e.starts_at]))
     const { data } = await supabase
       .from('flights')
-      .select('id, created_at, flight_players(player_id, players(id, first_name, surname, whs))')
+      .select('id, event_id, created_at, flight_players(player_id, players(id, first_name, surname, whs))')
       .in('event_id', eventIds)
     setPastFlights((data ?? []).map((f: any) => ({
-      date:    f.created_at,
-      players: f.flight_players.map((fp: any) => fp.players),
+      date:    eventDate.get(f.event_id) ?? f.created_at,
+      players: f.flight_players.map((fp: any) => fp.players).filter(Boolean),
     })))
   }
 
@@ -154,7 +159,7 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
     setGenerating(true)
     setManualEdits(false)
     try {
-      const baseOpts = { flightSize, balanceWHS, iterations, historyWindowDays: historyWindow, pastFlights, forbiddenPairs, preferredPairs, debug: true }
+      const baseOpts = { flightSize, balanceWHS, iterations, historyWindowDays: historyWindow, pastFlights, referenceDate: activeEvent?.starts_at, forbiddenPairs, preferredPairs, debug: true }
       if (holesMode === 'mixed' || !has9holers) {
         await generate(baseOpts)
       } else {
@@ -725,6 +730,15 @@ const flightGroups = useMemo(() =>
               </div>
             )}
           </div>
+
+          {isOwner && (
+            <PairHistoryMatrix
+              flights={flights}
+              pastFlights={pastFlights}
+              referenceDate={activeEvent?.starts_at}
+              historyWindow={historyWindow}
+            />
+          )}
 
           {dragState && (
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">

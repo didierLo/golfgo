@@ -625,7 +625,14 @@
     "holes9Badge": "9L",
     "tabStandard": "Flights",
     "tab4bbb": "4BBB Challenge",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "pairMatrix": {
+      "title": "Paarungsverlauf",
+      "hint": "Wie oft jedes Paar im gewählten Zeitraum zusammengespielt hat (dunkler = aktueller). Rahmen: Paar, das aktuell im selben Flight spielt — grün, wenn neu, rot, wenn bereits zusammengespielt.",
+      "show": "Anzeigen",
+      "hide": "Ausblenden",
+      "noHistory": "Kein Verlauf geladen: Wählen Sie oben einen Zeitraum."
+    }
   },
   "challenge4bbb": {
     "parameters": "4BBB Challenge — Einstellungen",
