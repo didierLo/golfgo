@@ -15,7 +15,7 @@ const COMM_VARS = [
   { key: '{{surname}}', label: 'Nom' },
   { key: '{{player_name}}', label: 'Prénom + Nom' },
   { key: '{{group_name}}', label: 'Groupe' },
-  { key: '{{owner_name}}', label: 'Signature' },
+  //{ key: '{{owner_name}}', label: 'Signature' },//
   { key: '{{event_title}}', label: 'Titre event' },
   { key: '{{event_date}}', label: 'Date event' },
   { key: '{{event_time}}', label: 'Heure event' },
