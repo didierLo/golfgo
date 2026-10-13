@@ -55,9 +55,14 @@ export default function ClubDetailPage() {
     const updated = { ...club, ...patch }
     setClub(updated)
     setSaving(true)
-    const { error } = await supabase.from('clubs').update(patch).eq('id', clubId)
+    // .select('id') pour détecter un UPDATE bloqué par RLS : dans ce cas Supabase
+    // ne renvoie ni erreur ni ligne modifiée, et l'échec resterait invisible.
+    const { data, error } = await supabase.from('clubs').update(patch).eq('id', clubId).select('id')
     setSaving(false)
-    if (error) toast.error(t('errors.generic') ?? 'Une erreur est survenue')
+    if (error || !data || data.length === 0) {
+      toast.error(t('errors.generic') ?? 'Une erreur est survenue')
+      loadClub() // revient à la dernière valeur réellement enregistrée
+    }
   }
 
   async function handleDeleteClub() {
@@ -157,6 +162,10 @@ export default function ClubDetailPage() {
             type="url"
             inputMode="url"
             autoFocus={editingWebsite}
+            // Tant que le champ a le focus, on reste en mode « saisie » : sinon, dès que
+            // la valeur commence par http(s):// le champ est remplacé par le bouton
+            // « Site du club » avant le blur, et rien n'est enregistré.
+            onFocus={() => setEditingWebsite(true)}
             value={club.website ?? ''}
             onChange={e => setClub({ ...club, website: e.target.value })}
             onBlur={() => {
