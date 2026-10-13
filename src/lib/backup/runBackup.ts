@@ -8,7 +8,10 @@ import * as Sentry from '@sentry/nextjs'
 // tables du schéma public, envoyé par email en pièce jointe, tracé dans
 // system_health_log (job = 'backup') pour la page « Santé du système ».
 //
-// Ne contient PAS : auth.users (mots de passe), policies RLS, fonctions, triggers.
+// Ne contient PAS (dans le fichier de données) : auth.users (mots de passe).
+// La STRUCTURE (tables, policies RLS, fonctions, triggers…) est jointe à part, en SQL,
+// via la fonction backup_schema_sql() ; la configuration Auth du tableau de bord
+// Supabase n'est exportable par aucun des deux.
 // Les tables sont découvertes automatiquement (RPC backup_list_tables) : une
 // future table est sauvegardée sans toucher au code.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,7 +92,30 @@ export async function runBackup(
       throw new Error(`Sauvegarde trop volumineuse pour un email (${formatBytes(gz.length)}) — prévoir un autre stockage`)
     }
 
-    const fileName = `golfgo-backup-${generatedAt.toISOString().slice(0, 10)}.json.gz`
+    // ── 3b. Structure de la base (tables, policies RLS, fonctions, triggers…) ──
+    // Générée par la fonction SQL backup_schema_sql() (réservée à la clé service_role,
+    // secret de webhook masqué). Un échec ici ne bloque PAS la sauvegarde des données :
+    // l'email part quand même, avec un avertissement, et l'échec est tracé.
+    let schemaBuffer: Buffer | null = null
+    let schemaError: string | null = null
+    try {
+      const { data: schemaSql, error: schemaRpcError } = await supabase.rpc('backup_schema_sql')
+      if (schemaRpcError) throw new Error(schemaRpcError.message)
+      if (typeof schemaSql !== 'string' || schemaSql.length < 1000) throw new Error('Export de structure vide ou incomplet')
+      schemaBuffer = Buffer.from(schemaSql, 'utf-8')
+      if (gz.length + schemaBuffer.length > MAX_ATTACHMENT_BYTES) {
+        throw new Error('Structure trop volumineuse pour être jointe avec les données')
+      }
+    } catch (schemaErr) {
+      schemaBuffer = null
+      schemaError = (schemaErr instanceof Error ? schemaErr.message : String(schemaErr)).slice(0, 300)
+      console.error('[BACKUP] structure non exportée:', schemaError)
+      Sentry.captureException(schemaErr)
+    }
+
+    const dayStamp = generatedAt.toISOString().slice(0, 10)
+    const fileName = `golfgo-backup-${dayStamp}.json.gz`
+    const schemaFileName = `golfgo-structure-${dayStamp}.sql`
     const dateLabel = generatedAt.toLocaleDateString('fr-BE', {
       day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Brussels',
     })
@@ -110,12 +136,18 @@ export async function runBackup(
         <p><strong>${tableCount}</strong> tables, <strong>${rowCount}</strong> lignes, pièce jointe de <strong>${formatBytes(gz.length)}</strong>
         (<code>${fileName}</code>, JSON compressé en gzip).</p>
         <p><strong>⚠️ Ce fichier contient les données personnelles des joueurs</strong> (emails, téléphones). Garde-le dans ta boîte ou sur ton disque, ne le transfère pas et ne le publie nulle part.</p>
-        <p>Cette sauvegarde ne contient pas les comptes de connexion (mots de passe), ni les règles de sécurité, fonctions et triggers de la base : ceux-ci se reconstruisent à partir des migrations SQL.</p>
+        ${schemaBuffer
+          ? `<p>Deuxième pièce jointe : <code>${schemaFileName}</code> (${formatBytes(schemaBuffer.length)}), la <strong>structure</strong> de la base en SQL — tables, règles de sécurité (RLS), fonctions, triggers, buckets. Le secret du webhook y est masqué (<code>&lt;WEBHOOK_SECRET&gt;</code>) : à remettre depuis Vercel en cas de restauration. Fichier confidentiel : ne le publie pas (dépôt GitHub public compris).</p>`
+          : `<p><strong>⚠️ La structure de la base n'a pas pu être exportée cette fois</strong> (${schemaError ?? 'erreur inconnue'}). Les données, elles, sont bien jointes.</p>`}
+        <p>Cette sauvegarde ne contient pas les comptes de connexion (mots de passe) ni la configuration Auth du tableau de bord Supabase (Site URL, Redirect URLs, « Confirm email », SMTP) : à noter à part.</p>
         <table border="1" cellpadding="6" style="border-collapse:collapse">
           <tr><th>Table</th><th>Lignes</th></tr>
           ${tableRows}
         </table>`,
-      attachments: [{ filename: fileName, content: gz }],
+      attachments: [
+        { filename: fileName, content: gz },
+        ...(schemaBuffer ? [{ filename: schemaFileName, content: schemaBuffer }] : []),
+      ],
     })
     if (sendError) throw new Error(`Envoi de l'email : ${sendError.message}`)
 
@@ -127,6 +159,10 @@ export async function runBackup(
       tables: tableCount,
       rows: rowCount,
       fileName,
+      schemaOk: schemaBuffer !== null,
+      schemaBytes: schemaBuffer?.length ?? 0,
+      schemaFileName: schemaBuffer ? schemaFileName : null,
+      ...(schemaError ? { schemaError } : {}),
       emailId: sent?.id ?? null,
     })
 
