@@ -22,6 +22,7 @@ export type OwnerContact = {
   firstName: string
   surname: string
   email: string | null
+  hideName: boolean    // groups_players.hide_name_in_emails : cette personne ne veut pas voir son nom dans les emails aux joueurs
   isPrimary: boolean   // correspond à groups.owner_id : c'est cette personne qui signe les emails aux joueurs
 }
 
@@ -31,10 +32,16 @@ export type GroupOwners = {
   all: OwnerContact[]            // à utiliser pour les alertes destinées à l'organisateur (push + email)
 }
 
+/** Nom du signataire à afficher dans un email aux joueurs : chaîne vide si la personne a demandé à ne pas apparaître. */
+export function signerDisplayName(owners: GroupOwners): string {
+  const p = owners.primary
+  return p && !p.hideName ? `${p.firstName} ${p.surname}` : ''
+}
+
 export async function getGroupOwners(supabase: any, groupId: string): Promise<GroupOwners> {
   const [{ data: group }, { data: rows }] = await Promise.all([
     supabase.from('groups').select('owner_id, template_logo_url').eq('id', groupId).maybeSingle(),
-    supabase.from('groups_players').select('player_id, user_id, players(first_name, surname, email)')
+    supabase.from('groups_players').select('player_id, user_id, hide_name_in_emails, players(first_name, surname, email)')
       .eq('group_id', groupId).eq('role', 'owner'),
   ])
   const ownerId = (group?.owner_id ?? null) as string | null
@@ -46,6 +53,7 @@ export async function getGroupOwners(supabase: any, groupId: string): Promise<Gr
       firstName: (p?.first_name ?? '') as string,
       surname: (p?.surname ?? '') as string,
       email: (p?.email ?? null) as string | null,
+      hideName: r.hide_name_in_emails === true,
       isPrimary: !!ownerId && r.user_id === ownerId,
     }
   })

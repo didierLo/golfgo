@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
-import { getGroupOwners } from '@/lib/groups/owner'
+import { getGroupOwners, signerDisplayName } from '@/lib/groups/owner'
 import { requireGroupOwner } from '@/lib/groups/requireOwner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -242,8 +242,7 @@ const [{ data: groupData }, eventResult] = await Promise.all([
 
 const event       = eventResult.data ?? undefined
 const owners      = await getGroupOwners(supabase, groupId)
-const ownerPlayer = owners.primary
-const ownerName   = ownerPlayer ? `${ownerPlayer.firstName} ${ownerPlayer.surname}` : ''
+const ownerName   = signerDisplayName(owners)
 const groupName   = (groupData as any)?.name ?? ''
 const logoUrl     = (groupData as any)?.template_logo_url ?? null
 

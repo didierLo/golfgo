@@ -358,7 +358,7 @@ for (const event of (events || []) as any[]) {
   // Organisateur(s) du groupe : un seul signe les emails aux joueurs (owners.primary),
   // mais toutes les personnes en rôle « owner » reçoivent les alertes ci-dessous (owners.all)
   const owners      = await getGroupOwners(supabase, event.group_id)
-  const ownerPlayer = owners.primary
+  const ownerPlayer = owners.primary && !owners.primary.hideName
     ? { first_name: owners.primary.firstName, surname: owners.primary.surname, email: owners.primary.email }
     : null
   const t  = serverT(gl)

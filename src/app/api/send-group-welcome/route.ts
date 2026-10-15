@@ -2,7 +2,7 @@ import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, type Locale, type EmailT } from '@/lib/i18n/server'
-import { getGroupOwners } from '@/lib/groups/owner'
+import { getGroupOwners, signerDisplayName } from '@/lib/groups/owner'
 import { requireGroupOwner } from '@/lib/groups/requireOwner'
 
 // Envoie les instructions d'arrivée (créer son compte + installer l'application) à des membres
@@ -174,7 +174,7 @@ export async function POST(req: Request) {
     const inviteUrl  = `${appUrl}/${locale}/signup`
     const qrUrl      = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(inviteUrl)}`
     const owners     = await getGroupOwners(admin, groupId)
-    const senderName = owners.primary ? `${owners.primary.firstName} ${owners.primary.surname}` : t('email.common.organiser')
+    const senderName = signerDisplayName(owners) || t('email.common.organiser')
     const groupName  = esc(group.name ?? '')
     const logoUrl    = (group as any).template_logo_url ?? null
     const subject    = t('email.groupInvite.subject', { group: group.name ?? '' })

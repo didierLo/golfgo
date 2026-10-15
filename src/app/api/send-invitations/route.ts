@@ -3,7 +3,7 @@ import { sleep, EMAIL_SEND_DELAY_MS } from '@/lib/email/rate-limit'
 import { buildEmailLogoHeader } from '@/lib/email/logo'
 import { sendOrQueueEmail } from '@/lib/email/queueEmail'
 import { getGroupLocale, serverT, DATE_LOCALE, type Locale, type EmailT } from '@/lib/i18n/server'
-import { getGroupOwners } from '@/lib/groups/owner'
+import { getGroupOwners, signerDisplayName } from '@/lib/groups/owner'
 import { requireGroupOwner } from '@/lib/groups/requireOwner'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
@@ -271,8 +271,7 @@ if (pErr) return Response.json({ success: false, error: pErr.message }, { status
     const t  = serverT(gl)
     const dl = DATE_LOCALE[gl]
     const owners      = await getGroupOwners(supabase, event.group_id)
-    const ownerPlayer = owners.primary
-    const ownerName   = ownerPlayer ? `${ownerPlayer.firstName} ${ownerPlayer.surname}` : ''
+    const ownerName   = signerDisplayName(owners)
     const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
     const eventLink = `${appUrl}/groups/${event.group_id}/events/${eventId}`
     const eventDate = formatDate(event.starts_at, dl)
