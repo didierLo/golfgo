@@ -61,30 +61,51 @@ export async function geocodeLocation(query: string, countryCode?: string): Prom
 
 export type EventForGeocode = {
   location: string | null
-  courses?: { course_name?: string | null; clubs?: { name?: string | null; region?: string | null; country?: string | null } | null } | null
+  courses?: {
+    course_name?: string | null
+    clubs?: {
+      name?: string | null
+      region?: string | null
+      country?: string | null
+      latitude?: number | null
+      longitude?: number | null
+    } | null
+  } | null
 }
 
-// Essaie plusieurs sources dans l'ordre, du plus précis (texte libre de l'organisateur)
-// au plus fiable (région/pays du club lié à l'événement), jusqu'à ce qu'une réussisse.
+// Ordre de recherche, du plus fiable au moins fiable :
+// 1) coordonnées GPS du club lié à l'événement (aucune ambiguïté possible)
+// 2) nom du club / du parcours, limité au pays du club
+// 3) région du club
+// 4) texte libre de l'organisateur, toujours limité au pays du club quand il est connu
+//    (sans cela, une abréviation comme « LLN » est géocodée à l'autre bout du monde)
 export async function geocodeEventLocation(event: EventForGeocode): Promise<{ coords: GeoResult; label: string } | null> {
   const club = event.courses?.clubs
+  const country = club?.country ?? undefined
+
+  if (club?.latitude != null && club?.longitude != null) {
+    return { coords: { lat: club.latitude, lon: club.longitude }, label: club.name ?? event.location ?? '' }
+  }
+
   const attempts: { query: string; countryCode?: string; label: string }[] = []
 
-  if (event.location) {
-    attempts.push({ query: event.location, label: event.location })
-    const simplified = simplifyLocationQuery(event.location)
-    if (simplified !== event.location) attempts.push({ query: simplified, label: event.location })
+  if (club?.name) {
+    attempts.push({ query: club.name, countryCode: country, label: club.name })
+    const simplifiedClub = simplifyLocationQuery(club.name)
+    if (simplifiedClub !== club.name) attempts.push({ query: simplifiedClub, countryCode: country, label: club.name })
   }
   if (event.courses?.course_name) {
-    attempts.push({ query: event.courses.course_name, countryCode: club?.country ?? undefined, label: event.courses.course_name })
-  }
-  if (club?.name) {
-    attempts.push({ query: club.name, countryCode: club.country ?? undefined, label: club.name })
+    attempts.push({ query: event.courses.course_name, countryCode: country, label: event.courses.course_name })
   }
   if (club?.region) {
-    const countryName = club.country ? COUNTRY_CODE_TO_NAME[club.country] : undefined
+    const countryName = country ? COUNTRY_CODE_TO_NAME[country] : undefined
     const query = countryName ? `${club.region}, ${countryName}` : club.region
-    attempts.push({ query, countryCode: club.country ?? undefined, label: club.name ?? club.region })
+    attempts.push({ query, countryCode: country, label: club.name ?? club.region })
+  }
+  if (event.location) {
+    attempts.push({ query: event.location, countryCode: country, label: event.location })
+    const simplified = simplifyLocationQuery(event.location)
+    if (simplified !== event.location) attempts.push({ query: simplified, countryCode: country, label: event.location })
   }
 
   for (const attempt of attempts) {
@@ -94,7 +115,13 @@ export async function geocodeEventLocation(event: EventForGeocode): Promise<{ co
   return null
 }
 
-export type HourlyPoint = { hour: number; label: string; temp: number; precipProb: number; code: number; isDay: boolean }
+export type HourlyPoint = { hour: number; label: string; temp: number; precipMm: number; code: number; isDay: boolean }
+
+// Cumul de pluie de l'heure, en mm, avec une décimale (« 0 », « 0,4 », « 2,1 »)
+export function formatPrecipMm(mm: number, locale = 'fr'): string {
+  const v = Math.round((mm ?? 0) * 10) / 10
+  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(v)} mm`
+}
 
 // Prévisions heure par heure autour d'un moment donné (ex. l'heure de départ),
 // par défaut de 1h avant à 6h après. Peut chevaucher deux dates calendaires.
@@ -113,7 +140,7 @@ export async function fetchHourlyWindow(
 
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-      `&hourly=temperature_2m,precipitation_probability,weathercode,is_day` +
+      `&hourly=temperature_2m,precipitation,weathercode,is_day` +
       `&timezone=Europe%2FBrussels&start_date=${startDate}&end_date=${endDate}`
     const res = await fetch(url)
     if (!res.ok) return null
@@ -130,7 +157,7 @@ export async function fetchHourlyWindow(
         hour:       w.hour,
         label:      `${String(w.hour).padStart(2, '0')}h`,
         temp:       Math.round(json.hourly.temperature_2m[idx]),
-        precipProb: json.hourly.precipitation_probability[idx],
+        precipMm:   json.hourly.precipitation[idx] ?? 0,
         code:       json.hourly.weathercode[idx],
         isDay:      json.hourly.is_day[idx] === 1,
       })

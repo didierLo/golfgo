@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
 import { generateICS } from '@/lib/ics' 
-import { geocodeEventLocation, fetchHourlyWindow, weatherCodeInfo, type HourlyPoint } from '@/lib/weather'
+import { geocodeEventLocation, fetchHourlyWindow, weatherCodeInfo, formatPrecipMm, type HourlyPoint } from '@/lib/weather'
 
 const supabase = createClient()
 
@@ -29,7 +29,7 @@ type MyEvent = {
       name: string
       color: string | null
     }
-    courses: { course_name: string; clubs: { name: string; website: string | null } | null } | null
+    courses: { course_name: string; clubs: { name: string; website: string | null; country: string | null; region: string | null; latitude: number | null; longitude: number | null } | null } | null
   }
 }
 
@@ -515,6 +515,7 @@ function PhotoModal({ eventId, onClose, onUploaded }: { eventId: string; onClose
 
 function WeatherModal({ event, onClose }: { event: MyEvent; onClose: () => void }) {
   const t = useTranslations()
+  const locale = useLocale()
   const [points, setPoints] = useState<HourlyPoint[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [unavailable, setUnavailable] = useState(false)
@@ -565,7 +566,7 @@ function WeatherModal({ event, onClose }: { event: MyEvent; onClose: () => void 
                   <span className="text-[10px] text-slate-400 mb-1">{p.label}</span>
                   <span className="text-[20px] leading-none mb-1">{info.emoji}</span>
                   <span className="text-[12px] font-bold text-slate-900">{p.temp}°</span>
-                  <span className="text-[9px] text-blue-500 mt-1">💧{p.precipProb}%</span>
+                  <span className="text-[9px] text-blue-500 mt-1">💧{formatPrecipMm(p.precipMm, locale)}</span>
                 </div>
               )
             })}
@@ -615,7 +616,7 @@ async function loadData() {
         events(id, title, starts_at, location, group_id,
                max_participants, fee_per_person,
                groups!events_group_id_fkey(name, color),
-               courses(course_name, clubs(name, website)))`)
+               courses(course_name, clubs(name, website, country, region, latitude, longitude)))`)
       .eq('player_id', player.id)
       .order('starts_at', { foreignTable: 'events', ascending: false }),
 

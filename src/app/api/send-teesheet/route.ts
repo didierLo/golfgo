@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
     const [{ data: event }, { data: participants }] = await Promise.all([
       supabase.from('events')
-        .select('title, starts_at, location, group_id, is_golf, courses(course_name, clubs(name, region, country))')
+        .select('title, starts_at, location, group_id, is_golf, courses(course_name, clubs(name, region, country, latitude, longitude))')
         .eq('id', eventId).single(),
       participantsQuery,
     ])
