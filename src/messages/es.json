@@ -1,5 +1,6 @@
 {
   "nav": {
+    "promotions": "Promociones",
     "myEvents": "Mis eventos",
     "participants": "Participantes",
     "teesheet": "Lista de salidas",
@@ -517,6 +518,25 @@
     "backgroundHint": "Foto que se muestra detrás de la aplicación para este grupo, en ordenador, tablet y móvil.",
     "backgroundAdd": "+ Añadir una foto de fondo",
     "backgroundReset": "Volver a la foto predeterminada"
+  },
+  "promotions": {
+    "title": "Promociones de los clubes",
+    "subtitle": "Ofertas especiales y tarifas reducidas encontradas en las webs de los clubes de golf belgas.",
+    "disclaimer": "Información recogida de las webs de los clubes, a título indicativo. Consulta siempre con el club antes de reservar.",
+    "all": "Todo",
+    "kind": { "promo": "Promociones", "twilight": "Última hora de la tarde", "winter": "Invierno", "pack": "Paquetes con estancia" },
+    "rangeBoth": "Del {from} al {to}",
+    "rangeUntil": "Hasta el {date}",
+    "rangeFrom": "A partir del {date}",
+    "rangeUnknown": "Fechas no indicadas",
+    "endsSoon": "Termina pronto",
+    "comingSoon": "Próximamente",
+    "conditions": "Condiciones",
+    "offerLink": "Ver la oferta",
+    "clubSite": "Web del club",
+    "verifiedOn": "Comprobado el {date}",
+    "empty": "No hay promociones por ahora.",
+    "loadError": "No se pudieron cargar las promociones."
   },
   "stats": {
     "kind": "Tipo de partida",

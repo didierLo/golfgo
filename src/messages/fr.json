@@ -1,5 +1,6 @@
 {
   "nav": {
+    "promotions": "Promotions",
     "myEvents": "Mes événements",
     "participants": "Participants",
     "teesheet": "Liste des départs",
@@ -518,6 +519,25 @@
     "backgroundHint": "Photo affichée derrière l'application pour ce groupe, sur ordinateur, tablette et smartphone.",
     "backgroundAdd": "+ Ajouter une photo de fond",
     "backgroundReset": "Revenir à la photo par défaut"
+  },
+  "promotions": {
+    "title": "Promotions des clubs",
+    "subtitle": "Offres spéciales et tarifs réduits repérés sur les sites des clubs belges.",
+    "disclaimer": "Informations relevées sur les sites des clubs, à titre indicatif. Vérifie toujours auprès du club avant de réserver.",
+    "all": "Tout",
+    "kind": { "promo": "Promotions", "twilight": "Fin de journée", "winter": "Hiver", "pack": "Packs séjour" },
+    "rangeBoth": "Du {from} au {to}",
+    "rangeUntil": "Jusqu'au {date}",
+    "rangeFrom": "À partir du {date}",
+    "rangeUnknown": "Dates non précisées",
+    "endsSoon": "Se termine bientôt",
+    "comingSoon": "À venir",
+    "conditions": "Conditions",
+    "offerLink": "Voir l'offre",
+    "clubSite": "Site du club",
+    "verifiedOn": "Vérifié le {date}",
+    "empty": "Aucune promotion pour le moment.",
+    "loadError": "Impossible de charger les promotions."
   },
   "stats": {
     "kind": "Type de partie",

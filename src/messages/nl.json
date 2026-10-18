@@ -1,5 +1,6 @@
 {
   "nav": {
+    "promotions": "Promoties",
     "myEvents": "Mijn evenementen",
     "participants": "Deelnemers",
     "teesheet": "Startlijst",
@@ -516,6 +517,25 @@
     "backgroundHint": "Foto die voor deze groep achter de app wordt getoond, op computer, tablet en smartphone.",
     "backgroundAdd": "+ Achtergrondfoto toevoegen",
     "backgroundReset": "Terug naar standaardfoto"
+  },
+  "promotions": {
+    "title": "Clubpromoties",
+    "subtitle": "Speciale aanbiedingen en verlaagde tarieven op de websites van Belgische golfclubs.",
+    "disclaimer": "Informatie afkomstig van de websites van de clubs, enkel ter indicatie. Controleer altijd bij de club voordat je boekt.",
+    "all": "Alles",
+    "kind": { "promo": "Promoties", "twilight": "Late namiddag", "winter": "Winter", "pack": "Verblijfspakketten" },
+    "rangeBoth": "Van {from} tot {to}",
+    "rangeUntil": "Tot {date}",
+    "rangeFrom": "Vanaf {date}",
+    "rangeUnknown": "Data niet vermeld",
+    "endsSoon": "Bijna afgelopen",
+    "comingSoon": "Binnenkort",
+    "conditions": "Voorwaarden",
+    "offerLink": "Bekijk aanbieding",
+    "clubSite": "Website van de club",
+    "verifiedOn": "Gecontroleerd op {date}",
+    "empty": "Momenteel geen promoties.",
+    "loadError": "Promoties konden niet worden geladen."
   },
   "stats": {
     "kind": "Type partij",

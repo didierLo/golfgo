@@ -1,5 +1,6 @@
 {
   "nav": {
+    "promotions": "Aktionen",
     "myEvents": "Meine Veranstaltungen",
     "participants": "Teilnehmer",
     "teesheet": "Startliste",
@@ -517,6 +518,25 @@
     "backgroundHint": "Foto, die für diese Gruppe im Hintergrund der App angezeigt wird — auf Computer, Tablet und Smartphone.",
     "backgroundAdd": "+ Hintergrundfoto hinzufügen",
     "backgroundReset": "Zum Standardfoto zurücksetzen"
+  },
+  "promotions": {
+    "title": "Club-Aktionen",
+    "subtitle": "Sonderangebote und ermäßigte Tarife von den Websites belgischer Golfclubs.",
+    "disclaimer": "Angaben von den Websites der Clubs, unverbindlich. Bitte vor der Buchung immer beim Club nachfragen.",
+    "all": "Alle",
+    "kind": { "promo": "Aktionen", "twilight": "Spätnachmittag", "winter": "Winter", "pack": "Aufenthaltspakete" },
+    "rangeBoth": "Vom {from} bis {to}",
+    "rangeUntil": "Bis {date}",
+    "rangeFrom": "Ab {date}",
+    "rangeUnknown": "Zeitraum nicht angegeben",
+    "endsSoon": "Endet bald",
+    "comingSoon": "Demnächst",
+    "conditions": "Bedingungen",
+    "offerLink": "Angebot ansehen",
+    "clubSite": "Website des Clubs",
+    "verifiedOn": "Geprüft am {date}",
+    "empty": "Derzeit keine Aktionen.",
+    "loadError": "Aktionen konnten nicht geladen werden."
   },
   "stats": {
     "kind": "Spieltyp",

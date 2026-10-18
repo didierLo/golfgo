@@ -1,5 +1,6 @@
 {
   "nav": {
+    "promotions": "Promotions",
     "myEvents": "My events",
     "participants": "Participants",
     "teesheet": "Tee sheet",
@@ -518,6 +519,25 @@
     "backgroundHint": "Photo shown behind the app for this group, on computer, tablet and phone.",
     "backgroundAdd": "+ Add a background photo",
     "backgroundReset": "Reset to default photo"
+  },
+  "promotions": {
+    "title": "Club promotions",
+    "subtitle": "Special offers and reduced rates found on Belgian golf club websites.",
+    "disclaimer": "Information collected from club websites, for guidance only. Always check with the club before booking.",
+    "all": "All",
+    "kind": { "promo": "Promotions", "twilight": "Late afternoon", "winter": "Winter", "pack": "Stay packs" },
+    "rangeBoth": "From {from} to {to}",
+    "rangeUntil": "Until {date}",
+    "rangeFrom": "From {date}",
+    "rangeUnknown": "Dates not specified",
+    "endsSoon": "Ending soon",
+    "comingSoon": "Coming soon",
+    "conditions": "Conditions",
+    "offerLink": "View offer",
+    "clubSite": "Club website",
+    "verifiedOn": "Checked on {date}",
+    "empty": "No promotions at the moment.",
+    "loadError": "Could not load promotions."
   },
   "stats": {
     "kind": "Game type",
