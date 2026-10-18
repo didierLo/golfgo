@@ -339,8 +339,8 @@ export default function PromotionsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-[12px] font-bold uppercase tracking-wide text-slate-500">{p.club?.name ?? ''}</p>
                       {p.origin === 'manual' && (
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-800">
-                          {t('promotions.manualBadge')}
+                        <span className="text-[12px] font-medium text-slate-400">
+                          ({t('promotions.manualBadge')})
                         </span>
                       )}
                     </div>

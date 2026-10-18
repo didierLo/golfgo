@@ -538,7 +538,7 @@
     "verifiedOn": "Vérifié le {date}",
     "empty": "Aucune promotion pour le moment.",
     "loadError": "Impossible de charger les promotions.",
-    "manualBadge": "Ajoutée par un administrateur",
+    "manualBadge": "Admin",
     "form": {"add": "Ajouter une promotion", "addTitle": "Nouvelle promotion", "editTitle": "Modifier la promotion", "club": "Club", "clubPlaceholder": "Choisir un club…", "kind": "Type", "title": "Titre", "price": "Prix", "pricePlaceholder": "ex. 49 € / green fee", "description": "Description", "conditions": "Conditions", "validFrom": "Valable à partir du", "validTo": "Valable jusqu'au", "url": "Lien vers l'offre (facultatif)", "note": "Cette carte sera visible par tous les membres de GolfGo. Tu pourras la modifier ou la supprimer.", "save": "Enregistrer", "saving": "Enregistrement…", "cancel": "Annuler", "edit": "Modifier", "delete": "Supprimer", "confirmDelete": "Supprimer cette promotion ?", "errClub": "Choisis un club.", "errTitle": "Indique un titre.", "errDates": "La date de début doit précéder la date de fin.", "errUrl": "Le lien n'est pas valide.", "errSave": "Enregistrement impossible. Réessaie."}
   },
   "stats": {
