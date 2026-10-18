@@ -521,8 +521,8 @@
   "promotions": {
     "title": "Clubpromoties",
     "subtitle": "Speciale aanbiedingen en verlaagde tarieven op de websites van Belgische golfclubs.",
+    "lastUpdate": "Laatst bijgewerkt: {date}",
     "disclaimer": "Informatie afkomstig van de websites van de clubs, enkel ter indicatie. Controleer altijd bij de club voordat je boekt.",
-    "all": "Alles",
     "kind": { "promo": "Promoties", "twilight": "Late namiddag", "winter": "Winter", "pack": "Verblijfspakketten" },
     "rangeBoth": "Van {from} tot {to}",
     "rangeUntil": "Tot {date}",

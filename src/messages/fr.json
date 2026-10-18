@@ -523,8 +523,8 @@
   "promotions": {
     "title": "Promotions des clubs",
     "subtitle": "Offres spéciales et tarifs réduits repérés sur les sites des clubs belges.",
+    "lastUpdate": "Dernière mise à jour : {date}",
     "disclaimer": "Informations relevées sur les sites des clubs, à titre indicatif. Vérifie toujours auprès du club avant de réserver.",
-    "all": "Tout",
     "kind": { "promo": "Promotions", "twilight": "Fin de journée", "winter": "Hiver", "pack": "Packs séjour" },
     "rangeBoth": "Du {from} au {to}",
     "rangeUntil": "Jusqu'au {date}",

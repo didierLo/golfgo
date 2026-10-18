@@ -522,8 +522,8 @@
   "promotions": {
     "title": "Club-Aktionen",
     "subtitle": "Sonderangebote und ermäßigte Tarife von den Websites belgischer Golfclubs.",
+    "lastUpdate": "Zuletzt aktualisiert: {date}",
     "disclaimer": "Angaben von den Websites der Clubs, unverbindlich. Bitte vor der Buchung immer beim Club nachfragen.",
-    "all": "Alle",
     "kind": { "promo": "Aktionen", "twilight": "Spätnachmittag", "winter": "Winter", "pack": "Aufenthaltspakete" },
     "rangeBoth": "Vom {from} bis {to}",
     "rangeUntil": "Bis {date}",

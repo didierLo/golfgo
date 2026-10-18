@@ -522,8 +522,8 @@
   "promotions": {
     "title": "Promociones de los clubes",
     "subtitle": "Ofertas especiales y tarifas reducidas encontradas en las webs de los clubes de golf belgas.",
+    "lastUpdate": "Última actualización: {date}",
     "disclaimer": "Información recogida de las webs de los clubes, a título indicativo. Consulta siempre con el club antes de reservar.",
-    "all": "Todo",
     "kind": { "promo": "Promociones", "twilight": "Última hora de la tarde", "winter": "Invierno", "pack": "Paquetes con estancia" },
     "rangeBoth": "Del {from} al {to}",
     "rangeUntil": "Hasta el {date}",
