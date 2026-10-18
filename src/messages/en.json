@@ -537,7 +537,9 @@
     "clubSite": "Club website",
     "verifiedOn": "Checked on {date}",
     "empty": "No promotions at the moment.",
-    "loadError": "Could not load promotions."
+    "loadError": "Could not load promotions.",
+    "manualBadge": "Added by an administrator",
+    "form": {"add": "Add a promotion", "addTitle": "New promotion", "editTitle": "Edit promotion", "club": "Club", "clubPlaceholder": "Choose a club…", "kind": "Type", "title": "Title", "price": "Price", "pricePlaceholder": "e.g. €49 / green fee", "description": "Description", "conditions": "Conditions", "validFrom": "Valid from", "validTo": "Valid until", "url": "Link to the offer (optional)", "note": "This card will be visible to all GolfGo members. You can edit or delete it later.", "save": "Save", "saving": "Saving…", "cancel": "Cancel", "edit": "Edit", "delete": "Delete", "confirmDelete": "Delete this promotion?", "errClub": "Choose a club.", "errTitle": "Enter a title.", "errDates": "The start date must be before the end date.", "errUrl": "The link is not valid.", "errSave": "Could not save. Please try again."}
   },
   "stats": {
     "kind": "Game type",

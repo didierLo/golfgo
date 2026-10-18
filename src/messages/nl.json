@@ -535,7 +535,9 @@
     "clubSite": "Website van de club",
     "verifiedOn": "Gecontroleerd op {date}",
     "empty": "Momenteel geen promoties.",
-    "loadError": "Promoties konden niet worden geladen."
+    "loadError": "Promoties konden niet worden geladen.",
+    "manualBadge": "Toegevoegd door een beheerder",
+    "form": {"add": "Promotie toevoegen", "addTitle": "Nieuwe promotie", "editTitle": "Promotie wijzigen", "club": "Club", "clubPlaceholder": "Kies een club…", "kind": "Type", "title": "Titel", "price": "Prijs", "pricePlaceholder": "bv. € 49 / green fee", "description": "Beschrijving", "conditions": "Voorwaarden", "validFrom": "Geldig vanaf", "validTo": "Geldig tot", "url": "Link naar het aanbod (optioneel)", "note": "Deze kaart is zichtbaar voor alle GolfGo-leden. Je kunt ze later wijzigen of verwijderen.", "save": "Opslaan", "saving": "Opslaan…", "cancel": "Annuleren", "edit": "Wijzigen", "delete": "Verwijderen", "confirmDelete": "Deze promotie verwijderen?", "errClub": "Kies een club.", "errTitle": "Geef een titel op.", "errDates": "De begindatum moet vóór de einddatum liggen.", "errUrl": "De link is niet geldig.", "errSave": "Opslaan mislukt. Probeer opnieuw."}
   },
   "stats": {
     "kind": "Type partij",
