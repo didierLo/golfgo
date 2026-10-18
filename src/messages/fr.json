@@ -691,7 +691,7 @@
   },
   "participants": {
     "byEvent": "Par événement",
-    "overview": "Aperçu",
+    "overview": "Tous les événements",
     "invitations": "← Invitations",
     "readOnly": "Vue en lecture seule — seul l'organisateur peut modifier les inscriptions",
     "noParticipants": "Aucun participant — envoyez des invitations depuis la page « Invitations »",

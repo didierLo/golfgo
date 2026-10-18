@@ -689,7 +689,7 @@
   },
   "participants": {
     "byEvent": "Per evenement",
-    "overview": "Overzicht",
+    "overview": "Alle evenementen",
     "invitations": "← Uitnodigingen",
     "readOnly": "Alleen-lezen — alleen de organisator kan inschrijvingen wijzigen",
     "noParticipants": "Geen deelnemers — stuur uitnodigingen via de pagina Uitnodigingen",

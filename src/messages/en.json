@@ -691,7 +691,7 @@
   },
   "participants": {
     "byEvent": "By event",
-    "overview": "Overview",
+    "overview": "All events",
     "exporterExcel": "Export to Excel",
     "invitations": "← Invitations",
     "readOnly": "Read-only — only the organiser can modify registrations",

@@ -394,6 +394,11 @@ export default function ParticipantsPage() {
     })
   }
 
+  // L'onglet « Tous les événements » n'a d'intérêt que s'il y a au moins 2 événements à venir
+  const upcomingCount = events.filter(e => new Date(e.starts_at) >= new Date()).length
+  const showOverviewTab = isOwner && upcomingCount > 1
+  useEffect(() => { if (viewMode === 'overview' && !showOverviewTab && events.length > 0) setViewMode('list') }, [viewMode, showOverviewTab, events.length])
+
   useEffect(() => { if (groupId) loadEvents() }, [groupId])
   useEffect(() => { if (selectedEventId) loadParticipants(selectedEventId) }, [selectedEventId, groupId])
   useEffect(() => { if (viewMode === 'overview' && isOwner && groupId) loadOverview() }, [viewMode, isOwner, groupId])
@@ -411,10 +416,6 @@ export default function ParticipantsPage() {
   async function loadParticipants(evId: string) {
   setLoading(true)
 
-  // test temporaire
-  const { data: me } = await supabase.rpc('auth_player_id')
-  console.log('auth_player_id =', me)
-
   const [{ data, error }, { data: evData }] = await Promise.all([
     supabase
       .from('event_participants')
@@ -423,8 +424,6 @@ export default function ParticipantsPage() {
     supabase.from('events').select('extra_activity_label').eq('id', evId).single(),
   ])
 
-  console.log('participants data=', data, 'error=', error)
-    
   if (error) { console.error(error); setLoading(false); return }
     // FIX — filtre les lignes orphelines (players null = joueur supprimé ou RLS)
     const clean = (data || []).filter((p: any) => p.players != null)
@@ -790,7 +789,7 @@ export default function ParticipantsPage() {
               viewMode === 'list' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
             {t('participants.byEvent')}
           </button>
-          {isOwner && (
+          {showOverviewTab && (
             <button type="button" onClick={() => setViewMode('overview')}
               className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors ${
                 viewMode === 'overview' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -1034,10 +1033,10 @@ export default function ParticipantsPage() {
               {t('participants.noUpcoming')}
             </div>
           ) : (
-            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
+            <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden w-fit max-w-full"
               style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
               <div className="overflow-x-auto">
-                <table className="w-full text-[12px] border-collapse">
+                <table className="w-auto text-[12px] border-collapse">
                   <thead>
                     <tr className="bg-white/30 border-b border-white/40">
                       <th className="px-4 py-3 text-left font-semibold text-slate-600 sticky left-0 bg-white/40 min-w-[160px]">{t('participants.member')}</th>

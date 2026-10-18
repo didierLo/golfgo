@@ -690,7 +690,7 @@
   },
   "participants": {
     "byEvent": "Por evento",
-    "overview": "Resumen",
+    "overview": "Todos los eventos",
     "invitations": "← Invitaciones",
     "readOnly": "Solo lectura — solo el organizador puede modificar las inscripciones",
     "noParticipants": "Sin participantes — envía invitaciones desde la página Invitaciones",
