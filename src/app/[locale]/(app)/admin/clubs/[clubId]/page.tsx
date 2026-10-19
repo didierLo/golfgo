@@ -153,7 +153,7 @@ export default function ClubDetailPage() {
               🌐 {t('clubs.openWebsite')}
             </a>
             <button type="button" onClick={() => setEditingWebsite(true)} title={t('clubs.websitePlaceholder')}
-              className="text-[13px] text-gray-400 hover:text-gray-700 px-1">
+                            className="text-[16px] font-bold text-black hover:text-[#185FA5] px-1.5">
               ✎
             </button>
           </span>
