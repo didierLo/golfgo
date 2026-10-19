@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTranslations, useLocale } from 'next-intl'
 
@@ -65,6 +65,7 @@ export default function PromotionsPage() {
   const [form,      setForm]      = useState<FormState>(EMPTY_FORM)
   const [saving,    setSaving]    = useState(false)
   const [formError, setFormError] = useState('')
+  const formRef = useRef<HTMLDivElement>(null)
 
   // Date du jour au format AAAA-MM-JJ, dans le fuseau de l'utilisateur
   const today = useMemo(() => new Date().toLocaleDateString('sv-SE'), [])
@@ -140,11 +141,19 @@ export default function PromotionsPage() {
     return { kind, items }
   }).filter(s => s.items.length > 0), [current, locale])
 
+  // Le formulaire s'affiche en haut de la page : on y amène l'écran, sinon on ne le voit pas
+  // quand on clique sur Modifier depuis une carte située plus bas.
+  function scrollToForm() {
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
+  }
+
   function openAdd() {
     setEditingId(null); setForm(EMPTY_FORM); setFormError(''); setFormOpen(true)
+    scrollToForm()
   }
   function openEdit(p: Promo) {
     setEditingId(p.id); setFormError(''); setFormOpen(true)
+    scrollToForm()
     setForm({
       club_id: p.club_id ?? '', kind: p.kind, title: p.title, price_text: p.price_text ?? '',
       description: p.description ?? '', conditions: p.conditions ?? '',
@@ -177,9 +186,15 @@ export default function PromotionsPage() {
       source_url: url || null, verified_on: today,
     }
     setSaving(true)
-    const { error: err } = editingId
-      ? await supabase.from('club_promotions').update(fields).eq('id', editingId)
-      : await supabase.from('club_promotions').insert({ ...fields, origin: 'manual', created_by: userId, active: true })
+    let err: any = null
+    if (editingId) {
+      // .select('id') : un UPDATE refusé par les droits ne renvoie ni erreur ni ligne ; on le détecte ici
+      const { data, error } = await supabase.from('club_promotions').update(fields).eq('id', editingId).select('id')
+      err = error ?? ((!data || data.length === 0) ? new Error('Aucune ligne modifiée (droits ?)') : null)
+    } else {
+      const { error } = await supabase.from('club_promotions').insert({ ...fields, origin: 'manual', created_by: userId, active: true })
+      err = error
+    }
     setSaving(false)
     if (err) { console.error(err); setFormError(t('promotions.form.errSave')); return }
     closeForm()
@@ -188,7 +203,8 @@ export default function PromotionsPage() {
 
   async function remove(p: Promo) {
     if (!window.confirm(t('promotions.form.confirmDelete'))) return
-    const { error: err } = await supabase.from('club_promotions').delete().eq('id', p.id)
+    const { data, error: err0 } = await supabase.from('club_promotions').delete().eq('id', p.id).select('id')
+    const err = err0 ?? ((!data || data.length === 0) ? new Error('Aucune ligne supprimée (droits ?)') : null)
     if (err) { console.error(err); window.alert(t('promotions.form.errSave')); return }
     load()
   }
@@ -230,7 +246,7 @@ export default function PromotionsPage() {
 
       {/* Formulaire d'ajout / modification (admins de groupe) */}
       {isOwner && formOpen && (
-        <div className="rounded-2xl border border-white/60 shadow-sm p-4 sm:p-5 mb-5 space-y-3"
+        <div ref={formRef} className="rounded-2xl border border-white/60 shadow-sm p-4 sm:p-5 mb-5 space-y-3 scroll-mt-4"
           style={{ background: 'rgba(255,255,255,0.95)' }}>
           <h2 className="text-[15px] font-black text-slate-900">
             {editingId ? t('promotions.form.editTitle') : t('promotions.form.addTitle')}
