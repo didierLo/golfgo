@@ -525,7 +525,7 @@
     "subtitle": "Special offers and reduced rates found on Belgian golf club websites.",
     "lastUpdate": "Last updated: {date}",
     "disclaimer": "Information collected from club websites, for guidance only. Always check with the club before booking.",
-    "kind": { "promo": "Promotions", "twilight": "Late afternoon", "winter": "Winter", "pack": "Stay packs" },
+    "kind": { "promo": "Promotions", "twilight": "Late afternoon", "winter": "Winter", "pack": "Stay packs", "card": "Benefit cards" },
     "rangeBoth": "From {from} to {to}",
     "rangeUntil": "Until {date}",
     "rangeFrom": "From {date}",
@@ -534,12 +534,13 @@
     "comingSoon": "Coming soon",
     "conditions": "Conditions",
     "offerLink": "View offer",
+    "cardSite": "Website",
     "clubSite": "Club website",
     "verifiedOn": "Checked on {date}",
     "empty": "No promotions at the moment.",
     "loadError": "Could not load promotions.",
     "manualBadge": "Admin",
-    "form": {"add": "Add a promotion", "addTitle": "New promotion", "editTitle": "Edit promotion", "club": "Club", "clubPlaceholder": "Choose a club…", "kind": "Type", "title": "Title", "price": "Price", "pricePlaceholder": "e.g. €49 / green fee", "description": "Description", "conditions": "Conditions", "validFrom": "Valid from", "validTo": "Valid until", "url": "Link to the offer (optional)", "note": "This card will be visible to all GolfGo members. You can edit or delete it later.", "save": "Save", "saving": "Saving…", "cancel": "Cancel", "edit": "Edit", "delete": "Delete", "confirmDelete": "Delete this promotion?", "errClub": "Choose a club.", "errTitle": "Enter a title.", "errDates": "The start date must be before the end date.", "errUrl": "The link is not valid.", "errSave": "Could not save. Please try again."}
+    "form": {"add": "Add a promotion", "addTitle": "New promotion", "editTitle": "Edit promotion", "club": "Club", "clubPlaceholder": "Choose a club…", "kind": "Type", "title": "Title", "price": "Price", "pricePlaceholder": "e.g. €49 / green fee", "description": "Description", "conditions": "Conditions", "validFrom": "Valid from", "validTo": "Valid until", "url": "Link to the offer (optional)", "note": "This card will be visible to all GolfGo members. You can edit or delete it later.", "save": "Save", "saving": "Saving…", "cancel": "Cancel", "edit": "Edit", "delete": "Delete", "confirmDelete": "Delete this promotion?", "errClub": "Choose a club.", "errTitle": "Enter a title.", "errDates": "The start date must be before the end date.", "errUrl": "The link is not valid.", "errSave": "Could not save. Please try again.", "cardName": "Card name", "cardBenefits": "Benefits (summary)", "cardUrl": "Card website"}
   },
   "stats": {
     "kind": "Game type",

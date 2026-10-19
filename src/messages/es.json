@@ -524,7 +524,7 @@
     "subtitle": "Ofertas especiales y tarifas reducidas encontradas en las webs de los clubes de golf belgas.",
     "lastUpdate": "Última actualización: {date}",
     "disclaimer": "Información recogida de las webs de los clubes, a título indicativo. Consulta siempre con el club antes de reservar.",
-    "kind": { "promo": "Promociones", "twilight": "Última hora de la tarde", "winter": "Invierno", "pack": "Paquetes con estancia" },
+    "kind": { "promo": "Promociones", "twilight": "Última hora de la tarde", "winter": "Invierno", "pack": "Paquetes con estancia", "card": "Tarjetas de ventajas" },
     "rangeBoth": "Del {from} al {to}",
     "rangeUntil": "Hasta el {date}",
     "rangeFrom": "A partir del {date}",
@@ -533,12 +533,13 @@
     "comingSoon": "Próximamente",
     "conditions": "Condiciones",
     "offerLink": "Ver la oferta",
+    "cardSite": "Sitio web",
     "clubSite": "Web del club",
     "verifiedOn": "Comprobado el {date}",
     "empty": "No hay promociones por ahora.",
     "loadError": "No se pudieron cargar las promociones.",
     "manualBadge": "Admin",
-    "form": {"add": "Añadir una promoción", "addTitle": "Nueva promoción", "editTitle": "Editar promoción", "club": "Club", "clubPlaceholder": "Elige un club…", "kind": "Tipo", "title": "Título", "price": "Precio", "pricePlaceholder": "p. ej. 49 € / green fee", "description": "Descripción", "conditions": "Condiciones", "validFrom": "Válida desde", "validTo": "Válida hasta", "url": "Enlace a la oferta (opcional)", "note": "Esta tarjeta será visible para todos los miembros de GolfGo. Podrás editarla o eliminarla más tarde.", "save": "Guardar", "saving": "Guardando…", "cancel": "Cancelar", "edit": "Editar", "delete": "Eliminar", "confirmDelete": "¿Eliminar esta promoción?", "errClub": "Elige un club.", "errTitle": "Indica un título.", "errDates": "La fecha de inicio debe ser anterior a la de fin.", "errUrl": "El enlace no es válido.", "errSave": "No se pudo guardar. Inténtalo de nuevo."}
+    "form": {"add": "Añadir una promoción", "addTitle": "Nueva promoción", "editTitle": "Editar promoción", "club": "Club", "clubPlaceholder": "Elige un club…", "kind": "Tipo", "title": "Título", "price": "Precio", "pricePlaceholder": "p. ej. 49 € / green fee", "description": "Descripción", "conditions": "Condiciones", "validFrom": "Válida desde", "validTo": "Válida hasta", "url": "Enlace a la oferta (opcional)", "note": "Esta tarjeta será visible para todos los miembros de GolfGo. Podrás editarla o eliminarla más tarde.", "save": "Guardar", "saving": "Guardando…", "cancel": "Cancelar", "edit": "Editar", "delete": "Eliminar", "confirmDelete": "¿Eliminar esta promoción?", "errClub": "Elige un club.", "errTitle": "Indica un título.", "errDates": "La fecha de inicio debe ser anterior a la de fin.", "errUrl": "El enlace no es válido.", "errSave": "No se pudo guardar. Inténtalo de nuevo.", "cardName": "Nombre de la tarjeta", "cardBenefits": "Ventajas (resumen)", "cardUrl": "Sitio web de la tarjeta"}
   },
   "stats": {
     "kind": "Tipo de partida",

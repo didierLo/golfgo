@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from 'next-intl'
 
 const supabase = createClient()
 
-type Kind = 'promo' | 'twilight' | 'winter' | 'pack'
+type Kind = 'promo' | 'twilight' | 'winter' | 'pack' | 'card'
 type Promo = {
   id: string
   kind: Kind
@@ -20,7 +20,7 @@ type Promo = {
   verified_on: string         // AAAA-MM-JJ
   origin: 'auto' | 'manual'   // 'manual' = carte saisie par un admin de groupe
   created_by: string | null
-  club_id: string
+  club_id: string | null     // null pour une carte avantages (non liée à un club)
   club: { name: string; website: string | null } | null
 }
 
@@ -37,12 +37,13 @@ const EMPTY_FORM: FormState = {
 const inputClass = 'w-full border border-slate-300 rounded-lg px-3 py-2.5 text-[14px] bg-white focus:outline-none focus:border-blue-400'
 const labelClass = 'block text-[12px] font-semibold text-slate-700 mb-1'
 
-const KINDS: Kind[] = ['promo', 'twilight', 'winter', 'pack']
+const KINDS: Kind[] = ['promo', 'twilight', 'winter', 'pack', 'card']
 const KIND_COLOR: Record<Kind, string> = {
   promo:    '#D4537E',
   twilight: '#185FA5',
   winter:   '#1D9E75',
   pack:     '#7F77DD',
+  card:     '#C2790A',
 }
 
 const DAY_MS = 86_400_000
@@ -133,6 +134,7 @@ export default function PromotionsPage() {
         const va = a.valid_to ?? '9999-12-31', vb = b.valid_to ?? '9999-12-31'
         if (va !== vb) return va < vb ? -1 : 1
       }
+      if (kind === 'card') return a.title.localeCompare(b.title, locale)
       return (a.club?.name ?? '').localeCompare(b.club?.name ?? '', locale)
     })
     return { kind, items }
@@ -144,7 +146,7 @@ export default function PromotionsPage() {
   function openEdit(p: Promo) {
     setEditingId(p.id); setFormError(''); setFormOpen(true)
     setForm({
-      club_id: p.club_id, kind: p.kind, title: p.title, price_text: p.price_text ?? '',
+      club_id: p.club_id ?? '', kind: p.kind, title: p.title, price_text: p.price_text ?? '',
       description: p.description ?? '', conditions: p.conditions ?? '',
       valid_from: p.valid_from ?? '', valid_to: p.valid_to ?? '', source_url: p.source_url ?? '',
     })
@@ -155,9 +157,10 @@ export default function PromotionsPage() {
   async function save() {
     setFormError('')
     if (!userId) return
-    if (!form.club_id)      { setFormError(t('promotions.form.errClub'));  return }
+    const isCard = form.kind === 'card'
+    if (!isCard && !form.club_id) { setFormError(t('promotions.form.errClub'));  return }
     if (!form.title.trim()) { setFormError(t('promotions.form.errTitle')); return }
-    if (form.valid_from && form.valid_to && form.valid_from > form.valid_to) {
+    if (!isCard && form.valid_from && form.valid_to && form.valid_from > form.valid_to) {
       setFormError(t('promotions.form.errDates')); return
     }
     let url = form.source_url.trim()
@@ -167,9 +170,10 @@ export default function PromotionsPage() {
     }
     const nn = (v: string) => (v.trim() ? v.trim() : null)
     const fields = {
-      club_id: form.club_id, kind: form.kind, title: form.title.trim(),
-      price_text: nn(form.price_text), description: nn(form.description), conditions: nn(form.conditions),
-      valid_from: form.valid_from || null, valid_to: form.valid_to || null,
+      club_id: isCard ? null : form.club_id, kind: form.kind, title: form.title.trim(),
+      price_text: nn(form.price_text), description: nn(form.description),
+      conditions: isCard ? null : nn(form.conditions),
+      valid_from: isCard ? null : (form.valid_from || null), valid_to: isCard ? null : (form.valid_to || null),
       source_url: url || null, verified_on: today,
     }
     setSaving(true)
@@ -233,22 +237,24 @@ export default function PromotionsPage() {
           </h2>
 
           <div>
-            <label className={labelClass}>{t('promotions.form.club')} *</label>
-            <select className={inputClass} value={form.club_id} onChange={e => setField('club_id', e.target.value)}>
-              <option value="">{t('promotions.form.clubPlaceholder')}</option>
-              {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-
-          <div>
             <label className={labelClass}>{t('promotions.form.kind')} *</label>
             <select className={inputClass} value={form.kind} onChange={e => setField('kind', e.target.value)}>
               {KINDS.map(k => <option key={k} value={k}>{t(`promotions.kind.${k}` as any)}</option>)}
             </select>
           </div>
 
+          {form.kind !== 'card' && (
+            <div>
+              <label className={labelClass}>{t('promotions.form.club')} *</label>
+              <select className={inputClass} value={form.club_id} onChange={e => setField('club_id', e.target.value)}>
+                <option value="">{t('promotions.form.clubPlaceholder')}</option>
+                {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+          )}
+
           <div>
-            <label className={labelClass}>{t('promotions.form.title')} *</label>
+            <label className={labelClass}>{form.kind === 'card' ? t('promotions.form.cardName') : t('promotions.form.title')} *</label>
             <input className={inputClass} maxLength={120} value={form.title} onChange={e => setField('title', e.target.value)} />
           </div>
 
@@ -259,30 +265,34 @@ export default function PromotionsPage() {
           </div>
 
           <div>
-            <label className={labelClass}>{t('promotions.form.description')}</label>
+            <label className={labelClass}>{form.kind === 'card' ? t('promotions.form.cardBenefits') : t('promotions.form.description')}</label>
             <textarea className={inputClass} rows={3} maxLength={500} value={form.description}
               onChange={e => setField('description', e.target.value)} />
           </div>
 
-          <div>
-            <label className={labelClass}>{t('promotions.form.conditions')}</label>
-            <textarea className={inputClass} rows={2} maxLength={300} value={form.conditions}
-              onChange={e => setField('conditions', e.target.value)} />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {form.kind !== 'card' && (
+            <>
             <div>
-              <label className={labelClass}>{t('promotions.form.validFrom')}</label>
-              <input type="date" className={inputClass} value={form.valid_from} onChange={e => setField('valid_from', e.target.value)} />
+              <label className={labelClass}>{t('promotions.form.conditions')}</label>
+              <textarea className={inputClass} rows={2} maxLength={300} value={form.conditions}
+                onChange={e => setField('conditions', e.target.value)} />
             </div>
-            <div>
-              <label className={labelClass}>{t('promotions.form.validTo')}</label>
-              <input type="date" className={inputClass} value={form.valid_to} onChange={e => setField('valid_to', e.target.value)} />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>{t('promotions.form.validFrom')}</label>
+                <input type="date" className={inputClass} value={form.valid_from} onChange={e => setField('valid_from', e.target.value)} />
+              </div>
+              <div>
+                <label className={labelClass}>{t('promotions.form.validTo')}</label>
+                <input type="date" className={inputClass} value={form.valid_to} onChange={e => setField('valid_to', e.target.value)} />
+              </div>
             </div>
-          </div>
+            </>
+          )}
 
           <div>
-            <label className={labelClass}>{t('promotions.form.url')}</label>
+            <label className={labelClass}>{form.kind === 'card' ? t('promotions.form.cardUrl') : t('promotions.form.url')}</label>
             <input className={inputClass} inputMode="url" placeholder="https://" value={form.source_url}
               onChange={e => setField('source_url', e.target.value)} />
           </div>
@@ -337,7 +347,9 @@ export default function PromotionsPage() {
                     style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-[12px] font-bold uppercase tracking-wide text-slate-500">{p.club?.name ?? ''}</p>
+                      {p.kind !== 'card' && (
+                        <p className="text-[12px] font-bold uppercase tracking-wide text-slate-500">{p.club?.name ?? ''}</p>
+                      )}
                       {p.origin === 'manual' && (
                         <span className="text-[12px] font-medium text-slate-400">
                           ({t('promotions.manualBadge')})
@@ -351,6 +363,7 @@ export default function PromotionsPage() {
                     )}
                     {p.description && <p className="text-[13px] text-slate-800 mt-1.5 leading-relaxed">{p.description}</p>}
 
+                    {p.kind !== 'card' && (
                     <div className="flex flex-wrap items-center gap-2 mt-3">
                       <span className="text-[12px] font-semibold text-slate-700">📅 {rangeLabel(p)}</span>
                       {endsSoon(p) && (
@@ -360,6 +373,7 @@ export default function PromotionsPage() {
                         <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">{t('promotions.comingSoon')}</span>
                       )}
                     </div>
+                    )}
 
                     {p.conditions && (
                       <p className="text-[12px] text-slate-600 mt-2 leading-relaxed">
@@ -371,10 +385,10 @@ export default function PromotionsPage() {
                       {p.source_url && (
                         <a href={p.source_url} target="_blank" rel="noopener noreferrer"
                           className="inline-flex items-center justify-center min-h-[40px] px-4 rounded-xl bg-[#185FA5] text-white text-[13px] font-semibold hover:bg-[#144f8a] transition-colors">
-                          {t('promotions.offerLink')}
+                          {p.kind === 'card' ? t('promotions.cardSite') : t('promotions.offerLink')}
                         </a>
                       )}
-                      {p.club?.website && (
+                      {p.kind !== 'card' && p.club?.website && (
                         <a href={p.club.website} target="_blank" rel="noopener noreferrer"
                           className="inline-flex items-center justify-center min-h-[40px] px-4 rounded-xl border border-slate-300 bg-white text-slate-700 text-[13px] font-semibold hover:bg-slate-50 transition-colors">
                           {t('promotions.clubSite')}

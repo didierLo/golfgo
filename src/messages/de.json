@@ -524,7 +524,7 @@
     "subtitle": "Sonderangebote und ermäßigte Tarife von den Websites belgischer Golfclubs.",
     "lastUpdate": "Zuletzt aktualisiert: {date}",
     "disclaimer": "Angaben von den Websites der Clubs, unverbindlich. Bitte vor der Buchung immer beim Club nachfragen.",
-    "kind": { "promo": "Aktionen", "twilight": "Spätnachmittag", "winter": "Winter", "pack": "Aufenthaltspakete" },
+    "kind": { "promo": "Aktionen", "twilight": "Spätnachmittag", "winter": "Winter", "pack": "Aufenthaltspakete", "card": "Vorteilskarten" },
     "rangeBoth": "Vom {from} bis {to}",
     "rangeUntil": "Bis {date}",
     "rangeFrom": "Ab {date}",
@@ -533,12 +533,13 @@
     "comingSoon": "Demnächst",
     "conditions": "Bedingungen",
     "offerLink": "Angebot ansehen",
+    "cardSite": "Website",
     "clubSite": "Website des Clubs",
     "verifiedOn": "Geprüft am {date}",
     "empty": "Derzeit keine Aktionen.",
     "loadError": "Aktionen konnten nicht geladen werden.",
     "manualBadge": "Admin",
-    "form": {"add": "Aktion hinzufügen", "addTitle": "Neue Aktion", "editTitle": "Aktion bearbeiten", "club": "Club", "clubPlaceholder": "Club wählen…", "kind": "Art", "title": "Titel", "price": "Preis", "pricePlaceholder": "z. B. 49 € / Greenfee", "description": "Beschreibung", "conditions": "Bedingungen", "validFrom": "Gültig ab", "validTo": "Gültig bis", "url": "Link zum Angebot (optional)", "note": "Diese Karte ist für alle GolfGo-Mitglieder sichtbar. Du kannst sie später bearbeiten oder löschen.", "save": "Speichern", "saving": "Wird gespeichert…", "cancel": "Abbrechen", "edit": "Bearbeiten", "delete": "Löschen", "confirmDelete": "Diese Aktion löschen?", "errClub": "Wähle einen Club.", "errTitle": "Gib einen Titel ein.", "errDates": "Das Startdatum muss vor dem Enddatum liegen.", "errUrl": "Der Link ist ungültig.", "errSave": "Speichern nicht möglich. Bitte erneut versuchen."}
+    "form": {"add": "Aktion hinzufügen", "addTitle": "Neue Aktion", "editTitle": "Aktion bearbeiten", "club": "Club", "clubPlaceholder": "Club wählen…", "kind": "Art", "title": "Titel", "price": "Preis", "pricePlaceholder": "z. B. 49 € / Greenfee", "description": "Beschreibung", "conditions": "Bedingungen", "validFrom": "Gültig ab", "validTo": "Gültig bis", "url": "Link zum Angebot (optional)", "note": "Diese Karte ist für alle GolfGo-Mitglieder sichtbar. Du kannst sie später bearbeiten oder löschen.", "save": "Speichern", "saving": "Wird gespeichert…", "cancel": "Abbrechen", "edit": "Bearbeiten", "delete": "Löschen", "confirmDelete": "Diese Aktion löschen?", "errClub": "Wähle einen Club.", "errTitle": "Gib einen Titel ein.", "errDates": "Das Startdatum muss vor dem Enddatum liegen.", "errUrl": "Der Link ist ungültig.", "errSave": "Speichern nicht möglich. Bitte erneut versuchen.", "cardName": "Name der Karte", "cardBenefits": "Vorteile (Zusammenfassung)", "cardUrl": "Website der Karte"}
   },
   "stats": {
     "kind": "Spieltyp",

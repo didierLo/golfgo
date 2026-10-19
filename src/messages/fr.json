@@ -525,7 +525,7 @@
     "subtitle": "Offres spéciales et tarifs réduits repérés sur les sites des clubs belges.",
     "lastUpdate": "Dernière mise à jour : {date}",
     "disclaimer": "Informations relevées sur les sites des clubs, à titre indicatif. Vérifie toujours auprès du club avant de réserver.",
-    "kind": { "promo": "Promotions", "twilight": "Fin de journée", "winter": "Hiver", "pack": "Packs séjour" },
+    "kind": { "promo": "Promotions", "twilight": "Fin de journée", "winter": "Hiver", "pack": "Packs séjour", "card": "Cartes avantages" },
     "rangeBoth": "Du {from} au {to}",
     "rangeUntil": "Jusqu'au {date}",
     "rangeFrom": "À partir du {date}",
@@ -534,12 +534,13 @@
     "comingSoon": "À venir",
     "conditions": "Conditions",
     "offerLink": "Voir l'offre",
+    "cardSite": "Site web",
     "clubSite": "Site du club",
     "verifiedOn": "Vérifié le {date}",
     "empty": "Aucune promotion pour le moment.",
     "loadError": "Impossible de charger les promotions.",
     "manualBadge": "Admin",
-    "form": {"add": "Ajouter une promotion", "addTitle": "Nouvelle promotion", "editTitle": "Modifier la promotion", "club": "Club", "clubPlaceholder": "Choisir un club…", "kind": "Type", "title": "Titre", "price": "Prix", "pricePlaceholder": "ex. 49 € / green fee", "description": "Description", "conditions": "Conditions", "validFrom": "Valable à partir du", "validTo": "Valable jusqu'au", "url": "Lien vers l'offre (facultatif)", "note": "Cette carte sera visible par tous les membres de GolfGo. Tu pourras la modifier ou la supprimer.", "save": "Enregistrer", "saving": "Enregistrement…", "cancel": "Annuler", "edit": "Modifier", "delete": "Supprimer", "confirmDelete": "Supprimer cette promotion ?", "errClub": "Choisis un club.", "errTitle": "Indique un titre.", "errDates": "La date de début doit précéder la date de fin.", "errUrl": "Le lien n'est pas valide.", "errSave": "Enregistrement impossible. Réessaie."}
+    "form": {"add": "Ajouter une promotion", "addTitle": "Nouvelle promotion", "editTitle": "Modifier la promotion", "club": "Club", "clubPlaceholder": "Choisir un club…", "kind": "Type", "title": "Titre", "price": "Prix", "pricePlaceholder": "ex. 49 € / green fee", "description": "Description", "conditions": "Conditions", "validFrom": "Valable à partir du", "validTo": "Valable jusqu'au", "url": "Lien vers l'offre (facultatif)", "note": "Cette carte sera visible par tous les membres de GolfGo. Tu pourras la modifier ou la supprimer.", "save": "Enregistrer", "saving": "Enregistrement…", "cancel": "Annuler", "edit": "Modifier", "delete": "Supprimer", "confirmDelete": "Supprimer cette promotion ?", "errClub": "Choisis un club.", "errTitle": "Indique un titre.", "errDates": "La date de début doit précéder la date de fin.", "errUrl": "Le lien n'est pas valide.", "errSave": "Enregistrement impossible. Réessaie.", "cardName": "Nom de la carte", "cardBenefits": "Avantages (résumé)", "cardUrl": "Site web de la carte"}
   },
   "stats": {
     "kind": "Type de partie",
