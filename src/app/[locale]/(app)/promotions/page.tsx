@@ -55,7 +55,7 @@ export default function PromotionsPage() {
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
 
-  // Admin de groupe : peut ajouter / modifier / supprimer ses propres cartes
+  // Admin de groupe : peut ajouter, et modifier / supprimer toutes les cartes
   const [userId,    setUserId]    = useState<string | null>(null)
   const [isOwner,   setIsOwner]   = useState(false)
   const [clubs,     setClubs]     = useState<ClubOption[]>([])
@@ -386,7 +386,7 @@ export default function PromotionsPage() {
                           {t('promotions.verifiedOn', { date: formatDay(p.verified_on) })}
                         </span>
                       )}
-                      {p.origin === 'manual' && p.created_by === userId && (
+                      {isOwner && (
                         <span className="flex gap-2 sm:ml-auto">
                           <button onClick={() => openEdit(p)}
                             className="min-h-[40px] px-3 rounded-xl border border-slate-300 bg-white text-slate-700 text-[13px] font-semibold hover:bg-slate-50">
