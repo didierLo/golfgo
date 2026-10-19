@@ -87,7 +87,7 @@ window.location.href = `/groups/${group.id}/members`
           <div className="flex gap-2.5">
             {GROUP_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setColor(c)}
-                className="w-7 h-7 rounded-full transition-transform hover:scale-110 flex-shrink-0"
+                className="w-7 h-7 rounded-full transition-transform hover:scale-110 shrink-0"
                 style={{ background: c, outline: color === c ? `3px solid ${c}` : 'none', outlineOffset: '2px' }} />
             ))}
           </div>

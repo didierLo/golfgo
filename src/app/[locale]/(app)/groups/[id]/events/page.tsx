@@ -34,7 +34,7 @@ function EventCard({ event, groupId, goingCount, onDelete, isOwner, onNotOwner, 
     <div className={`rounded-xl overflow-hidden border border-white/50 hover:border-slate-300 transition-colors bg-white ${past ? 'opacity-60' : ''}`}>
       <div className="px-4 py-3">
         <div className="flex items-start gap-3">
-          <div className="w-[3px] h-12 rounded-full flex-shrink-0 bg-[#185FA5] mt-0.5" />
+          <div className="w-[3px] h-12 rounded-full shrink-0 bg-[#185FA5] mt-0.5" />
           <div className="flex-1 min-w-0 cursor-pointer" onClick={() => {
             localStorage.setItem(`golfgo-active-event-${groupId}`, event.id)
             window.location.href = base
@@ -52,7 +52,7 @@ function EventCard({ event, groupId, goingCount, onDelete, isOwner, onNotOwner, 
               </span>
             </div>
           </div>
-       <div className="flex items-center gap-1 flex-shrink-0">
+       <div className="flex items-center gap-1 shrink-0">
   {(event.photoCount ?? 0) > 0 && (
     <a href={`${base}/edit`}
       className="flex items-center gap-1 text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">

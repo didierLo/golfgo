@@ -83,7 +83,7 @@ export default function CommRecipientsPanel({
           return (
             <label key={member.id} className={`flex items-center gap-3 px-5 py-2.5 cursor-pointer transition-colors ${!hasEmail ? 'opacity-40 cursor-not-allowed' : isSelected ? 'bg-[#EBF3FC]/50' : 'hover:bg-slate-50'}`}>
               <input type="checkbox" checked={isSelected} disabled={!hasEmail} onChange={() => hasEmail && toggleMember(member.id)} className="rounded border-slate-300 text-[#185FA5] focus:ring-[#185FA5]/30" />
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
                 style={{ background: member.role === 'guest' ? '#FEF3C7' : '#EBF3FC', color: member.role === 'guest' ? '#92400E' : '#0C447C' }}>
                 {member.first_name[0]}{member.surname[0]}
               </div>

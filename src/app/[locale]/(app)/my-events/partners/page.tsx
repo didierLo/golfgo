@@ -172,7 +172,7 @@ export default function MyPartnersPage() {
                     {/* Mon nom */}
                     <td className="px-4 py-3 border-r border-slate-100">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-[#185FA5] flex items-center justify-center flex-shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-[#185FA5] flex items-center justify-center shrink-0">
                           <span className="text-[9px] font-bold text-white">
                             {me.first_name[0]}{me.surname[0]}
                           </span>
@@ -235,7 +235,7 @@ export default function MyPartnersPage() {
                     <span className="text-[12px] text-slate-400 italic">{t('partners.solo')}</span>
                   ) : round.partners.map(p => (
                     <div key={p.id} className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5">
-                      <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
                         <span className="text-[8px] font-bold text-slate-500">{p.first_name[0]}{p.surname[0]}</span>
                       </div>
                       <span className="text-[12px] font-medium text-slate-800">{p.first_name} {p.surname}</span>

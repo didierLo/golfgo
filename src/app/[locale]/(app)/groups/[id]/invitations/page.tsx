@@ -80,7 +80,7 @@ function MemberSearchView({
             {suggestions.map((m, i) => (
               <button key={m.id} onClick={() => selectMember(m)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#EBF3FC]/60 transition-colors text-left ${i < suggestions.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] flex-shrink-0">
+                <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] shrink-0">
                   {m.first_name[0]}{m.surname[0]}
                 </div>
                 <span className="text-[13px] text-slate-800">
@@ -98,7 +98,7 @@ function MemberSearchView({
         <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden"
           style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
           <div className="flex items-center gap-3 px-4 py-3 bg-[#EBF3FC]/60 border-b border-white/40">
-            <div className="w-8 h-8 rounded-full bg-[#185FA5] flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#185FA5] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
               {selectedMember.first_name[0]}{selectedMember.surname[0]}
             </div>
             <div className="flex-1">
@@ -506,7 +506,7 @@ const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length 
                     <input type="checkbox" disabled={!p.players?.email || !isOwner}
                       checked={selectedPlayers.includes(p.player_id)} onChange={() => togglePlayer(p.player_id)}
                       className="rounded accent-[#185FA5]" />
-                    <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[10px] font-bold text-[#0C447C] shrink-0">
                       {p.players?.first_name[0]}{p.players?.surname[0]}
                     </div>
                     <span className="text-[13px] font-medium text-slate-800 flex-1">{p.players?.first_name} {p.players?.surname}</span>
@@ -543,7 +543,7 @@ const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length 
                     </span>
                     {isSelected && !sendEmail && (
                       <button type="button" onClick={() => toggleHoles(m.id)}
-                      className={`text-[11px] font-bold px-2 py-1 rounded-lg border transition-colors flex-shrink-0 ${holesCls}`}>
+                      className={`text-[11px] font-bold px-2 py-1 rounded-lg border transition-colors shrink-0 ${holesCls}`}>
                         {holesLabel}
 
                       </button>
@@ -564,7 +564,7 @@ const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length 
           <div className="flex items-start gap-3 mb-4 p-3.5 bg-white/30 rounded-xl border border-white/50">
             <button type="button" onClick={() => { if (!isOwner) { showAdminToast(); return }; setSendEmail(v => !v) }}
               style={{ backgroundColor: sendEmail ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
-              className={`mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 ${!isOwner ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+              className={`mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 shrink-0 ${!isOwner ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
               <div style={{ transform: sendEmail ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
                 className="w-4 h-4 rounded-full bg-white shadow-sm" />
             </button>
@@ -695,9 +695,9 @@ const allCancelSelected = filteredInvited.length > 0 && selectedToCancel.length 
               return (
                 <div key={inv.id} className={`flex items-center gap-3 px-4 py-3 ${selectedToCancel.includes(inv.id) ? 'bg-red-50/50' : ''} ${i < sortedFiltered.length - 1 ? 'border-b border-white/30' : ''}`}>
                   {isInvited && isOwner
-                    ? <input type="checkbox" checked={selectedToCancel.includes(inv.id)} onChange={() => toggleCancel(inv.id)} className="rounded accent-[#185FA5] flex-shrink-0" />
-                    : <div className="w-4 flex-shrink-0" />}
-                  <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
+                    ? <input type="checkbox" checked={selectedToCancel.includes(inv.id)} onChange={() => toggleCancel(inv.id)} className="rounded accent-[#185FA5] shrink-0" />
+                    : <div className="w-4 shrink-0" />}
+                  <div className="w-7 h-7 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] shrink-0">
                     {inv.players?.first_name[0]}{inv.players?.surname[0]}
                   </div>
                   <div className="flex-1 min-w-0">

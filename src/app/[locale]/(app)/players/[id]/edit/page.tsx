@@ -149,7 +149,7 @@ setLoading(false)
       {groupId && (
         <a href={`/groups/${groupId}/members/add`}
           className="flex items-center gap-2 mb-4 rounded-xl bg-[#EBF3FC] border border-[#185FA5]/20 px-3 py-2.5 text-[11.5px] text-[#0C447C] leading-snug hover:bg-[#DCEAFA] transition-colors">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" className="shrink-0">
             <circle cx="8" cy="8" r="7" stroke="#185FA5" strokeWidth="1.3"/>
             <path d="M8 7.2v4M8 5.3v.1" stroke="#185FA5" strokeWidth="1.3" strokeLinecap="round"/>
           </svg>
@@ -219,7 +219,7 @@ setLoading(false)
                       form.default_tee_color === tee.value
                         ? 'border-slate-400 bg-white shadow-sm text-slate-700'
                         : 'border-slate-200 text-slate-400 hover:border-slate-300'}`}>
-                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: tee.color }} />
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: tee.color }} />
                     {tee.label}
                   </button>
                 ))}

@@ -53,7 +53,7 @@ function HolesBadge({ holes, section }: { holes: number | null; section: HolesSe
   if (!holes || holes === 18 || !section) return null   // ← ajout de !section
   const label = section === 'out' ? '9F' : '9B'
   return (
-    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 flex-shrink-0">
+    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 shrink-0">
       {label}
     </span>
   )
@@ -206,7 +206,7 @@ function MessageModal({
         </button>
 
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
             style={{ background: '#EBF3FC', color: '#0C447C' }}>
             {firstName[0]}{surname[0]}
           </div>
@@ -321,7 +321,7 @@ function MBadge({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       title={t('participants.viewMessageTitle')}
-      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-colors hover:scale-110"
+      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 transition-colors hover:scale-110"
       style={{ background: '#185FA5', color: '#fff' }}
     >
       M
@@ -336,7 +336,7 @@ function RBadge({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       title={t('participants.viewNoteTitle')}
-      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-colors hover:scale-110"
+      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 transition-colors hover:scale-110"
       style={{ background: '#4338CA', color: '#fff' }}
     >
       R

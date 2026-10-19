@@ -314,11 +314,11 @@ export default function GroupStatsPage() {
               <div className="space-y-2">
                 {stats.byFlightCount.map(r => (
                   <div key={r.n} className="flex items-center gap-3">
-                    <span className="text-[12px] font-semibold text-slate-700 w-24 flex-shrink-0">
+                    <span className="text-[12px] font-semibold text-slate-700 w-24 shrink-0">
                       {t('stats.flightsLabel', { count: r.n })}
                     </span>
                     <Bar value={r.count} max={maxByFlightCount} />
-                    <span className="text-[12px] font-bold text-slate-800 w-20 text-right flex-shrink-0">
+                    <span className="text-[12px] font-bold text-slate-800 w-20 text-right shrink-0">
                       {t('stats.gamesLabel', { count: r.count })}
                     </span>
                   </div>
@@ -332,11 +332,11 @@ export default function GroupStatsPage() {
               <div className="space-y-2">
                 {stats.bySize.map(r => (
                   <div key={r.n} className="flex items-center gap-3">
-                    <span className="text-[12px] font-semibold text-slate-700 w-24 flex-shrink-0">
+                    <span className="text-[12px] font-semibold text-slate-700 w-24 shrink-0">
                       {t('stats.playersLabel', { count: r.n })}
                     </span>
                     <Bar value={r.count} max={maxBySize} color="#3B6D11" />
-                    <span className="text-[12px] font-bold text-slate-800 w-20 text-right flex-shrink-0">
+                    <span className="text-[12px] font-bold text-slate-800 w-20 text-right shrink-0">
                       {t('stats.flightsLabel', { count: r.count })}
                     </span>
                   </div>
@@ -351,10 +351,10 @@ export default function GroupStatsPage() {
             <div className="space-y-1.5">
               {rankingShown.map((r, i) => (
                 <div key={r.id} className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold text-slate-300 w-5 text-right flex-shrink-0">{i + 1}</span>
-                  <span className="text-[12px] font-semibold text-slate-700 w-36 sm:w-48 truncate flex-shrink-0">{playerName(r.id)}</span>
+                  <span className="text-[10px] font-bold text-slate-300 w-5 text-right shrink-0">{i + 1}</span>
+                  <span className="text-[12px] font-semibold text-slate-700 w-36 sm:w-48 truncate shrink-0">{playerName(r.id)}</span>
                   <Bar value={r.count} max={maxRanking} color="#EF9F27" />
-                  <span className="text-[12px] font-bold text-slate-800 w-16 text-right flex-shrink-0">
+                  <span className="text-[12px] font-bold text-slate-800 w-16 text-right shrink-0">
                     {t('stats.timesLabel', { count: r.count })}
                   </span>
                 </div>
@@ -374,11 +374,11 @@ export default function GroupStatsPage() {
             <div className="space-y-2">
               {stats.byTimes.map(r => (
                 <div key={r.n} className="flex items-center gap-3">
-                  <span className="text-[12px] font-semibold text-slate-700 w-24 flex-shrink-0">
+                  <span className="text-[12px] font-semibold text-slate-700 w-24 shrink-0">
                     {t('stats.timesLabel', { count: r.n })}
                   </span>
                   <Bar value={r.count} max={maxByTimes} color="#7F77DD" />
-                  <span className="text-[12px] font-bold text-slate-800 w-20 text-right flex-shrink-0">
+                  <span className="text-[12px] font-bold text-slate-800 w-20 text-right shrink-0">
                     {t('stats.playersLabel', { count: r.count })}
                   </span>
                 </div>

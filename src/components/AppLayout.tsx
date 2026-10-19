@@ -48,7 +48,7 @@ function NavItem({ href, icon, label, active, muted, iconColor }: { href: string
   const t = useTranslations()
   return (
     <Link href={href} className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-semibold transition-all duration-150 ${active ? 'bg-[#185FA5] text-white shadow-sm shadow-blue-900/20' : muted ? 'text-slate-400 hover:text-slate-500 hover:bg-slate-100/60' : 'text-slate-900 hover:text-black hover:bg-slate-100/80'}`}>
-      <span className="flex-shrink-0 transition-transform duration-150 group-hover:scale-110" style={{ color: active ? 'white' : muted ? '#CBD5E1' : (iconColor ?? '#185FA5') }}>{icon}</span>
+      <span className="shrink-0 transition-transform duration-150 group-hover:scale-110" style={{ color: active ? 'white' : muted ? '#CBD5E1' : (iconColor ?? '#185FA5') }}>{icon}</span>
       <span className="flex-1 leading-none">{label}</span>
       {muted && <span className="text-[9px] text-slate-400 font-normal tracking-wide uppercase">{t('nav.soon')}</span>}
     </Link>
@@ -79,7 +79,7 @@ function SidebarSection({ label, emoji, children }: { label: string; emoji?: str
 }
 
 function GroupDot({ color, size = 8 }: { color: string; size?: number }) {
-  return <span className="rounded-full flex-shrink-0 ring-2 ring-white" style={{ width: size, height: size, background: color, display: 'inline-block' }} />
+  return <span className="rounded-full shrink-0 ring-2 ring-white" style={{ width: size, height: size, background: color, display: 'inline-block' }} />
 }
 
 const ORGANISER_SEGMENTS = [
@@ -259,25 +259,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 </div>
 
       {/* TOPBAR */}
-      <header className="h-[56px] flex items-center flex-shrink-0 z-30 shadow-md shadow-blue-900/20 overflow-visible"
+      <header className="h-[56px] flex items-center shrink-0 z-30 shadow-md shadow-blue-900/20 overflow-visible"
         style={{ background: 'rgba(24, 95, 165, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
         <div className="max-w-[1280px] w-full mx-auto flex items-center overflow-visible" style={{ scrollbarWidth: 'none' }}>
-          <div className="flex items-center flex-shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
+          <div className="flex items-center shrink-0 w-[60px] sm:w-[60px] lg:w-[220px]">
             <Link href="/my-events" className="flex items-center gap-2.5 select-none px-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo/GG_Favicon.png" alt="" className="h-[30px] w-[30px] object-contain rounded-lg flex-shrink-0" />
+              <img src="/logo/GG_Favicon.png" alt="" className="h-[30px] w-[30px] object-contain rounded-lg shrink-0" />
               <span className="hidden lg:flex items-baseline leading-none">
                 <span className="text-[18px] font-black text-white tracking-tight">Golf</span>
                 <span className="text-[18px] font-black tracking-tight" style={{ color: '#4CAF1A' }}>Go</span>
               </span>
             </Link>
           </div>
-          <div className="w-px h-full bg-white/30 flex-shrink-0 self-stretch" />
+          <div className="w-px h-full bg-white/30 shrink-0 self-stretch" />
           <div className="flex items-center gap-3 flex-1 px-4">
 
            {showBack && (
               <button onClick={() => router.back()}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all flex-shrink-0">
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all shrink-0">
                 {Icons.back}
                 <span>{t('nav.back')}</span>
               </button>
@@ -286,7 +286,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {loading ? (
               <div className="h-8 w-48 rounded-full bg-white/15 animate-pulse" />
                       ) : activeGroup ? (
-                <div className="relative flex-shrink-0" ref={pillRef}>
+                <div className="relative shrink-0" ref={pillRef}>
                   <button
                     onClick={() => {
                     setPillMenuOpen(v => !v)
@@ -373,7 +373,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex-1" />
 
             {currentUser ? (
-              <div className="relative flex-shrink-0" ref={avatarRef}>
+              <div className="relative shrink-0" ref={avatarRef}>
                 <button onClick={() => setAvatarMenuOpen(v => !v)} title={currentUser.name}
                   className="w-[34px] h-[34px] rounded-full bg-[#4CAF1A] flex items-center justify-center text-[12px] font-black text-white select-none ring-2 ring-white/30 hover:ring-white/60 transition-all cursor-pointer">
                   {currentUser.initials}
@@ -468,7 +468,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 )}
               </div>
             ) : (
-              <Link href="/login" className="w-[34px] h-[34px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0">
+              <Link href="/login" className="w-[34px] h-[34px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors shrink-0">
                 {Icons.user}
               </Link>
             )}
@@ -481,7 +481,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         
 
         {/* Sidebar desktop */}
-        <aside className="hidden lg:flex w-[220px] flex-shrink-0 flex-col py-6 px-3 gap-1 border-r border-white/50"
+        <aside className="hidden lg:flex w-[220px] shrink-0 flex-col py-6 px-3 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <SidebarSection label={t('nav.play')} emoji="⛳">
             <NavItem href="/my-events"                    icon={Icons.myEvents}     iconColor="#185FA5" label={t('nav.myEvents')}    active={isActive('/my-events')} />
@@ -519,7 +519,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Sidebar tablette */}
-        <aside className="hidden sm:flex lg:hidden w-[60px] flex-shrink-0 flex-col items-center py-5 gap-1 border-r border-white/50"
+        <aside className="hidden sm:flex lg:hidden w-[60px] shrink-0 flex-col items-center py-5 gap-1 border-r border-white/50"
           style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
             <NavIconItem href="/my-events"                    icon={Icons.myEvents}     iconColor="#185FA5" label={t('nav.myEvents')}    active={isActive('/my-events')} />

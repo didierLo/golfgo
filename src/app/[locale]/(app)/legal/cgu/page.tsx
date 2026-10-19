@@ -30,7 +30,7 @@ export default function CguPage() {
         style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#EAF3DE] flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#EAF3DE] flex items-center justify-center shrink-0">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="text-[#3B6D11]">
               <path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.3"/>
               <path d="M5 6h6M5 9h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
@@ -70,7 +70,7 @@ export default function CguPage() {
           <ul className="mt-2 flex flex-col gap-1.5">
             {(['i1','i2','i3','i4'] as const).map(i => (
               <li key={i} className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3B6D11] flex-shrink-0 mt-1.5" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3B6D11] shrink-0 mt-1.5" />
                 <span className="text-[12px] text-slate-600 leading-relaxed">{t(`sections.usage.items.${i}`)}</span>
               </li>
             ))}

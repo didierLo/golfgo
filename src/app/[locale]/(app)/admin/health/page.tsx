@@ -105,7 +105,7 @@ export default function HealthDashboardPage() {
                   <div className="text-[11px] text-red-500 truncate">{row.last_error}</div>
                 </div>
                 <button onClick={() => handleRetry(row.id)} disabled={busy}
-                  className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-100 disabled:opacity-40 flex-shrink-0">
+                  className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-100 disabled:opacity-40 shrink-0">
                   Relancer
                 </button>
               </div>

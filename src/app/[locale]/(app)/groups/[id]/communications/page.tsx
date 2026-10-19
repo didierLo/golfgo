@@ -82,7 +82,7 @@ function IconBtn({ onClick, href, title, disabled, color, children }: {
   onClick?: () => void; href?: string; title: string
   disabled?: boolean; color?: 'blue'; children: React.ReactNode
 }) {
-  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0`
+  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors shrink-0`
   const cls = disabled
     ? `${base} border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed`
     : color === 'blue'
@@ -559,7 +559,7 @@ printFormatName, printScorecardNotes
           </IconBtn>
           <button
             onClick={() => setShowSettings(v => !v)}
-            className={`w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0 ${showSettings ? 'border-[#185FA5] bg-[#EBF3FC] text-[#185FA5]' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+            className={`w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors shrink-0 ${showSettings ? 'border-[#185FA5] bg-[#EBF3FC] text-[#185FA5]' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}
             title={t('communications.settings.title')}>
             ⚙️
           </button>

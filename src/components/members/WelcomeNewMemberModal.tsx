@@ -151,7 +151,7 @@ export default function WelcomeNewMemberModal({ groupId, onClose }: { groupId: s
         <div className="bg-slate-50 rounded-xl px-3 py-2.5 mb-5 flex items-center gap-2">
           <span className="text-[11px] text-slate-600 truncate flex-1 select-all">{signupUrl}</span>
           <button onClick={copyLink}
-            className="flex-shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
+            className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-[#185FA5] text-white hover:bg-[#0C447C] transition-colors">
             {copied ? t('members.welcome.copied') : t('members.welcome.copy')}
           </button>
         </div>

@@ -30,7 +30,7 @@ export default function PrivacyPage() {
         style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#EBF3FC] flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#EBF3FC] flex items-center justify-center shrink-0">
             <svg width="18" height="18" viewBox="0 0 16 16" fill="none" className="text-[#185FA5]">
               <path d="M8 1.5L2 4v4c0 3.5 2.5 6 6 7 3.5-1 6-3.5 6-7V4L8 1.5z" stroke="currentColor" strokeWidth="1.3"/>
             </svg>
@@ -140,7 +140,7 @@ function Items({ section, keys, t }: { section: string; keys: string[]; t: any }
     <ul className="mt-1.5 mb-1.5 flex flex-col gap-1.5">
       {keys.map(k => (
         <li key={k} className="flex items-start gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#185FA5] flex-shrink-0 mt-1.5" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#185FA5] shrink-0 mt-1.5" />
           <span className="text-[12px] text-slate-600 leading-relaxed">
             {t(`sections.${section}.items.${k}`)}
           </span>

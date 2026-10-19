@@ -36,7 +36,7 @@ function IconBtn({ onClick, title, disabled, locked, color, children }: {
   onClick?: () => void; title: string
   disabled?: boolean; locked?: boolean; color?: 'blue'; children: React.ReactNode
 }) {
-  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0`
+  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors shrink-0`
   const cls = (disabled || locked)
     ? `${base} border-slate-200 text-slate-300 bg-slate-50 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`
     : color === 'blue'

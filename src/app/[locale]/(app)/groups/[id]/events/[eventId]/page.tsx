@@ -145,7 +145,7 @@ export default function EventOverviewPage() {
         style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
 
         <div className="flex items-start gap-3">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 mt-0.5 flex-shrink-0">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 mt-0.5 shrink-0">
             <rect x="1" y="3" width="14" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/>
             <path d="M1 7h14M5 1v4M11 1v4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
           </svg>
@@ -159,7 +159,7 @@ export default function EventOverviewPage() {
 
         {event.location && (
           <div className="flex items-center gap-3">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 shrink-0">
               <path d="M8 1.5C5.51 1.5 3.5 3.51 3.5 6c0 3.75 4.5 8.5 4.5 8.5s4.5-4.75 4.5-8.5C12.5 3.51 10.49 1.5 8 1.5z" stroke="currentColor" strokeWidth="1.3"/>
               <circle cx="8" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.3"/>
             </svg>
@@ -169,7 +169,7 @@ export default function EventOverviewPage() {
 
         {event.competition_formats?.name && (
           <div className="flex items-center gap-3">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 shrink-0">
               <path d="M3 13V8M6 13V5M9 13V7M12 13V3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
             </svg>
             <span className="text-[13px] text-slate-700">{event.competition_formats.name}</span>
@@ -178,7 +178,7 @@ export default function EventOverviewPage() {
 
         {(event.courses?.course_name || event.location) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 shrink-0">
               <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3"/>
               <path d="M8 5v3M8 11v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
@@ -213,7 +213,7 @@ export default function EventOverviewPage() {
         )}
 
         <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 flex-shrink-0">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-slate-400 shrink-0">
             <circle cx="6" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
             <path d="M1 13c0-2.76 2.24-5 5-5a5 5 0 015 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
             <circle cx="12" cy="5" r="2" stroke="currentColor" strokeWidth="1.3"/>

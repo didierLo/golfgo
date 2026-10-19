@@ -146,7 +146,7 @@ export default function ClubsPage() {
                     className="flex-1 min-w-0 flex items-center justify-between gap-3 pl-4 pr-2 py-3 text-left"
                   >
                     <span className="text-[13px] font-medium text-gray-900 truncate">{c.name}</span>
-                    <span className="text-[12px] text-gray-700 flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-[12px] text-gray-700 flex items-center gap-1.5 shrink-0">
                       {c.region && <span>{c.region}</span>}
                       <span>{COUNTRY_FLAGS[c.country] ?? ''} {c.country}</span>
                     </span>
@@ -154,7 +154,7 @@ export default function ClubsPage() {
                   {/* Bouton « Site du club » — seulement si une adresse http(s) est renseignée */}
                   {c.website && /^https?:\/\//i.test(c.website) && (
                     <a href={c.website} target="_blank" rel="noopener noreferrer"
-                      className="mr-3 flex-shrink-0 inline-flex items-center gap-1 border border-gray-200 rounded-md px-2 py-1 text-[11px] font-medium text-[#185FA5] bg-white hover:border-[#185FA5]/40 transition-colors whitespace-nowrap">
+                      className="mr-3 shrink-0 inline-flex items-center gap-1 border border-gray-200 rounded-md px-2 py-1 text-[11px] font-medium text-[#185FA5] bg-white hover:border-[#185FA5]/40 transition-colors whitespace-nowrap">
                       🌐 {t('clubs.openWebsite')}
                     </a>
                   )}

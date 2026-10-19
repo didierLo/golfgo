@@ -23,7 +23,7 @@ function Toggle({ value, onChange, label, desc }: {
     <div className="flex items-start gap-3">
       <button type="button" onClick={() => onChange(!value)}
         style={{ backgroundColor: value ? '#185FA5' : '#CBD5E1', transition: 'background-color 0.2s' }}
-        className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 flex-shrink-0 cursor-pointer">
+        className="mt-0.5 w-9 h-5 rounded-full flex items-center px-0.5 shrink-0 cursor-pointer">
         <div style={{ transform: value ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 0.2s' }}
           className="w-4 h-4 rounded-full bg-white shadow-sm" />
       </button>
@@ -200,7 +200,7 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
           <div className="flex gap-2.5">
             {GROUP_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setColor(c)}
-                className="w-7 h-7 rounded-full transition-transform hover:scale-110 flex-shrink-0"
+                className="w-7 h-7 rounded-full transition-transform hover:scale-110 shrink-0"
                 style={{ background: c, outline: color === c ? `3px solid ${c}` : 'none', outlineOffset: '2px' }} />
             ))}
           </div>

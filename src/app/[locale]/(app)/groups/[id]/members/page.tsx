@@ -339,7 +339,7 @@ export default function MembersPage() {
 
               <div className="flex items-center gap-2.5 cursor-pointer min-w-0"
                 onClick={() => router.push(`/players/${member.id}/edit?groupId=${groupId}`)}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
                   style={{
                     background: member.role === 'owner' ? '#185FA5' : member.role === 'guest' ? '#FEF3C7' : '#EBF3FC',
                     color:      member.role === 'owner' ? '#ffffff'  : member.role === 'guest' ? '#92400E' : '#0C447C',

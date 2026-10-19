@@ -47,7 +47,7 @@ function Badge({ status }: { status: string }) {
   const s = STATUS_STYLE[status] ?? { bg: '#F1F5F9', text: '#64748B' }
   const label = t(`status.${status}` as any, { default: status.toLowerCase() })
   return (
-    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
+    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
       style={{ background: s.bg, color: s.text }}>
       {label}
     </span>
@@ -117,7 +117,7 @@ function daysUntil(dateStr: string): number {
 function ActionPill({ onClick, icon, label, href }: {
   onClick?: (ev: React.MouseEvent) => void; icon: React.ReactNode; label: string; href?: string
 }) {
-  const className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-600 hover:bg-white hover:text-[#185FA5] hover:shadow-sm transition-all whitespace-nowrap flex-shrink-0"
+  const className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-600 hover:bg-white hover:text-[#185FA5] hover:shadow-sm transition-all whitespace-nowrap shrink-0"
   if (href) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={className}>
@@ -150,7 +150,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
   return (
     <div className={`bg-white border rounded-xl overflow-hidden hover:border-slate-300 hover:shadow-sm transition-all ${past ? 'opacity-55 border-slate-100' : 'border-slate-200'}`}>
       <div className="flex items-center gap-3 px-4 py-3">
-        <div onClick={onView} className="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 cursor-pointer"
+        <div onClick={onView} className="w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 cursor-pointer"
           style={{ background: `${groupColor}18` }}>
           <span className="text-[13px] font-black leading-none" style={{ color: groupColor }}>{day}</span>
           <span className="text-[9px] font-bold uppercase tracking-wide leading-none mt-0.5" style={{ color: groupColor }}>{month}</span>
@@ -162,11 +162,11 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
             {formatDayFull(e.events.starts_at, locale)}
           </div>
           <div className="text-[11.5px] text-slate-600 mt-0.5 flex items-center gap-1 truncate">
-            <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: groupColor }} />
+            <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ background: groupColor }} />
             <span className="truncate">{e.events.groups?.name}</span>
-            <span className="flex-shrink-0">·</span>
-            <span className="flex-shrink-0 font-medium">{formatTime(e.events.starts_at, locale)}</span>
-            {e.events.location && (<><span className="flex-shrink-0">·</span><span className="truncate">{e.events.location}</span></>)}
+            <span className="shrink-0">·</span>
+            <span className="shrink-0 font-medium">{formatTime(e.events.starts_at, locale)}</span>
+            {e.events.location && (<><span className="shrink-0">·</span><span className="truncate">{e.events.location}</span></>)}
           </div>
           {e.events.max_participants && (
             <span className={`text-[11px] font-medium ${
@@ -178,7 +178,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
           )}
         </div>
 
-        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+        <div className="flex flex-col items-end gap-2 shrink-0">
           <Badge status={e.status} />
 
           {e.events.fee_per_person && !past && (
@@ -553,7 +553,7 @@ function WeatherModal({ event, onClose }: { event: MyEvent; onClose: () => void 
         </div>
         {loading ? (
           <div className="flex gap-1.5 overflow-x-auto">
-            {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="w-14 h-24 bg-slate-100 rounded-lg animate-pulse flex-shrink-0" />)}
+            {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="w-14 h-24 bg-slate-100 rounded-lg animate-pulse shrink-0" />)}
           </div>
         ) : unavailable || !points?.length ? (
           <p className="text-center text-slate-400 text-[13px] py-6">{t('myEvents.weatherUnavailable')}</p>
@@ -562,7 +562,7 @@ function WeatherModal({ event, onClose }: { event: MyEvent; onClose: () => void 
             {points.map((p, i) => {
               const info = weatherCodeInfo(p.code)
               return (
-                <div key={i} className="flex flex-col items-center flex-shrink-0 w-14 py-2 rounded-lg bg-slate-50 border border-slate-100">
+                <div key={i} className="flex flex-col items-center shrink-0 w-14 py-2 rounded-lg bg-slate-50 border border-slate-100">
                   <span className="text-[10px] text-slate-400 mb-1">{p.label}</span>
                   <span className="text-[20px] leading-none mb-1">{info.emoji}</span>
                   <span className="text-[12px] font-bold text-slate-900">{p.temp}°</span>
@@ -726,7 +726,7 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
           <a href="/my-events/partners"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-semibold transition-all border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-[#185FA5] hover:text-white hover:border-[#185FA5]"
           >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
               <circle cx="8"  cy="4"  r="2"   stroke="currentColor" strokeWidth="1.4"/>
               <circle cx="3"  cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
               <circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>

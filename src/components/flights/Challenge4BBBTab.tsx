@@ -74,7 +74,7 @@ function GlobalPlanning({
                         {player ? (
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-medium text-slate-800">{player.first_name} {player.surname}</span>
-                            <span className="text-[11px] text-slate-400 font-mono flex-shrink-0">
+                            <span className="text-[11px] text-slate-400 font-mono shrink-0">
                               {player.whs !== null ? Number(player.whs).toFixed(1) : '—'}
                             </span>
                           </div>
@@ -176,7 +176,7 @@ function FlightCard({
               } ${isOwner ? 'cursor-grab active:cursor-grabbing' : ''}`}>
               <div className="flex items-center gap-2">
                 {isOwner && (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 flex-shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 shrink-0">
                     <circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/>
                     <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
                     <circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>
@@ -246,7 +246,7 @@ function BenchArea({
                   : 'bg-white border-slate-200 hover:border-slate-300'
               } ${isOwner ? 'cursor-grab active:cursor-grabbing' : ''}`}>
               {isOwner && (
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 flex-shrink-0">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 shrink-0">
                   <circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/>
                   <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
                   <circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>

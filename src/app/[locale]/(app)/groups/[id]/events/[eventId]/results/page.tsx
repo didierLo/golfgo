@@ -24,7 +24,7 @@ function IconBtn({ onClick, href, title, disabled, color, children }: {
   onClick?: () => void; href?: string; title: string
   disabled?: boolean; color?: 'blue'; children: React.ReactNode
 }) {
-  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0`
+  const base = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors shrink-0`
   const cls = disabled
     ? `${base} border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed`
     : color === 'blue'
@@ -81,7 +81,7 @@ function EventPill({ events, selectedId, onSelect }: {
                       </p>
                     </div>
                     {isSelected && (
-                      <svg width="13" height="13" viewBox="0 0 12 12" fill="none" className="text-[#185FA5] flex-shrink-0">
+                      <svg width="13" height="13" viewBox="0 0 12 12" fill="none" className="text-[#185FA5] shrink-0">
                         <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     )}
@@ -460,7 +460,7 @@ export default function ResultsPage() {
                                 return (
                                   <button key={p.id} onClick={() => setActivePlayerId(p.id)}
                                     title={`${p.first_name} ${p.surname}`}
-                                    className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all flex-shrink-0 ${
+                                    className={`w-11 h-11 rounded-full text-[12px] font-bold border-2 transition-all shrink-0 ${
                                       isActive ? 'bg-[#185FA5] text-white border-[#185FA5] shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:border-[#185FA5]'
                                     }`}>
                                     {initials}

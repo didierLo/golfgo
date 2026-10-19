@@ -228,7 +228,7 @@ function ConstraintSection({ title, description, pairs, nameOf, color, emptyLabe
           <p className="text-[14px] font-bold" style={{ color: color.text }}>{title}</p>
           <p className="text-[12px] mt-0.5" style={{ color: color.text, opacity: 0.75 }}>{description}</p>
         </div>
-        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
+        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0"
           style={{ background: 'white', color: color.text, border: `1px solid ${color.border}` }}>
           {pairs.length}
         </span>
@@ -247,7 +247,7 @@ function ConstraintSection({ title, description, pairs, nameOf, color, emptyLabe
                 {nameOf(p.player_b, p.players_b)}
               </span>
               <button onClick={() => onRemove(p.id)}
-                className="text-[11px] font-semibold text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors flex-shrink-0">
+                className="text-[11px] font-semibold text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors shrink-0">
                 {removeLabel}
               </button>
             </div>

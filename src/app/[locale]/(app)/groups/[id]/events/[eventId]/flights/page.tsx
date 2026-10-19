@@ -563,7 +563,7 @@ const flightGroups = useMemo(() =>
                         isDragging ? 'opacity-40 border-slate-200' : 'border-[#185FA5]/30'
                       } ${isOwner ? 'cursor-grab active:cursor-grabbing' : ''}`}>
                       {isOwner && (
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 flex-shrink-0">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 shrink-0">
                           <circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/>
                           <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
                           <circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>
@@ -702,7 +702,7 @@ const flightGroups = useMemo(() =>
                                     } ${isOwner ? 'cursor-grab active:cursor-grabbing' : ''}`}>
                                     <div className="flex items-center gap-2">
                                       {isOwner && (
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 flex-shrink-0">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300 shrink-0">
                                           <circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/>
                                           <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
                                           <circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>

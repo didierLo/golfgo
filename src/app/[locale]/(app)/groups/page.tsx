@@ -155,7 +155,7 @@ export default function GroupsPage() {
               style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
               <div className="px-4 py-3 flex items-center gap-3 cursor-pointer"
                 onClick={() => router.push(`/groups/${group.id}/events`)}>
-                <div className="w-[3px] h-10 rounded-full flex-shrink-0" style={{ background: color }} />
+                <div className="w-[3px] h-10 rounded-full shrink-0" style={{ background: color }} />
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-semibold text-slate-900">{group.name}</div>
                   <div className="text-[12px] text-slate-500 mt-0.5 flex items-center gap-1.5">
@@ -167,7 +167,7 @@ export default function GroupsPage() {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                   <button onClick={() => editGroup(group.id, group.role)}
                     className={`text-[11px] font-semibold border px-2.5 py-1.5 rounded-lg transition-colors ${
                       isOwner ? 'text-slate-600 border-white/50 hover:bg-white/30' : 'text-slate-300 border-slate-100 cursor-not-allowed'

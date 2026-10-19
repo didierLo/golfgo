@@ -197,7 +197,7 @@ export default function AddMemberPage() {
                   const addedRole = added[p.id]
                   return (
                     <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${i < results.length - 1 ? 'border-b border-white/30' : ''}`}>
-                      <div className="w-8 h-8 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-[#EBF3FC] flex items-center justify-center text-[11px] font-bold text-[#0C447C] shrink-0">
                         {p.first_name[0]}{p.surname[0]}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -212,7 +212,7 @@ export default function AddMemberPage() {
                           ✓ {addedRole === 'guest' ? t('addMember.visitor') : t('addMember.member')}
                         </span>
                       ) : (
-                        <div className="flex gap-1.5 flex-shrink-0">
+                        <div className="flex gap-1.5 shrink-0">
                           <button onClick={() => addExisting(p.id, 'member')} disabled={loadingKey === `${p.id}-member`}
                             className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-[#185FA5] text-[#185FA5] bg-white hover:bg-[#EBF3FC] disabled:opacity-50 transition-colors whitespace-nowrap">
                             {loadingKey === `${p.id}-member` ? '…' : t('addMember.member')}
@@ -242,7 +242,7 @@ export default function AddMemberPage() {
             }}
             className="w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all hover:scale-[1.01] active:scale-[0.99]"
             style={{ background: 'rgba(235,243,252,0.60)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderColor: 'rgba(24,95,165,0.18)', boxShadow: '0 1px 8px rgba(24,95,165,0.07)' }}>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(24,95,165,0.12)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(24,95,165,0.12)' }}>
               <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#185FA5" strokeWidth="2" strokeLinecap="round"/></svg>
             </div>
             <span className="text-[13px] font-semibold text-[#185FA5]">{t('addMember.createPlayer')}</span>
@@ -255,7 +255,7 @@ export default function AddMemberPage() {
             }}
             className="w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all hover:scale-[1.01] active:scale-[0.99]"
             style={{ background: 'rgba(254,243,199,0.55)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderColor: 'rgba(217,119,6,0.20)', boxShadow: '0 1px 8px rgba(217,119,6,0.07)' }}>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(217,119,6,0.12)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(217,119,6,0.12)' }}>
               <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
                 <circle cx="10" cy="7" r="3.5" stroke="#B45309" strokeWidth="1.7"/>
                 <path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="#B45309" strokeWidth="1.7" strokeLinecap="round"/>
@@ -331,7 +331,7 @@ export default function AddMemberPage() {
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[12px] font-semibold transition-colors ${
                         form.default_tee_color === tee.value ? 'border-slate-400 bg-white shadow-sm text-slate-700' : 'border-slate-200 text-slate-400 hover:border-slate-300'
                       }`}>
-                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: tee.color }} />
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: tee.color }} />
                       {tee.label}
                     </button>
                   ))}
@@ -365,7 +365,7 @@ export default function AddMemberPage() {
               </button>
             </div>
             <div className="flex items-start gap-2 rounded-xl bg-[#EBF3FC] border border-[#185FA5]/20 px-3 py-2.5">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" className="shrink-0 mt-0.5">
                 <circle cx="8" cy="8" r="7" stroke="#185FA5" strokeWidth="1.3"/>
                 <path d="M8 7.2v4M8 5.3v.1" stroke="#185FA5" strokeWidth="1.3" strokeLinecap="round"/>
               </svg>

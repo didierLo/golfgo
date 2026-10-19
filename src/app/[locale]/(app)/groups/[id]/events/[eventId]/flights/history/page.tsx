@@ -329,10 +329,10 @@ export default function FlightHistoryPage() {
             {flightRows.map((flight, i) => (
               <div key={flight.id}
                 className={`flex items-center gap-4 px-4 py-3 ${i < flightRows.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                <span className="text-[11px] font-semibold text-slate-400 w-24 flex-shrink-0">
+                <span className="text-[11px] font-semibold text-slate-400 w-24 shrink-0">
                   {formatDate(flight.date)}
                 </span>
-                <span className="text-[10px] font-bold text-slate-300 flex-shrink-0">
+                <span className="text-[10px] font-bold text-slate-300 shrink-0">
                   #{i + 1}
                 </span>
                 <div className="flex flex-wrap gap-1.5 flex-1">

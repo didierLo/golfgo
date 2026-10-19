@@ -33,7 +33,7 @@ function IconBtn({ onClick, href, title, disabled, active, children }: {
   onClick?: () => void; href?: string; title: string
   disabled?: boolean; active?: boolean; children: React.ReactNode
 }) {
-  const cls = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors flex-shrink-0 ${
+  const cls = `w-9 h-9 flex items-center justify-center rounded-xl border text-[16px] transition-colors shrink-0 ${
     disabled
       ? 'border-slate-200 text-slate-300 bg-slate-50 cursor-not-allowed'
       : active
