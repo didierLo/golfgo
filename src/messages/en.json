@@ -120,9 +120,10 @@
       "printedOn": "Printed on {date}",
       "siteUrl": "GolfGo — golfgo.be"
     },
-    "reorderHint": "⠿ Drag a tee time to reorder · tap the time to edit it manually",
+    "reorderHint": "⠿ Drag a tee time or tap its number to move it · tap the time to edit it manually",
     "reorderSaving": " · saving…",
     "dragHandleTitle": "Drag to reorder",
+    "editNumberTitle": "Type a number to move this flight",
     "editTimeTitle": "Edit tee time",
     "resetTimeTitle": "Revert to automatic time",
     "errorSaveTime": "Error saving the time — please try again",

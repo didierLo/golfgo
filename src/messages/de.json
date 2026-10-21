@@ -119,9 +119,10 @@
       "printedOn": "Gedruckt am {date}",
       "siteUrl": "GolfGo — golfgo.be"
     },
-    "reorderHint": "⠿ Ziehen Sie einen Abschlag, um die Reihenfolge zu ändern · tippen Sie auf die Uhrzeit, um sie manuell zu bearbeiten",
+    "reorderHint": "⠿ Ziehen Sie einen Abschlag oder tippen Sie auf seine Nummer, um ihn zu verschieben · tippen Sie auf die Uhrzeit, um sie manuell zu bearbeiten",
     "reorderSaving": " · wird gespeichert…",
     "dragHandleTitle": "Ziehen zum Umordnen",
+    "editNumberTitle": "Nummer eingeben, um diesen Flight zu verschieben",
     "editTimeTitle": "Abschlagzeit bearbeiten",
     "resetTimeTitle": "Zur automatischen Zeit zurückkehren",
     "errorSaveTime": "Fehler beim Speichern der Zeit — bitte erneut versuchen",

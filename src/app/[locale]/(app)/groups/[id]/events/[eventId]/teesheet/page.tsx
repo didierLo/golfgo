@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
@@ -83,6 +83,11 @@ export default function TeeSheetPage() {
   const [dragFlightIdx,     setDragFlightIdx]     = useState<number | null>(null)
   const [dragOverFlightIdx, setDragOverFlightIdx] = useState<number | null>(null)
   const [reordering,        setReordering]        = useState(false)
+
+  // ── Numéro de flight saisi directement (alternative au glisser-déposer) ──
+  const [editingNumIdx, setEditingNumIdx] = useState<number | null>(null)
+  const [numDraft,      setNumDraft]      = useState('')
+  const cancelNumRef = useRef(false)
 
   // ── Heure de départ modifiée manuellement ──
   const [editingTimeIdx, setEditingTimeIdx] = useState<number | null>(null)
@@ -291,6 +296,23 @@ export default function TeeSheetPage() {
     }
   }
 
+  // ── Déplacer un flight en tapant son nouveau numéro ──
+  function startEditNumber(idx: number) {
+    if (!isOwner || reordering) return
+    cancelNumRef.current = false
+    setNumDraft(String(idx + 1))
+    setEditingNumIdx(idx)
+  }
+
+  function commitEditNumber(idx: number) {
+    setEditingNumIdx(null)
+    if (cancelNumRef.current) { cancelNumRef.current = false; return }
+    const n = parseInt(numDraft, 10)
+    if (Number.isNaN(n)) return
+    const target = Math.min(Math.max(n, 1), flights.length) - 1 // borné entre 1 et le nombre de flights
+    moveFlight(idx, target)
+  }
+
   function onFlightDragStart(idx: number) {
     if (!isOwner) return
     setDragFlightIdx(idx)
@@ -481,7 +503,36 @@ export default function TeeSheetPage() {
                       ⠿
                     </span>
                   )}
-                  <span className="flight-label-text text-[13px] font-black text-slate-800">{t('teesheet.flight', { number: flight.flight_number })}</span>
+                  {isOwner && editingNumIdx === index ? (
+                    <div className="print:hidden flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={flights.length}
+                        autoFocus
+                        onFocus={e => e.target.select()}
+                        value={numDraft}
+                        onChange={e => setNumDraft(e.target.value)}
+                        onBlur={() => commitEditNumber(index)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                          if (e.key === 'Escape') { cancelNumRef.current = true; (e.target as HTMLInputElement).blur() }
+                        }}
+                        className="w-16 text-[15px] font-black text-[#185FA5] border border-[#185FA5]/40 rounded-lg px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30"
+                      />
+                      <span className="text-[11px] text-slate-400">/ {flights.length}</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => startEditNumber(index)}
+                      disabled={!isOwner}
+                      title={isOwner ? t('teesheet.editNumberTitle') : undefined}
+                      className={`flight-label-text text-[13px] font-black text-slate-800 ${isOwner ? 'hover:underline decoration-dashed underline-offset-2 cursor-pointer' : ''}`}>
+                      {t('teesheet.flight', { number: flight.flight_number })}
+                    </button>
+                  )}
                 </div>
                 {isOwner && editingTimeIdx === index ? (
                   <input

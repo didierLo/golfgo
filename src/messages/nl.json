@@ -118,9 +118,10 @@
       "printedOn": "Afgedrukt op {date}",
       "siteUrl": "GolfGo — golfgo.be"
     },
-    "reorderHint": "⠿ Sleep een vertrek om de volgorde te wijzigen · tik op het tijdstip om het handmatig aan te passen",
+    "reorderHint": "⠿ Sleep een vertrek of tik op het nummer om het te verplaatsen · tik op het tijdstip om het handmatig aan te passen",
     "reorderSaving": " · opslaan…",
     "dragHandleTitle": "Slepen om te herordenen",
+    "editNumberTitle": "Typ een nummer om deze flight te verplaatsen",
     "editTimeTitle": "Vertrektijd wijzigen",
     "resetTimeTitle": "Terug naar automatische tijd",
     "errorSaveTime": "Fout bij het opslaan van de tijd — probeer het opnieuw",

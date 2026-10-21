@@ -119,9 +119,10 @@
       "printedOn": "Impreso el {date}",
       "siteUrl": "GolfGo — golfgo.be"
     },
-    "reorderHint": "⠿ Arrastra una salida para cambiar el orden · toca la hora para editarla manualmente",
+    "reorderHint": "⠿ Arrastra una salida o toca su número para moverla · toca la hora para editarla manualmente",
     "reorderSaving": " · guardando…",
     "dragHandleTitle": "Arrastrar para reordenar",
+    "editNumberTitle": "Escribe un número para mover este flight",
     "editTimeTitle": "Editar hora de salida",
     "resetTimeTitle": "Volver a la hora automática",
     "errorSaveTime": "Error al guardar la hora — inténtalo de nuevo",
