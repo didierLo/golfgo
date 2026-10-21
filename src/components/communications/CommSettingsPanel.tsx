@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
-import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { useLocale, useTranslations } from 'next-intl'
 
 export type Template = {
   template_logo_url:           string | null
@@ -16,47 +16,26 @@ export type Template = {
 }
 
 type Props = {
-  groupTemplate: Template
-  setGroupTemplate: React.Dispatch<React.SetStateAction<Template>>
+  groupId: string
   saving: boolean
-  uploading: boolean
   onSaveTemplate: () => void
   onReset: () => void
-  onLogoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-export default function CommSettingsPanel({
-  groupTemplate, setGroupTemplate, saving, uploading,
-  onSaveTemplate, onReset, onLogoUpload,
-}: Props) {
-  const t = useTranslations()
-  const fileInputRef   = useRef<HTMLInputElement>(null)
+export default function CommSettingsPanel({ groupId, saving, onSaveTemplate, onReset }: Props) {
+  const t      = useTranslations()
+  const locale = useLocale()
 
   return (
     <div className="rounded-xl border border-white/60 shadow-sm p-5 mb-6" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">{t('communications.settings.visualIdentity')}</p>
-      <p className="text-[11px] text-slate-400 mb-4">{t('communications.settings.visualDesc')}</p>
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">{t('communications.settings.title')}</p>
 
+      {/* Le logo se gère désormais avec l'image de fond, dans les paramètres du groupe */}
       <div className="mb-5">
-        <div>
-          <label className="block text-[12px] font-semibold text-slate-600 mb-2">{t('communications.templates.headerLogo')}</label>
-          {groupTemplate.template_logo_url ? (
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={groupTemplate.template_logo_url} alt="Logo" className="h-12 object-contain border border-white/50 rounded-xl p-1 bg-white/30" />
-              <div className="flex flex-col gap-1">
-                <button onClick={() => fileInputRef.current?.click()} className="text-[11px] font-semibold text-[#185FA5] hover:underline">{t('communications.templates.changeLogo')}</button>
-                <button onClick={() => setGroupTemplate(prev => ({ ...prev, template_logo_url: null }))} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
-              </div>
-            </div>
-          ) : (
-            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-              className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
-              {uploading ? t('communications.templates.uploading') : t('communications.templates.addLogo')}
-            </button>
-          )}
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onLogoUpload} />
-        </div>
+        <p className="text-[12px] text-slate-600">{t('communications.settings.logoMoved')}</p>
+        <Link href={`/${locale}/groups/${groupId}/edit`} className="inline-block mt-1.5 text-[12px] font-semibold text-[#185FA5] hover:underline">
+          {t('communications.settings.logoMovedLink')}
+        </Link>
       </div>
 
       <div className="flex items-center justify-between mt-5 gap-3">

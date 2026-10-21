@@ -63,12 +63,19 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
   const [bgUploading,     setBgUploading]     = useState(false)
   const bgFileInputRef = useRef<HTMLInputElement>(null)
 
+  // Logo des emails et documents imprimés (colonne groups.template_logo_url, la même que celle lue par
+  // les emails, la feuille de départ et les scorecards). Même principe que le fond : l'envoi et la
+  // suppression s'enregistrent tout de suite en base, sans passer par « Enregistrer ».
+  const [logoUrl,         setLogoUrl]         = useState<string | null>(null)
+  const [logoUploading,   setLogoUploading]   = useState(false)
+  const logoFileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => { fetchGroup() }, [])
 
   async function fetchGroup() {
     const { data, error } = await supabase
       .from('groups')
-      .select('name, description, color, auto_reminders, auto_teesheet, auto_invitation, background_url')
+      .select('name, description, color, auto_reminders, auto_teesheet, auto_invitation, background_url, template_logo_url')
       .eq('id', id).single()
     if (error) { alert(error.message); router.push('/groups'); return }
     setName(data.name)
@@ -79,6 +86,7 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
     setLoading(false)
     setAutoInvitation(data.auto_invitation ?? false)
     setBackgroundUrl(data.background_url ?? null)
+    setLogoUrl(data.template_logo_url ?? null)
 
     // Langue du groupe : requête séparée, pour ne pas casser cette page si la migration SQL n'est pas encore passée
     const { data: loc } = await supabase.from('groups').select('locale').eq('id', id).maybeSingle()
@@ -136,6 +144,48 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
       window.location.reload()
     } catch (e: any) {
       alert(`Erreur inattendue lors de la réinitialisation : ${e?.message ?? e}`)
+    }
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file) return
+    setLogoUploading(true)
+    try {
+      // Même emplacement que l'ancien écran Communications → Réglages : les logos déjà envoyés restent valables
+      const path = `${id}/logo.${file.name.split('.').pop()}`
+      const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
+      if (error) { alert(`Envoi impossible : ${error.message}`); return }
+      const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
+      const bustedUrl = `${publicUrl}?v=${Date.now()}`
+      // .select('id') : sans lui, une écriture refusée par les droits d'accès ne remonte pas comme une erreur
+      const { data: updated, error: dbError } = await supabase.from('groups')
+        .update({ template_logo_url: bustedUrl }).eq('id', id).select('id')
+      if (dbError) { alert(`Enregistrement impossible : ${dbError.message}`); return }
+      if (!updated || updated.length === 0) {
+        alert("Le logo a bien été envoyé, mais l'enregistrement n'a modifié aucune ligne (probablement un problème de droits d'accès sur ce groupe). Rien n'a changé.")
+        return
+      }
+      setLogoUrl(bustedUrl)
+    } catch (err: any) {
+      alert(`Erreur inattendue lors de l'envoi du logo : ${err?.message ?? err}`)
+    } finally {
+      setLogoUploading(false)
+      if (logoFileInputRef.current) logoFileInputRef.current.value = ''
+    }
+  }
+
+  async function handleLogoDelete() {
+    try {
+      const { data: updated, error } = await supabase.from('groups')
+        .update({ template_logo_url: null }).eq('id', id).select('id')
+      if (error) { alert(`Suppression impossible : ${error.message}`); return }
+      if (!updated || updated.length === 0) {
+        alert("La suppression n'a modifié aucune ligne (probablement un problème de droits d'accès sur ce groupe).")
+        return
+      }
+      setLogoUrl(null)
+    } catch (err: any) {
+      alert(`Erreur inattendue lors de la suppression du logo : ${err?.message ?? err}`)
     }
   }
 
@@ -233,6 +283,30 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
           )}
           <input ref={bgFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBackgroundUpload} />
           <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.backgroundHint')}</p>
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editGroup.logoLabel')}</label>
+          {logoUrl ? (
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl} alt="Logo" className="h-12 object-contain border border-white/50 rounded-xl p-1 bg-white/30" />
+              <div className="flex flex-col gap-1">
+                <button type="button" onClick={() => logoFileInputRef.current?.click()} disabled={logoUploading}
+                  className="text-[11px] font-semibold text-[#185FA5] hover:underline">
+                  {logoUploading ? t('communications.templates.uploading') : t('communications.templates.changeLogo')}
+                </button>
+                <button type="button" onClick={handleLogoDelete} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" onClick={() => logoFileInputRef.current?.click()} disabled={logoUploading}
+              className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
+              {logoUploading ? t('communications.templates.uploading') : t('communications.templates.addLogo')}
+            </button>
+          )}
+          <input ref={logoFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+          <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.logoHint')}</p>
         </div>
 
         <div>

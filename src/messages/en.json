@@ -287,7 +287,9 @@
     "settings": {
       "title": "Settings",
       "visualIdentity": "Visual identity",
-      "visualDesc": "Logo and colors used in emails sent from this group."
+      "visualDesc": "Logo and colors used in emails sent from this group.",
+      "logoMoved": "The logo for emails and documents is now changed in the group settings, next to the background image.",
+      "logoMovedLink": "Open group settings"
     },
     "message": {
       "title": "Message",
@@ -519,7 +521,9 @@
     "backgroundLabel": "App background",
     "backgroundHint": "Photo shown behind the app for this group, on computer, tablet and phone.",
     "backgroundAdd": "+ Add a background photo",
-    "backgroundReset": "Reset to default photo"
+    "backgroundReset": "Reset to default photo",
+    "logoLabel": "Group logo",
+    "logoHint": "Shown in the header of emails (invitations, reminders, teesheets) and printed documents (teesheet, scorecards)."
   },
   "promotions": {
     "title": "Club promotions",

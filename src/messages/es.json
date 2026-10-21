@@ -286,7 +286,9 @@
     "settings": {
       "title": "Configuración",
       "visualIdentity": "Identidad visual",
-      "visualDesc": "Logo y colores usados en los correos de este grupo."
+      "visualDesc": "Logo y colores usados en los correos de este grupo.",
+      "logoMoved": "El logo de los correos y documentos ahora se cambia en los ajustes del grupo, junto con la imagen de fondo.",
+      "logoMovedLink": "Abrir los ajustes del grupo"
     },
     "message": {
       "title": "Mensaje",
@@ -518,7 +520,9 @@
     "backgroundLabel": "Fondo de la aplicación",
     "backgroundHint": "Foto que se muestra detrás de la aplicación para este grupo, en ordenador, tablet y móvil.",
     "backgroundAdd": "+ Añadir una foto de fondo",
-    "backgroundReset": "Volver a la foto predeterminada"
+    "backgroundReset": "Volver a la foto predeterminada",
+    "logoLabel": "Logo del grupo",
+    "logoHint": "Se muestra en la cabecera de los correos (invitaciones, recordatorios, teesheets) y de los documentos impresos (teesheet, tarjetas de puntuación)."
   },
   "promotions": {
     "title": "Promociones de los clubes",
