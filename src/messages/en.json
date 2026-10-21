@@ -523,7 +523,8 @@
     "backgroundAdd": "+ Add a background photo",
     "backgroundReset": "Reset to default photo",
     "logoLabel": "Group logo",
-    "logoHint": "Shown in the header of emails (invitations, reminders, teesheets) and printed documents (teesheet, scorecards)."
+    "logoHint": "Shown in the header of emails (invitations, reminders, teesheets) and printed documents (teesheet, scorecards). If no custom logo is set, the GolfGo logo is used.",
+    "logoReset": "Reset to default logo"
   },
   "promotions": {
     "title": "Club promotions",

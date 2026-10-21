@@ -522,7 +522,8 @@
     "backgroundAdd": "+ Hintergrundfoto hinzufügen",
     "backgroundReset": "Zum Standardfoto zurücksetzen",
     "logoLabel": "Gruppenlogo",
-    "logoHint": "Wird in der Kopfzeile von E-Mails (Einladungen, Erinnerungen, Tee-Sheets) und gedruckten Dokumenten (Tee-Sheet, Scorekarten) angezeigt."
+    "logoHint": "Wird in der Kopfzeile von E-Mails (Einladungen, Erinnerungen, Tee-Sheets) und gedruckten Dokumenten (Tee-Sheet, Scorekarten) angezeigt. Ohne eigenes Logo wird das GolfGo-Logo verwendet.",
+    "logoReset": "Zum Standardlogo zurücksetzen"
   },
   "promotions": {
     "title": "Club-Aktionen",

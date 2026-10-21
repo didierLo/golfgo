@@ -287,24 +287,23 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
 
         <div>
           <label className="block text-[12px] font-semibold text-slate-600 mb-1.5">{t('editGroup.logoLabel')}</label>
-          {logoUrl ? (
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt="Logo" className="h-12 object-contain border border-white/50 rounded-xl p-1 bg-white/30" />
-              <div className="flex flex-col gap-1">
-                <button type="button" onClick={() => logoFileInputRef.current?.click()} disabled={logoUploading}
-                  className="text-[11px] font-semibold text-[#185FA5] hover:underline">
-                  {logoUploading ? t('communications.templates.uploading') : t('communications.templates.changeLogo')}
-                </button>
-                <button type="button" onClick={handleLogoDelete} className="text-[11px] font-semibold text-red-500 hover:underline">{t('communications.templates.deleteLogo')}</button>
-              </div>
+          {/* Sans logo personnalisé, les emails et documents utilisent le logo GolfGo (voir src/lib/email/logo.ts) :
+              on le montre ici, comme pour le fond, pour que l'on voie ce qui est utilisé. */}
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl ?? '/logo/GG_Logo_avec_nom_bandeau.jpeg'} alt="Logo" className="h-12 object-contain border border-white/50 rounded-xl p-1 bg-white/30" />
+            <div className="flex flex-col gap-1">
+              <button type="button" onClick={() => logoFileInputRef.current?.click()} disabled={logoUploading}
+                className="text-[11px] font-semibold text-[#185FA5] hover:underline">
+                {logoUploading
+                  ? t('communications.templates.uploading')
+                  : logoUrl ? t('communications.templates.changeLogo') : t('communications.templates.addLogo')}
+              </button>
+              {logoUrl && (
+                <button type="button" onClick={handleLogoDelete} className="text-[11px] font-semibold text-red-500 hover:underline">{t('editGroup.logoReset')}</button>
+              )}
             </div>
-          ) : (
-            <button type="button" onClick={() => logoFileInputRef.current?.click()} disabled={logoUploading}
-              className="w-full border border-dashed border-slate-300 rounded-xl py-4 text-[12px] font-medium text-slate-400 hover:border-[#185FA5] hover:text-[#185FA5] transition-colors">
-              {logoUploading ? t('communications.templates.uploading') : t('communications.templates.addLogo')}
-            </button>
-          )}
+          </div>
           <input ref={logoFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
           <p className="text-[11px] text-slate-500 mt-1 on-bg">{t('editGroup.logoHint')}</p>
         </div>

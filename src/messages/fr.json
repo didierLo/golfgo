@@ -523,7 +523,8 @@
     "backgroundAdd": "+ Ajouter une photo de fond",
     "backgroundReset": "Revenir à la photo par défaut",
     "logoLabel": "Logo du groupe",
-    "logoHint": "Affiché en en-tête des emails (invitations, rappels, teesheets) et des documents imprimés (teesheet, scorecards)."
+    "logoHint": "Affiché en en-tête des emails (invitations, rappels, teesheets) et des documents imprimés (teesheet, scorecards). Sans logo personnalisé, le logo GolfGo est utilisé.",
+    "logoReset": "Revenir au logo par défaut"
   },
   "promotions": {
     "title": "Promotions des clubs",

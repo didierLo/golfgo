@@ -521,7 +521,8 @@
     "backgroundAdd": "+ Achtergrondfoto toevoegen",
     "backgroundReset": "Terug naar standaardfoto",
     "logoLabel": "Groepslogo",
-    "logoHint": "Wordt bovenaan getoond in e-mails (uitnodigingen, herinneringen, teesheets) en afgedrukte documenten (teesheet, scorekaarten)."
+    "logoHint": "Wordt bovenaan getoond in e-mails (uitnodigingen, herinneringen, teesheets) en afgedrukte documenten (teesheet, scorekaarten). Zonder eigen logo wordt het GolfGo-logo gebruikt.",
+    "logoReset": "Terug naar standaardlogo"
   },
   "promotions": {
     "title": "Clubpromoties",
