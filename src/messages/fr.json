@@ -1598,6 +1598,8 @@
     "statusExists": "Existant",
     "statusJoin": "À ajouter au groupe",
     "statusInGroup": "Déjà dans le groupe",
+    "statusReview": "À vérifier",
+    "reviewHint": "Certaines lignes sans n° fédéral correspondent à plusieurs joueurs : elles sont ignorées. Indiquez leur n° fédéral dans le fichier puis réimportez.",
     "templateHint": "Fédération belge ou fichier custom — télécharge le template si besoin.",
     "fileLabel": "Fichier CSV / XLS / XLSX",
     "addToGroup": "Ajouter au groupe (optionnel)",

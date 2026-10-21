@@ -1600,6 +1600,8 @@
     "statusExists": "Existing",
     "statusJoin": "To add to the group",
     "statusInGroup": "Already in the group",
+    "statusReview": "To check",
+    "reviewHint": "Some rows without a federation no. match several players: they are skipped. Add their federation no. to the file and import again.",
     "templateHint": "Belgian federation or custom file — download the template if needed.",
     "fileLabel": "CSV / XLS / XLSX file",
     "addToGroup": "Add to group (optional)",

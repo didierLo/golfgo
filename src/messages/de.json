@@ -1600,6 +1600,8 @@
     "statusExists": "Vorhanden",
     "statusJoin": "Zur Gruppe hinzuzufügen",
     "statusInGroup": "Bereits in der Gruppe",
+    "statusReview": "Zu prüfen",
+    "reviewHint": "Einige Zeilen ohne Verbandsnummer passen zu mehreren Spielern: Sie werden übersprungen. Tragen Sie deren Verbandsnummer in die Datei ein und importieren Sie erneut.",
     "templateHint": "Belgischer Verband oder eigene Datei — laden Sie bei Bedarf die Vorlage herunter.",
     "fileLabel": "CSV-/XLS-/XLSX-Datei",
     "addToGroup": "Zur Gruppe hinzufügen (optional)",

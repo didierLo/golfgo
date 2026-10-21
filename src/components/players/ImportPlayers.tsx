@@ -10,20 +10,23 @@ const supabase = createClient()
 type PlayerPreview = {
   federal_no: string; first_name: string; surname: string; whs: number | null
   email: string | null; phone: string | null; home_club: string | null
-  status: 'NEW' | 'UPDATE' | 'JOIN' | 'EXISTS'
+  status: 'NEW' | 'UPDATE' | 'JOIN' | 'EXISTS' | 'REVIEW'
   id: string | null          // identifiant du joueur s'il est déjà connu de GolfGo
   inGroup: boolean           // déjà membre du groupe choisi
+  byName: boolean            // retrouvé par son nom (ligne sans n° fédéral) : on ne touche pas à son nom
 }
 
 // NEW    : inconnu de GolfGo → créé (et ajouté au groupe choisi)
 // UPDATE : déjà connu, le fichier apporte des changements
 // JOIN   : déjà connu, rien à modifier, mais pas encore membre du groupe choisi → ajouté au groupe
 // EXISTS : déjà connu et déjà dans le groupe (ou aucun groupe choisi) → rien à faire
+// REVIEW : ligne sans n° fédéral dont le nom correspond à plusieurs joueurs → ignorée, à compléter dans le fichier
 const STATUS_STYLE = {
   NEW:    { labelKey: 'playersImport.statusNew',    bg: '#EAF3DE', text: '#3B6D11' },
   UPDATE: { labelKey: 'playersImport.statusUpdate', bg: '#FAEEDA', text: '#854F0B' },
   JOIN:   { labelKey: 'playersImport.statusJoin',   bg: '#E6F1FB', text: '#0C447C' },
   EXISTS: { labelKey: 'playersImport.statusExists', bg: '#F1F5F9', text: '#64748B' },
+  REVIEW: { labelKey: 'playersImport.statusReview', bg: '#FCEBEB', text: '#A32D2D' },
 }
 
 // ─── Template download ─────────────────────────────────────────────────────────
@@ -98,43 +101,72 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
     // handicap ne sont fournis QUE pour les joueurs qui partagent déjà un groupe avec vous. Les autres ne sont
     // jamais modifiés par un import (ils peuvent en revanche être ajoutés à votre groupe).
     const lookupGroup = currentGroupId || groupId
-    type Known = { federal_no: string; id: string; visible: boolean; first_name: string | null; surname: string | null; whs: number | null; email: string | null; phone: string | null; home_club: string | null }
+    type Known = { federal_no: string | null; id: string; visible: boolean; first_name: string | null; surname: string | null; whs: number | null; email: string | null; phone: string | null; home_club: string | null }
     let existing: Known[] = []
     if (lookupGroup && federals.length > 0) {
       const { data: found, error } = await supabase.rpc('catalog_lookup', { p_group_id: lookupGroup, p_federals: federals })
       if (error) { alert(error.message); return }
       existing = found ?? []
     }
-    const map = new Map(); existing.forEach(p => map.set(p.federal_no, p))
+    const map = new Map(); existing.forEach(p => { if (p.federal_no) map.set(p.federal_no, p) })
+
+    // Lignes SANS n° fédéral : on cherche le joueur par son nom (sans tenir compte des majuscules, accents,
+    // tirets ni de l'ordre des mots). Un seul candidat → c'est lui. Plusieurs candidats (fiches en double) →
+    // on retient celui qui partage déjà un groupe avec vous ; s'il en reste plusieurs, la ligne est « À vérifier »
+    // (jamais de doublon créé à l'aveugle).
+    const picks = new Map<number, { player: Known | null; ambiguous: boolean }>()
+    if (lookupGroup) {
+      const toMatch = data
+        .map((r, i) => ({ i, federal: String(r.federal_no || '').trim(), first_name: String(r.first_name || '').trim(), surname: String(r.surname || '').trim() }))
+        .filter(x => !x.federal && (x.first_name || x.surname))
+        .map(({ i, first_name, surname }) => ({ i, first_name, surname }))
+      if (toMatch.length > 0) {
+        const { data: found, error } = await supabase.rpc('catalog_match_names', { p_group_id: lookupGroup, p_names: toMatch })
+        if (error) { alert(error.message); return }
+        const byRow = new Map<number, Known[]>()
+        ;(found ?? []).forEach((m: any) => { const arr = byRow.get(m.idx) ?? []; arr.push(m); byRow.set(m.idx, arr) })
+        byRow.forEach((cands, i) => {
+          if (cands.length === 1) { picks.set(i, { player: cands[0], ambiguous: false }); return }
+          const vis = cands.filter(c => c.visible)
+          picks.set(i, vis.length === 1 ? { player: vis[0], ambiguous: false } : { player: null, ambiguous: true })
+        })
+      }
+    }
 
     // Qui est déjà membre du groupe choisi ?
     const memberIds = new Set<string>()
-    if (groupId && existing.length > 0) {
+    const knownIds = [...existing.map(e => e.id), ...Array.from(picks.values()).filter(p => p.player).map(p => p.player!.id)]
+    if (groupId && knownIds.length > 0) {
       const { data: gp } = await supabase.from('groups_players').select('player_id')
-        .eq('group_id', groupId).in('player_id', existing.map(e => e.id))
+        .eq('group_id', groupId).in('player_id', knownIds)
       gp?.forEach(m => memberIds.add(m.player_id))
     }
     const previewRows: PlayerPreview[] = data.map((r, i) => {
       let federal = String(r.federal_no || '').trim().toUpperCase()
-      if (!federal) federal = `AUTO_${Date.now()}_${i}`
+      const hasFederal = !!federal
+      const pick = hasFederal ? undefined : picks.get(i)
+      if (!federal) federal = pick?.player ? (pick.player.federal_no ?? '') : `AUTO_${Date.now()}_${i}`
       const whs        = cleanWHS(r.whs)
       const first_name = String(r.first_name || '').trim().replace(/\b\w/g, l => l.toUpperCase())
       const surname     = String(r.surname || '').trim().toUpperCase()
       const email       = r.email || null
       const phone       = cleanPhone(r.phone)
       const home_club   = r.home_club || null
-      const existingPlayer = map.get(federal)
+      const existingPlayer: Known | undefined = hasFederal ? map.get(federal) : (pick?.player ?? undefined)
+      const byName = !hasFederal && !!pick?.player
       let status: PlayerPreview['status'] = 'NEW'
       const inGroup = !!existingPlayer && memberIds.has(existingPlayer.id)
-      if (existingPlayer && existingPlayer.visible === false) {
+      if (pick?.ambiguous) {
+        status = 'REVIEW'   // plusieurs joueurs portent ce nom : on ne devine pas
+      } else if (existingPlayer && existingPlayer.visible === false) {
         status = 'EXISTS'   // joueur d'un autre groupe : reconnu, jamais modifié depuis cet import
       } else if (existingPlayer) {
         // Un champ ne compte comme "changé" que s'il est réellement renseigné dans le
         // fichier ET différent de la valeur en base — une cellule vide n'est jamais un changement.
         const changed =
           (whs !== null && whs !== existingPlayer.whs) ||
-          (!!first_name && first_name !== existingPlayer.first_name) ||
-          (!!surname && surname !== existingPlayer.surname) ||
+          (!byName && !!first_name && first_name !== existingPlayer.first_name) ||
+          (!byName && !!surname && surname !== existingPlayer.surname) ||
           (!!email && email !== existingPlayer.email) ||
           (!!phone && phone !== existingPlayer.phone) ||
           (!!home_club && home_club !== existingPlayer.home_club)
@@ -143,9 +175,9 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
       // Connu de GolfGo mais pas encore dans le groupe choisi : il sera ajouté au groupe
       if (status === 'EXISTS' && existingPlayer && groupId && !inGroup) status = 'JOIN'
       return { federal_no: federal, first_name, surname, whs, email, phone, home_club, status,
-        id: existingPlayer?.id ?? null, inGroup }
+        id: existingPlayer?.id ?? null, inGroup, byName }
     })
-    const map2 = new Map(); previewRows.forEach(p => map2.set(p.federal_no, p))
+    const map2 = new Map(); previewRows.forEach(p => map2.set(p.id ?? p.federal_no, p))
     setPreview(Array.from(map2.values()))
   }
 
@@ -177,14 +209,14 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
     //    ne touche donc jamais la valeur déjà en base.
     for (const p of updateRows) {
       const patch: Record<string, any> = {}
-      if (p.first_name)   patch.first_name = p.first_name
-      if (p.surname)      patch.surname    = p.surname
+      if (p.first_name && !p.byName) patch.first_name = p.first_name
+      if (p.surname && !p.byName)    patch.surname    = p.surname
       if (p.whs !== null) patch.whs        = p.whs
       if (p.email)        patch.email      = p.email
       if (p.phone)        patch.phone      = p.phone
       if (p.home_club)    patch.home_club  = p.home_club
       if (Object.keys(patch).length === 0) continue
-      const { data, error } = await supabase.from('players').update(patch).eq('federal_no', p.federal_no).select('id')
+      const { data, error } = await supabase.from('players').update(patch).eq('id', p.id as string).select('id')
       if (error) { alert(error.message); setLoading(false); return }
       if (data?.[0]?.id) touchedIds.push(data[0].id)
     }
@@ -213,15 +245,16 @@ export default function ImportPlayers({ currentGroupId }: { currentGroupId?: str
     setPreview([]); setRows(null); setFileName(''); setLoading(false)
   }
 
-const { newCount, updateCount, joinCount, existsCount, actionCount } = useMemo(() => {
+const { newCount, updateCount, joinCount, existsCount, reviewCount, actionCount } = useMemo(() => {
   const newCount    = preview.filter(p => p.status === 'NEW').length
   const updateCount = preview.filter(p => p.status === 'UPDATE').length
   const joinCount   = preview.filter(p => p.status === 'JOIN').length
   const existsCount = preview.filter(p => p.status === 'EXISTS').length
+  const reviewCount = preview.filter(p => p.status === 'REVIEW').length
   // Joueurs concernés par l'import : créés, mis à jour (selon le mode) ou ajoutés au groupe
   const updatesNotInGroup = groupId ? preview.filter(p => p.status === 'UPDATE' && !p.inGroup).length : 0
   const actionCount = newCount + joinCount + (mode === 'update' ? updateCount : updatesNotInGroup)
-  return { newCount, updateCount, joinCount, existsCount, actionCount }
+  return { newCount, updateCount, joinCount, existsCount, reviewCount, actionCount }
 }, [preview, mode, groupId])
 
 
@@ -267,14 +300,18 @@ const { newCount, updateCount, joinCount, existsCount, actionCount } = useMemo((
       {preview.length > 0 && (
         <>
           <div className="flex gap-2 flex-wrap">
-            {[{ n: newCount, ...STATUS_STYLE.NEW }, { n: updateCount, ...STATUS_STYLE.UPDATE }, { n: joinCount, ...STATUS_STYLE.JOIN }, { n: existsCount, ...STATUS_STYLE.EXISTS }]
-              .filter(b => b.n > 0 || b.labelKey !== STATUS_STYLE.JOIN.labelKey)
+            {[{ n: newCount, ...STATUS_STYLE.NEW }, { n: updateCount, ...STATUS_STYLE.UPDATE }, { n: joinCount, ...STATUS_STYLE.JOIN }, { n: existsCount, ...STATUS_STYLE.EXISTS }, { n: reviewCount, ...STATUS_STYLE.REVIEW }]
+              .filter(b => b.n > 0 || (b.labelKey !== STATUS_STYLE.JOIN.labelKey && b.labelKey !== STATUS_STYLE.REVIEW.labelKey))
               .map(({ n, labelKey, bg, text }) => (
               <div key={labelKey} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold" style={{ background: bg, color: text }}>
                 <span className="font-black">{n}</span> {t(labelKey === STATUS_STYLE.EXISTS.labelKey && groupId ? 'playersImport.statusInGroup' : labelKey)}
               </div>
             ))}
           </div>
+
+          {reviewCount > 0 && (
+            <p className="text-[12px] text-[#A32D2D] bg-[#FCEBEB] rounded-xl px-3 py-2">{t('playersImport.reviewHint')}</p>
+          )}
 
           <div className="flex gap-4">
             {(['insert', 'update'] as const).map(m => (
@@ -292,7 +329,7 @@ const { newCount, updateCount, joinCount, existsCount, actionCount } = useMemo((
                 <div key={i} className={`flex items-center justify-between px-3 py-2.5 text-[12px] ${i < preview.length - 1 ? 'border-b border-slate-100' : ''}`}>
                   <span className="font-medium text-slate-800">{p.first_name} {p.surname}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-400 font-mono">{p.federal_no}</span>
+                    <span className="text-slate-400 font-mono">{p.federal_no.startsWith('AUTO_') ? '' : p.federal_no}</span>
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: s.bg, color: s.text }}>{t(p.status === 'EXISTS' && groupId ? 'playersImport.statusInGroup' : s.labelKey)}</span>
                   </div>
                 </div>

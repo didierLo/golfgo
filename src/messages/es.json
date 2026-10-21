@@ -1599,6 +1599,8 @@
     "statusExists": "Existente",
     "statusJoin": "Para añadir al grupo",
     "statusInGroup": "Ya en el grupo",
+    "statusReview": "Por revisar",
+    "reviewHint": "Algunas filas sin nº de federación coinciden con varios jugadores: se omiten. Añade su nº de federación al archivo e impórtalo de nuevo.",
     "templateHint": "Federación belga o archivo propio — descarga la plantilla si la necesitas.",
     "fileLabel": "Archivo CSV / XLS / XLSX",
     "addToGroup": "Añadir al grupo (opcional)",

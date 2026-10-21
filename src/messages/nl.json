@@ -1597,6 +1597,8 @@
     "statusExists": "Bestaand",
     "statusJoin": "Toe te voegen aan de groep",
     "statusInGroup": "Al in de groep",
+    "statusReview": "Te controleren",
+    "reviewHint": "Sommige rijen zonder federatienummer komen overeen met meerdere spelers: ze worden overgeslagen. Voeg hun federatienummer toe aan het bestand en importeer opnieuw.",
     "templateHint": "Belgische federatie of eigen bestand — download indien nodig de sjabloon.",
     "fileLabel": "CSV-/XLS-/XLSX-bestand",
     "addToGroup": "Aan groep toevoegen (optioneel)",
