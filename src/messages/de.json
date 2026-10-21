@@ -286,7 +286,9 @@
     "settings": {
       "title": "Einstellungen",
       "visualIdentity": "Visuelle Identität",
-      "visualDesc": "Logo und Farben für E-Mails dieser Gruppe."
+      "visualDesc": "Logo und Farben für E-Mails dieser Gruppe.",
+      "logoMoved": "Das Logo für E-Mails und Dokumente ändern Sie jetzt in den Gruppeneinstellungen, zusammen mit dem Hintergrundbild.",
+      "logoMovedLink": "Gruppeneinstellungen öffnen"
     },
     "message": {
       "title": "Nachricht",
@@ -518,7 +520,10 @@
     "backgroundLabel": "App-Hintergrund",
     "backgroundHint": "Foto, die für diese Gruppe im Hintergrund der App angezeigt wird — auf Computer, Tablet und Smartphone.",
     "backgroundAdd": "+ Hintergrundfoto hinzufügen",
-    "backgroundReset": "Zum Standardfoto zurücksetzen"
+    "backgroundReset": "Zum Standardfoto zurücksetzen",
+    "logoLabel": "Gruppenlogo",
+    "logoHint": "Wird in der Kopfzeile von E-Mails (Einladungen, Erinnerungen, Tee-Sheets) und gedruckten Dokumenten (Tee-Sheet, Scorekarten) angezeigt. Ohne eigenes Logo wird das GolfGo-Logo verwendet.",
+    "logoReset": "Zum Standardlogo zurücksetzen"
   },
   "promotions": {
     "title": "Club-Aktionen",

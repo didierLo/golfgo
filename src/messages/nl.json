@@ -285,7 +285,9 @@
     "settings": {
       "title": "Instellingen",
       "visualIdentity": "Visuele identiteit",
-      "visualDesc": "Logo en kleuren voor e-mails van deze groep."
+      "visualDesc": "Logo en kleuren voor e-mails van deze groep.",
+      "logoMoved": "Het logo voor e-mails en documenten wijzig je nu in de groepsinstellingen, samen met de achtergrondafbeelding.",
+      "logoMovedLink": "Groepsinstellingen openen"
     },
     "message": {
       "title": "Bericht",
@@ -517,7 +519,10 @@
     "backgroundLabel": "Achtergrond van de app",
     "backgroundHint": "Foto die voor deze groep achter de app wordt getoond, op computer, tablet en smartphone.",
     "backgroundAdd": "+ Achtergrondfoto toevoegen",
-    "backgroundReset": "Terug naar standaardfoto"
+    "backgroundReset": "Terug naar standaardfoto",
+    "logoLabel": "Groepslogo",
+    "logoHint": "Wordt bovenaan getoond in e-mails (uitnodigingen, herinneringen, teesheets) en afgedrukte documenten (teesheet, scorekaarten). Zonder eigen logo wordt het GolfGo-logo gebruikt.",
+    "logoReset": "Terug naar standaardlogo"
   },
   "promotions": {
     "title": "Clubpromoties",

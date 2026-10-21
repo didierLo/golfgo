@@ -129,7 +129,6 @@ export default function CommunicationsPage() {
   const [groupTemplate,   setGroupTemplate]   = useState<Template>(() => buildDefaults(t))
   const [selectedEventId, setSelectedEventId] = useState<string>('')
   const [saving,          setSaving]          = useState(false)
-  const [uploading,       setUploading]       = useState(false)
   const [showSettings,    setShowSettings]    = useState(false)
   
  const [printPhcpMap, setPrintPhcpMap] = useState<Record<string, { phcp: number; whs: number; tee?: TeeInfo }>>({})
@@ -249,7 +248,9 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
 
   async function handleSaveTemplate() {
     setSaving(true)
-    const { error } = await supabase.from('groups').update(groupTemplate).eq('id', groupId)
+    // Le logo se gère dans les paramètres du groupe (groups/[id]/edit) : on ne le réécrit pas ici
+    const { template_logo_url: _logo, ...templateWithoutLogo } = groupTemplate
+    const { error } = await supabase.from('groups').update(templateWithoutLogo).eq('id', groupId)
     if (error) { toast.error(error.message); setSaving(false); return }
     toast.success(t('communications.toasts.groupSaved'))
     setSaving(false)
@@ -262,22 +263,11 @@ const [printScorecardNotes, setPrintScorecardNotes] = useState('')
       template_invitation_body:    defaults.template_invitation_body,
       template_teesheet_subject:   defaults.template_teesheet_subject,
       template_teesheet_body:      defaults.template_teesheet_body,
-      template_logo_url:           null,
     }).eq('id', groupId)
     if (error) { toast.error(error.message); return }
-    setGroupTemplate({ ...defaults })
+    // Le logo n'est plus touché ici : il se gère dans les paramètres du groupe
+    setGroupTemplate(prev => ({ ...defaults, template_logo_url: prev.template_logo_url }))
     toast.success(t('communications.toasts.groupReset'))
-  }
-
-  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]; if (!file) return; setUploading(true)
-    const path = `${groupId}/logo.${file.name.split('.').pop()}`
-    const { error } = await supabase.storage.from('templates').upload(path, file, { upsert: true })
-    if (error) { toast.error(error.message); setUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('templates').getPublicUrl(path)
-    const bustedUrl = `${publicUrl}?v=${Date.now()}`
-    setGroupTemplate(prev => ({ ...prev, template_logo_url: bustedUrl }))
-    toast.success(t('communications.toasts.logoUploaded')); setUploading(false)
   }
 
   const membersWithEmail = useMemo(() =>
@@ -571,13 +561,10 @@ printFormatName, printScorecardNotes
    {/* ── Panneau Paramètres (collapsible) ── */}
       {showSettings && (
         <CommSettingsPanel
-          groupTemplate={groupTemplate}
-          setGroupTemplate={setGroupTemplate}
+          groupId={groupId}
           saving={saving}
-          uploading={uploading}
           onSaveTemplate={handleSaveTemplate}
           onReset={handleReset}
-          onLogoUpload={handleLogoUpload}
         />
       )}
 
