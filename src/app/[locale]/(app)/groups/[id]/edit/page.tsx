@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import { LOCALES, LOCALE_NAMES, normalizeLocale, type Locale } from '@/lib/i18n/types'
 import { getGroupOwners, type OwnerContact } from '@/lib/groups/owner'
+import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import PushSubscribeButton from '@/components/notifications/PushSubscribeButton'
 
 const supabase = createClient()
 
@@ -40,8 +42,10 @@ export default function EditGroupPage() {
   const params = useParams()
   const id     = params.id as string
   const t      = useTranslations()
+  const { role } = useGroupRole(id)
+  const isOwner  = role === 'owner'
 
-  const [name,           setName]           = useState('')
+  const [name,          setName]           = useState('')
   const [description,    setDescription]    = useState('')
   const [color,          setColor]          = useState(GROUP_COLORS[0])
   const [autoReminders,  setAutoReminders]  = useState(false)
@@ -346,6 +350,15 @@ const [autoInvitation,   setAutoInvitation] = useState(false)
             label={t('editGroup.autoTeesheetLabel')}
             desc={t('editGroup.autoTeesheetDesc')}
           />
+
+          {/* Notifications sur CET appareil (propres à chaque utilisateur, pas un réglage du groupe) :
+              le bouton agit tout de suite, sans passer par « Enregistrer ». */}
+          {isOwner && (
+            <div className="border-t border-slate-200/70 pt-4">
+              <PushSubscribeButton />
+              <p className="text-[11px] text-slate-500 mt-1.5 on-bg">{t('editGroup.pushHint')}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2 pt-2">

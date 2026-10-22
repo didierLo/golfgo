@@ -524,7 +524,8 @@
     "backgroundReset": "Reset to default photo",
     "logoLabel": "Group logo",
     "logoHint": "Shown in the header of emails (invitations, reminders, teesheets) and printed documents (teesheet, scorecards). If no custom logo is set, the GolfGo logo is used.",
-    "logoReset": "Reset to default logo"
+    "logoReset": "Reset to default logo",
+    "pushHint": "Notifies you on this device of sign-ups, withdrawals and waiting-list changes. Enable it on each device where you want to be notified."
   },
   "promotions": {
     "title": "Club promotions",
@@ -1577,7 +1578,7 @@
     "denied": "Permission denied — enable notifications in your browser settings",
     "activationError": "Error while enabling notifications",
     "activated": "Notifications enabled on this device",
-    "enable": "Enable withdrawal notifications",
+    "enable": "Enable participation notifications",
     "enabled": "Notifications enabled",
     "enabling": "Enabling…"
   },

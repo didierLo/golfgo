@@ -522,7 +522,8 @@
     "backgroundReset": "Terug naar standaardfoto",
     "logoLabel": "Groepslogo",
     "logoHint": "Wordt bovenaan getoond in e-mails (uitnodigingen, herinneringen, teesheets) en afgedrukte documenten (teesheet, scorekaarten). Zonder eigen logo wordt het GolfGo-logo gebruikt.",
-    "logoReset": "Terug naar standaardlogo"
+    "logoReset": "Terug naar standaardlogo",
+    "pushHint": "Waarschuwt je op dit toestel bij inschrijvingen, afmeldingen en wijzigingen op de wachtlijst. Schakel dit in op elk toestel waarop je gewaarschuwd wilt worden."
   },
   "promotions": {
     "title": "Clubpromoties",
@@ -1574,7 +1575,7 @@
     "denied": "Toestemming geweigerd — schakel meldingen in via de browserinstellingen",
     "activationError": "Fout bij het activeren",
     "activated": "Meldingen ingeschakeld op dit apparaat",
-    "enable": "Meldingen bij afmeldingen inschakelen",
+    "enable": "Meldingen bij deelname inschakelen",
     "enabled": "Meldingen ingeschakeld",
     "enabling": "Activeren…"
   },

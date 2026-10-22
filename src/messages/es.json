@@ -523,7 +523,8 @@
     "backgroundReset": "Volver a la foto predeterminada",
     "logoLabel": "Logo del grupo",
     "logoHint": "Se muestra en la cabecera de los correos (invitaciones, recordatorios, teesheets) y de los documentos impresos (teesheet, tarjetas de puntuación). Sin logo personalizado se usa el logo de GolfGo.",
-    "logoReset": "Volver al logo predeterminado"
+    "logoReset": "Volver al logo predeterminado",
+    "pushHint": "Te avisa en este dispositivo de inscripciones, bajas y cambios en la lista de espera. Actívalo en cada dispositivo donde quieras recibir avisos."
   },
   "promotions": {
     "title": "Promociones de los clubes",
@@ -1576,7 +1577,7 @@
     "denied": "Permiso denegado — activa las notificaciones en los ajustes del navegador",
     "activationError": "Error al activar las notificaciones",
     "activated": "Notificaciones activadas en este dispositivo",
-    "enable": "Activar notificaciones de bajas",
+    "enable": "Activar notificaciones de participación",
     "enabled": "Notificaciones activadas",
     "enabling": "Activando…"
   },

@@ -523,7 +523,8 @@
     "backgroundReset": "Zum Standardfoto zurücksetzen",
     "logoLabel": "Gruppenlogo",
     "logoHint": "Wird in der Kopfzeile von E-Mails (Einladungen, Erinnerungen, Tee-Sheets) und gedruckten Dokumenten (Tee-Sheet, Scorekarten) angezeigt. Ohne eigenes Logo wird das GolfGo-Logo verwendet.",
-    "logoReset": "Zum Standardlogo zurücksetzen"
+    "logoReset": "Zum Standardlogo zurücksetzen",
+    "pushHint": "Benachrichtigt Sie auf diesem Gerät über Anmeldungen, Absagen und Änderungen der Warteliste. Auf jedem Gerät aktivieren, auf dem Sie benachrichtigt werden möchten."
   },
   "promotions": {
     "title": "Club-Aktionen",
@@ -1577,7 +1578,7 @@
     "denied": "Berechtigung verweigert — aktivieren Sie die Benachrichtigungen in den Browsereinstellungen",
     "activationError": "Fehler bei der Aktivierung",
     "activated": "Benachrichtigungen auf diesem Gerät aktiviert",
-    "enable": "Benachrichtigungen bei Absagen aktivieren",
+    "enable": "Benachrichtigungen bei Teilnahmen aktivieren",
     "enabled": "Benachrichtigungen aktiviert",
     "enabling": "Aktivierung…"
   },
