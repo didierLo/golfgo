@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { buildPairHistory } from '@/lib/golf/flights/formats/simple'
 import { pairKey } from '@/lib/utils/pairs'
 
@@ -18,16 +18,22 @@ type Props = {
 
 const WINDOW_KEY: Record<number, string> = { 0: 'none', 30: '30d', 90: '3m', 180: '6m', 365: '1y' }
 
-// Couleur d'un carré : vert pour « jamais ensemble », sinon un bleu d'autant plus foncé que la paire a joué
-// récemment (pas de rouge : avec peu de joueurs, beaucoup de paires ont déjà joué ensemble).
-function cellStyle(count: number, weight: number): { background: string; color: string; border: string } {
+// Couleur d'un carré : vert seulement pour « jamais joué ensemble » ; sinon la couleur dépend de la date de la
+// dernière rencontre de la paire (par rapport à la date de l'événement) : rouge très récent → orange → jaune → sable.
+// Jamais de vert pour une paire qui a déjà joué ensemble, même il y a longtemps.
+const RECENCY_BANDS: { maxDays: number; background: string; color: string; border: string }[] = [
+  { maxDays: 7,        background: '#D94040', color: '#FFFFFF', border: '1px solid #B92E2E' },   // ≤ 1 semaine
+  { maxDays: 14,       background: '#F59E42', color: '#5C2E00', border: '1px solid #D9822A' },   // ≤ 2 semaines
+  { maxDays: 21,       background: '#F8C15A', color: '#5C3D00', border: '1px solid #DDA43C' },   // ≤ 3 semaines
+  { maxDays: 31,       background: '#FBE28F', color: '#5C4A00', border: '1px solid #E4C766' },   // ≤ 1 mois
+  { maxDays: 62,       background: '#FDF1C7', color: '#6B5A1E', border: '1px solid #EBDDA4' },   // ≤ 2 mois
+  { maxDays: Infinity, background: '#F1EBDD', color: '#6B6250', border: '1px solid #DDD4BF' },   // plus ancien
+]
+
+function cellStyle(count: number, daysAway: number | null): { background: string; color: string; border: string } {
   if (count === 0) return { background: '#EAF3DE', color: '#3B6D11', border: '1px solid #C0DD97' }
-  const alpha = 0.15 + 0.65 * Math.min(1, weight)
-  return {
-    background: `rgba(24,95,165,${alpha.toFixed(2)})`,
-    color: alpha > 0.5 ? '#ffffff' : '#0C447C',
-    border: '1px solid rgba(24,95,165,0.25)',
-  }
+  const band = daysAway === null ? RECENCY_BANDS[RECENCY_BANDS.length - 1] : (RECENCY_BANDS.find(b => daysAway <= b.maxDays) ?? RECENCY_BANDS[RECENCY_BANDS.length - 1])
+  return { background: band.background, color: band.color, border: band.border }
 }
 
 function shortName(p: any) {
@@ -37,6 +43,7 @@ function shortName(p: any) {
 
 export default function PairHistoryMatrix({ flights, pastFlights, referenceDate, historyWindow }: Props) {
   const t = useTranslations()
+  const locale = useLocale()
   const [open, setOpen] = useState(true)
 
   const history = useMemo(
@@ -93,15 +100,20 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
                   style={cellStyle(0, 0)}>0</span>
                 {t('flights.pairMatrix.legendNew')}
               </span>
-              <span className="inline-flex items-center gap-2 text-[12px] font-medium text-slate-700">
-                <span className="inline-flex gap-1">
-                  <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px] font-bold"
-                    style={cellStyle(1, 0.1)}>1</span>
-                  <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px] font-bold"
-                    style={cellStyle(1, 1)}>1</span>
+              {[
+                { band: 0, label: t('flights.pairMatrix.legendWeeks', { count: 1 }) },
+                { band: 1, label: t('flights.pairMatrix.legendWeeks', { count: 2 }) },
+                { band: 2, label: t('flights.pairMatrix.legendWeeks', { count: 3 }) },
+                { band: 3, label: t('flights.pairMatrix.legendMonths', { count: 1 }) },
+                { band: 4, label: t('flights.pairMatrix.legendMonths', { count: 2 }) },
+                { band: 5, label: t('flights.pairMatrix.legendOlder') },
+              ].map(({ band, label }) => (
+                <span key={band} className="inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-700">
+                  <span className="w-5 h-5 rounded-md"
+                    style={{ background: RECENCY_BANDS[band].background, border: RECENCY_BANDS[band].border }} />
+                  {band < 5 ? `≤ ${label}` : label}
                 </span>
-                {t('flights.pairMatrix.legendRecent')}
-              </span>
+              ))}
               <span className="text-[12px] font-semibold text-slate-600">
                 · {t('flights.pairMatrix.newPairs', { fresh: totalFresh, total: totalPairs })}
               </span>
@@ -152,9 +164,9 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
                                 const count = e?.count ?? 0
                                 return (
                                   <td key={c.id}>
-                                    <div title={`${shortName(c)} × ${shortName(r)} — ${count}×`}
+                                    <div title={`${shortName(c)} × ${shortName(r)} — ${count}×${e?.lastDate != null ? ` — ${t('flights.pairMatrix.lastTogether', { date: new Date(e.lastDate).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) })}` : ''}`}
                                       className="w-9 h-9 rounded-md flex items-center justify-center text-[14px] font-bold"
-                                      style={cellStyle(count, e?.weight ?? 0)}>
+                                      style={cellStyle(count, e?.daysAway ?? null)}>
                                       {count}
                                     </div>
                                   </td>

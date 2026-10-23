@@ -18,6 +18,10 @@ import { pairKey } from "@/lib/utils/pairs"
  *  - les joueurs 9 trous Back (9B) aussi, en commençant par les flights où il y a un 9F à remplacer
  *    (au 10e trou, le 9B prend la place du 9F qui s'arrête).
  *  Cette contrainte passe avant l'historique et les handicaps ; seules les paires interdites la dépassent.
+ *
+ * Équilibre WHS (option) : on ajoute au coût la somme, sur les flights, de (moyenne WHS du flight − moyenne
+ * WHS générale)². Les flights ont ainsi des niveaux proches, sans jamais l'emporter sur les paires interdites
+ * ni sur la contrainte 9F / 9B. Un joueur sans WHS compte comme la moyenne générale (neutre).
  */
 
 // ── Réglages ────────────────────────────────────────────────────────────────
@@ -29,6 +33,7 @@ const HISTORY_WEIGHT    = 100     // pénalité de base d'une paire déjà joué
 const FORBIDDEN_PENALTY = 10000
 const PREFERRED_BONUS   = 500
 const DAY_MS            = 24 * 60 * 60 * 1000
+const WHS_WEIGHT        = 10      // équilibre des handicaps : par (écart de moyenne WHS d'un flight)² ; 3 coups d'écart ≈ 90, un peu moins qu'une paire récente
 const BALANCE_WEIGHT    = 2000    // répartition 9F / 9B : bien au-dessus de l'historique, sous les paires interdites
 
 // Catégorie d'un joueur : 0 = normal (18 trous ou 9 trous sans section), 1 = 9 trous Front, 2 = 9 trous Back
@@ -57,6 +62,10 @@ export type PairHistoryEntry = {
   count: number
   /** Même chose, mais chaque partie est pondérée selon sa proximité avec l'événement (1 = très proche). */
   weight: number
+  /** Date (ms) de la rencontre la plus proche de l'événement, ou null si les dates sont inconnues. */
+  lastDate: number | null
+  /** Nombre de jours entre cette rencontre et l'événement (valeur absolue), ou null si inconnu. */
+  daysAway: number | null
 }
 
 /**
@@ -77,18 +86,20 @@ export function buildPairHistory(
     const ps: any[] = (flight.players ?? []).filter((p: any) => p?.id)
 
     let weight = 1
+    let days: number | null = null
     const t = flight.date ? new Date(flight.date).getTime() : NaN
     if (!Number.isNaN(t) && !Number.isNaN(ref)) {
-      const days = Math.abs(ref - t) / DAY_MS
+      days = Math.abs(ref - t) / DAY_MS
       weight = Math.pow(0.5, days / halfLifeDays)
     }
 
     for (let i = 0; i < ps.length; i++) {
       for (let j = i + 1; j < ps.length; j++) {
         const key = pairKey(ps[i].id, ps[j].id)
-        const e = map.get(key) ?? { count: 0, weight: 0 }
+        const e = map.get(key) ?? { count: 0, weight: 0, lastDate: null, daysAway: null }
         e.count += 1
         e.weight += weight
+        if (days !== null && (e.daysAway === null || days < e.daysAway)) { e.daysAway = days; e.lastDate = t }
         map.set(key, e)
       }
     }
@@ -200,7 +211,7 @@ function buildInitial(n: number, sizes: number[], cat: Cat[]): number[][] {
   return flights
 }
 
-function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: number, cat: Cat[]): number[][] {
+function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: number, cat: Cat[], whs: number[] | null): number[][] {
   // Un seul flight, ou aucun échange possible : rien à optimiser.
   if (sizes.length < 2) return buildInitial(n, sizes, cat)
 
@@ -212,14 +223,21 @@ function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: num
   const structural = (flights: number[][]) =>
     flights.reduce((sum, f) => sum + balanceCost(countOf(f, 1), countOf(f, 2)), 0) * BALANCE_WEIGHT
 
+  // Équilibre WHS : coût d'un flight = (moyenne du flight − moyenne générale)²
+  const mu = whs && n > 0 ? whs.reduce((a, b) => a + b, 0) / n : 0
+  const whsCost = (sum: number, size: number) => size > 0 ? WHS_WEIGHT * (sum / size - mu) ** 2 : 0
+  const whsTotal = (flights: number[][]) =>
+    whs ? flights.reduce((acc, f) => acc + whsCost(f.reduce((a, idx) => a + whs[idx], 0), f.length), 0) : 0
+
   let best: number[][] = buildInitial(n, sizes, cat)
-  let bestScore = totalPenalty(best, pen) + structural(best)
+  let bestScore = totalPenalty(best, pen) + structural(best) + whsTotal(best)
 
   for (let r = 0; r < restarts; r++) {
     const cur = buildInitial(n, sizes, cat)
-    let curScore = totalPenalty(cur, pen) + structural(cur)
+    let curScore = totalPenalty(cur, pen) + structural(cur) + whsTotal(cur)
     const nF = cur.map(f => countOf(f, 1))
     const nB = cur.map(f => countOf(f, 2))
+    const sumW = cur.map(f => whs ? f.reduce((a, idx) => a + whs[idx], 0) : 0)   // somme des WHS par flight
 
     if (curScore < bestScore) { best = cur.map(f => f.slice()); bestScore = curScore }
 
@@ -254,11 +272,21 @@ function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: num
         )
       }
 
+      // Variation de l'équilibre WHS (les tailles de flights ne changent pas dans un échange).
+      let newSi = sumW[i], newSj = sumW[j]
+      if (whs) {
+        newSi += whs[y] - whs[x]
+        newSj += whs[x] - whs[y]
+        delta += whsCost(newSi, fi.length) + whsCost(newSj, fj.length)
+               - whsCost(sumW[i], fi.length) - whsCost(sumW[j], fj.length)
+      }
+
       const temperature = T0 * (1 - s / stepsPerStart) + 0.01
       if (delta <= 0 || Math.random() < Math.exp(-delta / temperature)) {
         fi[xi] = y
         fj[yi] = x
         nF[i] = newFi; nB[i] = newBi; nF[j] = newFj; nB[j] = newBj
+        sumW[i] = newSi; sumW[j] = newSj
         curScore += delta
         if (curScore < bestScore - 1e-9) {
           best = cur.map(f => f.slice())
@@ -289,11 +317,19 @@ export function simpleFlights(players: any[], options: any) {
   // « iterations » du formulaire = nombre d'essais ; ici chaque essai est un échange de joueurs (très rapide).
   const totalSteps = Math.max(3000, iterations * 40)
   const cat: Cat[] = players.map(categoryOf)
-  const best       = searchBest(players.length, sizes, pen, totalSteps, cat)
+  // Valeurs WHS pour l'équilibrage (sans WHS = moyenne générale) ; null si l'option est désactivée.
+  let whsVals: number[] | null = null
+  if (balanceWHS) {
+    const known = players.map(p => (p.whs === null || p.whs === undefined || Number.isNaN(Number(p.whs))) ? null : Number(p.whs))
+    const vals  = known.filter((v): v is number => v !== null)
+    const avg   = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0
+    whsVals = vals.length >= 2 ? known.map(v => v ?? avg) : null
+  }
+  const best       = searchBest(players.length, sizes, pen, totalSteps, cat, whsVals)
 
   let flightArrays: any[][] = best.map(flight => flight.map(idx => players[idx]))
 
-  // Équilibrage WHS : dans chaque flight, trier du plus faible au plus fort
+  // Affichage : dans chaque flight, trier du plus faible au plus fort WHS
   if (balanceWHS) {
     flightArrays = flightArrays.map(flight => {
       const withWHS    = flight.filter(p => p.whs !== null && p.whs !== undefined)
