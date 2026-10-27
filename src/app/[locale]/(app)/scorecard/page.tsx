@@ -554,6 +554,7 @@ useEffect(() => {
       </div>
       <p className="text-[15px] font-bold text-slate-700 mb-1">{error}</p>
       <p className="text-[13px] text-slate-500 on-bg">{t('scorecard.noEventsHint')}</p>
+      <a href="/scorecard/free" className="mt-5 inline-flex items-center justify-center h-12 px-6 rounded-xl bg-[#185FA5] text-white text-[15px] font-bold">{t('freeRound.open')}</a>
     </div>
   )
 
@@ -593,6 +594,11 @@ useEffect(() => {
   return (
    <div className="p-5 sm:p-6 max-w-2xl">
       <h1 className="text-[22px] font-black text-slate-900 tracking-tight mb-4">{t('scorecard.title')}</h1>
+
+      <a href="/scorecard/free"
+        className="flex items-center justify-between gap-3 rounded-xl border border-[#B5D4F4] bg-[#EBF3FC] px-4 py-3 mb-4 text-[14px] font-bold text-[#185FA5] hover:bg-[#185FA5] hover:text-white transition-colors">
+        <span>{t('freeRound.open')}</span><span aria-hidden>→</span>
+      </a>
 
       {allEvents.length > 0 && (
         <div className="rounded-xl border border-white/60 shadow-sm p-4 mb-5"
