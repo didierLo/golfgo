@@ -1808,7 +1808,7 @@
     "editRound": "Runde bearbeiten",
     "club": "Club",
     "clubSearch": "Clubnamen eingeben…",
-    "noClubs": "Kein Club gefunden",
+    "noClubs": "Kein Club gefunden. Es werden nur Clubs angezeigt, deren Löcher in GolfGo erfasst sind.",
     "change": "Ändern",
     "course": "Platz",
     "tee": "Abschlag",

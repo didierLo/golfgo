@@ -1805,7 +1805,7 @@
     "editRound": "Kaart wijzigen",
     "club": "Club",
     "clubSearch": "Typ de naam van de club…",
-    "noClubs": "Geen club gevonden",
+    "noClubs": "Geen club gevonden. Alleen clubs waarvan de holes in GolfGo zijn ingevoerd, worden getoond.",
     "change": "Wijzigen",
     "course": "Baan",
     "tee": "Afslag",

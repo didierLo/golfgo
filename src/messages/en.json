@@ -1808,7 +1808,7 @@
     "editRound": "Edit round",
     "club": "Club",
     "clubSearch": "Type the club name…",
-    "noClubs": "No club found",
+    "noClubs": "No club found. Only clubs whose holes are entered in GolfGo are listed.",
     "change": "Change",
     "course": "Course",
     "tee": "Tee",

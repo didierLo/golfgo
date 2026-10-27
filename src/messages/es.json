@@ -1807,7 +1807,7 @@
     "editRound": "Modificar la tarjeta",
     "club": "Club",
     "clubSearch": "Escriba el nombre del club…",
-    "noClubs": "Ningún club encontrado",
+    "noClubs": "Ningún club encontrado. Solo se muestran los clubes cuyos hoyos están introducidos en GolfGo.",
     "change": "Cambiar",
     "course": "Campo",
     "tee": "Salida",

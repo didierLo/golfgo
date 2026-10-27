@@ -52,6 +52,7 @@ export default function FreeRoundPage() {
   const [clubQuery, setClubQuery] = useState('')
   const [club, setClub] = useState<Club | null>(null)
   const [courses, setCourses] = useState<Course[]>([])
+  const [playableCourseIds, setPlayableCourseIds] = useState<Set<string>>(new Set()) // parcours dont les trous sont encodés
   const [courseId, setCourseId] = useState<string>('')
   const [tees, setTees] = useState<TeeInfo[]>([])
   const [teeId, setTeeId] = useState<string>('')
@@ -99,7 +100,15 @@ export default function FreeRoundPage() {
         supabase.from('clubs').select('id, name, country').order('name'),
         loadRounds(p.id),
       ])
-      const list = (clubData ?? []) as Club[]
+      // Un parcours n'est jouable ici que si ses trous sont encodés dans GolfGo (9 au moins) : sinon pas de carte possible.
+      const { data: courseRows } = await supabase.from('courses').select('id, club_id, course_holes(count)')
+      const okCourses = new Set<string>()
+      const okClubs = new Set<string>()
+      for (const c of (courseRows ?? []) as any[]) {
+        if ((c.course_holes?.[0]?.count ?? 0) >= 9) { okCourses.add(c.id); okClubs.add(c.club_id) }
+      }
+      setPlayableCourseIds(okCourses)
+      const list = ((clubData ?? []) as Club[]).filter(c => okClubs.has(c.id))
       // Les clubs belges d'abord : c'est là que jouent les groupes de GolfGo.
       list.sort((a, b) => Number(b.country === 'BE') - Number(a.country === 'BE') || a.name.localeCompare(b.name, locale))
       setClubs(list)
@@ -116,7 +125,7 @@ export default function FreeRoundPage() {
     setPhcpTouched(false)
     if (!c) return
     const { data } = await supabase.from('courses').select('id, course_name').eq('club_id', c.id).order('course_name')
-    const list = (data ?? []) as Course[]
+    const list = ((data ?? []) as Course[]).filter(c => playableCourseIds.has(c.id))
     setCourses(list)
     if (list.length === 1) await pickCourse(list[0].id)
   }
@@ -279,6 +288,7 @@ export default function FreeRoundPage() {
                       <button key={c.id} type="button" onClick={() => pickClub(c)}
                         className="w-full text-left px-3 py-3 text-[15px] text-slate-900 hover:bg-slate-50 active:bg-slate-100">
                         {c.name}
+                        {c.country && c.country !== 'BE' && <span className="ml-2 text-[11px] font-bold text-slate-400">{c.country}</span>}
                       </button>
                     ))}
                 </div>
@@ -336,7 +346,9 @@ export default function FreeRoundPage() {
       {/* ── Saisie des scores ── */}
       {courseId && holes.length > 0 && me && !courseLoading && (
         <div className="mb-5">
-          <ScorecardTable holes={holes} players={entrants} scores={scores} setScores={setScores} eventFormat="stableford" />
+          <div className="rounded-xl border border-white/60 shadow-sm overflow-hidden" style={cardStyle}>
+            <ScorecardTable holes={holes} players={entrants} scores={scores} setScores={setScores} eventFormat="stableford" />
+          </div>
           <div className="grid grid-cols-1 gap-3 mt-4">
             <button type="button" onClick={save} disabled={saving || filledCount === 0}
               className="h-14 rounded-xl bg-[#185FA5] text-white text-[16px] font-bold disabled:opacity-40">

@@ -1806,7 +1806,7 @@
     "editRound": "Modifier la carte",
     "club": "Club",
     "clubSearch": "Tapez le nom du club…",
-    "noClubs": "Aucun club trouvé",
+    "noClubs": "Aucun club trouvé. Seuls les clubs dont les trous sont encodés dans GolfGo sont proposés.",
     "change": "Changer",
     "course": "Parcours",
     "tee": "Départ",
