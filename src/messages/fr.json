@@ -1774,6 +1774,7 @@
     "emailFooter": "Contrôle automatique GolfGo · tu ne seras prévenu(e) à nouveau que si la situation change"
   },
   "distance": {
+    "cardButton": "Distance au trou (GPS)",
     "title": "Distance au green",
     "locating": "Recherche de votre position…",
     "searching": "Recherche du parcours…",
@@ -1793,7 +1794,7 @@
     "next": "Suivant",
     "autoOn": "Trou choisi automatiquement",
     "autoOff": "Revenir au choix automatique",
-    "accuracy": "Précision GPS : ± {m} m",
+    "accuracy": "Précision d'environ 10 mètres",
     "disclaimer": "Distances indicatives. Vérifiez que les télémètres sont autorisés dans votre compétition.",
     "attribution": "Données du parcours : © contributeurs OpenStreetMap"
   }

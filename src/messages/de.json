@@ -1776,6 +1776,7 @@
     "emailFooter": "Automatische GolfGo-Prüfung · Sie werden nur erneut benachrichtigt, wenn sich die Situation ändert"
   },
   "distance": {
+    "cardButton": "Distanz zum Loch (GPS)",
     "title": "Distanz zum Grün",
     "locating": "Ihre Position wird gesucht…",
     "searching": "Der Platz wird gesucht…",
@@ -1795,7 +1796,7 @@
     "next": "Weiter",
     "autoOn": "Loch automatisch gewählt",
     "autoOff": "Zurück zur Automatik",
-    "accuracy": "GPS-Genauigkeit: ± {m} m",
+    "accuracy": "Genauigkeit von etwa 10 Metern",
     "disclaimer": "Die Distanzen sind Richtwerte. Prüfen Sie, ob Entfernungsmesser in Ihrem Turnier erlaubt sind.",
     "attribution": "Platzdaten: © OpenStreetMap-Mitwirkende"
   }

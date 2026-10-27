@@ -1773,6 +1773,7 @@
     "emailFooter": "Automatische GolfGo-controle · je wordt alleen opnieuw gewaarschuwd als de situatie verandert"
   },
   "distance": {
+    "cardButton": "Afstand tot hole (GPS)",
     "title": "Afstand tot de green",
     "locating": "Uw positie wordt gezocht…",
     "searching": "De baan wordt gezocht…",
@@ -1792,7 +1793,7 @@
     "next": "Volgende",
     "autoOn": "Hole automatisch gekozen",
     "autoOff": "Terug naar automatisch",
-    "accuracy": "GPS-nauwkeurigheid: ± {m} m",
+    "accuracy": "Nauwkeurigheid van ongeveer 10 meter",
     "disclaimer": "Afstanden zijn indicatief. Controleer of afstandsmeters zijn toegestaan in uw wedstrijd.",
     "attribution": "Baangegevens: © OpenStreetMap-bijdragers"
   }

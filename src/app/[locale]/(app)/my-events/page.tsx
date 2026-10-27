@@ -117,7 +117,7 @@ function daysUntil(dateStr: string): number {
 function ActionPill({ onClick, icon, label, href }: {
   onClick?: (ev: React.MouseEvent) => void; icon: React.ReactNode; label: string; href?: string
 }) {
-  const className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-600 hover:bg-white hover:text-[#185FA5] hover:shadow-sm transition-all whitespace-nowrap shrink-0"
+  const className = "flex flex-col items-center justify-center gap-1 px-1 py-2 min-h-[56px] rounded-lg text-[11px] leading-tight font-medium text-center text-slate-600 hover:bg-white hover:text-[#185FA5] hover:shadow-sm transition-all"
   if (href) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={className}>
@@ -137,6 +137,7 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
   onWeather: () => void; past?: boolean; locale: string
 }) {
   const t = useTranslations()
+  const router = useRouter()
   const groupColor = e.events.groups?.color ?? '#378ADD'
   const { day, month } = getDayMonth(e.events.starts_at, locale)
 
@@ -197,13 +198,15 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
         </div>
       </div>
 
-      {/* Barre d'actions — icône + libellé, pour que ce soit clair sans avoir à deviner */}
-            <div className="flex items-center flex-wrap gap-1 px-2 py-1.5 border-t border-slate-100 bg-slate-50/60">
+      {/* Barre d'actions — 2 lignes de 3 boutons (icône + libellé).
+          Ligne 1 : Calendrier · Météo du jour · Photo.   Ligne 2 : Site du club · Itinéraire · Distance au trou (GPS).
+          Un bouton absent (événement passé, pas de site…) laisse sa place vide pour que les autres ne bougent pas. */}
+      <div className="grid grid-cols-3 gap-1 px-2 py-1.5 border-t border-slate-100 bg-slate-50/60">
         <ActionPill
           onClick={ev => { ev.stopPropagation(); onICS() }}
           label={t('myEvents.calendar.addToCalendar')}
           icon={
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect x="1" y="2" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.4"/>
               <path d="M1 6h14" stroke="currentColor" strokeWidth="1.4"/>
               <path d="M5 1v3M11 1v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
@@ -212,60 +215,74 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
           }
         />
 
-        {!past && (
+        {!past ? (
           <ActionPill
             onClick={ev => { ev.stopPropagation(); onWeather() }}
             label={t('myEvents.weather')}
             icon={
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <circle cx="7" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.4"/>
                 <path d="M7 1v1.5M7 12.5V14M1 7h1.5M12.5 7H14M3 3l1 1M11 11l1 1M11 3l-1 1M3 11l1-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
               </svg>
             }
           />
-        )}
+        ) : <div />}
 
-        {mapsQuery && (
-          <ActionPill
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
-            onClick={ev => ev.stopPropagation()}
-            label={t('myEvents.directions')}
-            icon={
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <path d="M8 1L1 5.5v7L8 15l7-2.5v-7L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-                <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
-              </svg>
-            }
-          />
-        )}
-
-        {safeClubWebsite && (
-          <ActionPill
-            href={safeClubWebsite}
-            onClick={ev => ev.stopPropagation()}
-            label={t('clubs.openWebsite')}
-            icon={
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3"/>
-                <path d="M1.5 8h13M8 1.5c1.8 1.9 2.7 4.1 2.7 6.5S9.8 12.6 8 14.5C6.2 12.6 5.3 10.4 5.3 8S6.2 3.4 8 1.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-              </svg>
-            }
-          />
-        )}
-
-        {showPhotos && (
+        {showPhotos ? (
           <ActionPill
             onClick={ev => { ev.stopPropagation(); onPhotos() }}
-          label={(e.photoCount ?? 0) > 0 ? t('myEvents.photo.count', { count: e.photoCount ?? 0 }) : t('myEvents.photo.add')}
+            label={(e.photoCount ?? 0) > 0 ? t('myEvents.photo.count', { count: e.photoCount ?? 0 }) : t('myEvents.photo.add')}
             icon={
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
                 <circle cx="8" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
                 <path d="M5 4l1.5-2h3L11 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             }
           />
-        )}
+        ) : <div />}
+
+        {safeClubWebsite ? (
+          <ActionPill
+            href={safeClubWebsite}
+            onClick={ev => ev.stopPropagation()}
+            label={t('clubs.openWebsite')}
+            icon={
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M1.5 8h13M8 1.5c1.8 1.9 2.7 4.1 2.7 6.5S9.8 12.6 8 14.5C6.2 12.6 5.3 10.4 5.3 8S6.2 3.4 8 1.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+              </svg>
+            }
+          />
+        ) : <div />}
+
+        {mapsQuery ? (
+          <ActionPill
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
+            onClick={ev => ev.stopPropagation()}
+            label={t('myEvents.directions')}
+            icon={
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1L1 5.5v7L8 15l7-2.5v-7L8 1z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+                <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
+              </svg>
+            }
+          />
+        ) : <div />}
+
+        {!past ? (
+          <ActionPill
+            onClick={ev => { ev.stopPropagation(); router.push('/distance') }}
+            label={t('distance.cardButton')}
+            icon={
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="5.2" stroke="currentColor" strokeWidth="1.4"/>
+                <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+                <path d="M8 .8v2.4M8 12.8v2.4M.8 8h2.4M12.8 8h2.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+            }
+          />
+        ) : <div />}
       </div>
     </div>
   )
@@ -722,28 +739,19 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
             </button>
           </div>
 
-          {/* Toggle Promotions / Partenaires (ouvrent leur propre page) */}
-          <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
-            <a href="/promotions"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all text-slate-500 hover:text-slate-700">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                <path d="M2 8.4V2.8A.8.8 0 012.8 2h5.6a.8.8 0 01.57.23l5 5a.8.8 0 010 1.14l-5.6 5.6a.8.8 0 01-1.14 0l-5-5A.8.8 0 012 8.4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-                <circle cx="5.2" cy="5.2" r="1" fill="currentColor"/>
-              </svg>
-              {t('nav.promotions')}
-            </a>
-            <a href="/my-events/partners"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all text-slate-500 hover:text-slate-700">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                <circle cx="8"  cy="4"  r="2"   stroke="currentColor" strokeWidth="1.4"/>
-                <circle cx="3"  cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
-                <circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
-                <path d="M8 6v2.5M8 8.5L3 10.2M8 8.5L13 10.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-              </svg>
-              <span className="hidden sm:inline">{t('myEvents.partners')}</span>
-              <span className="sm:hidden">{t('myEvents.partnersMobile')}</span>
-            </a>
-          </div>
+          {/* Bouton Mes partenaires — icône seule sur mobile, texte sur sm+ */}
+          <a href="/my-events/partners"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-semibold transition-all border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-[#185FA5] hover:text-white hover:border-[#185FA5]"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0">
+              <circle cx="8"  cy="4"  r="2"   stroke="currentColor" strokeWidth="1.4"/>
+              <circle cx="3"  cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
+              <circle cx="13" cy="12" r="1.8" stroke="currentColor" strokeWidth="1.4"/>
+              <path d="M8 6v2.5M8 8.5L3 10.2M8 8.5L13 10.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
+           <span className="hidden sm:inline">{t('myEvents.partners')}</span>
+           <span className="sm:hidden">{t('myEvents.partnersMobile')}</span>
+          </a>
 
         </div>
       </div>

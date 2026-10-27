@@ -1776,6 +1776,7 @@
     "emailFooter": "Automatic GolfGo check · you are only notified again if the situation changes"
   },
   "distance": {
+    "cardButton": "Distance to hole (GPS)",
     "title": "Distance to the green",
     "locating": "Finding your position…",
     "searching": "Looking for the course…",
@@ -1795,7 +1796,7 @@
     "next": "Next",
     "autoOn": "Hole chosen automatically",
     "autoOff": "Back to automatic",
-    "accuracy": "GPS accuracy: ± {m} m",
+    "accuracy": "Accuracy of about 10 metres",
     "disclaimer": "Distances are indicative. Check that rangefinders are allowed in your competition.",
     "attribution": "Course data: © OpenStreetMap contributors"
   }

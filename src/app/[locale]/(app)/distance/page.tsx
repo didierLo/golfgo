@@ -220,7 +220,7 @@ export default function DistancePage() {
       )}
 
       <div className="mt-4 space-y-1 text-center">
-        {pos && <p className="text-[12px] text-slate-600 on-bg">{t('accuracy', { m: Math.round(pos.accuracy) })}</p>}
+        <p className="text-[12px] text-slate-600 on-bg">{t('accuracy')}</p>
         <p className="text-[11px] text-slate-500 on-bg">{t('disclaimer')}</p>
         <p className="text-[11px] text-slate-500 on-bg">{t('attribution')}</p>
       </div>
