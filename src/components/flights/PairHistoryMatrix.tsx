@@ -8,7 +8,7 @@ import { pairKey } from '@/lib/utils/pairs'
 type Props = {
   /** Flights actuellement affichés (générés ou modifiés à la main) : un petit tableau par flight */
   flights: any[]
-  /** Flights des autres événements du groupe : { date, players: [{ id }] } */
+  /** Flights des autres événements du groupe : { date, players: [{ id }] } (seuls ceux jusqu'à la date de référence sont comptés) */
   pastFlights: any[]
   /** Date de l'événement en cours (sert à donner plus de poids aux parties proches) */
   referenceDate?: string | null
@@ -46,10 +46,21 @@ export default function PairHistoryMatrix({ flights, pastFlights, referenceDate,
   const locale = useLocale()
   const [open, setOpen] = useState(true)
 
-  const history = useMemo(
-    () => buildPairHistory(pastFlights, referenceDate),
-    [pastFlights, referenceDate]
-  )
+  // L'historique affiché ne tient compte que des événements jusqu'à la date de celui qu'on regarde (jour compris) :
+  // pour la 1ʳᵉ date d'une série, aucune paire n'est « déjà jouée », même si des dates ultérieures sont déjà planifiées.
+  // (La génération automatique des flights, elle, continue d'utiliser tout l'historique chargé : voir simple.ts.)
+  const history = useMemo(() => {
+    const ref = referenceDate ? new Date(referenceDate).getTime() : NaN
+    const DAY_MS = 24 * 60 * 60 * 1000
+    const relevant = Number.isNaN(ref)
+      ? pastFlights
+      : pastFlights.filter((f: any) => {
+          const t = f?.date ? new Date(f.date).getTime() : NaN
+          // Date inconnue : on garde la partie (comportement d'avant). Sinon : même jour ou avant.
+          return Number.isNaN(t) || Math.floor(t / DAY_MS) <= Math.floor(ref / DAY_MS)
+        })
+    return buildPairHistory(relevant, referenceDate)
+  }, [pastFlights, referenceDate])
 
   // Un bloc par flight (au moins 2 joueurs), avec le nombre de paires nouvelles.
   const blocks = useMemo(() => {
