@@ -32,7 +32,6 @@ const Icons = {
   back:          (<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>),
   payments:      (<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M1 7h14" stroke="currentColor" strokeWidth="1.4"/><circle cx="5" cy="10.5" r="1" fill="currentColor"/></svg>),
   promotions:    (<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M2 8.4V2.8A.8.8 0 012.8 2h5.6a.8.8 0 01.57.23l5 5a.8.8 0 010 1.14l-5.6 5.6a.8.8 0 01-1.14 0l-5-5A.8.8 0 012 8.4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/><circle cx="5.2" cy="5.2" r="1" fill="currentColor"/></svg>),
-  distance:      (<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.2" stroke="currentColor" strokeWidth="1.4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><path d="M8 .8v2.4M8 12.8v2.4M.8 8h2.4M12.8 8h2.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>),
   hamburger: (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
       <rect x="3"  y="4.5"  width="3" height="3" rx="0.5" fill="currentColor" />
@@ -490,7 +489,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label={t('nav.teesheet')}     active={!!teesheetHref && isActive(teesheetHref)} />
             <NavItem href="/scorecard"                    icon={Icons.scorecard}    iconColor="#D85A30" label={t('nav.scorecard')}    active={isActive('/scorecard')} />
             <NavItem href="/promotions"                   icon={Icons.promotions}   iconColor="#D4537E" label={t('nav.promotions')}   active={isActive('/promotions')} />
-            <NavItem href="/distance"                      icon={Icons.distance}       iconColor="#1D9E75" label={t('nav.distance')}    active={isActive('/distance')} />
           </SidebarSection>
 
 
@@ -529,7 +527,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NavIconItem href={teesheetHref ?? '/groups'}     icon={Icons.teesheet}     iconColor="#1D9E75" label={t('nav.teesheet')}     active={!!teesheetHref && isActive(teesheetHref)} />
             <NavIconItem href="/scorecard"                    icon={Icons.scorecard}    iconColor="#D85A30" label={t('nav.scorecard')}    active={isActive('/scorecard')} />
             <NavIconItem href="/promotions"                   icon={Icons.promotions}   iconColor="#D4537E" label={t('nav.promotions')}   active={isActive('/promotions')} />
-            <NavIconItem href="/distance"                  icon={Icons.distance}       iconColor="#1D9E75" label={t('nav.distance')}    active={isActive('/distance')} />
           </div>
           <div className="w-8 h-px bg-slate-100 my-2" />
           <div className="flex flex-col items-center gap-1 w-full px-2.5">
@@ -597,10 +594,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           { href: participantsHref ?? '/groups', icon: Icons.participants,  label: t('nav.participants'),  color: '#7F77DD' },
           { href: teesheetHref ?? '/groups',     icon: Icons.teesheet,      label: t('nav.teesheet'),      color: '#1D9E75' },
           { href: '/scorecard',                  icon: Icons.scorecard,    label: t('nav.scorecard'),    color: '#D85A30' },
-          { href: '/distance',                    icon: Icons.distance,     label: t('nav.distance'),     color: '#1D9E75' },
+          { href: '/promotions',                 icon: Icons.promotions,   label: t('nav.promotions'),   color: '#D4537E' },
         ].map(item => {
-          // « Mes événements » reste allumé sur la page Promotions, qui s'ouvre depuis cette page.
-          const active = isActive(item.href) || (item.href === '/my-events' && isActive('/promotions'))
+          const active = isActive(item.href)
           return (
             <Link key={item.label} href={item.href} onClick={() => setDrawerOpen(false)}
               className="flex flex-col items-center justify-center gap-1 flex-1 py-2.5 relative">
