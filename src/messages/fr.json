@@ -1,6 +1,7 @@
 {
   "nav": {
     "promotions": "Promotions",
+    "distance": "Distances",
     "myEvents": "Mes événements",
     "participants": "Participants",
     "teesheet": "Liste des départs",
@@ -1771,5 +1772,29 @@
     "emailTeesheetSent": "Le tee sheet a déjà été envoyé aux joueurs dans cet état.",
     "emailCta": "Ouvrir les flights →",
     "emailFooter": "Contrôle automatique GolfGo · tu ne seras prévenu(e) à nouveau que si la situation change"
+  },
+  "distance": {
+    "title": "Distance au green",
+    "locating": "Recherche de votre position…",
+    "searching": "Recherche du parcours…",
+    "gpsDenied": "La localisation est refusée. Autorisez-la pour GolfGo dans les réglages de votre téléphone, puis réessayez.",
+    "gpsUnavailable": "Votre position est indisponible pour le moment.",
+    "loadError": "Impossible de charger les données du parcours.",
+    "noCourse": "Aucune donnée de parcours à proximité. Cet écran fonctionne sur un parcours de golf dessiné dans OpenStreetMap.",
+    "retry": "Réessayer",
+    "hole": "Trou",
+    "par": "Par",
+    "unit": "m",
+    "front": "Devant",
+    "center": "Centre",
+    "back": "Derrière",
+    "noGreen": "Green non disponible pour ce trou",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "autoOn": "Trou choisi automatiquement",
+    "autoOff": "Revenir au choix automatique",
+    "accuracy": "Précision GPS : ± {m} m",
+    "disclaimer": "Distances indicatives. Vérifiez que les télémètres sont autorisés dans votre compétition.",
+    "attribution": "Données du parcours : © contributeurs OpenStreetMap"
   }
 }

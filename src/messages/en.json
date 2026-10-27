@@ -1,6 +1,7 @@
 {
   "nav": {
     "promotions": "Promotions",
+    "distance": "Distance",
     "myEvents": "My events",
     "participants": "Participants",
     "teesheet": "Tee sheet",
@@ -1773,5 +1774,29 @@
     "emailTeesheetSent": "The tee sheet has already been sent to the players in this state.",
     "emailCta": "Open the flights →",
     "emailFooter": "Automatic GolfGo check · you are only notified again if the situation changes"
+  },
+  "distance": {
+    "title": "Distance to the green",
+    "locating": "Finding your position…",
+    "searching": "Looking for the course…",
+    "gpsDenied": "Location access is denied. Allow it for GolfGo in your phone settings, then try again.",
+    "gpsUnavailable": "Your position is not available right now.",
+    "loadError": "Could not load the course data.",
+    "noCourse": "No course data nearby. This screen works on a golf course that is mapped in OpenStreetMap.",
+    "retry": "Try again",
+    "hole": "Hole",
+    "par": "Par",
+    "unit": "m",
+    "front": "Front",
+    "center": "Centre",
+    "back": "Back",
+    "noGreen": "Green not available for this hole",
+    "prev": "Previous",
+    "next": "Next",
+    "autoOn": "Hole chosen automatically",
+    "autoOff": "Back to automatic",
+    "accuracy": "GPS accuracy: ± {m} m",
+    "disclaimer": "Distances are indicative. Check that rangefinders are allowed in your competition.",
+    "attribution": "Course data: © OpenStreetMap contributors"
   }
 }

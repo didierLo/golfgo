@@ -1,6 +1,7 @@
 {
   "nav": {
     "promotions": "Promociones",
+    "distance": "Distancia",
     "myEvents": "Mis eventos",
     "participants": "Participantes",
     "teesheet": "Lista de salidas",
@@ -1772,5 +1773,29 @@
     "emailTeesheetSent": "La lista de salidas ya se ha enviado a los jugadores en este estado.",
     "emailCta": "Abrir los flights →",
     "emailFooter": "Control automático de GolfGo · solo se te avisará de nuevo si la situación cambia"
+  },
+  "distance": {
+    "title": "Distancia al green",
+    "locating": "Buscando su posición…",
+    "searching": "Buscando el campo…",
+    "gpsDenied": "El acceso a la ubicación está denegado. Permítalo para GolfGo en los ajustes de su teléfono e inténtelo de nuevo.",
+    "gpsUnavailable": "Su posición no está disponible por ahora.",
+    "loadError": "No se pudieron cargar los datos del campo.",
+    "noCourse": "No hay datos de campo cerca. Esta pantalla funciona en un campo de golf dibujado en OpenStreetMap.",
+    "retry": "Reintentar",
+    "hole": "Hoyo",
+    "par": "Par",
+    "unit": "m",
+    "front": "Delante",
+    "center": "Centro",
+    "back": "Detrás",
+    "noGreen": "Green no disponible para este hoyo",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "autoOn": "Hoyo elegido automáticamente",
+    "autoOff": "Volver al modo automático",
+    "accuracy": "Precisión GPS: ± {m} m",
+    "disclaimer": "Las distancias son orientativas. Compruebe que los telémetros están permitidos en su competición.",
+    "attribution": "Datos del campo: © colaboradores de OpenStreetMap"
   }
 }

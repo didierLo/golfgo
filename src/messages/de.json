@@ -1,6 +1,7 @@
 {
   "nav": {
     "promotions": "Aktionen",
+    "distance": "Distanz",
     "myEvents": "Meine Veranstaltungen",
     "participants": "Teilnehmer",
     "teesheet": "Startliste",
@@ -1773,5 +1774,29 @@
     "emailTeesheetSent": "Die Startliste wurde bereits in diesem Zustand an die Spieler gesendet.",
     "emailCta": "Flights öffnen →",
     "emailFooter": "Automatische GolfGo-Prüfung · Sie werden nur erneut benachrichtigt, wenn sich die Situation ändert"
+  },
+  "distance": {
+    "title": "Distanz zum Grün",
+    "locating": "Ihre Position wird gesucht…",
+    "searching": "Der Platz wird gesucht…",
+    "gpsDenied": "Der Standortzugriff ist verweigert. Erlauben Sie ihn für GolfGo in den Einstellungen Ihres Telefons und versuchen Sie es erneut.",
+    "gpsUnavailable": "Ihre Position ist derzeit nicht verfügbar.",
+    "loadError": "Die Platzdaten konnten nicht geladen werden.",
+    "noCourse": "Keine Platzdaten in der Nähe. Dieser Bildschirm funktioniert auf einem Golfplatz, der in OpenStreetMap erfasst ist.",
+    "retry": "Erneut versuchen",
+    "hole": "Loch",
+    "par": "Par",
+    "unit": "m",
+    "front": "Vorne",
+    "center": "Mitte",
+    "back": "Hinten",
+    "noGreen": "Grün für dieses Loch nicht verfügbar",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "autoOn": "Loch automatisch gewählt",
+    "autoOff": "Zurück zur Automatik",
+    "accuracy": "GPS-Genauigkeit: ± {m} m",
+    "disclaimer": "Die Distanzen sind Richtwerte. Prüfen Sie, ob Entfernungsmesser in Ihrem Turnier erlaubt sind.",
+    "attribution": "Platzdaten: © OpenStreetMap-Mitwirkende"
   }
 }
