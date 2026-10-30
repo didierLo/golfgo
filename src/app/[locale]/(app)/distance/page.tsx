@@ -19,6 +19,8 @@ type LoadState = 'idle' | 'loading' | 'ready' | 'error'
 const ON_COURSE_M = 800
 // Au-delà de cette distance du point où les données ont été chargées, on les recharge.
 const RELOAD_M = 2000
+// Dernier parcours chargé, gardé sur le téléphone : au prochain passage, l'affichage est immédiat.
+const STORE_KEY = 'golfgo.distance.course'
 
 export default function DistancePage() {
   const t = useTranslations('distance')
@@ -73,6 +75,22 @@ export default function DistancePage() {
     }
   }, [])
 
+  // ── Parcours déjà connu sur ce téléphone : affichage immédiat, mise à jour en arrière-plan ──
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORE_KEY)
+      if (!raw) return
+      const saved = JSON.parse(raw) as { holes: HoleGeo[]; at: LatLon }
+      if (Array.isArray(saved.holes) && saved.holes.length > 0 && saved.at) {
+        setHoles(saved.holes)
+        setFetchedAt(saved.at)
+        setLoadState('ready')
+      }
+    } catch {
+      // Stockage indisponible : sans importance.
+    }
+  }, [])
+
   // ── Chargement des données du parcours ──
   const load = useCallback(async (lat: number, lon: number) => {
     if (fetching.current) return
@@ -82,8 +100,12 @@ export default function DistancePage() {
       const res = await fetch(`/api/golf-hole-data?lat=${lat}&lon=${lon}`)
       if (!res.ok) throw new Error(String(res.status))
       const data = await res.json()
-      setHoles((data.holes ?? []) as HoleGeo[])
+      const loaded = (data.holes ?? []) as HoleGeo[]
+      setHoles(loaded)
       setFetchedAt([lat, lon])
+      try {
+        if (loaded.length > 0) localStorage.setItem(STORE_KEY, JSON.stringify({ holes: loaded, at: [lat, lon] }))
+      } catch {}
       setManualRef(null)
       setLoadState('ready')
     } catch {
