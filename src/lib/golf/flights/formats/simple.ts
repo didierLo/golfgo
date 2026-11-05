@@ -22,6 +22,12 @@ import { pairKey } from "@/lib/utils/pairs"
  * Équilibre WHS (option) : on ajoute au coût la somme, sur les flights, de (moyenne WHS du flight − moyenne
  * WHS générale)². Les flights ont ainsi des niveaux proches, sans jamais l'emporter sur les paires interdites
  * ni sur la contrainte 9F / 9B. Un joueur sans WHS compte comme la moyenne générale (neutre).
+ *
+ * Souhaits « 1er flight » / « dernier flight » (options.positionPrefs) : le flight n° 1 est celui qui part en
+ * premier. Chaque flight d'écart avec la position voulue coûte POSITION_WEIGHT : plus fort que l'historique
+ * des paires (on préfère rejouer avec un partenaire connu que rater le souhait), mais sous la répartition
+ * 9F / 9B et les paires interdites. Si trop de joueurs veulent la même place, les premiers servis restent
+ * dans le flight voulu et les autres sont placés le plus près possible.
  */
 
 // ── Réglages ────────────────────────────────────────────────────────────────
@@ -35,9 +41,13 @@ const PREFERRED_BONUS   = 500
 const DAY_MS            = 24 * 60 * 60 * 1000
 const WHS_WEIGHT        = 10      // équilibre des handicaps : par (écart de moyenne WHS d'un flight)² ; 3 coups d'écart ≈ 90, un peu moins qu'une paire récente
 const BALANCE_WEIGHT    = 2000    // répartition 9F / 9B : bien au-dessus de l'historique, sous les paires interdites
+const POSITION_WEIGHT   = 400     // souhait « 1er / dernier flight » : par flight d'écart ; au-dessus de l'historique, sous 9F / 9B
 
 // Catégorie d'un joueur : 0 = normal (18 trous ou 9 trous sans section), 1 = 9 trous Front, 2 = 9 trous Back
 type Cat = 0 | 1 | 2
+
+// Souhait de position d'un joueur : 0 = aucun, 1 = 1er flight, 2 = dernier flight
+type PosPref = 0 | 1 | 2
 function categoryOf(p: any): Cat {
   if (p?.holes_played === 9) {
     if (p.holes_section === 'out') return 1
@@ -211,7 +221,7 @@ function buildInitial(n: number, sizes: number[], cat: Cat[]): number[][] {
   return flights
 }
 
-function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: number, cat: Cat[], whs: number[] | null): number[][] {
+function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: number, cat: Cat[], whs: number[] | null, posPref: PosPref[]): number[][] {
   // Un seul flight, ou aucun échange possible : rien à optimiser.
   if (sizes.length < 2) return buildInitial(n, sizes, cat)
 
@@ -229,12 +239,23 @@ function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: num
   const whsTotal = (flights: number[][]) =>
     whs ? flights.reduce((acc, f) => acc + whsCost(f.reduce((a, idx) => a + whs[idx], 0), f.length), 0) : 0
 
+  // Souhait « 1er / dernier flight » : coût = POSITION_WEIGHT × nombre de flights d'écart avec la place voulue.
+  // Le flight d'indice 0 part en premier, celui d'indice sizes.length − 1 en dernier.
+  const lastFlight = sizes.length - 1
+  const hasPos = posPref.some(p => p !== 0)
+  const posCost = (idx: number, f: number) =>
+    posPref[idx] === 1 ? POSITION_WEIGHT * f
+    : posPref[idx] === 2 ? POSITION_WEIGHT * (lastFlight - f)
+    : 0
+  const positional = (flights: number[][]) =>
+    hasPos ? flights.reduce((sum, fl, f) => sum + fl.reduce((a, idx) => a + posCost(idx, f), 0), 0) : 0
+
   let best: number[][] = buildInitial(n, sizes, cat)
-  let bestScore = totalPenalty(best, pen) + structural(best) + whsTotal(best)
+  let bestScore = totalPenalty(best, pen) + structural(best) + whsTotal(best) + positional(best)
 
   for (let r = 0; r < restarts; r++) {
     const cur = buildInitial(n, sizes, cat)
-    let curScore = totalPenalty(cur, pen) + structural(cur) + whsTotal(cur)
+    let curScore = totalPenalty(cur, pen) + structural(cur) + whsTotal(cur) + positional(cur)
     const nF = cur.map(f => countOf(f, 1))
     const nB = cur.map(f => countOf(f, 2))
     const sumW = cur.map(f => whs ? f.reduce((a, idx) => a + whs[idx], 0) : 0)   // somme des WHS par flight
@@ -281,6 +302,9 @@ function searchBest(n: number, sizes: number[], pen: number[][], totalSteps: num
                - whsCost(sumW[i], fi.length) - whsCost(sumW[j], fj.length)
       }
 
+      // Variation du coût « 1er / dernier flight » : x passe du flight i au flight j, y l'inverse.
+      if (hasPos) delta += posCost(x, j) + posCost(y, i) - posCost(x, i) - posCost(y, j)
+
       const temperature = T0 * (1 - s / stepsPerStart) + 0.01
       if (delta <= 0 || Math.random() < Math.exp(-delta / temperature)) {
         fi[xi] = y
@@ -325,7 +349,13 @@ export function simpleFlights(players: any[], options: any) {
     const avg   = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0
     whsVals = vals.length >= 2 ? known.map(v => v ?? avg) : null
   }
-  const best       = searchBest(players.length, sizes, pen, totalSteps, cat, whsVals)
+  // Souhaits « 1er / dernier flight » (Map id joueur → 'first' | 'last'), s'il y en a.
+  const positionPrefs: Map<string, string> = options.positionPrefs ?? new Map()
+  const posPref: PosPref[] = players.map(p => {
+    const pref = positionPrefs.get(p.id)
+    return pref === 'first' ? 1 : pref === 'last' ? 2 : 0
+  })
+  const best       = searchBest(players.length, sizes, pen, totalSteps, cat, whsVals, posPref)
 
   let flightArrays: any[][] = best.map(flight => flight.map(idx => players[idx]))
 

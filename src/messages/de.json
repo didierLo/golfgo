@@ -416,6 +416,36 @@
       }
     }
   },
+  "flightPositionPref": {
+    "badgeFirst": "1.",
+    "badgeLast": "Letzter",
+    "okTitle": "Wunsch erfüllt",
+    "wantsFirst": "Möchte im ersten Flight spielen",
+    "wantsLast": "Möchte im letzten Flight spielen",
+    "koTitleFirst": "Möchte den ersten Flight — aktuell Flight {flight}",
+    "koTitleLast": "Möchte den letzten Flight — aktuell Flight {flight}",
+    "warningTitle": "{count, plural, one {# Positionswunsch nicht erfüllt} other {# Positionswünsche nicht erfüllt}}",
+    "warningFirst": "{name} möchte im ersten Flight spielen (aktuell Flight {flight})",
+    "warningLast": "{name} möchte im letzten Flight spielen (aktuell Flight {flight})",
+    "warningHint": "Verschieben Sie den Spieler oder ändern Sie die Reihenfolge der Flights, um diese Wünsche zu erfüllen.",
+    "settings": {
+      "title": "Erster oder letzter Flight",
+      "subtitle": "Spieler, die regelmäßig als Erste oder als Letzte starten möchten. Diese Wünsche werden bei der Erstellung der Flights berücksichtigt und in Flights sowie in der Startliste gemeldet, wenn eine manuelle Änderung sie nicht mehr erfüllt.",
+      "addTitle": "Wunsch hinzufügen",
+      "player": "Spieler",
+      "preference": "Wunsch",
+      "choose": "Auswählen...",
+      "add": "Hinzufügen",
+      "adding": "Wird hinzugefügt...",
+      "firstTitle": "Erster Flight",
+      "firstDesc": "Diese Spieler werden nach Möglichkeit im ersten Flight platziert",
+      "lastTitle": "Letzter Flight",
+      "lastDesc": "Diese Spieler werden nach Möglichkeit im letzten Flight platziert",
+      "empty": "Keine Spieler",
+      "remove": "Entfernen",
+      "error": "Speichern nicht möglich — bitte erneut versuchen"
+    }
+  },
   "constraints": {
     "title": "Flight-Einschränkungen",
     "subtitle": "Kombinationen definieren, die bei der Flight-Generierung vermieden oder bevorzugt werden sollen",

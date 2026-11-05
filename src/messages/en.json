@@ -417,6 +417,36 @@
       }
     }
   },
+  "flightPositionPref": {
+    "badgeFirst": "1st",
+    "badgeLast": "Last",
+    "okTitle": "Preference respected",
+    "wantsFirst": "Wants to play in the first flight",
+    "wantsLast": "Wants to play in the last flight",
+    "koTitleFirst": "Wants the first flight — currently flight {flight}",
+    "koTitleLast": "Wants the last flight — currently flight {flight}",
+    "warningTitle": "{count, plural, one {# flight position preference not met} other {# flight position preferences not met}}",
+    "warningFirst": "{name} wants the first flight (currently flight {flight})",
+    "warningLast": "{name} wants the last flight (currently flight {flight})",
+    "warningHint": "Move the player or reorder the flights to respect these preferences.",
+    "settings": {
+      "title": "First or last flight",
+      "subtitle": "Players who regularly want to tee off first or last. These preferences are taken into account when flights are generated, and flagged in Flights and in the tee sheet if a manual change no longer respects them.",
+      "addTitle": "Add a preference",
+      "player": "Player",
+      "preference": "Preference",
+      "choose": "Choose...",
+      "add": "Add",
+      "adding": "Adding...",
+      "firstTitle": "First flight",
+      "firstDesc": "These players will be placed in the first flight if possible",
+      "lastTitle": "Last flight",
+      "lastDesc": "These players will be placed in the last flight if possible",
+      "empty": "No players",
+      "remove": "Remove",
+      "error": "Could not save — please try again"
+    }
+  },
   "constraints": {
     "title": "Flight constraints",
     "subtitle": "Define combinations to avoid or prefer when generating flights",

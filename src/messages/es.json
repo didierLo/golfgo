@@ -416,6 +416,36 @@
       }
     }
   },
+  "flightPositionPref": {
+    "badgeFirst": "1.º",
+    "badgeLast": "Último",
+    "okTitle": "Preferencia respetada",
+    "wantsFirst": "Quiere salir en el primer flight",
+    "wantsLast": "Quiere salir en el último flight",
+    "koTitleFirst": "Quiere el primer flight — ahora flight {flight}",
+    "koTitleLast": "Quiere el último flight — ahora flight {flight}",
+    "warningTitle": "{count, plural, one {# preferencia de posición no respetada} other {# preferencias de posición no respetadas}}",
+    "warningFirst": "{name} quiere salir en el primer flight (ahora flight {flight})",
+    "warningLast": "{name} quiere salir en el último flight (ahora flight {flight})",
+    "warningHint": "Mueva al jugador o reordene los flights para respetar estas preferencias.",
+    "settings": {
+      "title": "Primer o último flight",
+      "subtitle": "Jugadores que quieren salir habitualmente los primeros o los últimos. Estas preferencias se tienen en cuenta al generar los flights, y se señalan en Flights y en la lista de salidas si un cambio manual deja de respetarlas.",
+      "addTitle": "Añadir una preferencia",
+      "player": "Jugador",
+      "preference": "Preferencia",
+      "choose": "Elija...",
+      "add": "Añadir",
+      "adding": "Añadiendo...",
+      "firstTitle": "Primer flight",
+      "firstDesc": "Estos jugadores se colocarán en el primer flight si es posible",
+      "lastTitle": "Último flight",
+      "lastDesc": "Estos jugadores se colocarán en el último flight si es posible",
+      "empty": "Ningún jugador",
+      "remove": "Eliminar",
+      "error": "No se pudo guardar — inténtelo de nuevo"
+    }
+  },
   "constraints": {
     "title": "Restricciones de flights",
     "subtitle": "Definir combinaciones a evitar o preferir al generar flights",

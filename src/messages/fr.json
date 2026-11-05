@@ -417,6 +417,36 @@
       }
     }
   },
+  "flightPositionPref": {
+    "badgeFirst": "1er",
+    "badgeLast": "Dernier",
+    "okTitle": "Souhait respecté",
+    "wantsFirst": "Souhaite partir dans le 1er flight",
+    "wantsLast": "Souhaite partir dans le dernier flight",
+    "koTitleFirst": "Souhaite le 1er flight — actuellement flight {flight}",
+    "koTitleLast": "Souhaite le dernier flight — actuellement flight {flight}",
+    "warningTitle": "{count, plural, one {# souhait de position non respecté} other {# souhaits de position non respectés}}",
+    "warningFirst": "{name} souhaite partir dans le 1er flight (actuellement flight {flight})",
+    "warningLast": "{name} souhaite partir dans le dernier flight (actuellement flight {flight})",
+    "warningHint": "Déplacez le joueur ou réorganisez les flights pour respecter ces souhaits.",
+    "settings": {
+      "title": "Premier ou dernier flight",
+      "subtitle": "Joueurs qui souhaitent partir régulièrement en tête ou en fin de peloton. Ces souhaits sont pris en compte à la génération des flights, et signalés dans Flights et dans la liste des départs si un changement manuel ne les respecte plus.",
+      "addTitle": "Ajouter un souhait",
+      "player": "Joueur",
+      "preference": "Souhait",
+      "choose": "Choisissez...",
+      "add": "Ajouter",
+      "adding": "Ajout en cours...",
+      "firstTitle": "Premier flight",
+      "firstDesc": "Ces joueurs seront placés dans le 1er flight si possible",
+      "lastTitle": "Dernier flight",
+      "lastDesc": "Ces joueurs seront placés dans le dernier flight si possible",
+      "empty": "Aucun joueur",
+      "remove": "Supprimer",
+      "error": "Enregistrement impossible — réessayez"
+    }
+  },
   "constraints": {
     "title": "Restrictions de flights",
     "subtitle": "Définir les combinaisons à éviter ou à privilégier lors de la génération des flights",

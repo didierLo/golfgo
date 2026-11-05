@@ -9,6 +9,8 @@ import { useGroupRole } from '@/lib/hooks/useGroupRole'
 import { useTranslations, useLocale } from 'next-intl'
 import Challenge4BBBTab from '@/components/flights/Challenge4BBBTab'
 import PairHistoryMatrix from '@/components/flights/PairHistoryMatrix'
+import { fetchPositionPrefs, checkPositionPrefs, type PositionPrefs } from '@/lib/golf/flights/positionPrefs'
+import { PositionPrefBadge, PositionPrefWarning } from '@/components/flights/PositionPrefBadge'
 
 
 const supabase = createClient()
@@ -91,6 +93,7 @@ export default function FlightsPage() {
   const [pastFlights,    setPastFlights]    = useState<any[]>([])
   const [forbiddenPairs, setForbiddenPairs] = useState<Set<string>>(new Set())
   const [preferredPairs, setPreferredPairs] = useState<Set<string>>(new Set())
+  const [positionPrefs,  setPositionPrefs]  = useState<PositionPrefs>(new Map())   // souhaits « 1er / dernier flight »
   const [generating,     setGenerating]     = useState(false)
   const [saving,         setSaving]         = useState(false)
   const [dragState,      setDragState]      = useState<DragState | null>(null)
@@ -116,6 +119,7 @@ export default function FlightsPage() {
     }
     setForbiddenPairs(forbidden)
     setPreferredPairs(preferred)
+    setPositionPrefs(await fetchPositionPrefs(supabase, groupId))
   }
 
   async function loadPastFlights(historyWindowDays: number = 180) {
@@ -159,7 +163,7 @@ const { players9front, players9back, players9, players18, has9holers } = useMemo
     setGenerating(true)
     setManualEdits(false)
     try {
-      const baseOpts = { flightSize, balanceWHS, iterations, historyWindowDays: historyWindow, pastFlights, referenceDate: activeEvent?.starts_at, forbiddenPairs, preferredPairs, debug: true }
+      const baseOpts = { flightSize, balanceWHS, iterations, historyWindowDays: historyWindow, pastFlights, referenceDate: activeEvent?.starts_at, forbiddenPairs, preferredPairs, positionPrefs, debug: true }
       if (holesMode === 'mixed' || !has9holers) {
         await generate(baseOpts)
       } else {
@@ -316,6 +320,18 @@ const flightGroups = useMemo(() =>
       ].filter(g => g.flights.length > 0)
     : [{ label: null, color: null, bg: null, flights: sortedFlights }]
 , [holesMode, has9holers, sortedFlights])
+
+// Souhaits « 1er / dernier flight » : respectés ou non, d'après les flights tels qu'ils sont affichés
+const positionChecks = useMemo(() =>
+  checkPositionPrefs(
+    sortedFlights.map((f: any) => ({ number: f.flight_no, players: Array.isArray(f.players) ? f.players : [] })),
+    positionPrefs,
+  )
+, [sortedFlights, positionPrefs])
+
+const positionViolations = useMemo(() =>
+  Array.from(positionChecks.values()).filter(c => !c.ok)
+, [positionChecks])
 
   if (loading || roleLoading || eventsLoading) return (
     <div className="p-6 space-y-3">
@@ -535,6 +551,7 @@ const flightGroups = useMemo(() =>
                       <span className="text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-lg">{p.whs}</span>
                     )}
                     {holesBadge(p)}
+                    {positionPrefs.has(p.id) && <PositionPrefBadge pref={positionPrefs.get(p.id)!} />}
                   </div>
                 ))}
               </div>
@@ -574,6 +591,7 @@ const flightGroups = useMemo(() =>
                         <span className="text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-lg">{p.whs}</span>
                       )}
                       {holesBadge(p)}
+                    {positionPrefs.has(p.id) && <PositionPrefBadge pref={positionPrefs.get(p.id)!} />}
                     </div>
                   )
                 })}
@@ -615,6 +633,8 @@ const flightGroups = useMemo(() =>
                 {t('flights.dragHint')}
               </p>
             )}
+
+            <PositionPrefWarning violations={positionViolations} className="mb-3" />
 
             {flights.length === 0 ? (
               <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-slate-400 on-bg-card">
@@ -711,6 +731,7 @@ const flightGroups = useMemo(() =>
                                       <span className="text-[11px] text-slate-300 w-3">{i + 1}</span>
                                       <span className="text-[13px] font-medium text-slate-800">{p.first_name} {p.surname}</span>
                                       {holesBadge(p)}
+                                      {positionPrefs.has(p.id) && <PositionPrefBadge pref={positionPrefs.get(p.id)!} check={positionChecks.get(p.id)} />}
                                     </div>
                                     {p.whs !== null && (
                                       <span className="text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-lg">{p.whs}</span>

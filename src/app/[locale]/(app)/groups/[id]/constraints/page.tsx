@@ -10,6 +10,12 @@ const supabase = createClient()
 
 type Player = { id: string; first_name: string; surname: string }
 type ConstraintType = 'forbidden' | 'preferred'
+type PositionPref = 'first' | 'last'
+type PositionRow = {
+  player_id: string
+  preference: PositionPref
+  players: any   // jointure joueur (objet, ou tableau selon la version de PostgREST)
+}
 type Pair = {
   id: string
   player_a: string
@@ -39,6 +45,13 @@ export default function ConstraintsPage() {
   const [adding,  setAdding]  = useState(false)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+
+  // Souhaits « 1er / dernier flight »
+  const [posRows,   setPosRows]   = useState<PositionRow[]>([])
+  const [posPlayer, setPosPlayer] = useState('')
+  const [posChoice, setPosChoice] = useState<PositionPref>('first')
+  const [posAdding, setPosAdding] = useState(false)
+  const [posError,  setPosError]  = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -81,6 +94,11 @@ async function load() {
 
   setPlayers((members || []).map((m: any) => m.player).filter(Boolean))
   setPairs((constraints || []) as any)
+
+  const { data: prefs } = await supabase.from('player_flight_preferences')
+    .select('player_id, preference, players(first_name, surname)')
+    .eq('group_id', groupId)
+  setPosRows((prefs || []) as any)
   setLoading(false)
 }
 
@@ -112,8 +130,29 @@ async function load() {
     load()
   }
 
+  // Un joueur n'a qu'un seul souhait : le changer (1er → dernier) remplace l'ancien.
+  async function addPositionPref() {
+    if (!posPlayer) return
+    setPosAdding(true); setPosError(false)
+    const { error } = await supabase.from('player_flight_preferences').upsert(
+      { group_id: groupId, player_id: posPlayer, preference: posChoice },
+      { onConflict: 'group_id,player_id' },
+    )
+    setPosAdding(false)
+    if (error) { setPosError(true); return }
+    setPosPlayer('')
+    load()
+  }
+
+  async function removePositionPref(playerId: string) {
+    await supabase.from('player_flight_preferences').delete().eq('group_id', groupId).eq('player_id', playerId)
+    load()
+  }
+
   const forbidden = pairs.filter(p => p.constraint_type === 'forbidden')
   const preferred = pairs.filter(p => p.constraint_type === 'preferred')
+  const posFirst  = posRows.filter(r => r.preference === 'first')
+  const posLast   = posRows.filter(r => r.preference === 'last')
 
   if (loading) return (
     <div className="p-6 space-y-2 max-w-2xl">
@@ -206,6 +245,65 @@ async function load() {
         removeLabel={t('constraints.remove')}
         onRemove={removeConstraint}
       />
+
+      {/* ── Souhaits de position : 1er / dernier flight ── */}
+      <div className="mt-10 mb-5">
+        <h2 className="text-[18px] font-black text-slate-900 tracking-tight">{t('flightPositionPref.settings.title')}</h2>
+        <p className="text-[13px] text-slate-900 mt-0.5">{t('flightPositionPref.settings.subtitle')}</p>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">
+          {t('flightPositionPref.settings.addTitle')}
+        </p>
+        <div className="flex flex-wrap gap-3 items-end">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-slate-600">{t('flightPositionPref.settings.player')}</label>
+            <select value={posPlayer} onChange={e => setPosPlayer(e.target.value)}
+              className="border border-slate-200 rounded-lg px-3 py-2 text-[13px] bg-white text-slate-900 min-w-[160px] focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5]">
+              <option value="">{t('flightPositionPref.settings.choose')}</option>
+              {players.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.surname}</option>)}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-slate-600">{t('flightPositionPref.settings.preference')}</label>
+            <select value={posChoice} onChange={e => setPosChoice(e.target.value as PositionPref)}
+              className="border border-slate-200 rounded-lg px-3 py-2 text-[13px] bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#185FA5]/30 focus:border-[#185FA5]">
+              <option value="first">{t('flightPositionPref.settings.firstTitle')}</option>
+              <option value="last">{t('flightPositionPref.settings.lastTitle')}</option>
+            </select>
+          </div>
+
+          <button onClick={addPositionPref} disabled={posAdding || !posPlayer}
+            className="bg-[#185FA5] text-white text-[13px] font-semibold px-5 py-2 rounded-lg hover:bg-[#0C447C] disabled:opacity-40 transition-colors">
+            {posAdding ? t('flightPositionPref.settings.adding') : t('flightPositionPref.settings.add')}
+          </button>
+        </div>
+        {posError && <p className="text-[12px] text-red-600 mt-3">{t('flightPositionPref.settings.error')}</p>}
+      </div>
+
+      <PositionSection
+        title={t('flightPositionPref.settings.firstTitle')}
+        description={t('flightPositionPref.settings.firstDesc')}
+        rows={posFirst}
+        nameOf={nameOf}
+        color={{ bg: '#EBF3FC', text: '#185FA5', border: '#B5D4F4' }}
+        emptyLabel={t('flightPositionPref.settings.empty')}
+        removeLabel={t('flightPositionPref.settings.remove')}
+        onRemove={removePositionPref}
+      />
+
+      <PositionSection
+        title={t('flightPositionPref.settings.lastTitle')}
+        description={t('flightPositionPref.settings.lastDesc')}
+        rows={posLast}
+        nameOf={nameOf}
+        color={{ bg: '#FEF3C7', text: '#92400E', border: '#FCD34D' }}
+        emptyLabel={t('flightPositionPref.settings.empty')}
+        removeLabel={t('flightPositionPref.settings.remove')}
+        onRemove={removePositionPref}
+      />
     </div>
   )
 }
@@ -247,6 +345,52 @@ function ConstraintSection({ title, description, pairs, nameOf, color, emptyLabe
                 {nameOf(p.player_b, p.players_b)}
               </span>
               <button onClick={() => onRemove(p.id)}
+                className="text-[11px] font-semibold text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors shrink-0">
+                {removeLabel}
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
+function PositionSection({ title, description, rows, nameOf, color, emptyLabel, removeLabel, onRemove }: {
+  title: string
+  description: string
+  rows: PositionRow[]
+  nameOf: (id: string, joined: any) => string
+  color: { bg: string; text: string; border: string }
+  emptyLabel: string
+  removeLabel: string
+  onRemove: (playerId: string) => void
+}) {
+  return (
+    <div className="mb-6 rounded-xl border overflow-hidden" style={{ borderColor: color.border }}>
+      <div className="flex items-center justify-between px-5 py-3"
+        style={{ background: color.bg, borderBottom: `1px solid ${color.border}` }}>
+        <div>
+          <p className="text-[14px] font-bold" style={{ color: color.text }}>{title}</p>
+          <p className="text-[12px] mt-0.5" style={{ color: color.text, opacity: 0.75 }}>{description}</p>
+        </div>
+        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0"
+          style={{ background: 'white', color: color.text, border: `1px solid ${color.border}` }}>
+          {rows.length}
+        </span>
+      </div>
+      <div className="bg-white p-3 flex flex-col gap-2">
+        {rows.length === 0 ? (
+          <div className="text-[12px] text-slate-500 border border-dashed border-slate-200 rounded-lg px-4 py-3 text-center">
+            {emptyLabel}
+          </div>
+        ) : (
+          rows.map(r => (
+            <div key={r.player_id} className="flex items-center gap-3 border border-slate-100 rounded-lg px-4 py-2.5">
+              <span className="text-[13px] font-medium text-slate-800 flex-1">
+                {nameOf(r.player_id, r.players)}
+              </span>
+              <button onClick={() => onRemove(r.player_id)}
                 className="text-[11px] font-semibold text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors shrink-0">
                 {removeLabel}
               </button>

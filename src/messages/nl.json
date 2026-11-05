@@ -415,6 +415,36 @@
       }
     }
   },
+  "flightPositionPref": {
+    "badgeFirst": "1e",
+    "badgeLast": "Laatste",
+    "okTitle": "Wens gerespecteerd",
+    "wantsFirst": "Wil in de eerste flight spelen",
+    "wantsLast": "Wil in de laatste flight spelen",
+    "koTitleFirst": "Wil de eerste flight — nu flight {flight}",
+    "koTitleLast": "Wil de laatste flight — nu flight {flight}",
+    "warningTitle": "{count, plural, one {# positiewens niet gerespecteerd} other {# positiewensen niet gerespecteerd}}",
+    "warningFirst": "{name} wil in de eerste flight spelen (nu flight {flight})",
+    "warningLast": "{name} wil in de laatste flight spelen (nu flight {flight})",
+    "warningHint": "Verplaats de speler of wijzig de volgorde van de flights om deze wensen te respecteren.",
+    "settings": {
+      "title": "Eerste of laatste flight",
+      "subtitle": "Spelers die regelmatig als eerste of als laatste willen starten. Met deze wensen wordt rekening gehouden bij het genereren van de flights, en ze worden gemeld in Flights en in de startlijst als een handmatige wijziging ze niet meer respecteert.",
+      "addTitle": "Een wens toevoegen",
+      "player": "Speler",
+      "preference": "Wens",
+      "choose": "Kies...",
+      "add": "Toevoegen",
+      "adding": "Bezig met toevoegen...",
+      "firstTitle": "Eerste flight",
+      "firstDesc": "Deze spelers worden indien mogelijk in de eerste flight geplaatst",
+      "lastTitle": "Laatste flight",
+      "lastDesc": "Deze spelers worden indien mogelijk in de laatste flight geplaatst",
+      "empty": "Geen spelers",
+      "remove": "Verwijderen",
+      "error": "Opslaan mislukt — probeer het opnieuw"
+    }
+  },
   "constraints": {
     "title": "Flightbeperkingen",
     "subtitle": "Combinaties definiëren die vermeden of geprefereerd moeten worden bij het genereren van flights",

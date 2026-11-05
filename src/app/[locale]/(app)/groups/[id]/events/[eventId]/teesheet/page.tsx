@@ -10,6 +10,8 @@ import toast from 'react-hot-toast'
 import EmailPreviewModal from '@/components/email/EmailPreviewModal'
 import { useTranslations, useLocale } from 'next-intl'
 import { buildTeesheetHtml } from '@/lib/email/buildTeesheetHtml'
+import { fetchPositionPrefs, checkPositionPrefs, type PositionPrefs } from '@/lib/golf/flights/positionPrefs'
+import { PositionPrefBadge, PositionPrefWarning } from '@/components/flights/PositionPrefBadge'
 
 
 const supabase = createClient()
@@ -78,6 +80,7 @@ export default function TeeSheetPage() {
 
   const [showPreview,  setShowPreview]  = useState(false)
   const [logoUrl,      setLogoUrl]      = useState<string | null>(null)
+  const [positionPrefs, setPositionPrefs] = useState<PositionPrefs>(new Map())   // souhaits « 1er / dernier flight »
 
   // ── Réorganisation manuelle des départs (glisser-déposer, souris + tactile) ──
   const [dragFlightIdx,     setDragFlightIdx]     = useState<number | null>(null)
@@ -111,6 +114,20 @@ export default function TeeSheetPage() {
     supabase.from('groups').select('template_logo_url').eq('id', groupId).single()
       .then(({ data }) => setLogoUrl(data?.template_logo_url ?? null))
   }, [groupId])
+
+  // Souhaits « 1er / dernier flight » : réservés aux administrateurs (les autres ne voient aucun signalement).
+  useEffect(() => {
+    if (!groupId || !isOwner) { setPositionPrefs(new Map()); return }
+    fetchPositionPrefs(supabase, groupId).then(setPositionPrefs)
+  }, [groupId, isOwner])
+
+  // Recalculé à chaque changement d'ordre : on voit tout de suite si un déplacement casse un souhait.
+  const positionChecks = useMemo(() =>
+    checkPositionPrefs(flights.map(f => ({ number: f.flight_number, players: f.players })), positionPrefs)
+  , [flights, positionPrefs])
+  const positionViolations = useMemo(() =>
+    Array.from(positionChecks.values()).filter(c => !c.ok)
+  , [positionChecks])
 
   useEffect(() => { if (selectedEventId) loadData(selectedEventId) }, [selectedEventId])
 
@@ -476,6 +493,7 @@ export default function TeeSheetPage() {
               {t('teesheet.reorderHint')}{reordering || savingTime ? t('teesheet.reorderSaving') : ''}
             </p>
           )}
+          <PositionPrefWarning violations={positionViolations} />
           {flights.map((flight, index) => (
             <div key={flight.id}
               data-flight-idx={index}
@@ -576,6 +594,7 @@ export default function TeeSheetPage() {
                       <span className="text-[11px] text-slate-300 w-4">{i + 1}</span>
                       <span className="text-[13px] font-semibold text-slate-800">{p.first_name} {p.surname}</span>
                       <HolesBadge p={p} />
+                      {positionPrefs.has(p.id) && <PositionPrefBadge pref={positionPrefs.get(p.id)!} check={positionChecks.get(p.id)} />}
                     </div>
                     {p.whs !== null && (
                       <span className="text-[11px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-lg font-mono">
