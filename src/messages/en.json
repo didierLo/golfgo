@@ -1777,6 +1777,25 @@
     }
   },
 
+  "waitlistPromoted": {
+    "pushTitle": "You're in — {title}",
+    "pushBody": "A place has become available: you are off the waiting list for {date}.",
+    "emailSubject": "Good news: you're registered — {title}",
+    "emailHeading": "You're registered!",
+    "emailIntro": "A place has become available: you are off the waiting list and your participation is confirmed.",
+    "emailDeclineInfo": "If you can no longer make it, please let us know so the place can be offered to someone else.",
+    "emailViewButton": "View the event",
+    "emailDeclineButton": "I can no longer come",
+    "emailSignoff": "Kind regards,"
+  },
+  "waitlistDemoted": {
+    "pushTitle": "Waiting list — {title}",
+    "pushBody": "The event on {date} is full: you are on the waiting list. We will let you know if a place becomes available.",
+    "emailSubject": "You are on the waiting list — {title}",
+    "emailHeading": "You are on the waiting list",
+    "emailIntro": "The event is full: your registration has been moved to the waiting list and is not confirmed for now.",
+    "emailInfo": "If a place becomes available, you will be registered automatically and we will let you know right away."
+  },
   "pushNotif": {
     "waitlistTitle": "Waiting list — {title}",
     "confirmedTitle": "New confirmation — {title}",

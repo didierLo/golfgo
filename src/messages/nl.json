@@ -1774,6 +1774,25 @@
     }
   },
 
+  "waitlistPromoted": {
+    "pushTitle": "Je bent ingeschreven — {title}",
+    "pushBody": "Er is een plaats vrijgekomen: je staat niet meer op de wachtlijst voor {date}.",
+    "emailSubject": "Goed nieuws: je bent ingeschreven — {title}",
+    "emailHeading": "Je bent ingeschreven!",
+    "emailIntro": "Er is een plaats vrijgekomen: je staat niet meer op de wachtlijst en je deelname is bevestigd.",
+    "emailDeclineInfo": "Als je toch niet meer kunt komen, laat het ons dan weten zodat de plaats aan iemand anders kan worden aangeboden.",
+    "emailViewButton": "Bekijk het evenement",
+    "emailDeclineButton": "Ik kan niet meer komen",
+    "emailSignoff": "Met vriendelijke groeten,"
+  },
+  "waitlistDemoted": {
+    "pushTitle": "Wachtlijst — {title}",
+    "pushBody": "Het evenement van {date} is vol: je staat op de wachtlijst. We laten het je weten als er een plaats vrijkomt.",
+    "emailSubject": "Je staat op de wachtlijst — {title}",
+    "emailHeading": "Je staat op de wachtlijst",
+    "emailIntro": "Het evenement is vol: je inschrijving is naar de wachtlijst verplaatst en is voorlopig niet bevestigd.",
+    "emailInfo": "Als er een plaats vrijkomt, word je automatisch ingeschreven en laten we het je meteen weten."
+  },
   "pushNotif": {
     "waitlistTitle": "Wachtlijst — {title}",
     "confirmedTitle": "Nieuwe bevestiging — {title}",

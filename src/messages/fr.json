@@ -1775,6 +1775,25 @@
     }
   },
 
+  "waitlistPromoted": {
+    "pushTitle": "Vous êtes inscrit(e) — {title}",
+    "pushBody": "Une place s'est libérée : vous quittez la liste d'attente pour le {date}.",
+    "emailSubject": "Bonne nouvelle : vous êtes inscrit(e) — {title}",
+    "emailHeading": "Vous êtes inscrit(e) !",
+    "emailIntro": "Une place s'est libérée : vous quittez la liste d'attente et votre participation est confirmée.",
+    "emailDeclineInfo": "Si vous ne pouvez finalement plus venir, merci de le signaler pour que la place puisse être proposée à quelqu'un d'autre.",
+    "emailViewButton": "Voir l'événement",
+    "emailDeclineButton": "Je ne participe plus",
+    "emailSignoff": "Cordialement,"
+  },
+  "waitlistDemoted": {
+    "pushTitle": "Liste d'attente — {title}",
+    "pushBody": "L'événement du {date} est complet : vous êtes en liste d'attente. Nous vous prévenons si une place se libère.",
+    "emailSubject": "Vous êtes en liste d'attente — {title}",
+    "emailHeading": "Vous êtes en liste d'attente",
+    "emailIntro": "L'événement est complet : votre inscription est passée en liste d'attente et n'est donc pas confirmée pour le moment.",
+    "emailInfo": "Si une place se libère, vous serez inscrit(e) automatiquement et nous vous préviendrons aussitôt."
+  },
   "pushNotif": {
     "waitlistTitle": "Liste d'attente — {title}",
     "confirmedTitle": "Nouvelle confirmation — {title}",

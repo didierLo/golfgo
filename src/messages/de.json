@@ -1777,6 +1777,25 @@
     }
   },
 
+  "waitlistPromoted": {
+    "pushTitle": "Du bist angemeldet — {title}",
+    "pushBody": "Ein Platz ist frei geworden: Du bist nicht mehr auf der Warteliste für den {date}.",
+    "emailSubject": "Gute Nachrichten: Du bist angemeldet — {title}",
+    "emailHeading": "Du bist angemeldet!",
+    "emailIntro": "Ein Platz ist frei geworden: Du bist nicht mehr auf der Warteliste und deine Teilnahme ist bestätigt.",
+    "emailDeclineInfo": "Falls du doch nicht kommen kannst, sag bitte Bescheid, damit der Platz anderen angeboten werden kann.",
+    "emailViewButton": "Veranstaltung ansehen",
+    "emailDeclineButton": "Ich kann nicht mehr kommen",
+    "emailSignoff": "Mit freundlichen Grüßen,"
+  },
+  "waitlistDemoted": {
+    "pushTitle": "Warteliste — {title}",
+    "pushBody": "Die Veranstaltung am {date} ist voll: Du stehst auf der Warteliste. Wir benachrichtigen dich, sobald ein Platz frei wird.",
+    "emailSubject": "Du stehst auf der Warteliste — {title}",
+    "emailHeading": "Du stehst auf der Warteliste",
+    "emailIntro": "Die Veranstaltung ist voll: Deine Anmeldung wurde auf die Warteliste verschoben und ist vorerst nicht bestätigt.",
+    "emailInfo": "Sobald ein Platz frei wird, wirst du automatisch angemeldet und wir informieren dich sofort."
+  },
   "pushNotif": {
     "waitlistTitle": "Warteliste — {title}",
     "confirmedTitle": "Neue Zusage — {title}",
