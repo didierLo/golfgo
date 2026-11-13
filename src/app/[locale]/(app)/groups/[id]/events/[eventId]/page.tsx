@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { useTranslations, useLocale } from 'next-intl'
+import { useGroupRole } from '@/lib/hooks/useGroupRole'
 
 const supabase = createClient()
 
@@ -44,6 +45,7 @@ export default function EventOverviewPage() {
   const [participantCount, setParticipantCount] = useState(0)
   const [loading,          setLoading]          = useState(true)
   const [updating,         setUpdating]         = useState(false)
+  const { role } = useGroupRole(groupId)
 
   useEffect(() => { loadData() }, [eventId])
 
@@ -90,15 +92,19 @@ export default function EventOverviewPage() {
     if (holes !== undefined) update.holes_played = holes
     update.holes_section = section ?? null
 
-    const { error } = await supabase.from('event_participants')
+    // .select('status') : un trigger en base place automatiquement le joueur en liste d'attente
+    // si l'événement est complet ; on affiche donc le statut réellement enregistré.
+    const { data: saved, error } = await supabase.from('event_participants')
       .update(update).eq('event_id', eventId).eq('player_id', playerId)
+      .select('status')
 
     if (error) {
       toast.error(t('eventOverview.errorUpdate'))
     } else {
+      const finalStatus = ((saved?.[0]?.status as ParticipationStatus) ?? newStatus)
       const wasGoing = status === 'GOING'
-      const nowGoing = newStatus === 'GOING'
-      setStatus(newStatus)
+      const nowGoing = finalStatus === 'GOING'
+      setStatus(finalStatus)
       if (holes !== undefined) setHolesPlayed(holes)
       setHolesSection(section ?? null)
       setParticipantCount(prev => {
@@ -107,7 +113,9 @@ export default function EventOverviewPage() {
         return prev
       })
       let msg = t('eventOverview.toastDeclined')
-      if (newStatus === 'GOING') {
+      if (finalStatus === 'WAITLIST') {
+        msg = t('eventOverview.toastWaitlist')
+      } else if (newStatus === 'GOING') {
         if (holes === 9 && section === 'out') msg = t('eventOverview.toast9out')
         else if (holes === 9 && section === 'in') msg = t('eventOverview.toast9in')
         else msg = t('eventOverview.toast18')
@@ -128,6 +136,8 @@ export default function EventOverviewPage() {
   )
 
   const isFull    = !!event.max_participants && participantCount >= event.max_participants && status !== 'GOING'
+  const onWaitlist = status === 'WAITLIST'
+  const isAdmin   = role === 'owner'
   const active18  = status === 'GOING' && holesPlayed === 18
   const active9out = status === 'GOING' && holesPlayed === 9 && holesSection === 'out'
   const active9in  = status === 'GOING' && holesPlayed === 9 && holesSection === 'in'
@@ -236,31 +246,37 @@ export default function EventOverviewPage() {
           style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">{t('eventOverview.myParticipation')}</p>
 
+          {onWaitlist ? (
+            <div className="mb-3 px-3 py-2 rounded-lg text-[12px] font-semibold" style={{ background: '#FAEEDA', color: '#854F0B' }}>
+              ⏳ {t('eventOverview.onWaitlist')}
+            </div>
+          ) : isFull && !isAdmin ? (
+            <div className="mb-3 px-3 py-2 rounded-lg text-[12px] font-semibold" style={{ background: '#FAEEDA', color: '#854F0B' }}>
+              ⏳ {t('eventOverview.fullWaitlistInfo')}
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-2">
             {/* 18 trous */}
             <button
               onClick={() => respond('GOING', 18, null)}
-              disabled={updating || active18 || isFull}
+              disabled={updating || active18}
               className={`w-full text-[13px] font-semibold py-2.5 rounded-xl border-2 transition-all disabled:cursor-default ${
                 active18
                   ? 'bg-[#EAF3DE] border-[#3B6D11] text-[#3B6D11]'
-                  : isFull
-                    ? 'bg-slate-50 border-slate-200 text-slate-300'
-                    : 'border-slate-200 text-slate-600 hover:bg-[#EAF3DE] hover:border-[#3B6D11] hover:text-[#3B6D11]'
+                  : 'border-slate-200 text-slate-600 hover:bg-[#EAF3DE] hover:border-[#3B6D11] hover:text-[#3B6D11]'
               }`}>
-              {active18 ? t('eventOverview.going18active') : isFull ? t('eventOverview.full') : t('eventOverview.going18')}
+              {active18 ? t('eventOverview.going18active') : t('eventOverview.going18')}
             </button>
 
             {/* 9H Front */}
             <button
               onClick={() => respond('GOING', 9, 'out')}
-              disabled={updating || active9out || isFull}
+              disabled={updating || active9out}
               className={`w-full text-[13px] font-semibold py-2.5 rounded-xl border-2 transition-all disabled:cursor-default ${
                 active9out
                   ? 'bg-amber-50 border-amber-400 text-amber-700'
-                  : isFull
-                    ? 'bg-slate-50 border-slate-200 text-slate-300'
-                    : 'border-slate-200 text-slate-600 hover:bg-amber-50 hover:border-amber-400 hover:text-amber-700'
+                  : 'border-slate-200 text-slate-600 hover:bg-amber-50 hover:border-amber-400 hover:text-amber-700'
               }`}>
               {active9out ? t('eventOverview.going9outActive') : t('eventOverview.going9out')}
             </button>
@@ -268,13 +284,11 @@ export default function EventOverviewPage() {
             {/* 9H Back */}
             <button
               onClick={() => respond('GOING', 9, 'in')}
-              disabled={updating || active9in || isFull}
+              disabled={updating || active9in}
               className={`w-full text-[13px] font-semibold py-2.5 rounded-xl border-2 transition-all disabled:cursor-default ${
                 active9in
                   ? 'bg-orange-50 border-orange-400 text-orange-700'
-                  : isFull
-                    ? 'bg-slate-50 border-slate-200 text-slate-300'
-                    : 'border-slate-200 text-slate-600 hover:bg-orange-50 hover:border-orange-400 hover:text-orange-700'
+                  : 'border-slate-200 text-slate-600 hover:bg-orange-50 hover:border-orange-400 hover:text-orange-700'
               }`}>
               {active9in ? t('eventOverview.going9inActive') : t('eventOverview.going9in')}
             </button>

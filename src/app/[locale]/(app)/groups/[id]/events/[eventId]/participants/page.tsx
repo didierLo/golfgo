@@ -368,6 +368,7 @@ export default function ParticipantsPage() {
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [msgModal,        setMsgModal]        = useState<Participant | null>(null)
   const [extraActivityLabel, setExtraActivityLabel] = useState<string | null>(null)
+  const [maxParticipants,    setMaxParticipants]    = useState<number | null>(null)
   const [exporting,        setExporting]        = useState(false)
 
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
@@ -421,7 +422,7 @@ export default function ParticipantsPage() {
       .from('event_participants')
       .select(`player_id, status, responded_at, holes_played, holes_section, response_message, admin_note, extra_activity_count, players(first_name, surname, whs)`)
       .eq('event_id', evId),
-    supabase.from('events').select('extra_activity_label').eq('id', evId).single(),
+    supabase.from('events').select('extra_activity_label, max_participants').eq('id', evId).single(),
   ])
 
   if (error) { console.error(error); setLoading(false); return }
@@ -429,6 +430,7 @@ export default function ParticipantsPage() {
     const clean = (data || []).filter((p: any) => p.players != null)
     setParticipants(clean as any)
     setExtraActivityLabel(evData?.extra_activity_label ?? null)
+    setMaxParticipants(evData?.max_participants ?? null)
     setLoading(false)
   }
 
@@ -471,7 +473,15 @@ export default function ParticipantsPage() {
     setOverviewLoading(false)
   }
 
-  async function updateStatus(playerId: string, status: 'GOING' | 'DECLINED' | 'INVITED') {
+  async function updateStatus(playerId: string, status: 'GOING' | 'DECLINED' | 'INVITED' | 'WAITLIST') {
+    // Événement complet : l'admin peut inscrire en surnombre, mais seulement en connaissance de cause
+    if (status === 'GOING' && maxParticipants != null) {
+      const current = participants.find(p => p.player_id === playerId)
+      const goingNow = participants.filter(p => p.status === 'GOING').length
+      if (current?.status !== 'GOING' && goingNow >= maxParticipants) {
+        if (!confirm(t('participants.overbookedConfirm', { count: goingNow, max: maxParticipants }))) return
+      }
+    }
     await supabase.from('event_participants')
       .update({ status, responded_at: new Date().toISOString() })
       .eq('event_id', selectedEventId).eq('player_id', playerId)
@@ -758,13 +768,13 @@ export default function ParticipantsPage() {
 
   const gridCols = isOwner
     ? (extraActivityLabel
-        ? 'grid-cols-[minmax(160px,1fr)_40px_70px_54px_60px_80px_150px_130px_minmax(160px,190px)]'
-        : 'grid-cols-[minmax(160px,1fr)_40px_70px_60px_80px_150px_130px_minmax(160px,190px)]')
+        ? 'grid-cols-[minmax(160px,1fr)_40px_70px_54px_60px_80px_150px_130px_minmax(200px,230px)]'
+        : 'grid-cols-[minmax(160px,1fr)_40px_70px_60px_80px_150px_130px_minmax(200px,230px)]')
     : (extraActivityLabel
         ? 'grid-cols-[minmax(200px,1fr)_40px_70px_54px_60px_80px_150px_130px]'
         : 'grid-cols-[minmax(200px,1fr)_40px_70px_60px_80px_150px_130px]')
   const tableMinWidth = isOwner
-    ? (extraActivityLabel ? 'min-w-[920px]' : 'min-w-[880px]')
+    ? (extraActivityLabel ? 'min-w-[960px]' : 'min-w-[920px]')
     : (extraActivityLabel ? 'min-w-[780px]' : 'min-w-[740px]')
 
   return (
@@ -841,6 +851,14 @@ export default function ParticipantsPage() {
                 {has9holers ? t('participants.going18') : t('participants.going')}
               </span>
             </div>
+            {maxParticipants != null && going.length > maxParticipants && (
+              <div className="border border-red-300 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: '#FEE2E2' }}>
+                <span className="text-[20px] font-black text-red-700">+{going.length - maxParticipants}</span>
+                <span className="text-[10px] font-semibold text-red-700 uppercase tracking-wide whitespace-nowrap">
+                  {t('participants.overbooked', { max: maxParticipants })}
+                </span>
+              </div>
+            )}
             {going9front.length > 0 && (
               <div className="border border-amber-200 rounded-xl px-4 py-2.5 flex flex-col items-center min-w-[68px]" style={{ background: '#FEF3C7' }}>
                 <span className="text-[20px] font-black text-amber-700">{going9front.length}</span>
@@ -994,16 +1012,18 @@ export default function ParticipantsPage() {
                     {/* Actions owner */}
                     {isOwner && (
                       <div className="flex justify-center items-center gap-1">
-                        {(['GOING', 'DECLINED', 'INVITED'] as const).map(s => (
+                        {(['GOING', 'WAITLIST', 'DECLINED', 'INVITED'] as const).map(s => (
                           <button key={s} type="button" onClick={() => updateStatus(p.player_id, s)}
+                            title={s === 'WAITLIST' ? t('participants.putOnWaitlist') : undefined}
                             className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors ${
                               p.status === s
                                 ? s === 'GOING'    ? 'bg-[#EAF3DE] border-[#C0DD97] text-[#3B6D11]'
+                                : s === 'WAITLIST' ? 'bg-[#FAEEDA] border-[#E8C98F] text-[#854F0B]'
                                 : s === 'DECLINED' ? 'bg-[#FCEBEB] border-[#F7C1C1] text-[#A32D2D]'
                                 :                   'bg-[#EBF3FC] border-[#B5D4F4] text-[#0C447C]'
                                 : 'border-slate-200 text-slate-400 hover:bg-white/30'
                             }`}>
-                            {s === 'GOING' ? t('participants.yes') : s === 'DECLINED' ? t('participants.no') : t('participants.reset')}
+                            {s === 'GOING' ? t('participants.yes') : s === 'WAITLIST' ? '⏳' : s === 'DECLINED' ? t('participants.no') : t('participants.reset')}
                           </button>
                         ))}
                         <button type="button" onClick={() => removeParticipant(p.player_id)}
