@@ -67,6 +67,31 @@ async function fetchSentrySummary() {
   }
 }
 
+// Ajoute à chaque email de la file le nom du joueur, son adresse ACTUELLE, le groupe et l'événement :
+// l'administrateur voit ainsi tout de suite si l'adresse a déjà été corrigée dans la fiche du joueur.
+async function enrichEmailRows(rows: any[]) {
+  const ids = (k: string) => [...new Set(rows.map(r => r[k]).filter(Boolean))] as string[]
+  const [pIds, gIds, eIds] = [ids('player_id'), ids('group_id'), ids('event_id')]
+  const [{ data: players }, { data: groups }, { data: events }] = await Promise.all([
+    pIds.length ? supabaseAdmin.from('players').select('id, first_name, surname, email').in('id', pIds) : Promise.resolve({ data: [] as any[] }),
+    gIds.length ? supabaseAdmin.from('groups').select('id, name').in('id', gIds) : Promise.resolve({ data: [] as any[] }),
+    eIds.length ? supabaseAdmin.from('events').select('id, title, starts_at').in('id', eIds) : Promise.resolve({ data: [] as any[] }),
+  ])
+  const pBy = new Map((players ?? []).map((p: any) => [p.id, p]))
+  const gBy = new Map((groups ?? []).map((g: any) => [g.id, g]))
+  const eBy = new Map((events ?? []).map((e: any) => [e.id, e]))
+  return rows.map(r => {
+    const p = r.player_id ? pBy.get(r.player_id) as any : null
+    const e = r.event_id ? eBy.get(r.event_id) as any : null
+    return {
+      ...r,
+      player: p ? { name: `${p.first_name} ${p.surname}`, currentEmail: p.email ?? null } : null,
+      group_name: r.group_id ? (gBy.get(r.group_id) as any)?.name ?? null : null,
+      event: e ? { title: e.title, starts_at: e.starts_at } : null,
+    }
+  })
+}
+
 export async function GET() {
   if (!(await requireAdmin())) {
     return Response.json({ error: 'Unauthorized' }, { status: 403 })
@@ -96,8 +121,8 @@ export async function GET() {
 
   return Response.json({
     emailQueue: {
-      pending: pendingEmails ?? [],
-      failed:  failedEmails ?? [],
+      pending: await enrichEmailRows(pendingEmails ?? []),
+      failed:  await enrichEmailRows(failedEmails ?? []),
       counts:  { pending: pendingCount ?? 0, failed: failedCount ?? 0 },
     },
     dmarc: dmarcLog?.[0] ?? null,

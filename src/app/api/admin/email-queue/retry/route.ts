@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { createClient } from '@supabase/supabase-js'
+import { cleanEmailAddress, sendQueuedEmailNow } from '@/lib/email/queueEmail'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,10 +26,10 @@ export async function POST(req: Request) {
   const { id, to_email } = await req.json() as { id: string; to_email?: string }
   if (!id) return Response.json({ error: 'id requis' }, { status: 400 })
 
-  const update: Record<string, any> = { status: 'pending', attempts: 0, last_error: null }
+  const update: Record<string, any> = { status: 'pending', attempts: 0, last_error: null, resolved_at: null }
 
   if (to_email !== undefined) {
-    const trimmed = to_email.trim()
+    const trimmed = cleanEmailAddress(to_email)
     // Validation basique — le vrai contrôle se fait de toute façon côté Resend à l'envoi,
     // ceci évite juste de remettre en file une adresse manifestement encore invalide.
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
@@ -46,5 +47,7 @@ export async function POST(req: Request) {
   if (!data || data.length === 0) {
     return Response.json({ error: "Aucune ligne mise à jour — id introuvable" }, { status: 404 })
   }
-  return Response.json({ ok: true })
+  // Envoi immédiat de CET email : le résultat (parti ou refusé, et pourquoi) revient à l'écran.
+  const result = await sendQueuedEmailNow(id)
+  return Response.json({ ok: true, sent: result.sent, error: result.error ?? null })
 }

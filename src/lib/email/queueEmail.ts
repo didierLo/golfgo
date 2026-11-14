@@ -11,6 +11,16 @@ const supabaseAdmin = createClient(
 
 import { notifyOwnersOfEmailFailure } from '@/lib/email/notifyEmailFailure'
 
+/**
+ * Nettoie une adresse saisie à la main : espaces, retours à la ligne et espaces insécables n'ont
+ * jamais leur place dans une adresse (« gmail. com » → « gmail.com »). Les adresses de GolfGo sont
+ * toujours « nues » ; on ne touche pas à un éventuel format « Nom <adresse> ».
+ */
+export function cleanEmailAddress(raw: string): string {
+  const s = (raw ?? '').trim()
+  return s.includes('<') ? s : s.replace(/[\s\u00a0\u200b]+/g, '')
+}
+
 export type EmailCategory = 'reminder' | 'invitation' | 'teesheet' | 'communication' | 'group_invite' | 'scorecard' | 'other'
 
 export type EmailPayload = {
@@ -61,10 +71,11 @@ function isQuotaError(error: any): boolean {
 export async function sendOrQueueEmail(payload: EmailPayload): Promise<
   { sent: true } | { sent: false; queued: boolean; error: string }
 > {
+  const to = cleanEmailAddress(payload.to)
   const { error } = await resend.emails.send({
     from:        payload.from,
     ...(payload.replyTo ? { replyTo: payload.replyTo } : {}),
-    to:          payload.to,
+    to,
     subject:     payload.subject,
     html:        payload.html,
     ...(payload.headers ? { headers: payload.headers } : {}),
@@ -84,7 +95,7 @@ export async function sendOrQueueEmail(payload: EmailPayload): Promise<
     player_id:   payload.playerId ?? null,
     from_email:  payload.from,
     reply_to:    payload.replyTo ?? null,
-    to_email:    payload.to,
+    to_email:    to,
     subject:     payload.subject,
     html:        payload.html,
     headers:     payload.headers ?? null,
@@ -121,7 +132,7 @@ export async function drainEmailQueue(maxToSend: number = 80): Promise<{ sent: n
     const { error } = await resend.emails.send({
       from:        item.from_email,
       ...(item.reply_to ? { replyTo: item.reply_to } : {}),
-      to:          item.to_email,
+      to:          cleanEmailAddress(item.to_email),
       subject:     item.subject,
       html:        item.html,
       ...(item.headers ? { headers: item.headers } : {}),
@@ -163,4 +174,37 @@ export async function drainEmailQueue(maxToSend: number = 80): Promise<{ sent: n
     .eq('status', 'pending')
 
   return { sent, stillPending: stillPending ?? 0 }
+}
+
+/**
+ * Envoie IMMÉDIATEMENT un email de la file (après correction de l'adresse par l'administrateur),
+ * sans attendre le cron quotidien ni toucher aux autres emails en attente.
+ * Succès → statut « sent ». Dépassement de quota → reste « pending » (le cron le reprendra).
+ * Autre erreur → « failed » avec le message, pour que l'administrateur voie pourquoi.
+ */
+export async function sendQueuedEmailNow(id: string): Promise<{ sent: boolean; error?: string }> {
+  const { data: item } = await supabaseAdmin.from('email_queue').select('*').eq('id', id).maybeSingle()
+  if (!item) return { sent: false, error: 'Email introuvable' }
+
+  const { error } = await resend.emails.send({
+    from:        item.from_email,
+    ...(item.reply_to ? { replyTo: item.reply_to } : {}),
+    to:          cleanEmailAddress(item.to_email),
+    subject:     item.subject,
+    html:        item.html,
+    ...(item.headers ? { headers: item.headers } : {}),
+    ...(item.attachments ? { attachments: item.attachments } : {}),
+  })
+
+  if (!error) {
+    await supabaseAdmin.from('email_queue')
+      .update({ status: 'sent', sent_at: new Date().toISOString(), last_error: null })
+      .eq('id', id)
+    return { sent: true }
+  }
+
+  await supabaseAdmin.from('email_queue')
+    .update({ status: isQuotaError(error) ? 'pending' : 'failed', attempts: (item.attempts ?? 0) + 1, last_error: error.message })
+    .eq('id', id)
+  return { sent: false, error: error.message }
 }

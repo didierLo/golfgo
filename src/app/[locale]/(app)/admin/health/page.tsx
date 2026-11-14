@@ -6,7 +6,12 @@ import toast from 'react-hot-toast'
 
 const supabase = createClient()
 
-type EmailRow = { id: string; to_email: string; subject: string; last_error: string | null; created_at: string }
+type EmailRow = {
+  id: string; status: string; to_email: string; subject: string; last_error: string | null; created_at: string
+  player: { name: string; currentEmail: string | null } | null
+  group_name: string | null
+  event: { title: string; starts_at: string } | null
+}
 type SentryIssue = { title: string; level: string; count: number; lastSeen: string; url: string }
 type BackupLogRow = { run_at: string; summary: { ok: boolean; bytes?: number; tables?: number; rows?: number; trigger?: string; error?: string } }
 type HealthData = {
@@ -14,6 +19,76 @@ type HealthData = {
   dmarc: { run_at: string; summary: any } | null
   backup: { lastOk: BackupLogRow | null; lastAttempt: BackupLogRow | null }
   sentry: { available: boolean; reason?: string; unresolvedCount?: number; issues?: SentryIssue[] }
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const cleanAddr = (a: string) => a.replace(/[\s\u00a0\u200b]+/g, '')
+
+// Une ligne de la file d'emails : on peut CORRIGER l'adresse (et renvoyer tout de suite) ou SUPPRIMER l'email.
+function EmailQueueRow({ row, busy, onFix, onDelete }: {
+  row: EmailRow
+  busy: boolean
+  onFix: (id: string, address: string) => Promise<void>
+  onDelete: (id: string) => Promise<void>
+}) {
+  const failed   = row.status === 'failed'
+  const cleaned  = cleanAddr(row.to_email)
+  const current  = row.player?.currentEmail ? cleanAddr(row.player.currentEmail) : null
+  // Suggestion : l'adresse actuelle du joueur si elle a déjà été corrigée dans sa fiche, sinon l'adresse sans espaces
+  const currentIsFix = !!current && EMAIL_RE.test(current) && current.toLowerCase() !== row.to_email.toLowerCase()
+  const suggestion   = currentIsFix ? current! : cleaned
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft]     = useState(suggestion)
+  const eventPast = !!row.event && new Date(row.event.starts_at) < new Date()
+  const addressOk = EMAIL_RE.test(row.to_email)
+
+  return (
+    <div className={`rounded-lg border px-3 py-2.5 ${failed ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-200'}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[12px] font-medium text-slate-800 break-all">
+            {row.player ? `${row.player.name} — ` : ''}<span className={addressOk ? '' : 'text-red-600'}>« {row.to_email} »</span>
+          </div>
+          <div className="text-[11px] text-slate-500 truncate">
+            {row.group_name ? `${row.group_name} · ` : ''}{row.subject}
+            {row.event ? ` · ${new Date(row.event.starts_at).toLocaleDateString('fr-BE', { day: 'numeric', month: 'short', timeZone: 'UTC' })}` : ''}
+            {eventPast && <span className="ml-1 font-semibold text-amber-600">(événement passé)</span>}
+          </div>
+          {failed && row.last_error && <div className="text-[11px] text-red-500">{row.last_error}</div>}
+          {failed && currentIsFix && !editing && (
+            <div className="text-[11px] text-[#3B6D11] mt-0.5">✓ La fiche du joueur a déjà une adresse corrigée : {current}</div>
+          )}
+        </div>
+        {!editing && (
+          <div className="flex gap-1.5 shrink-0">
+            <button onClick={() => { setDraft(suggestion); setEditing(true) }} disabled={busy}
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-40">
+              Corriger
+            </button>
+            <button onClick={() => { if (confirm('Supprimer cet email de la file ? Il ne sera jamais envoyé.')) onDelete(row.id) }} disabled={busy}
+              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-100 disabled:opacity-40">
+              Supprimer
+            </button>
+          </div>
+        )}
+      </div>
+      {editing && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <input type="email" value={draft} onChange={e => setDraft(e.target.value)} autoFocus
+            className="flex-1 min-w-[220px] text-[12px] px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white" />
+          <button onClick={async () => { await onFix(row.id, draft); setEditing(false) }}
+            disabled={busy || !EMAIL_RE.test(cleanAddr(draft))}
+            className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-40">
+            Corriger et renvoyer
+          </button>
+          <button onClick={() => setEditing(false)} disabled={busy}
+            className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-600 hover:bg-slate-100">
+            Annuler
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 const cardClass = "bg-white border border-slate-200 rounded-2xl p-5"
@@ -32,14 +107,45 @@ export default function HealthDashboardPage() {
 
   useEffect(() => { load() }, [])
 
-  async function handleRetry(id: string) {
+  // Corrige l'adresse d'un email de la file puis le renvoie tout de suite ; l'écran dit si c'est parti ou refusé.
+  async function handleFix(id: string, address: string) {
     setBusy(true)
     const res = await fetch('/api/admin/email-queue/retry', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, to_email: address }),
+    })
+    const body = await res.json().catch(() => null)
+    if (!res.ok) toast.error(body?.error ?? 'Échec de la correction')
+    else if (body?.sent) toast.success('Adresse corrigée — email envoyé ✓')
+    else toast.error(`Adresse corrigée, mais l'envoi a échoué : ${body?.error ?? 'raison inconnue'}`)
+    await load()
+    setBusy(false)
+  }
+
+  async function handleDelete(id: string) {
+    setBusy(true)
+    const res = await fetch('/api/admin/email-queue/delete', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })
-    if (res.ok) { toast.success('Remis en file'); await load() }
-    else toast.error('Échec de la relance')
+    if (res.ok) toast.success('Email supprimé')
+    else toast.error('Échec de la suppression')
+    await load()
+    setBusy(false)
+  }
+
+  async function handleDeleteAll(scope: 'failed' | 'pending') {
+    const label = scope === 'failed' ? 'en échec' : 'en attente'
+    if (!confirm(`Supprimer tous les emails ${label} ? Ils ne seront jamais envoyés.`)) return
+    setBusy(true)
+    const res = await fetch('/api/admin/email-queue/delete', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scope }),
+    })
+    const body = await res.json().catch(() => null)
+    if (res.ok) toast.success(`${body?.deleted ?? 0} email(s) supprimé(s)`)
+    else toast.error('Échec de la suppression')
+    await load()
     setBusy(false)
   }
 
@@ -56,7 +162,11 @@ export default function HealthDashboardPage() {
   async function handleDrainNow() {
     setBusy(true)
     const res = await fetch('/api/admin/email-queue/drain', { method: 'POST' })
-    if (res.ok) { toast.success('File relancée'); await load() }
+    if (res.ok) {
+      const body = await res.json().catch(() => null)
+      toast.success(`${body?.sent ?? 0} email(s) envoyé(s), ${body?.stillPending ?? 0} encore en attente`)
+      await load()
+    }
     else toast.error('Échec')
     setBusy(false)
   }
@@ -77,11 +187,12 @@ export default function HealthDashboardPage() {
 
       {/* ── File d'emails ── */}
       <div className={cardClass}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between gap-3 mb-4">
           <h2 className="text-[14px] font-semibold text-slate-800">📧 File d'emails</h2>
-          <button onClick={handleDrainNow} disabled={busy}
+          <button onClick={handleDrainNow} disabled={busy || data.emailQueue.counts.pending === 0}
+            title="Réessaie les emails mis de côté (quota d'envoi dépassé). Ne corrige aucune adresse."
             className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-700 disabled:opacity-40">
-            Vider la file maintenant
+            Renvoyer les emails en attente
           </button>
         </div>
         <div className="flex gap-6 mb-4">
@@ -97,19 +208,35 @@ export default function HealthDashboardPage() {
           </div>
         </div>
         {data.emailQueue.failed.length > 0 && (
-          <div className="space-y-2">
-            {data.emailQueue.failed.map(row => (
-              <div key={row.id} className="flex items-center justify-between gap-3 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-                <div className="min-w-0">
-                  <div className="text-[12px] font-medium text-slate-800 truncate">{row.to_email} — {row.subject}</div>
-                  <div className="text-[11px] text-red-500 truncate">{row.last_error}</div>
-                </div>
-                <button onClick={() => handleRetry(row.id)} disabled={busy}
-                  className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-red-200 text-red-600 hover:bg-red-100 disabled:opacity-40 shrink-0">
-                  Relancer
-                </button>
-              </div>
-            ))}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[12px] font-semibold text-slate-600">En échec — adresse refusée</h3>
+              <button onClick={() => handleDeleteAll('failed')} disabled={busy}
+                className="text-[11px] font-semibold text-red-600 hover:underline disabled:opacity-40">
+                Tout supprimer
+              </button>
+            </div>
+            <div className="space-y-2">
+              {data.emailQueue.failed.map(row => (
+                <EmailQueueRow key={row.id} row={row} busy={busy} onFix={handleFix} onDelete={handleDelete} />
+              ))}
+            </div>
+          </div>
+        )}
+        {data.emailQueue.pending.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[12px] font-semibold text-slate-600">En attente d'envoi</h3>
+              <button onClick={() => handleDeleteAll('pending')} disabled={busy}
+                className="text-[11px] font-semibold text-red-600 hover:underline disabled:opacity-40">
+                Tout supprimer
+              </button>
+            </div>
+            <div className="space-y-2">
+              {data.emailQueue.pending.map(row => (
+                <EmailQueueRow key={row.id} row={row} busy={busy} onFix={handleFix} onDelete={handleDelete} />
+              ))}
+            </div>
           </div>
         )}
         {data.emailQueue.counts.pending === 0 && data.emailQueue.counts.failed === 0 && (
