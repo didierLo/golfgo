@@ -38,13 +38,16 @@ export async function POST(req: Request) {
     const dl = DATE_LOCALE[gl]
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
-    const [{ data: options }, { data: members }, owners, { data: groupRow }] = await Promise.all([
+    const [{ data: options }, { data: members }, owners, { data: groupRow }, { data: club }] = await Promise.all([
       admin.from('poll_options').select('id, starts_at').eq('poll_id', pollId).order('starts_at'),
       admin.from('groups_players')
         .select('player_id, role, email_opt_out, players(id, first_name, surname, email, user_id)')
         .eq('group_id', groupId),
       getGroupOwners(admin, groupId),
       admin.from('groups').select('name, template_logo_url').eq('id', groupId).maybeSingle(),
+      poll.club_id
+        ? admin.from('clubs').select('name, website, region, country').eq('id', poll.club_id).maybeSingle()
+        : Promise.resolve({ data: null }),
     ])
 
     // Les « visiteurs » (guest) ne sont pas sondés
@@ -77,6 +80,15 @@ export async function POST(req: Request) {
     const deadlineText = poll.deadline
       ? t('pollEmail.deadline', { date: new Date(poll.deadline + 'T00:00:00Z').toLocaleDateString(dl, { day: 'numeric', month: 'long', timeZone: 'UTC' }) })
       : ''
+    // Liens vers le club (mêmes que dans l'app : site web + recherche Google Maps)
+    const siteUrl = club?.website && /^https?:\/\//i.test(club.website) ? club.website : null
+    const mapsQuery = [club?.name ?? poll.location, club?.region, club?.country].filter(Boolean).join(' ')
+    const linkStyle = 'display:inline-block;margin:0 8px 8px 0;font-size:12px;font-weight:600;color:#185FA5;text-decoration:none;border:1px solid #B5D4F4;background:#EBF3FC;border-radius:8px;padding:6px 12px;'
+    const clubLinksHtml = (siteUrl || mapsQuery) ? `<div style="margin-top:10px;">${
+      siteUrl ? `<a href="${esc(siteUrl)}" style="${linkStyle}">${esc(t('clubs.openWebsite'))}</a>` : ''
+    }${
+      mapsQuery ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}" style="${linkStyle}">${esc(t('myEvents.directions'))}</a>` : ''
+    }</div>` : ''
     const ownerName = signerDisplayName(owners)
     const logoUrl   = (groupRow as any)?.template_logo_url ?? null
     const subjectKey = mode === 'remind' ? 'pollEmail.reminderSubject' : 'pollEmail.subject'
@@ -114,11 +126,12 @@ export async function POST(req: Request) {
   <tr><td style="background:#ffffff;padding:36px 32px;">
     <p style="margin:0 0 6px;font-size:13px;color:#64748B;">${esc(t('pollEmail.hello', { name: p.first_name }))}</p>
     <p style="margin:0 0 18px;font-size:18px;font-weight:700;color:#185FA5;">${esc(poll.title)}</p>
-    <p style="margin:0 0 20px;font-size:14px;color:#334155;line-height:1.7;">${esc(mode === 'remind' ? t('pollEmail.reminderIntro') : t('pollEmail.intro'))}</p>
-    ${poll.description ? `<p style="margin:0 0 20px;font-size:14px;color:#334155;line-height:1.7;">${esc(poll.description).replace(/\n/g, '<br/>')}</p>` : ''}
+    ${mode === 'remind' ? `<p style="margin:0 0 12px;font-size:14px;color:#92400E;font-weight:600;line-height:1.7;">${esc(t('pollEmail.reminderIntro'))}</p>` : ''}
+    <p style="margin:0 0 20px;font-size:14px;color:#334155;line-height:1.7;">${poll.description ? esc(poll.description).replace(/\n/g, '<br/>') : esc(t('pollEmail.intro'))}</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:24px;"><tr><td style="padding:14px 20px;">
       ${poll.location ? `<p style="margin:0 0 8px;font-size:13px;color:#0F172A;font-weight:600;">📍 ${esc(poll.location)}</p>` : ''}
       <table cellpadding="0" cellspacing="0">${optionsHtml}</table>
+      ${clubLinksHtml}
     </td></tr></table>
     <a href="${link}" style="display:block;text-decoration:none;text-align:center;background:#185FA5;color:#ffffff;font-size:16px;font-weight:700;border-radius:12px;padding:16px 20px;">${esc(t('pollEmail.cta'))} →</a>
     ${deadlineText ? `<p style="margin:16px 0 0;font-size:13px;color:#92400E;text-align:center;font-weight:600;">${esc(deadlineText)}</p>` : ''}

@@ -204,23 +204,93 @@ const T = {
   },
 }
 
+
+// ── Révision du 20/11 : question distincte du nom de l'événement, modification, tutoiement en français ──
+const REV = {
+  fr: {
+    polls: {
+      emptyHint: 'Propose plusieurs dates et laisse les membres répondre.',
+      fieldTitle: "Nom de l'événement", fieldDescription: 'Question posée aux membres',
+      defaultQuestion: 'Serais-tu partant(e) pour cet événement ? Indique les dates qui te conviennent.',
+      errNeedTitle: "Indique le nom de l'événement", errNeedDate: 'Ajoute au moins une date',
+      convertHint: "« Choisir cette date » crée l'événement : les partants sont inscrits, les « peut-être » invités. Tu complètes ensuite les détails.",
+      invalidDesc: "Ce lien de sondage n'est pas valide. Utilise le lien reçu par email ou ouvre GolfGo.",
+      intro: 'Pour chaque date, indique si tu es partant.', yourAnswer: 'Ta réponse',
+      thanks: 'Merci, tes réponses sont enregistrées.', changeHint: 'Tu peux les modifier tant que le sondage est ouvert.',
+      saveError: "Impossible d'enregistrer. Réessaie dans un instant.",
+      edit: 'Modifier', editTitle: 'Modifier le sondage', saveChanges: 'Enregistrer',
+      removedConfirm: '{count} date(s) retirée(s) : les réponses déjà données pour ces dates seront perdues. Continuer ?',
+      resendNotify: "Renvoyer l'email et la notification aux membres",
+      clubHint: "Le site du club et l'itinéraire sont ajoutés automatiquement au sondage.",
+    },
+    pollEmail: {
+      intro: 'Qui serait partant ? Indique en un clic ta disponibilité pour les dates ci-dessous.',
+      reminderIntro: "Tu n'as pas encore répondu à ce sondage. Quelques secondes suffisent.",
+    },
+  },
+  en: { polls: {
+    fieldTitle: 'Event name', fieldDescription: 'Question for members',
+    defaultQuestion: 'Are you in for this event? Pick the dates that suit you.',
+    edit: 'Edit', editTitle: 'Edit poll', saveChanges: 'Save',
+    removedConfirm: '{count} date(s) removed: answers already given for them will be lost. Continue?',
+    resendNotify: 'Send the email and notification to members again',
+    clubHint: 'The club website and directions are added to the poll automatically.',
+    errNeedTitle: 'Enter the event name',
+  } },
+  nl: { polls: {
+    fieldTitle: 'Naam van het evenement', fieldDescription: 'Vraag aan de leden',
+    defaultQuestion: 'Doet u mee aan dit evenement? Kies de data die u schikken.',
+    edit: 'Bewerken', editTitle: 'Peiling bewerken', saveChanges: 'Opslaan',
+    removedConfirm: '{count} datum(s) verwijderd: de al gegeven antwoorden voor deze data gaan verloren. Doorgaan?',
+    resendNotify: 'E-mail en melding opnieuw naar de leden sturen',
+    clubHint: 'De website van de club en de route worden automatisch aan de peiling toegevoegd.',
+    errNeedTitle: 'Geef de naam van het evenement in',
+  } },
+  de: { polls: {
+    fieldTitle: 'Name der Veranstaltung', fieldDescription: 'Frage an die Mitglieder',
+    defaultQuestion: 'Sind Sie bei dieser Veranstaltung dabei? Wählen Sie die Termine, die Ihnen passen.',
+    edit: 'Bearbeiten', editTitle: 'Umfrage bearbeiten', saveChanges: 'Speichern',
+    removedConfirm: '{count} Termin(e) entfernt: bereits gegebene Antworten dazu gehen verloren. Fortfahren?',
+    resendNotify: 'E-Mail und Benachrichtigung erneut an die Mitglieder senden',
+    clubHint: 'Website und Anfahrt des Clubs werden automatisch zur Umfrage hinzugefügt.',
+    errNeedTitle: 'Geben Sie den Namen der Veranstaltung ein',
+  } },
+  es: { polls: {
+    fieldTitle: 'Nombre del evento', fieldDescription: 'Pregunta a los miembros',
+    defaultQuestion: '¿Se apunta a este evento? Indique las fechas que le convienen.',
+    edit: 'Modificar', editTitle: 'Modificar la encuesta', saveChanges: 'Guardar',
+    removedConfirm: 'Se han quitado {count} fecha(s): se perderán las respuestas ya dadas para ellas. ¿Continuar?',
+    resendNotify: 'Volver a enviar el email y la notificación a los miembros',
+    clubHint: 'El sitio web y el itinerario del club se añaden automáticamente a la encuesta.',
+    errNeedTitle: 'Indique el nombre del evento',
+  } },
+}
+for (const lang of Object.keys(REV)) for (const ns of Object.keys(REV[lang])) Object.assign(T[lang][ns], REV[lang][ns])
+
 const dir = path.join(__dirname, '..', 'src', 'messages')
 for (const lang of Object.keys(T)) {
   const file = path.join(dir, `${lang}.json`)
-  const raw = fs.readFileSync(file, 'utf8')
+  let raw = fs.readFileSync(file, 'utf8')
   const parsed = JSON.parse(raw)
-  if (parsed.polls && parsed.pollEmail) { console.log(`${lang}.json : déjà à jour`); continue }
 
-  // Bloc à insérer, indenté comme le reste du fichier (2 espaces)
+  // Si une version précédente des blocs existe (ajoutée en fin de fichier par ce script), on la retire pour la remplacer.
+  const cut = raw.indexOf(',\n  "polls": {')
+  if (parsed.polls || parsed.pollEmail) {
+    if (cut === -1) { console.log(`${lang}.json : blocs polls trouvés ailleurs qu'en fin de fichier, rien modifié`); continue }
+    raw = raw.slice(0, cut) + '\n}' + (raw.endsWith('\n') ? '\n' : '')
+  }
+  const base = JSON.parse(raw)
+
   const block = ['polls', 'pollEmail']
-    .filter(k => !parsed[k])
     .map(k => `  ${JSON.stringify(k)}: ${JSON.stringify(T[lang][k], null, 2).replace(/\n/g, '\n  ')}`)
     .join(',\n')
-
   const end = raw.lastIndexOf('}')
   const before = raw.slice(0, end).replace(/\s+$/, '')
   const out = `${before},\n${block}\n}${raw.slice(end + 1)}`
-  JSON.parse(out)                      // sécurité : ne jamais écrire un JSON invalide
+
+  const check = JSON.parse(out)                       // sécurité : ne jamais écrire un JSON invalide
+  for (const k of Object.keys(base)) if (JSON.stringify(check[k]) !== JSON.stringify(base[k])) throw new Error(`${lang}.json : la clé ${k} aurait été modifiée`)
+  if (out === fs.readFileSync(file, 'utf8')) { console.log(`${lang}.json : déjà à jour`); continue }
   fs.writeFileSync(file, out)
-  console.log(`${lang}.json : textes du sondage ajoutés`)
+  console.log(`${lang}.json : textes du sondage ${parsed.polls ? 'mis à jour' : 'ajoutés'}`)
 }

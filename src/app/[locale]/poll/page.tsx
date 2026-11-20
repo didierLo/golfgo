@@ -7,6 +7,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import ClubLinks from '@/components/polls/ClubLinks'
 
 type Answer = 'yes' | 'maybe' | 'no'
 type Option = { id: string; starts_at: string; yes: number; maybe: number; no: number; mine: Answer | null }
@@ -14,6 +15,7 @@ type PollData = {
   poll_id: string; title: string; description: string | null; location: string | null
   status: 'open' | 'closed' | 'converted'; deadline: string | null; event_id: string | null; group_id: string
   group_name: string; player_name: string; can_vote: boolean
+  club: { name: string; website: string | null; region: string | null; country: string | null } | null
   voters_total: number; voters_answered: number; options: Option[]
 }
 
@@ -93,7 +95,8 @@ function PollContent() {
             <p className="text-[12px] text-slate-400 mb-1">{poll.group_name} · {t('polls.hello', { name: poll.player_name })}</p>
             <h1 className="text-[20px] font-black text-slate-900 leading-tight mb-1">{poll.title}</h1>
             {poll.location && <p className="text-[13px] text-slate-600 mb-1">📍 {poll.location}</p>}
-            {poll.description && <p className="text-[13px] text-slate-600 mb-1 whitespace-pre-line">{poll.description}</p>}
+            {poll.description && <p className="text-[14px] font-medium text-slate-800 mt-2 mb-1 whitespace-pre-line">{poll.description}</p>}
+            <ClubLinks name={poll.club?.name ?? poll.location} region={poll.club?.region ?? null} country={poll.club?.country ?? null} website={poll.club?.website ?? null} />
             {poll.deadline && poll.can_vote && (
               <p className="text-[12px] font-semibold text-amber-700 mb-1">
                 {t('polls.deadline', { date: new Date(poll.deadline + 'T00:00:00Z').toLocaleDateString(locale, { day: 'numeric', month: 'long', timeZone: 'UTC' }) })}
@@ -109,7 +112,7 @@ function PollContent() {
             {poll.status === 'open' && !poll.can_vote && (
               <div className="bg-slate-100 text-slate-600 rounded-xl px-4 py-3 text-[13px] font-semibold my-4">{t('polls.expiredMsg')}</div>
             )}
-            {poll.can_vote && <p className="text-[13px] text-slate-500 mt-3 mb-4">{t('polls.intro')}</p>}
+            {poll.can_vote && <p className="text-[13px] text-slate-500 mt-2 mb-2">{t('polls.intro')}</p>}
 
             <div className="flex flex-col gap-3 mt-3">
               {poll.options.map(o => (

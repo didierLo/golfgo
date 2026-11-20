@@ -107,6 +107,7 @@ begin
     'event_id',        p.event_id,
     'group_id',        p.group_id,
     'group_name',      (select name from groups where id = p.group_id),
+    'club',            (select jsonb_build_object('name', c.name, 'website', c.website, 'region', c.region, 'country', c.country) from clubs c where c.id = p.club_id),
     'player_name',     (select first_name from players where id = v.player_id),
     'can_vote',        (p.status = 'open' and (p.deadline is null or p.deadline >= (now() at time zone 'Europe/Brussels')::date)),
     'voters_total',    (select count(*) from poll_voters where poll_id = p.id),
