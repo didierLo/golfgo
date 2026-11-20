@@ -12,7 +12,7 @@ const intlMiddleware = createMiddleware({
 
 // Premier segment de route (juste après la locale) accessible sans être
 // connecté. Tout ce qui n'est pas dans cette liste exige une session.
-const PUBLIC_SEGMENTS = ['login', 'signup', 'forgot-password', 'reset-password', 'invite', 'legal']
+const PUBLIC_SEGMENTS = ['login', 'signup', 'forgot-password', 'reset-password', 'invite', 'poll', 'legal']
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl

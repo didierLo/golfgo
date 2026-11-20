@@ -85,7 +85,7 @@ function GroupDot({ color, size = 8 }: { color: string; size?: number }) {
 const ORGANISER_SEGMENTS = [
   '/events/', '/invitations', '/flights', '/results', '/participants',
   '/teesheet', '/scorecards', '/leaderboard', '/communications',
-  '/members', '/constraints', '/edit', '/scorecard', '/admin/clubs', '/partners',
+  '/members', '/constraints', '/edit', '/scorecard', '/admin/clubs', '/partners', '/polls',
 ]
 const supabase = createClient()
 export default function AppLayout({ children }: { children: React.ReactNode }) {

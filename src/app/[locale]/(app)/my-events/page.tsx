@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
 import { generateICS } from '@/lib/ics' 
+import OpenPollsBlock from '@/components/polls/OpenPollsBlock'
 import { geocodeEventLocation, fetchHourlyWindow, weatherCodeInfo, formatPrecipMm, type HourlyPoint } from '@/lib/weather'
 
 const supabase = createClient()
@@ -755,6 +756,8 @@ const { sorted, upcoming, past, nextEvent, goingCount, invitedCount } = useMemo(
 
         </div>
       </div>
+
+      {view === 'list' && <OpenPollsBlock />}
 
       {view === 'list' && events.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-6">

@@ -182,15 +182,23 @@ export default function EventsPage() {
           <h1 className="text-[22px] font-black text-slate-900 tracking-tight">{t('events.title')}</h1>
           <p className="text-[13px] text-slate-900 mt-0.5">{t('events.subtitle', { upcoming: upcoming.length, past: past.length })}</p>
         </div>
-        <button
-          onClick={() => isOwner
-            ? (window.location.href = `/groups/${groupId}/events/add`)
-            : showToast(t('events.adminOnly'))}
-          className={`flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl transition-colors ${
-            isOwner ? 'bg-[#185FA5] text-white hover:bg-[#0C447C]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-          }`}>
-          {t('events.newEvent')}
-        </button>
+        <div className="flex items-center gap-2">
+          {isOwner && (
+            <a href={`/groups/${groupId}/polls`}
+              className="flex items-center gap-1.5 text-[13px] font-semibold px-3 py-2 rounded-xl border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-[#185FA5] hover:text-white hover:border-[#185FA5] transition-colors">
+              <span aria-hidden>📅</span>{t('polls.title')}
+            </a>
+          )}
+          <button
+            onClick={() => isOwner
+              ? (window.location.href = `/groups/${groupId}/events/add`)
+              : showToast(t('events.adminOnly'))}
+            className={`flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-xl transition-colors ${
+              isOwner ? 'bg-[#185FA5] text-white hover:bg-[#0C447C]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+            }`}>
+            {t('events.newEvent')}
+          </button>
+        </div>
       </div>
 
       {upcoming.length > 0 && (
