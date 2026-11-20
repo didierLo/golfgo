@@ -28,7 +28,7 @@ export default function PollForm({ groupId, pollId }: { groupId: string; pollId?
   const [dates,       setDates]       = useState<string[]>([''])
   const [existing,    setExisting]    = useState<ExistingOption[]>([])
   const [deadline,    setDeadline]    = useState('')
-  const [notify,      setNotify]      = useState(!editing)
+  const [notify,      setNotify]      = useState(false)
   const [loading,     setLoading]     = useState(editing)
   const [saving,      setSaving]      = useState(false)
   const [error,       setError]       = useState('')
@@ -157,7 +157,8 @@ export default function PollForm({ groupId, pollId }: { groupId: string; pollId?
               ))}
             </div>
           )}
-          <p className="text-[11px] text-slate-500 mt-1">{t('polls.clubHint')}</p>
+          <p className="text-[11px] text-slate-500 mt-1">{t('polls.clubSearchHint')}</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">{t('polls.clubHint')}</p>
         </div>
 
         <div>

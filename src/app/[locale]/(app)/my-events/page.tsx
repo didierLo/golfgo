@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
 import { generateICS } from '@/lib/ics' 
 import OpenPollsBlock from '@/components/polls/OpenPollsBlock'
+import { clubMapsQuery } from '@/lib/golf/clubMaps'
 import { geocodeEventLocation, fetchHourlyWindow, weatherCodeInfo, formatPrecipMm, type HourlyPoint } from '@/lib/weather'
 
 const supabase = createClient()
@@ -142,8 +143,11 @@ function EventCard({ event: e, onView, onICS, onPay, onPhotos, onWeather, past =
   const groupColor = e.events.groups?.color ?? '#378ADD'
   const { day, month } = getDayMonth(e.events.starts_at, locale)
 
-  const mapsQuery = [e.events.location, e.events.courses?.course_name, e.events.courses?.clubs?.name]
-    .filter(Boolean).join(' ')
+  // Itinéraire vers le GOLF (pas vers une rue du même nom) : nom du parcours + « golf » (voir lib/golf/clubMaps.ts)
+  const mapsClub = e.events.courses?.clubs
+  const mapsQuery = mapsClub
+    ? clubMapsQuery({ name: mapsClub.name, courseName: e.events.courses?.course_name, region: mapsClub.region, country: mapsClub.country })
+    : [e.events.location, e.events.courses?.course_name].filter(Boolean).join(' ')
   const showPhotos = true
   // Garde-fou : on n'affiche le lien que pour une adresse http(s)
   const clubWebsite = e.events.courses?.clubs?.website

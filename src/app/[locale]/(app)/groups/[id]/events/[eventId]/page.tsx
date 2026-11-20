@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { useTranslations, useLocale } from 'next-intl'
 import { useGroupRole } from '@/lib/hooks/useGroupRole'
+import { clubMapsQuery } from '@/lib/golf/clubMaps'
 
 const supabase = createClient()
 
@@ -198,8 +199,10 @@ export default function EventOverviewPage() {
               {!event.courses?.course_name && event.location}
             </span>
             {(() => {
-              const mapsQuery = [event.location, event.courses?.course_name, (event.courses?.clubs as any)?.name]
-                .filter(Boolean).join(' ')
+              const clubName = (event.courses?.clubs as any)?.name
+              const mapsQuery = clubName
+                ? clubMapsQuery({ name: clubName, courseName: event.courses?.course_name })
+                : [event.location, event.courses?.course_name].filter(Boolean).join(' ')
               return mapsQuery ? (
                 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`}
                   target="_blank" rel="noopener noreferrer"

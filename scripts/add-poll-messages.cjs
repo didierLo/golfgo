@@ -222,6 +222,7 @@ const REV = {
       removedConfirm: '{count} date(s) retirée(s) : les réponses déjà données pour ces dates seront perdues. Continuer ?',
       resendNotify: "Renvoyer l'email et la notification aux membres",
       clubHint: "Le site du club et l'itinéraire sont ajoutés automatiquement au sondage.",
+      clubSearchHint: "Tape les premières lettres du nom du club, sans « golf » ni « club ».",
     },
     pollEmail: {
       intro: 'Qui serait partant ? Indique en un clic ta disponibilité pour les dates ci-dessous.',
@@ -229,6 +230,7 @@ const REV = {
     },
   },
   en: { polls: {
+    clubSearchHint: "Type the first letters of the club name, without “golf” or “club”.",
     fieldTitle: 'Event name', fieldDescription: 'Question for members',
     defaultQuestion: 'Are you in for this event? Pick the dates that suit you.',
     edit: 'Edit', editTitle: 'Edit poll', saveChanges: 'Save',
@@ -238,6 +240,7 @@ const REV = {
     errNeedTitle: 'Enter the event name',
   } },
   nl: { polls: {
+    clubSearchHint: "Typ de eerste letters van de clubnaam, zonder “golf” of “club”.",
     fieldTitle: 'Naam van het evenement', fieldDescription: 'Vraag aan de leden',
     defaultQuestion: 'Doet u mee aan dit evenement? Kies de data die u schikken.',
     edit: 'Bewerken', editTitle: 'Peiling bewerken', saveChanges: 'Opslaan',
@@ -247,6 +250,7 @@ const REV = {
     errNeedTitle: 'Geef de naam van het evenement in',
   } },
   de: { polls: {
+    clubSearchHint: "Geben Sie die ersten Buchstaben des Clubnamens ein, ohne „Golf“ und „Club“.",
     fieldTitle: 'Name der Veranstaltung', fieldDescription: 'Frage an die Mitglieder',
     defaultQuestion: 'Sind Sie bei dieser Veranstaltung dabei? Wählen Sie die Termine, die Ihnen passen.',
     edit: 'Bearbeiten', editTitle: 'Umfrage bearbeiten', saveChanges: 'Speichern',
@@ -256,6 +260,7 @@ const REV = {
     errNeedTitle: 'Geben Sie den Namen der Veranstaltung ein',
   } },
   es: { polls: {
+    clubSearchHint: "Escriba las primeras letras del nombre del club, sin «golf» ni «club».",
     fieldTitle: 'Nombre del evento', fieldDescription: 'Pregunta a los miembros',
     defaultQuestion: '¿Se apunta a este evento? Indique las fechas que le convienen.',
     edit: 'Modificar', editTitle: 'Modificar la encuesta', saveChanges: 'Guardar',

@@ -2,14 +2,15 @@
 
 // Boutons « Site du club » et « Itinéraire » d'un sondage (mêmes libellés et même lien Google Maps que dans Mes événements).
 import { useTranslations } from 'next-intl'
+import { clubMapsQuery } from '@/lib/golf/clubMaps'
 
-export default function ClubLinks({ name, region, country, website }: {
-  name: string | null; region: string | null; country: string | null; website: string | null
+export default function ClubLinks({ name, courseName, region, country, website }: {
+  name: string | null; courseName?: string | null; region: string | null; country: string | null; website: string | null
 }) {
   const t = useTranslations()
   // Garde-fou : on n'affiche le lien que pour une adresse http(s)
   const safeWebsite = website && /^https?:\/\//i.test(website) ? website : null
-  const query = [name, region, country].filter(Boolean).join(' ')
+  const query = name ? clubMapsQuery({ name, courseName, region, country }) : ''
   if (!safeWebsite && !query) return null
 
   const cls = 'flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-xl border border-[#B5D4F4] bg-[#EBF3FC] text-[#185FA5] hover:bg-[#185FA5] hover:text-white hover:border-[#185FA5] transition-colors'

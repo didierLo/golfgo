@@ -1960,7 +1960,8 @@
     "saveChanges": "Enregistrer",
     "removedConfirm": "{count} date(s) retirée(s) : les réponses déjà données pour ces dates seront perdues. Continuer ?",
     "resendNotify": "Renvoyer l'email et la notification aux membres",
-    "clubHint": "Le site du club et l'itinéraire sont ajoutés automatiquement au sondage."
+    "clubHint": "Le site du club et l'itinéraire sont ajoutés automatiquement au sondage.",
+    "clubSearchHint": "Tape les premières lettres du nom du club, sans « golf » ni « club »."
   },
   "pollEmail": {
     "hello": "Bonjour {name},",

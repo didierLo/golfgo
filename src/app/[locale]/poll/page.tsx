@@ -15,7 +15,7 @@ type PollData = {
   poll_id: string; title: string; description: string | null; location: string | null
   status: 'open' | 'closed' | 'converted'; deadline: string | null; event_id: string | null; group_id: string
   group_name: string; player_name: string; can_vote: boolean
-  club: { name: string; website: string | null; region: string | null; country: string | null } | null
+  club: { name: string; website: string | null; region: string | null; country: string | null; course: string | null } | null
   voters_total: number; voters_answered: number; options: Option[]
 }
 
@@ -96,7 +96,7 @@ function PollContent() {
             <h1 className="text-[20px] font-black text-slate-900 leading-tight mb-1">{poll.title}</h1>
             {poll.location && <p className="text-[13px] text-slate-600 mb-1">📍 {poll.location}</p>}
             {poll.description && <p className="text-[14px] font-medium text-slate-800 mt-2 mb-1 whitespace-pre-line">{poll.description}</p>}
-            <ClubLinks name={poll.club?.name ?? poll.location} region={poll.club?.region ?? null} country={poll.club?.country ?? null} website={poll.club?.website ?? null} />
+            <ClubLinks name={poll.club?.name ?? poll.location} courseName={poll.club?.course ?? null} region={poll.club?.region ?? null} country={poll.club?.country ?? null} website={poll.club?.website ?? null} />
             {poll.deadline && poll.can_vote && (
               <p className="text-[12px] font-semibold text-amber-700 mb-1">
                 {t('polls.deadline', { date: new Date(poll.deadline + 'T00:00:00Z').toLocaleDateString(locale, { day: 'numeric', month: 'long', timeZone: 'UTC' }) })}

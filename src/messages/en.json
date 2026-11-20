@@ -1956,6 +1956,7 @@
     "blockTitle": "Open polls",
     "answeredEdit": "Answered ✓",
     "answerNow": "Answer",
+    "clubSearchHint": "Type the first letters of the club name, without “golf” or “club”.",
     "defaultQuestion": "Are you in for this event? Pick the dates that suit you.",
     "edit": "Edit",
     "editTitle": "Edit poll",

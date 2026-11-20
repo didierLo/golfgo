@@ -1955,6 +1955,7 @@
     "blockTitle": "Encuestas en curso",
     "answeredEdit": "Respondida ✓",
     "answerNow": "Responder",
+    "clubSearchHint": "Escriba las primeras letras del nombre del club, sin «golf» ni «club».",
     "defaultQuestion": "¿Se apunta a este evento? Indique las fechas que le convienen.",
     "edit": "Modificar",
     "editTitle": "Modificar la encuesta",

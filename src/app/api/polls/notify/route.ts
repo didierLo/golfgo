@@ -8,6 +8,7 @@ import { getGroupLocale, serverT, DATE_LOCALE, type Locale } from '@/lib/i18n/se
 import { getGroupOwners, signerDisplayName } from '@/lib/groups/owner'
 import { requireGroupOwner } from '@/lib/groups/requireOwner'
 import { sendPushToUser } from '@/lib/push/send'
+import { clubMapsQuery } from '@/lib/golf/clubMaps'
 
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED === 'true'
 // Délai entre deux emails (limite de débit Resend) — plus court que le délai des envois en masse existants
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
       getGroupOwners(admin, groupId),
       admin.from('groups').select('name, template_logo_url').eq('id', groupId).maybeSingle(),
       poll.club_id
-        ? admin.from('clubs').select('name, website, region, country').eq('id', poll.club_id).maybeSingle()
+        ? admin.from('clubs').select('name, website, region, country, courses(course_name)').eq('id', poll.club_id).maybeSingle()
         : Promise.resolve({ data: null }),
     ])
 
@@ -82,7 +83,9 @@ export async function POST(req: Request) {
       : ''
     // Liens vers le club (mêmes que dans l'app : site web + recherche Google Maps)
     const siteUrl = club?.website && /^https?:\/\//i.test(club.website) ? club.website : null
-    const mapsQuery = [club?.name ?? poll.location, club?.region, club?.country].filter(Boolean).join(' ')
+    const mapsQuery = (club?.name ?? poll.location)
+      ? clubMapsQuery({ name: club?.name ?? poll.location, courseName: club?.courses?.[0]?.course_name, region: club?.region, country: club?.country })
+      : ''
     const linkStyle = 'display:inline-block;margin:0 8px 8px 0;font-size:12px;font-weight:600;color:#185FA5;text-decoration:none;border:1px solid #B5D4F4;background:#EBF3FC;border-radius:8px;padding:6px 12px;'
     const clubLinksHtml = (siteUrl || mapsQuery) ? `<div style="margin-top:10px;">${
       siteUrl ? `<a href="${esc(siteUrl)}" style="${linkStyle}">${esc(t('clubs.openWebsite'))}</a>` : ''

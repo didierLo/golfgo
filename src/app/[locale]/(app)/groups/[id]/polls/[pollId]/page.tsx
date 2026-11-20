@@ -9,7 +9,7 @@ import ClubLinks from '@/components/polls/ClubLinks'
 const supabase = createClient()
 
 type Answer = 'yes' | 'maybe' | 'no'
-type Poll    = { id: string; title: string; description: string | null; location: string | null; deadline: string | null; status: 'open' | 'closed' | 'converted'; event_id: string | null; clubs: { name: string; website: string | null; region: string | null; country: string | null } | null }
+type Poll    = { id: string; title: string; description: string | null; location: string | null; deadline: string | null; status: 'open' | 'closed' | 'converted'; event_id: string | null; clubs: { name: string; website: string | null; region: string | null; country: string | null; courses: { course_name: string | null }[] | null } | null }
 type Option  = { id: string; starts_at: string }
 type Member  = { player_id: string; first_name: string; surname: string }
 type Vote    = { option_id: string; player_id: string; answer: Answer }
@@ -45,7 +45,7 @@ export default function PollDetailPage() {
       }
     }
     const [{ data: p }, { data: o }, { data: m }, { data: v }] = await Promise.all([
-      supabase.from('polls').select('id, title, description, location, deadline, status, event_id, clubs(name, website, region, country)').eq('id', pollId).maybeSingle(),
+      supabase.from('polls').select('id, title, description, location, deadline, status, event_id, clubs(name, website, region, country, courses(course_name))').eq('id', pollId).maybeSingle(),
       supabase.from('poll_options').select('id, starts_at').eq('poll_id', pollId).order('starts_at'),
       supabase.from('groups_players').select('player_id, players(first_name, surname)').eq('group_id', groupId).neq('role', 'guest'),
       supabase.from('poll_votes').select('option_id, player_id, answer').eq('poll_id', pollId),
@@ -138,7 +138,7 @@ export default function PollDetailPage() {
       </div>
 
       {poll.description && <p className="text-[13px] text-slate-800 mb-3 whitespace-pre-line">{poll.description}</p>}
-      <ClubLinks name={poll.clubs?.name ?? poll.location} region={poll.clubs?.region ?? null} country={poll.clubs?.country ?? null} website={poll.clubs?.website ?? null} />
+      <ClubLinks name={poll.clubs?.name ?? poll.location} courseName={poll.clubs?.courses?.[0]?.course_name ?? null} region={poll.clubs?.region ?? null} country={poll.clubs?.country ?? null} website={poll.clubs?.website ?? null} />
 
       {poll.status === 'converted' && poll.event_id && (
         <div className="bg-[#EAF3DE] text-[#3B6D11] rounded-xl px-4 py-3 text-[13px] font-semibold mb-4 flex items-center justify-between gap-3">
